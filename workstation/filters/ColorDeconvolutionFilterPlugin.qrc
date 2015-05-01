@@ -1,0 +1,8 @@
+<RCC>
+  <qresource>
+    <file>ColorDeconvolutionFilter.ui</file>
+  </qresource>
+  <qresource prefix="icons">
+	<file>ColorDeconvolutionIcon.png</file>
+  </qresource>
+</RCC>
