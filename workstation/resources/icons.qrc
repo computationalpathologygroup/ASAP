@@ -1,0 +1,10 @@
+<RCC>
+  <qresource>
+    <file>FilterDockWidget.ui</file>
+  </qresource>
+  <qresource prefix="icons">
+	  <file alias="application.png">application.png</file>
+	  <file alias="open.png">open.png</file>
+	  <file alias="close.png">close.png</file>
+  </qresource>
+</RCC>
