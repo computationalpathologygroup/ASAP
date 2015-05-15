@@ -52,13 +52,16 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   setBackgroundBrush(QBrush(QColor("black")));
   setAutoFillBackground(true);
   QGLFormat fmt;
-  fmt.setSampleBuffers(true);
+  fmt.setSampleBuffers(false);
   fmt.setSamples(5);
-  QGLWidget* wdg = new QGLWidget(fmt);
-  setViewport(wdg);
+  //QGLWidget* wdg = new QGLWidget(fmt);
+  //setViewport(wdg);
+  setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
   
   setInteractive(false);
   this->setScene(new QGraphicsScene);
+  this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
+  this->scene()->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
           this, SLOT(showContextMenu(const QPoint&)));
@@ -251,7 +254,7 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   _img = img;
   _renderthread = new RenderThread(img);
   _filterthread = new FilterThread();
-  unsigned int tileSize = 512;
+  unsigned int tileSize = 1024;
 
   QGraphicsScene* scn = new QGraphicsScene();  
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;

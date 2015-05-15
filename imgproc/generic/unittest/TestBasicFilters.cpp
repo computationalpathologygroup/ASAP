@@ -15,11 +15,4 @@ using namespace pathology;
 
 namespace {
 
-#ifdef WIN32
-  static void reportTimeLapsed(unsigned long previous, std::string &message, unsigned long current = GetTickCount())
-  {
-    cout << message << " " << (current - previous) / 1000.0 << " ms" << endl;;
-  }
-#endif
-
 }

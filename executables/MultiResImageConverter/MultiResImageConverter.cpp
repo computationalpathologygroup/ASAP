@@ -18,14 +18,14 @@ namespace po = boost::program_options;
 using namespace std;
 using namespace pathology;
 
-void convertImage(std::string fileIn, std::string fileOut, std::string compression = "LZW", double quality = 70., double spacingX = -1.0, double spacingY = -1.0) {
+void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std::string compression = "LZW", double quality = 70., double spacingX = -1.0, double spacingY = -1.0) {
   MultiResolutionImageReader read;
   MultiResolutionImageWriter* writer;
-  if (fileOut.substr(fileOut.size() - 4) != ".svs") {
-    writer = new MultiResolutionImageWriter();
+  if (svs) {
+    writer = new AperioSVSWriter();
   }
   else {
-    writer = new AperioSVSWriter();
+    writer = new MultiResolutionImageWriter();
   }
   if (core::fileExists(fileIn)) {
     MultiResolutionImage* img = read.open(fileIn);
@@ -97,6 +97,7 @@ int main(int argc, char *argv[]) {
     po::options_description desc("Options");
     desc.add_options()
       ("help,h", "Displays this message")
+      ("svs,s", "Convert to Aperio SVS instead of regular TIFF")
       ("codec,c", po::value<std::string>(&codec)->default_value("LZW"), "Set compression codec. Can be one of the following: RAW, LZW, JPEG, JPEG2000Lossless or JPEG2000Lossy")
       ("rate,r", po::value<double>(&rate)->default_value(70.), "Set compression rate for JPEG and JPEG2000Lossy")
       ("spacingX,x", po::value<double>(&spacingX)->default_value(-1.0), "Set the pixel spacing of the x-dimension")
@@ -123,7 +124,7 @@ int main(int argc, char *argv[]) {
         .positional(positionalOptions).run(),
         vm);
       if (!vm.count("input")) {
-        cout << "MultiResolutionImageConverter v1.31" << endl;
+        cout << "MultiResolutionImageConverter v1.35" << endl;
         cout << "Usage: MultiResImageConverter.exe input output [options]" << endl;
       }
       if (vm.count("help")) {
@@ -138,12 +139,17 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
+    bool svs = false;
+    if (vm.count("svs")) {
+      svs = true;
+    }
+
     if (core::fileExists(inputPth) && !core::dirExists(outputPth)) {
       if (!vm["spacingX"].defaulted() || !vm["spacingY"].defaulted()) {
-        convertImage(inputPth, outputPth, codec, rate, spacingX, spacingY);
+        convertImage(inputPth, outputPth, svs, codec, rate, spacingX, spacingY);
       }
       else {
-        convertImage(inputPth, outputPth, codec, rate);
+        convertImage(inputPth, outputPth, svs, codec, rate);
       }
     } 
     else if (core::dirExists(outputPth)) { //Could be wildcards and output dir 
@@ -154,9 +160,14 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < fls.size(); ++i) {
         string outPth = fls[i];
         core::changePath(outPth, outputPth);
-        core::changeExtension(outPth, "tif");
+        if (svs) {
+          core::changeExtension(outPth, "svs");
+        }
+        else {
+          core::changeExtension(outPth, "tif");
+        }
         float rate = 100.;
-        convertImage(fls[i],outPth, codec, rate);
+        convertImage(fls[i],outPth, svs, codec, rate);
       }
     }
   } 

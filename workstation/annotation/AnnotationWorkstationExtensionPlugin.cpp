@@ -16,6 +16,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QApplication>
+#include "core/filetools.h"
 
 #include <numeric>
 #include <iostream>
@@ -132,8 +133,14 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetCurrentItemChanged(QTreeW
   }
 }
 
-void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed() {
-  QString fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), "D:\\Temp", tr("XML file (*.xml)"));
+void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string& filePath) {
+  QString fileName;
+  if (filePath.empty()) {
+    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), "D:\\Temp", tr("XML file (*.xml)"));
+  }
+  else {
+    fileName = QString::fromStdString(filePath);
+  }
   if (!fileName.isEmpty()) {
     onClearButtonPressed();
     _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
@@ -301,6 +308,11 @@ QDockWidget* AnnotationWorkstationExtensionPlugin::getDockWidget() {
 void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage* img, std::string fileName) {
   if (_dockWidget) {
     _dockWidget->setEnabled(true);
+  }
+  if (!fileName.empty()) {
+    std::string annotationPath = fileName;
+    core::changeExtension(annotationPath, "xml");
+    onLoadButtonPressed(annotationPath);
   }
 }
 

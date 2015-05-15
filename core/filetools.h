@@ -5,12 +5,6 @@
 #include <string>
 #include <vector>
 
-#ifdef WIN32
-#include <windows.h>
-#include <tchar.h>
-#include <shellapi.h>
-#endif
-
 namespace core
 {
 
@@ -39,10 +33,6 @@ namespace core
 // Deletes the directory, returns true iff the directory existed, is empty,
 // and was successfully deleted.
   bool EXPORT_CORE deleteDir(const std::string &name, bool deleteNonEmpty = false);
-
-#ifdef WIN32
-  bool DeleteDirectory(LPCTSTR lpszDir, bool noRecycleBin = true);
-#endif
 
 /////////////////////////
 // Returns true iff the directory exists and is empty.

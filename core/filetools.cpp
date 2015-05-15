@@ -11,6 +11,9 @@
 #include "filetools.h"
 
 #ifdef WIN32
+#include <windows.h>
+#include <tchar.h>
+#include <shellapi.h>
 const std::string dirsep("\\");
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
