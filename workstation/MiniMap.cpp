@@ -14,8 +14,8 @@ MiniMap::MiniMap(QPixmap* overview, QWidget *parent)
   //setAttribute(Qt::WA_StaticContents);
   QSizePolicy policy;
   policy.setHeightForWidth(true);
-  policy.setHorizontalPolicy(QSizePolicy::Maximum);
-  policy.setVerticalPolicy(QSizePolicy::Maximum);
+  policy.setHorizontalPolicy(QSizePolicy::Fixed);
+  policy.setVerticalPolicy(QSizePolicy::Fixed);
   setSizePolicy(policy);
   if (_overview) {
     _aspectRatio = static_cast<float>(_overview->width()) / _overview->height();

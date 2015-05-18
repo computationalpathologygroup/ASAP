@@ -16,6 +16,7 @@ class ImageFilterPluginInterface;
 class FilterDockWidget;
 class WorkstationExtensionPluginInterface;
 class QActionGroup;
+class QSettings;
 
 class PathologyWorkstation : public QMainWindow
 {
@@ -43,6 +44,7 @@ private slots:
 private:
   MultiResolutionImage *_img;
   unsigned long long _cacheMaxByteSize;
+  QSettings* _settings;
   
   // Plugins and filters
   QDir _pluginsDir;
@@ -71,6 +73,8 @@ private:
   void setupUi();
   void retranslateUi();
   void loadPlugins();
+  void readSettings();
+  void writeSettings();
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };

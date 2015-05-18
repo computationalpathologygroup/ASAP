@@ -50,18 +50,20 @@ void WSITileGraphicsItemCache::get(const keyType& k, QPointer<WSITileGraphicsIte
     return;
   }
   else {
-    _LRU.splice(
-      _LRU.end(),
-      _LRU,
-      it->second.second
-      );
+    if (it->second.second != _LRU.end()) {
+      _LRU.splice(
+        _LRU.end(),
+        _LRU,
+        it->second.second
+        );
+    }
     tile = it->second.first.first;
     size = it->second.first.second;
     return;
   }
 }
 
-int WSITileGraphicsItemCache::set(const keyType& k, QPointer<WSITileGraphicsItem> v, unsigned int size) {
+int WSITileGraphicsItemCache::set(const keyType& k, QPointer<WSITileGraphicsItem> v, unsigned int size, bool topLevel) {
   if (_cache.find(k) != _cache.end()) {
     return 1;
   }
@@ -72,8 +74,14 @@ int WSITileGraphicsItemCache::set(const keyType& k, QPointer<WSITileGraphicsItem
     evict();
   }
 
-  keyTypeList::iterator it = _LRU.insert(_LRU.end(), k);
-  _cache[k] = std::make_pair(std::make_pair(v, size), it);
+  // Do not add to the LRU if it is a top-level item so it is never removed
+  if (!topLevel) {
+    keyTypeList::iterator it = _LRU.insert(_LRU.end(), k);
+    _cache[k] = std::make_pair(std::make_pair(v, size), it);
+  }
+  else {
+    _cache[k] = std::make_pair(std::make_pair(v, size), _LRU.end());
+  }
   _cacheCurrentByteSize += size;
   return 0;
 }

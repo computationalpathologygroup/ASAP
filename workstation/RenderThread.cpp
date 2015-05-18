@@ -5,6 +5,7 @@
 
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
+#include "WSITileGraphicsItem.h"
 
 using namespace pathology;
 
@@ -24,6 +25,10 @@ RenderThread::RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* 
 
 RenderThread::~RenderThread() 
 {
+  shutdown();
+}
+
+void RenderThread::shutdown() {
   _abort = true;
   for (std::vector<RenderWorker*>::iterator it = _workers.begin(); it != _workers.end(); ++it) {
     (*it)->abort();
@@ -91,6 +96,13 @@ RenderJob RenderThread::getJob() {
 
 void RenderThread::clearJobs() {
   QMutexLocker locker(&_jobListMutex);
+  for (std::list<RenderJob>::iterator it = _jobList.begin(); it != _jobList.end(); ++it) {
+    _senderDeletionMutex.lock();
+    if (it->_sender) {
+      it->_sender->setVisible(true);
+    }
+    _senderDeletionMutex.unlock();
+  }
   _jobList.clear();
 }
 

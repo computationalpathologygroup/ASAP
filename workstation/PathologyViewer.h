@@ -40,6 +40,7 @@ public:
     bool isPanning();
     void zoom(float numSteps);
    
+    bool hasTool(const std::string& toolName) const;
     void addTool(ToolPluginInterface* tool);
     void setActiveTool(const std::string& toolName);
     float getSceneScale() { return _sceneScale; }
