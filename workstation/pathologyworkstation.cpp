@@ -28,7 +28,6 @@
 
 #include "pathologyworkstation.h"
 #include "PathologyViewer.h"
-#include "FilterDockWidget.h"
 #include "interfaces/interfaces.h"
 #include "WSITileGraphicsItemCache.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
@@ -40,8 +39,6 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
     QMainWindow(parent),
     _img(NULL),
     _cacheMaxByteSize(1000*512*512*3),
-    _filterDock(NULL),
-    _filters(new std::vector<std::shared_ptr<ImageFilterPluginInterface> >()),
     _settings(NULL)
 {
   setupUi();
@@ -49,7 +46,6 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
   connect(actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_actionOpen_triggered()));
   connect(actionClose, SIGNAL(triggered(bool)), this, SLOT(on_actionClose_triggered()));
 
-  this->initializeDocks();
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   this->loadPlugins();
   view->setCacheSize(_cacheMaxByteSize);
@@ -156,42 +152,7 @@ void PathologyWorkstation::loadPlugins() {
       }
       _pluginsDir.cdUp();
     }
-    if (_pluginsDir.cd("filters")) {
-      QListWidget* availableFilters = _filterDock->findChild<QListWidget*>("filterListWidget");
-      foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
-        if (fileName.toLower().endsWith(".dll")) {
-          QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
-          QObject *plugin = loader.instance();
-          if (plugin) {
-            std::shared_ptr<ImageFilterPluginInterface> filter(qobject_cast<ImageFilterPluginInterface *>(plugin));
-            if (filter) {
-              _filterPluginFileNames.push_back(fileName.toStdString());
-              if (_filterDock) {
-                QListWidgetItem* filterItem = new QListWidgetItem(filter->icon(), filter->name());
-                filterItem->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue(filter));      
-                availableFilters->addItem(filterItem);
-                filterItem->setHidden(true);
-              }
-            }
-          }
-        }
-      }
-    }
   }
-}
-
-void PathologyWorkstation::initializeDocks()
-{
-  _filterDock = new FilterDockWidget(this);
-  _filterDock->setEnabled(false);
-  _filterDock->setVisible(true);
-  _filterDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-  connect(this, SIGNAL(newImageLoaded(MultiResolutionImage*, std::string)), _filterDock, SLOT(onNewImageLoaded(MultiResolutionImage*)));
-  connect(this, SIGNAL(imageClosed()), _filterDock, SLOT(onImageClosed()));
-  connect(_filterDock, SIGNAL(requestFilterResultUpdate()), this, SLOT(onFilterResultUpdateRequested()));
-  connect(_filterDock, SIGNAL(requestFilterResultClear()), this, SLOT(onFilterResultClearRequested()));
-  connect(_filterDock, SIGNAL(changeAutoUpdateStatus(bool)), this, SLOT(onAutoUpdateStatusChanged(bool)));
-  addDockWidget(Qt::LeftDockWidgetArea, _filterDock);
 }
 
 PathologyWorkstation::~PathologyWorkstation()
@@ -201,39 +162,11 @@ PathologyWorkstation::~PathologyWorkstation()
   writeSettings();
 }
 
-void PathologyWorkstation::onFilterResultClearRequested() {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->clearFilterResult();
-  }
-}
-
-void PathologyWorkstation::onFilterResultUpdateRequested() {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->updateFilterResult();
-  }
-}
-
-void PathologyWorkstation::onAutoUpdateStatusChanged(bool autoUpdate) {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->setAutoUpdate(autoUpdate);
-    if (autoUpdate) {
-      view->updateFilterResult();
-    }
-  }
-}
-
 void PathologyWorkstation::on_actionClose_triggered()
 {
     emit imageClosed();
     if (_img) {
 		  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-      disconnect(_filterDock, SIGNAL(changeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)), view, SLOT(onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)));
-      _filterDock->onImageClosed();
-      _filterDock->setEnabled(false);
-
 		  view->close();
 		  delete _img;
 		  _img = NULL;
@@ -257,8 +190,6 @@ void PathologyWorkstation::on_actionOpen_triggered()
             vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels()-1);
             PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
             view->initialize(_img);
-            _filterDock->setEnabled(true);
-            connect(_filterDock, SIGNAL(changeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)), view, SLOT(onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)));
             emit newImageLoaded(_img, fn);
           } else {
             statusBar->showMessage("Unsupported file type version");

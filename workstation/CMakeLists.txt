@@ -22,11 +22,9 @@ set(HEADERS
   RenderThread.h
   RenderWorker.h
   PrefetchThread.h
-  FilterDockWidget.h
   WSITileGraphicsItem.h
   UtilityFunctions.h
   interfaces/interfaces.h
-  FilterThread.h
   QtProgressMonitor.h
 )
 
@@ -39,11 +37,9 @@ set(SOURCE
   RenderThread.cpp
   RenderWorker.cpp
   PrefetchThread.cpp
-  FilterDockWidget.cpp
   WSITileGraphicsItem.cpp
   UtilityFunctions.cpp
   PathologyWorkstation.rc
-  FilterThread.cpp
   QtProgressMonitor.cpp
 )
 
@@ -61,7 +57,7 @@ ELSE()
     resources/icons.qrc
   )
   qt5_add_resources(RESOURCE_ADDED ${RESOURCE})      
-  ADD_EXECUTABLE(ASAP WIN32 ${SOURCE} ${HEADERS} ${RESOURCE_ADDED})
+  ADD_EXECUTABLE(ASAP ${SOURCE} ${HEADERS} ${RESOURCE_ADDED})
   QT5_USE_MODULES(ASAP Core Widgets OpenGL UiTools)
 ENDIF()
 

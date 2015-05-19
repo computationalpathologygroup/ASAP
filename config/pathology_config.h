@@ -108,6 +108,12 @@
   #    define EXPORT_VISUALIZATIONPLUGIN __declspec(dllimport)
   #  endif
 
+# ifdef BUILD_FILTEREXTENSIONNPLUGIN
+#    define EXPORT_FILTEREXTENSIONNPLUGIN __declspec(dllexport)
+#  else
+#    define EXPORT_FILTEREXTENSIONNPLUGIN __declspec(dllimport)
+#  endif
+
 #else
   #  define EXPORT_CORE
   #  define EXPORT_MULTIRESOLUTIONIMAGEINTERFACE

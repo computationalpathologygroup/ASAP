@@ -8,13 +8,9 @@
 class MultiResolutionImage;
 class RenderThread;
 class PrefetchThread;
-class FilterThread;
-class DrawAnnotationService;
-class AnnotationModule;
 class ToolPluginInterface;
 class MiniMap;
 class WSITileGraphicsItemCache;
-class ImageFilterPluginInterface;
 
 class EXPORT_PATHOLOGYWORKSTATION PathologyViewer : public QGraphicsView
 {
@@ -57,11 +53,7 @@ signals :
 public slots :
     void moveTo(const QPointF& pos);
     void changeActiveTool();
-    void updateFilterResult();
-    void clearFilterResult();
     void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel);
-    void updateFilteredImage(QGraphicsItem* result, QRectF size);
-    void onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface> filter);
     void onForegroundImageChanged(MultiResolutionImage* for_img);
 
 private :
@@ -101,12 +93,10 @@ private :
     QPoint _prevPan;
 
     RenderThread* _renderthread;
-    FilterThread* _filterthread;
     PrefetchThread* _prefetchthread;
 
     unsigned long long _cacheSize;
     WSITileGraphicsItemCache* _cache;
-    QGraphicsItem* _filterResult;
 
     std::map<std::string, ToolPluginInterface*> _tools;
     bool _autoUpdate;

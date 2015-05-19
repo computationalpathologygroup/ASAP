@@ -14,7 +14,6 @@
 
 #include "MiniMap.h"
 #include "RenderThread.h"
-#include "FilterThread.h"
 #include "PrefetchThread.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
@@ -29,7 +28,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _img(NULL),
   _renderthread(NULL),
   _prefetchthread(NULL),
-  _filterthread(NULL),
   _zoomSensitivity(0.5),
   _panSensitivity(0.5),
   _numScheduledScalings(0),
@@ -40,7 +38,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _cacheSize(100 * 1024 * 1024 * 3),
   _activeTool(NULL),
   _sceneScale(1.),
-  _filterResult(NULL),
   _autoUpdate(false)
 {
   
@@ -144,9 +141,6 @@ void PathologyViewer::scalingTime(qreal x)
     return;
   }
   scale(factor, factor);
-  if (this->_filterResult) {
-    _filterResult->setVisible(false);
-  }
   emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()), -1);
   emit updateBBox(FOV);
 }
@@ -210,62 +204,12 @@ void PathologyViewer::setAutoUpdate(bool autoUpdate) {
 
 void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel) {
   _renderthread->clearJobs();
-  clearFilterResult();
-  if (_filterthread && _autoUpdate) {
-    updateFilterResult();
-  }
-}
-
-void PathologyViewer::clearFilterResult() {
-  if (_filterResult) {
-    _filterResult->setVisible(false);
-    this->scene()->removeItem(_filterResult);
-    delete _filterResult;
-    _filterResult = NULL;
-  }
-}
-
-void PathologyViewer::updateFilterResult() {
-  if (_img && _filterthread) {
-    float maxDownsample = 1. / this->_sceneScale;
-    QRectF FOV = this->mapToScene(this->rect()).boundingRect();
-    QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-    _filterthread->updateFilterResult(FOVImage, _img, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()), -1);
-  }
-}
-
-void PathologyViewer::onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface> filter) {
-  clearFilterResult();
-  if (_filterthread && filter == NULL) {
-    _filterthread->removeFilter();
-  }
-  else {
-    _filterthread->setFilter(filter);
-  }
-  if (_autoUpdate) {
-    updateFilterResult();
-  }
-}
-
-void PathologyViewer::updateFilteredImage(QGraphicsItem* result, QRectF size) {
-  clearFilterResult();
-  if (result) {
-    result->setVisible(false);
-    _filterResult = result;
-    this->scene()->addItem(_filterResult);
-    _filterResult->setZValue(std::numeric_limits<float>::max() - 1.);
-    _filterResult->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-    _filterResult->setPos(this->mapToScene(this->rect()).boundingRect().topLeft());
-    _filterResult->setTransform(QTransform::fromScale(static_cast<float>(this->width()) / size.width(), static_cast<float>(this->height()) / size.height()), true);
-    _filterResult->setVisible(true);
-  }
 }
 
 void PathologyViewer::initialize(MultiResolutionImage *img) {
   close();
   _img = img;
   _renderthread = new RenderThread(img);
-  _filterthread = new FilterThread();
   unsigned int tileSize = 1024;
 
   QGraphicsScene* scn = new QGraphicsScene();  
@@ -282,7 +226,6 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   setMouseTracking(true);
   QObject::connect(this, SIGNAL(channelChanged(int)), _renderthread, SLOT(onChannelChanged(int)));  
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int, int)), this, SLOT(onFieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int, int)));
-  QObject::connect(_filterthread, SIGNAL(filterResult(QGraphicsItem*, QRectF)), this, SLOT(updateFilteredImage(QGraphicsItem*, QRectF)));
   setEnabled(true);
 }
 
@@ -401,10 +344,6 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
 
 void PathologyViewer::close() {
   setEnabled(false);
-  if (_filterthread) {
-    _filterthread->deleteLater();
-    _filterthread = NULL;
-  }
   if (_prefetchthread) {
     _prefetchthread->deleteLater();
     _prefetchthread = NULL;
@@ -413,7 +352,6 @@ void PathologyViewer::close() {
   QGraphicsScene* oldScene = this->scene();
   this->setScene(new QGraphicsScene);
   oldScene->deleteLater();
-  _filterResult = NULL;
   _img = NULL;
   if (_renderthread) {
     _renderthread->shutdown();
@@ -456,9 +394,6 @@ void PathologyViewer::pan(const QPoint& panTo) {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  if (this->_filterResult) {
-    _filterResult->setVisible(false);
-  }
   emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()), -1);
   emit updateBBox(FOV);
 }

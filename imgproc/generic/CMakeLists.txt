@@ -22,6 +22,7 @@ SET(BASICFILTERS_SRCS
 ADD_LIBRARY(basicfilters SHARED ${BASICFILTERS_SRCS})
 TARGET_LINK_LIBRARIES(basicfilters multiresolutionimageinterface core)
 
+SET_TARGET_PROPERTIES(basicfilters PROPERTIES DEBUG_POSTFIX _d)
 IF(WIN32)  
   SET_TARGET_PROPERTIES(basicfilters PROPERTIES FOLDER pathology/diag/imgproc)    
 ENDIF(WIN32)
