@@ -21,6 +21,7 @@ public:
   void setInterpolationType(const std::string& interpolationType);
   std::string getInterpolationType();
   std::pair<int, int> seedPointsContaininPathPoint(const QPointF& point);
+  QPainterPath getCurrentPath(const std::vector<Point>& coords) const;
 
 private:
   float _rectSize;
@@ -34,7 +35,7 @@ private:
   std::string _type;
   float _currentLoD;
 
-  std::vector<QPointF> catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3);
+  std::vector<QPointF> catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3) const;
 
 };
 #endif

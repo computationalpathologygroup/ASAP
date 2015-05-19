@@ -23,6 +23,7 @@ public :
 
 private :
 
+  void addCoordinate(const QPointF& scenePos);
   void cancelAnnotation();
 
   AnnotationWorkstationExtensionPlugin* _annotationPlugin;

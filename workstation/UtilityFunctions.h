@@ -38,12 +38,7 @@ QImage convertMonochromeToRGB(T* data, unsigned int width, unsigned int height, 
   for (unsigned int i=channel, j = 0;i < width*height*numberOfChannels; i+=numberOfChannels, ++j)
   {
     T pixel_msb = ((data[i] - channelMin) / (channelMax - channelMin))*255.;
-    if (pixel_msb == 0) {
-      pixels[j] = qRgba(0,0,0,0);
-    }
-    else {
-      pixels[j] = applyLUT(pixel_msb, LUT);
-    }
+    pixels[j] = applyLUT(pixel_msb, LUT);
   }
   return img;
 }

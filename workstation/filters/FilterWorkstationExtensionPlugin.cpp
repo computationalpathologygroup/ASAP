@@ -149,6 +149,6 @@ void FilterWorkstationExtensionPlugin::onImageClosed() {
   if (_dockWidget) {
     _dockWidget->setEnabled(false);
     _dockWidget->onImageClosed();
-    disconnect(_dockWidget, SIGNAL(changeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)), _viewer, SLOT(onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)));
+    disconnect(_dockWidget, SIGNAL(changeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)), this, SLOT(onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)));
   }
 }

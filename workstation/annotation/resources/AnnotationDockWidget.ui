@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>344</width>
+    <width>326</width>
     <height>300</height>
    </rect>
   </property>
@@ -25,6 +25,9 @@
       </property>
       <property name="dragDropMode">
        <enum>QAbstractItemView::InternalMove</enum>
+      </property>
+      <property name="defaultDropAction">
+       <enum>Qt::CopyAction</enum>
       </property>
       <property name="uniformRowHeights">
        <bool>true</bool>
@@ -55,6 +58,9 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QPushButton" name="addGroupButton">
         <property name="text">

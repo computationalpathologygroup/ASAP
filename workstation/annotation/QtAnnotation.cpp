@@ -17,6 +17,10 @@ _scale(scale)
   this->setFlag(QGraphicsItem::ItemIsSelectable);
 }
 
+QtAnnotation::~QtAnnotation() {
+  _annotation = NULL;
+}
+
 void QtAnnotation::addCoordinate(const float& x, const float& y) {
   prepareGeometryChange();
   if (_annotation) {
@@ -49,6 +53,11 @@ void QtAnnotation::removeCoordinate(const int& index) {
   prepareGeometryChange();
   if (_annotation) {
     _annotation->removeCoordinate(index);
+    // Recenter annotation when anchorpoint is removed
+    if (index == 0 && _annotation->getCoordinates().size() > 0) {
+      Point center = _annotation->getCoordinate(0);
+      this->setPos(center.getX()*_scale, center.getY()*_scale);
+    }
   }
 }
 
@@ -56,6 +65,11 @@ void QtAnnotation::setCoordinates(const std::vector<Point>& coordinates) {
   prepareGeometryChange();
   if (_annotation) {
     _annotation->setCoordinates(coordinates);
+    // Recenter annotation when anchorpoint is removed
+    if (_annotation->getCoordinates().size() > 0) {
+      Point center = _annotation->getCoordinate(0);
+      this->setPos(center.getX()*_scale, center.getY()*_scale);
+    }
   }
 }
 
@@ -64,12 +78,14 @@ Annotation* QtAnnotation::getAnnotation() const {
 }
 
 void QtAnnotation::setActiveSeedPoint(const unsigned int seedPointIndex) {
+  prepareGeometryChange();
   if (seedPointIndex < this->getAnnotation()->getCoordinates().size()) {
     _activeSeedPoint = seedPointIndex;
   }
 }
 
 void QtAnnotation::clearActiveSeedPoint() {
+  prepareGeometryChange();
   _activeSeedPoint = -1;
 }
 

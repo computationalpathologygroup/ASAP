@@ -417,7 +417,7 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
       }
     }
     if (_annotationService) {
-      _annotationService->getList()->removeAnnotation(annotation->getAnnotation()->getName());
+     _annotationService->getList()->removeAnnotation(annotation->getAnnotation()->getName());
     }
     annotation->deleteLater();
   }

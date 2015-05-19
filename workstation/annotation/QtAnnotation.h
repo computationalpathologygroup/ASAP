@@ -14,7 +14,7 @@ class EXPORT_PATHOLOGYANNOTATION QtAnnotation : public QGraphicsItem, public QOb
 
 public:
   QtAnnotation(Annotation* annotation, float scale = 1.);
-  virtual ~QtAnnotation() {};
+  virtual ~QtAnnotation();
   void addCoordinate(const float& x, const float& y);
   void addCoordinate(const Point& xy);
   void insertCoordinate(const int& index, const float& x, const float& y);
