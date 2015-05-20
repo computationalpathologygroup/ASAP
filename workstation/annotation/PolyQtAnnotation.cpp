@@ -144,7 +144,7 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
   }
 }
 
-std::pair<int, int> PolyQtAnnotation::seedPointsContaininPathPoint(const QPointF& point) {
+std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPointF& point) {
   std::pair<int, int> indexes = std::pair<int, int>(-1, -1);
   QPointF localPos = this->mapFromScene(point);
   if (_currentPath.elementCount() > 0) {
@@ -211,13 +211,25 @@ void PolyQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
   this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
 }
 
-QPainterPath PolyQtAnnotation::shape() const {
+QPainterPath PolyQtAnnotation::shape() const {  
+  QPainterPath rectPath;
   QPainterPathStroker stroker;
-  if (isSelected()) {
-    stroker.setWidth(_lineAnnotationSelectedThickness / _currentLoD);
+  QPainterPath strokePath;
+  if (_annotation) {
+    std::vector<Point> coords = _annotation->getCoordinates();
+    for (unsigned int i = 0; i < coords.size(); ++i) {
+      rectPath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
+    }
+    if (isSelected()) {
+      stroker.setWidth(_lineAnnotationSelectedThickness / _currentLoD);
+    }
+    else {
+      stroker.setWidth(_lineThickness / _currentLoD);
+    }
+    strokePath = stroker.createStroke(_currentPath).subtracted(rectPath);
+    for (unsigned int i = 0; i < coords.size(); ++i) {
+      strokePath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
+    }
   }
-  else {
-    stroker.setWidth(_lineThickness / _currentLoD);
-  }
-  return stroker.createStroke(_currentPath);
+  return strokePath.simplified();
 }

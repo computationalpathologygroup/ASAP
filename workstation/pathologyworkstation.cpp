@@ -157,8 +157,7 @@ void PathologyWorkstation::loadPlugins() {
 
 PathologyWorkstation::~PathologyWorkstation()
 {
-  this->findChild<PathologyViewer*>("pathologyView")->close();
-  delete _img;
+  on_actionClose_triggered();
   writeSettings();
 }
 

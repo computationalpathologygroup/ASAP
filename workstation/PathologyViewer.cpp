@@ -48,11 +48,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   setContentsMargins(0,0,0,0);
   setBackgroundBrush(QBrush(QColor("black")));
   setAutoFillBackground(true);
-  QGLFormat fmt;
-  fmt.setSampleBuffers(false);
-  fmt.setSamples(5);
-  //QGLWidget* wdg = new QGLWidget(fmt);
-  //setViewport(wdg);
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
   
   setInteractive(false);

@@ -20,7 +20,7 @@ public:
   void moveCoordinatesBy(const Point& moveBy);
   void setInterpolationType(const std::string& interpolationType);
   std::string getInterpolationType();
-  std::pair<int, int> seedPointsContaininPathPoint(const QPointF& point);
+  std::pair<int, int> seedPointsContainingPathPoint(const QPointF& point);
   QPainterPath getCurrentPath(const std::vector<Point>& coords) const;
 
 private:

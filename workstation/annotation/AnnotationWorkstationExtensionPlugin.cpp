@@ -52,7 +52,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     connect(loadButton, SIGNAL(clicked()), this, SLOT(onLoadButtonPressed()));
     connect(_treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(onItemNameChanged(QTreeWidgetItem*, int)));
     connect(_treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*, int)));
-    connect(_treeWidget, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(onTreeWidgetCurrentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)));
+    connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
   }
 }
 
@@ -65,7 +65,7 @@ AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
 }
 
 void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
-  clearSelection();
+  _treeWidget->clearSelection();
   clearTreeWidget();
   clearQtAnnotations();
   clearAnnotationList();
@@ -113,20 +113,35 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetItemDoubleClicked(QTreeWi
   }
 }
 
-void AnnotationWorkstationExtensionPlugin::onTreeWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous) {
-  clearSelection();
-  if (current) {
-    if (current->data(0, Qt::UserRole).value<QString>().endsWith("_annotation")) {
-      addAnnotationToSelection(_qtAnnotations[current->data(0, Qt::UserRole).value<QString>()]);
+void AnnotationWorkstationExtensionPlugin::onTreeWidgetSelectedItemsChanged() {
+  // First clear all the selected annotations
+  for (QSet<QtAnnotation*>::iterator it = _selectedAnnotations.begin(); it != _selectedAnnotations.end(); ++it) {
+    (*it)->setSelected(false);
+    (*it)->clearActiveSeedPoint();
+  }
+  _selectedAnnotations.clear();
+  _activeAnnotation = NULL;
+
+  // Then update from list view
+  QList<QTreeWidgetItem*> selItems = _treeWidget->selectedItems();
+  for (QList<QTreeWidgetItem*>::iterator itm = selItems.begin(); itm != selItems.end(); ++itm) {
+    if ((*itm)->data(0, Qt::UserRole).value<QString>().endsWith("_annotation")) {
+      QtAnnotation* annotation = _qtAnnotations[(*itm)->data(0, Qt::UserRole).value<QString>()];
+      annotation->setSelected(true);
+      _selectedAnnotations.insert(annotation);
+      _activeAnnotation = annotation;
     }
     else {
-      if (current->childCount() > 0) {
-        QTreeWidgetItemIterator it(current->child(0));
-        while (*it && (*it)->parent() != current->parent()) {
-          if ((*it)->data(0, Qt::UserRole).value<QString>().endsWith("_annotation")) {
-            addAnnotationToSelection(_qtAnnotations[(*it)->data(0, Qt::UserRole).value<QString>()]);
+      if ((*itm)->childCount() > 0) {
+        QTreeWidgetItemIterator subItm((*itm)->child(0));
+        while (*subItm && (*subItm)->parent() != (*itm)->parent()) {
+          if ((*subItm)->data(0, Qt::UserRole).value<QString>().endsWith("_annotation")) {
+            QtAnnotation* annotation = _qtAnnotations[(*subItm)->data(0, Qt::UserRole).value<QString>()];
+            annotation->setSelected(true);
+            _selectedAnnotations.insert(annotation);
+            _activeAnnotation = annotation;
           }
-          ++it;
+          ++subItm;
         }
       }
     }
@@ -272,13 +287,19 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
   else if (qobject_cast<QWidget*>(watched) == _treeWidget && event->type() == QEvent::KeyPress) {
     QKeyEvent* kpEvent = dynamic_cast<QKeyEvent*>(event);
     if (kpEvent->key() == Qt::Key::Key_Delete) {
-      QTreeWidgetItem* itm = _treeWidget->currentItem();
-      if (itm->data(0, Qt::UserRole).value<QString>().endsWith("_group")) {
-        deleteAnnotationGroup(_qtAnnotationGroups[itm->data(0, Qt::UserRole).value<QString>()]);
+      QList<QTreeWidgetItem*> selItems = _treeWidget->selectedItems();
+      // Handle selected items iteratively to make sure we do not accidentely remove the parent before the child
+      while (!selItems.empty()) {
+        QTreeWidgetItem* itm = selItems[0];
+        if (itm->data(0, Qt::UserRole).value<QString>().endsWith("_group")) {
+          deleteAnnotationGroup(_qtAnnotationGroups[itm->data(0, Qt::UserRole).value<QString>()]);
+        }
+        else {
+          deleteAnnotation(_qtAnnotations[itm->data(0, Qt::UserRole).value<QString>()]);
+        }
+        selItems = _treeWidget->selectedItems();
       }
-      else {
-        deleteAnnotation(_qtAnnotations[itm->data(0, Qt::UserRole).value<QString>()]);
-      }
+      connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
     }
   }
   return QObject::eventFilter(watched, event);
@@ -362,10 +383,9 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
     return;
   }
   if (_generatedAnnotation) {
+    _treeWidget->clearSelection();
     _generatedAnnotation->setZValue(std::numeric_limits<float>::max());
     _viewer->scene()->addItem(_generatedAnnotation);
-    _activeAnnotation = _generatedAnnotation;
-    addAnnotationToSelection(_activeAnnotation);
   }
 }
 
@@ -384,42 +404,43 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
       newAnnotation->setFlags(newAnnotation->flags() & ~Qt::ItemIsDropEnabled);
       newAnnotation->setFlags(newAnnotation->flags() | Qt::ItemIsEditable);
       newAnnotation->setData(0, Qt::UserRole, annotUID);
-      _treeWidget->resizeColumnToContents(0);
+      newAnnotation->setSelected(true);
+      _treeWidget->resizeColumnToContents(0);      
+      _activeAnnotation = _generatedAnnotation;
       _generatedAnnotation = NULL;
     }
     else {
-      removeAnnotationFromSelection(_generatedAnnotation);
       _viewer->scene()->removeItem(_generatedAnnotation);
       delete _generatedAnnotation->getAnnotation();
       _generatedAnnotation->deleteLater();
       _generatedAnnotation = NULL;
-      _activeAnnotation = NULL;
     }
   }
 }
 
 void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annotation) {
   if (annotation) {
-    removeAnnotationFromSelection(annotation);
-    if (_viewer) {
-      _viewer->scene()->removeItem(annotation);
-    }
     if (_treeWidget) {
       QTreeWidgetItemIterator it(_treeWidget);
       while (*it) {
         if ((*it)->text(0) == QString::fromStdString(annotation->getAnnotation()->getName())) {
           QString annotUID = (*it)->data(0, Qt::UserRole).value<QString>();
           _qtAnnotations.remove(annotUID);
+          if (_viewer) {
+            _viewer->scene()->removeItem(annotation);
+          }
+          if (_annotationService) {
+            _annotationService->getList()->removeAnnotation(annotation->getAnnotation()->getName());
+          }
+          annotation->deleteLater();
+          _selectedAnnotations.remove(annotation);
+          (*it)->setSelected(false);
           delete (*it);
           break;
         }
         ++it;
       }
     }
-    if (_annotationService) {
-     _annotationService->getList()->removeAnnotation(annotation->getAnnotation()->getName());
-    }
-    annotation->deleteLater();
   }
 }
 
@@ -440,7 +461,11 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotationGroup(AnnotationGroup
           }
         }
         QString groupUID = (*it)->data(0, Qt::UserRole).value<QString>();
+        if (_annotationService) {
+          _annotationService->getList()->removeGroup(_qtAnnotationGroups[groupUID]->getName());
+        }
         _qtAnnotationGroups.remove(groupUID);
+        (*it)->setSelected(false);
         delete (*it);
         break;
       }
@@ -457,38 +482,34 @@ QtAnnotation* AnnotationWorkstationExtensionPlugin::getActiveAnnotation() {
   return _activeAnnotation;
 }
 
+void AnnotationWorkstationExtensionPlugin::clearSelection() {
+  if (_treeWidget) {
+    _treeWidget->clearSelection();
+  }
+}
+
 void AnnotationWorkstationExtensionPlugin::addAnnotationToSelection(QtAnnotation* annotation) {
-  annotation->setSelected(true);
-  _selectedAnnotations.push_back(annotation);
-  _activeAnnotation = annotation;
+  QTreeWidgetItemIterator it(_treeWidget);
+  while (*it) {
+    if ((*it)->text(0) == QString::fromStdString(annotation->getAnnotation()->getName())) {
+      (*it)->setSelected(true);
+      break;
+    }
+    ++it;
+  }
 }
 
 void AnnotationWorkstationExtensionPlugin::removeAnnotationFromSelection(QtAnnotation* annotation) {
-  annotation->setSelected(false);
-  annotation->clearActiveSeedPoint();
-  int index = _selectedAnnotations.indexOf(annotation);
-  if (index >= 0) {
-    _selectedAnnotations.removeAt(index);
-  }
-  if (annotation == _activeAnnotation) {
-    if (_selectedAnnotations.empty()) {
-      _activeAnnotation = NULL;
+  QTreeWidgetItemIterator it(_treeWidget);
+  while (*it) {
+    if ((*it)->text(0) == QString::fromStdString(annotation->getAnnotation()->getName())) {
+      (*it)->setSelected(true);
+      break;
     }
-    else {
-      _activeAnnotation = _selectedAnnotations.last();
-    }
+    ++it;
   }
 }
 
-void AnnotationWorkstationExtensionPlugin::clearSelection() {
-  for (QList<QtAnnotation*>::iterator it = _selectedAnnotations.begin(); it != _selectedAnnotations.end(); ++it) {
-    (*it)->setSelected(false);
-    (*it)->clearActiveSeedPoint();
-  }
-  _selectedAnnotations.clear();
-  _activeAnnotation = NULL;
-}
-
-QList<QtAnnotation*> AnnotationWorkstationExtensionPlugin::getSelectedAnnotations() {
+QSet<QtAnnotation*> AnnotationWorkstationExtensionPlugin::getSelectedAnnotations() {
   return _selectedAnnotations;
 }

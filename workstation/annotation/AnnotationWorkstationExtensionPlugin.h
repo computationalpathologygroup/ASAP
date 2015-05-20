@@ -31,14 +31,13 @@ public :
     QDockWidget* getDockWidget();
     QtAnnotation* getActiveAnnotation();
     QtAnnotation* getGeneratedAnnotation();
-    QList<QtAnnotation*> getSelectedAnnotations();
+    QSet<QtAnnotation*> getSelectedAnnotations();
     void addAnnotationToSelection(QtAnnotation* annotation);
     void removeAnnotationFromSelection(QtAnnotation* annotation);
-    void clearSelection();
-    QList<QtAnnotation*> getSelectedAnnotation();
     bool eventFilter(QObject* watched, QEvent* event);
     void deleteAnnotation(QtAnnotation* annotation);
     void deleteAnnotationGroup(AnnotationGroup* group);
+    void clearSelection();
 
 public slots:
     void onNewImageLoaded(MultiResolutionImage* img, std::string fileName);
@@ -49,14 +48,14 @@ public slots:
     void onSaveButtonPressed();
     void onItemNameChanged(QTreeWidgetItem* item, int column);
     void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
-    void onTreeWidgetCurrentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void onTreeWidgetSelectedItemsChanged();
 
 private :
     std::vector<ToolPluginInterface*> _annotationTools;
     AnnotationService* _annotationService;
     QtAnnotation* _generatedAnnotation;
     QtAnnotation* _activeAnnotation;
-    QList<QtAnnotation*> _selectedAnnotations;
+    QSet<QtAnnotation*> _selectedAnnotations;
     QMap<QString, QtAnnotation*> _qtAnnotations;
     QMap<QString, AnnotationGroup*> _qtAnnotationGroups;
     QDockWidget* _dockWidget;
