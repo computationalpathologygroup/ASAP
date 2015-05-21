@@ -25,6 +25,7 @@ QRectF DotQtAnnotation::boundingRect() const {
 void DotQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
   QWidget *widget) {
   if (_annotation) {
+    _rectColor = this->getDrawingColor();
     float lod = option->levelOfDetailFromTransform(painter->worldTransform());
     std::vector<Point> coords = _annotation->getCoordinates();
     for (std::vector<Point>::const_iterator it = coords.begin(); it != coords.end(); ++it) {

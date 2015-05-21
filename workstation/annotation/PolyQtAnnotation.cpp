@@ -11,7 +11,6 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
   _rectSize(10),
   _lineThickness(3),
   _lineAnnotationSelectedThickness(4.5),
-  _lineColor(QColor("yellow")),
   _rectColor(QColor("blue")),
   _rectSelectedColor(QColor("red")),
   _closed(false),
@@ -111,6 +110,7 @@ QPainterPath PolyQtAnnotation::getCurrentPath(const std::vector<Point>& coords) 
 void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
   QWidget *widget) {
   if (_annotation) {
+    QColor lineColor = this->getDrawingColor();
     _currentLoD = option->levelOfDetailFromTransform(painter->worldTransform());
     std::vector<Point> coords = _annotation->getCoordinates();
     if (coords.size() > 1) {
@@ -118,10 +118,10 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
       painter->setRenderHints(QPainter::Antialiasing);
       painter->setRenderHints(QPainter::HighQualityAntialiasing);
       if (isSelected()) {
-        painter->strokePath(_currentPath, QPen(QBrush(_lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
+        painter->strokePath(_currentPath, QPen(QBrush(lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
       }
       else {
-        painter->strokePath(_currentPath, QPen(QBrush(_lineColor), _lineThickness / _currentLoD));
+        painter->strokePath(_currentPath, QPen(QBrush(lineColor), _lineThickness / _currentLoD));
       }
     }
     if (isSelected()) {
@@ -154,7 +154,7 @@ std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPoint
       QPainterPath::Element elm = _currentPath.elementAt(el);
       if (elm.type == 1) {
         QGraphicsLineItem line;
-        line.setPen(QPen(QBrush(_lineColor), _lineThickness / _currentLoD));
+        line.setPen(QPen(QBrush(), _lineThickness / _currentLoD));
         line.setLine(prev.x(), prev.y(), elm.x, elm.y);
         if (line.contains(localPos)) {
           indexes = std::pair<int, int>(lineIndex, lineIndex + 1);

@@ -1,5 +1,6 @@
 #include "QtAnnotation.h"
 #include "Annotation.h"
+#include "AnnotationGroup.h"
 
 using namespace std;
 
@@ -19,6 +20,23 @@ _scale(scale)
 
 QtAnnotation::~QtAnnotation() {
   _annotation = NULL;
+}
+
+QColor QtAnnotation::getDrawingColor() {
+  QColor drawingColor("#F4FA58");
+  if (_annotation) {
+    if (_annotation->getGroup()) {
+      AnnotationGroup* grp = _annotation->getGroup();
+      while (grp->getGroup()) {
+        grp = grp->getGroup();
+      }
+      return QColor(grp->getColor().c_str());
+    }
+    else {
+      return QColor(_annotation->getColor().c_str());
+    }
+  }
+  return drawingColor;
 }
 
 void QtAnnotation::addCoordinate(const float& x, const float& y) {

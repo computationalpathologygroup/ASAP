@@ -29,7 +29,6 @@ private:
   QColor _rectSelectedColor;
   float _lineThickness;
   float _lineAnnotationSelectedThickness;
-  QColor _lineColor;
   bool _closed;
   QPainterPath _currentPath;
   std::string _type;

@@ -50,6 +50,9 @@ public slots:
     void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
     void onTreeWidgetSelectedItemsChanged();
 
+private slots:
+void resizeOnExpand();
+
 private :
     std::vector<ToolPluginInterface*> _annotationTools;
     AnnotationService* _annotationService;

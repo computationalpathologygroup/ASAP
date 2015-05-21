@@ -49,6 +49,11 @@
       </property>
       <column>
        <property name="text">
+        <string>Color</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Name</string>
        </property>
       </column>

@@ -16,7 +16,6 @@ public:
     NONE,
     DOT,
     POLYGON,
-//    FREEHAND,
     SPLINE
   };
 
@@ -44,6 +43,9 @@ public:
   void setGroup(AnnotationGroup* group);
   AnnotationGroup* getGroup() const;
 
+  std::string getColor() const;
+  void setColor(const std::string& color);
+
   std::vector<Point> getImageBoundingBox();
   std::vector<Point> getLocalBoundingBox();
   Point getCenter();
@@ -54,5 +56,6 @@ private:
   std::string _name;
   AnnotationGroup* _group;
   const static char* _typeStrings[5];
+  std::string _color;
 };
 #endif

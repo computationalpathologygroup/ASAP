@@ -38,6 +38,8 @@ public:
   void setEditable(const bool editable);
   bool getEditable() const;
 
+  QColor getDrawingColor();
+
 protected:
 	Annotation* _annotation;
   float _scale;
