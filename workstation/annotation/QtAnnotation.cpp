@@ -8,7 +8,9 @@ QtAnnotation::QtAnnotation(Annotation* annotation, float scale) :
 QGraphicsItem(),
 QObject(),
 _annotation(annotation),
-_scale(scale)
+_scale(scale),
+_editable(true),
+_activeSeedPoint(-1)
 {
   // We consider the first point to act as the 'center' of the annotation
   if (_annotation) {

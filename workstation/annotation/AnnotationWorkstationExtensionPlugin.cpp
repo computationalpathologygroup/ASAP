@@ -68,6 +68,9 @@ AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
 }
 
 void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
+  if (_generatedAnnotation) {
+    finishAnnotation();
+  }
   _treeWidget->clearSelection();
   clearTreeWidget();
   clearQtAnnotations();
@@ -103,6 +106,8 @@ void AnnotationWorkstationExtensionPlugin::clearQtAnnotations() {
   }
   _qtAnnotations.clear();
   _qtAnnotationGroups.clear();
+  _activeAnnotation = NULL;
+  _generatedAnnotation = NULL;
 }
 
 void AnnotationWorkstationExtensionPlugin::onItemNameChanged(QTreeWidgetItem* item, int column) {
@@ -202,6 +207,12 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         newAnnotationGroup->setText(2, "Group");
         newAnnotationGroup->setData(1, Qt::UserRole, QString::fromStdString(key));
         newAnnotationGroup->setFlags(newAnnotationGroup->flags() | Qt::ItemIsEditable);
+        int cHeight = _treeWidget->visualItemRect(newAnnotationGroup).height();
+        QPixmap iconPM(cHeight, cHeight);
+        iconPM.fill(QColor((*it)->getColor().c_str()));
+        QIcon color(iconPM);
+        newAnnotationGroup->setIcon(0, color);
+        newAnnotationGroup->setData(0, Qt::UserRole, QColor((*it)->getColor().c_str()));
         annotToWidget[(*it)] = newAnnotationGroup;
       }
       else {
@@ -219,6 +230,12 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
           newAnnotationGroup->setText(2, "Group");
           newAnnotationGroup->setData(1, Qt::UserRole, QString::fromStdString(key));
           newAnnotationGroup->setFlags(newAnnotationGroup->flags() | Qt::ItemIsEditable);
+          int cHeight = _treeWidget->visualItemRect(newAnnotationGroup).height();
+          QPixmap iconPM(cHeight, cHeight);
+          iconPM.fill(QColor((*it).second->getColor().c_str()));
+          QIcon color(iconPM);
+          newAnnotationGroup->setIcon(0, color);
+          newAnnotationGroup->setData(0, Qt::UserRole, QColor((*it).second->getColor().c_str()));
           annotToWidget[(*it).second] = newAnnotationGroup;
           it = childGroups.erase(it);
         }
@@ -262,9 +279,19 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       newAnnotation->setFlags(newAnnotation->flags() & ~Qt::ItemIsDropEnabled);
       newAnnotation->setFlags(newAnnotation->flags() | Qt::ItemIsEditable);
       newAnnotation->setData(1, Qt::UserRole, QString::fromStdString(key));
+      int cHeight = _treeWidget->visualItemRect(newAnnotation).height();
+      if (_treeWidget->topLevelItemCount() > 0) {
+        cHeight = _treeWidget->visualItemRect(_treeWidget->topLevelItem(0)).height();
+      }
+      QPixmap iconPM(cHeight, cHeight);
+      iconPM.fill(QColor((*it)->getColor().c_str()));
+      QIcon color(iconPM);
+      newAnnotation->setIcon(0, color);
+      newAnnotation->setData(0, Qt::UserRole, QColor((*it)->getColor().c_str()));
 
     }
     _treeWidget->resizeColumnToContents(0);
+    _treeWidget->resizeColumnToContents(1);
   }
 }
 
