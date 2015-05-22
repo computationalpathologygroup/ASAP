@@ -51,6 +51,8 @@ void XmlRepository::saveAnnotation(const Annotation* annotation, pugi::xml_node*
   else {
     attributeGroup.set_value("None");
   }
+  pugi::xml_attribute attributeColor = nodeAnnotation.append_attribute("Color");
+  attributeColor.set_value(annotation->getColor().c_str());
 
   pugi::xml_node nodeCoordinates = nodeAnnotation.append_child("Coordinates");
   std::vector<Point> coordinates = annotation->getCoordinates();
@@ -77,6 +79,8 @@ void XmlRepository::saveGroup(const AnnotationGroup* group, pugi::xml_node* node
   else {
     attributeGroup.set_value("None");
   }
+  pugi::xml_attribute attributeColor = nodeGroup.append_attribute("Color");
+  attributeColor.set_value(group->getColor().c_str());
 
   pugi::xml_node nodeAttributes = nodeGroup.append_child("Attributes");
   std::map<std::string, std::string> attributes = group->getAttributes();
@@ -107,6 +111,10 @@ bool XmlRepository::load()
     AnnotationGroup* group = new AnnotationGroup();
     std::string groupName = it->attribute("Name").value();
     group->setName(groupName);
+    std::string groupColor = it->attribute("Color").value();
+    if (!groupColor.empty()) {
+      group->setColor(groupColor);
+    }
     std::string parentGroupName = it->attribute("PartOfGroup").value();
     if (parentGroupName != "None") {
       groupToParent[groupName] = parentGroupName;
@@ -136,6 +144,10 @@ bool XmlRepository::load()
 
 		annotation->setName(it->attribute("Name").value());
     annotation->setTypeFromString(it->attribute("Type").value());
+    std::string annotColor = it->attribute("Color").value();
+    if (!annotColor.empty()) {
+      annotation->setColor(annotColor);
+    }
     std::string annotationGroup = it->attribute("PartOfGroup").value();
     if (annotationGroup != "None") {
       if (nameToGroup.find(annotationGroup) != nameToGroup.end()) {

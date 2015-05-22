@@ -20,7 +20,8 @@ public:
   void moveCoordinatesBy(const Point& moveBy);
   void setInterpolationType(const std::string& interpolationType);
   std::string getInterpolationType();
-  std::pair<int, int> seedPointsContaininPathPoint(const QPointF& point);
+  std::pair<int, int> seedPointsContainingPathPoint(const QPointF& point);
+  QPainterPath getCurrentPath(const std::vector<Point>& coords) const;
 
 private:
   float _rectSize;
@@ -28,13 +29,12 @@ private:
   QColor _rectSelectedColor;
   float _lineThickness;
   float _lineAnnotationSelectedThickness;
-  QColor _lineColor;
   bool _closed;
   QPainterPath _currentPath;
   std::string _type;
   float _currentLoD;
 
-  std::vector<QPointF> catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3);
+  std::vector<QPointF> catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3) const;
 
 };
 #endif

@@ -1,5 +1,6 @@
 #include "QtAnnotation.h"
 #include "Annotation.h"
+#include "AnnotationGroup.h"
 
 using namespace std;
 
@@ -7,7 +8,9 @@ QtAnnotation::QtAnnotation(Annotation* annotation, float scale) :
 QGraphicsItem(),
 QObject(),
 _annotation(annotation),
-_scale(scale)
+_scale(scale),
+_editable(true),
+_activeSeedPoint(-1)
 {
   // We consider the first point to act as the 'center' of the annotation
   if (_annotation) {
@@ -15,6 +18,27 @@ _scale(scale)
     this->setPos(center.getX()*_scale, center.getY()*_scale);
   }
   this->setFlag(QGraphicsItem::ItemIsSelectable);
+}
+
+QtAnnotation::~QtAnnotation() {
+  _annotation = NULL;
+}
+
+QColor QtAnnotation::getDrawingColor() {
+  QColor drawingColor("#F4FA58");
+  if (_annotation) {
+    if (_annotation->getGroup()) {
+      AnnotationGroup* grp = _annotation->getGroup();
+      while (grp->getGroup()) {
+        grp = grp->getGroup();
+      }
+      return QColor(grp->getColor().c_str());
+    }
+    else {
+      return QColor(_annotation->getColor().c_str());
+    }
+  }
+  return drawingColor;
 }
 
 void QtAnnotation::addCoordinate(const float& x, const float& y) {
@@ -49,6 +73,11 @@ void QtAnnotation::removeCoordinate(const int& index) {
   prepareGeometryChange();
   if (_annotation) {
     _annotation->removeCoordinate(index);
+    // Recenter annotation when anchorpoint is removed
+    if (index == 0 && _annotation->getCoordinates().size() > 0) {
+      Point center = _annotation->getCoordinate(0);
+      this->setPos(center.getX()*_scale, center.getY()*_scale);
+    }
   }
 }
 
@@ -56,6 +85,11 @@ void QtAnnotation::setCoordinates(const std::vector<Point>& coordinates) {
   prepareGeometryChange();
   if (_annotation) {
     _annotation->setCoordinates(coordinates);
+    // Recenter annotation when anchorpoint is removed
+    if (_annotation->getCoordinates().size() > 0) {
+      Point center = _annotation->getCoordinate(0);
+      this->setPos(center.getX()*_scale, center.getY()*_scale);
+    }
   }
 }
 
@@ -64,12 +98,14 @@ Annotation* QtAnnotation::getAnnotation() const {
 }
 
 void QtAnnotation::setActiveSeedPoint(const unsigned int seedPointIndex) {
+  prepareGeometryChange();
   if (seedPointIndex < this->getAnnotation()->getCoordinates().size()) {
     _activeSeedPoint = seedPointIndex;
   }
 }
 
 void QtAnnotation::clearActiveSeedPoint() {
+  prepareGeometryChange();
   _activeSeedPoint = -1;
 }
 

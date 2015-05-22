@@ -11,7 +11,6 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
   _rectSize(10),
   _lineThickness(3),
   _lineAnnotationSelectedThickness(4.5),
-  _lineColor(QColor("yellow")),
   _rectColor(QColor("blue")),
   _rectSelectedColor(QColor("red")),
   _closed(false),
@@ -24,23 +23,15 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
 QRectF PolyQtAnnotation::boundingRect() const {
   QRectF bRect;
   if (_annotation) {
-      std::vector<Point> bbox = _annotation->getLocalBoundingBox();
-      Point center = _annotation->getCenter();
-      Point start = _annotation->getCoordinate(0);
-      QPointF tl((_scale*(bbox[0].getX() + (center.getX() - start.getX()))) - _rectSize, (_scale*(bbox[0].getY() + (center.getY() - start.getY()))) - _rectSize);
-      QPointF br((_scale*(bbox[1].getX() + (center.getX() - start.getX()))) + _rectSize, (_scale*(bbox[1].getY() + (center.getY() - start.getY()))) + _rectSize);
-      bRect = QRectF(tl, br);
-    if (_type != "spline") {
-      QRectF cpRect = _currentPath.controlPointRect();
+      QRectF cpRect = getCurrentPath(_annotation->getCoordinates()).controlPointRect();
       QPointF tl = cpRect.topLeft() - QPointF(_rectSize, _rectSize);
       QPointF br = cpRect.bottomRight() + QPointF(_rectSize, _rectSize);
       bRect = bRect.united(QRectF(tl, br));
-    }
   }
   return bRect;
 }
 
-std::vector<QPointF> PolyQtAnnotation::catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3)
+std::vector<QPointF> PolyQtAnnotation::catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3) const
 {
   std::vector<QPointF> bezierPoints;
   bezierPoints.push_back(p1);
@@ -75,58 +66,62 @@ std::string PolyQtAnnotation::getInterpolationType() {
   return _type;
 }
 
+QPainterPath PolyQtAnnotation::getCurrentPath(const std::vector<Point>& coords) const {
+  QPainterPath pth;
+  pth.moveTo(0, 0);
+  for (unsigned int i = 0; i < coords.size() - 1; ++i) {
+    if (_type != "spline") {
+      pth.lineTo(this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale));
+    }
+    else {
+      QPointF p1 = this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale);
+      QPointF p2 = this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale);
+      QPointF p0 = p1 - (p2 - p1);
+      if (i > 0) {
+        p0 = this->mapFromScene(coords[i - 1].getX()*_scale, coords[i - 1].getY()*_scale);
+      }
+      else if (i == 0 && _closed && coords.size() > 2) {
+        p0 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
+      }
+      QPointF p3 = p2 + (p2 - p1);
+      if (i < coords.size() - 2) {
+        p3 = this->mapFromScene(coords[i + 2].getX()*_scale, coords[i + 2].getY()*_scale);
+      }
+      std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
+      pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
+    }
+  }
+  if (_closed) {
+    if (_type != "spline") {
+      pth.lineTo(0, 0);
+    }
+    else {
+      QPointF p0 = this->mapFromScene(coords[coords.size() - 2].getX()*_scale, coords[coords.size() - 2].getY()*_scale);
+      QPointF p1 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
+      QPointF p2 = this->mapFromScene(coords[0].getX()*_scale, coords[0].getY()*_scale);
+      QPointF p3 = this->mapFromScene(coords[1].getX()*_scale, coords[1].getY()*_scale);
+      std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
+      pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
+    }
+  }
+  return pth;
+}
 
 void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
   QWidget *widget) {
   if (_annotation) {
+    QColor lineColor = this->getDrawingColor();
     _currentLoD = option->levelOfDetailFromTransform(painter->worldTransform());
     std::vector<Point> coords = _annotation->getCoordinates();
     if (coords.size() > 1) {
-      QPainterPath pth;
-      pth.moveTo(0, 0);
-      for (unsigned int i = 0; i < coords.size() - 1; ++i) {
-        if (_type != "spline") {
-          pth.lineTo(this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale));
-        }
-        else {
-          QPointF p1 = this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale);
-          QPointF p2 = this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale);
-          QPointF p0 = p1 - (p2 - p1);
-          if (i > 0) {
-            p0 = this->mapFromScene(coords[i - 1].getX()*_scale, coords[i - 1].getY()*_scale);
-          }
-          else if (i == 0 && _closed && coords.size() > 2) {
-            p0 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
-          }
-          QPointF p3 = p2 + (p2 - p1);
-          if (i < coords.size() - 2) {
-            p3 = this->mapFromScene(coords[i + 2].getX()*_scale, coords[i + 2].getY()*_scale);
-          }
-          std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
-          pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
-        }
-      }
-      if (_closed) {
-        if (_type != "spline") {
-          pth.lineTo(0, 0);
-        }
-        else {
-          QPointF p0 = this->mapFromScene(coords[coords.size() - 2].getX()*_scale, coords[coords.size() - 2].getY()*_scale);
-          QPointF p1 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
-          QPointF p2 = this->mapFromScene(coords[0].getX()*_scale, coords[0].getY()*_scale);
-          QPointF p3 = this->mapFromScene(coords[1].getX()*_scale, coords[1].getY()*_scale);
-          std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
-          pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
-        }
-      }
-      _currentPath = pth;
+      _currentPath = getCurrentPath(coords);
       painter->setRenderHints(QPainter::Antialiasing);
       painter->setRenderHints(QPainter::HighQualityAntialiasing);
       if (isSelected()) {
-        painter->strokePath(pth, QPen(QBrush(_lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
+        painter->strokePath(_currentPath, QPen(QBrush(lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
       }
       else {
-        painter->strokePath(pth, QPen(QBrush(_lineColor), _lineThickness / _currentLoD));
+        painter->strokePath(_currentPath, QPen(QBrush(lineColor), _lineThickness / _currentLoD));
       }
     }
     if (isSelected()) {
@@ -149,7 +144,7 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
   }
 }
 
-std::pair<int, int> PolyQtAnnotation::seedPointsContaininPathPoint(const QPointF& point) {
+std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPointF& point) {
   std::pair<int, int> indexes = std::pair<int, int>(-1, -1);
   QPointF localPos = this->mapFromScene(point);
   if (_currentPath.elementCount() > 0) {
@@ -159,7 +154,7 @@ std::pair<int, int> PolyQtAnnotation::seedPointsContaininPathPoint(const QPointF
       QPainterPath::Element elm = _currentPath.elementAt(el);
       if (elm.type == 1) {
         QGraphicsLineItem line;
-        line.setPen(QPen(QBrush(_lineColor), _lineThickness / _currentLoD));
+        line.setPen(QPen(QBrush(), _lineThickness / _currentLoD));
         line.setLine(prev.x(), prev.y(), elm.x, elm.y);
         if (line.contains(localPos)) {
           indexes = std::pair<int, int>(lineIndex, lineIndex + 1);
@@ -216,13 +211,25 @@ void PolyQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
   this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
 }
 
-QPainterPath PolyQtAnnotation::shape() const {
+QPainterPath PolyQtAnnotation::shape() const {  
+  QPainterPath rectPath;
   QPainterPathStroker stroker;
-  if (isSelected()) {
-    stroker.setWidth(_lineAnnotationSelectedThickness / _currentLoD);
+  QPainterPath strokePath;
+  if (_annotation) {
+    std::vector<Point> coords = _annotation->getCoordinates();
+    for (unsigned int i = 0; i < coords.size(); ++i) {
+      rectPath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
+    }
+    if (isSelected()) {
+      stroker.setWidth(_lineAnnotationSelectedThickness / _currentLoD);
+    }
+    else {
+      stroker.setWidth(_lineThickness / _currentLoD);
+    }
+    strokePath = stroker.createStroke(_currentPath).subtracted(rectPath);
+    for (unsigned int i = 0; i < coords.size(); ++i) {
+      strokePath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
+    }
   }
-  else {
-    stroker.setWidth(_lineThickness / _currentLoD);
-  }
-  return stroker.createStroke(_currentPath);
+  return strokePath.simplified();
 }

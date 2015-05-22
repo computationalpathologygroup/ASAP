@@ -14,7 +14,6 @@
 
 #include "MiniMap.h"
 #include "RenderThread.h"
-#include "FilterThread.h"
 #include "PrefetchThread.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
@@ -29,7 +28,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _img(NULL),
   _renderthread(NULL),
   _prefetchthread(NULL),
-  _filterthread(NULL),
   _zoomSensitivity(0.5),
   _panSensitivity(0.5),
   _numScheduledScalings(0),
@@ -37,10 +35,9 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _prevPan(0,0),
   _map(NULL), 
   _cache(NULL),
-  _cacheSize(1000 * 512 * 512 * 3),
+  _cacheSize(100 * 1024 * 1024 * 3),
   _activeTool(NULL),
   _sceneScale(1.),
-  _filterResult(NULL),
   _autoUpdate(false)
 {
   
@@ -51,14 +48,12 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   setContentsMargins(0,0,0,0);
   setBackgroundBrush(QBrush(QColor("black")));
   setAutoFillBackground(true);
-  QGLFormat fmt;
-  fmt.setSampleBuffers(true);
-  fmt.setSamples(5);
-  QGLWidget* wdg = new QGLWidget(fmt);
-  setViewport(wdg);
+  setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
   
   setInteractive(false);
   this->setScene(new QGraphicsScene);
+  this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
+  this->scene()->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
           this, SLOT(showContextMenu(const QPoint&)));
@@ -120,7 +115,7 @@ void PathologyViewer::zoom(float numSteps) {
     _numScheduledScalings = numSteps;
 
   QTimeLine *anim = new QTimeLine(300, this);
-  anim->setUpdateInterval(10);
+  anim->setUpdateInterval(5);
 
   connect(anim, SIGNAL(valueChanged(qreal)), SLOT(scalingTime(qreal)));
   connect(anim, SIGNAL(finished()), SLOT(zoomFinished()));
@@ -131,17 +126,16 @@ void PathologyViewer::scalingTime(qreal x)
 {
   qreal factor = 1.0 + qreal(_numScheduledScalings) / 300.0;
   float maxDownsample = _img->getLevelDownsample(_img->getNumberOfLevels() - 1);
-  float minScale = this->transform().m11() > this->transform().m22() ? this->transform().m22() : this->transform().m11();
-  float maxScale = this->transform().m11() > this->transform().m22() ? this->transform().m11() : this->transform().m22();
-  if ((factor < 1.0 && minScale < 0.25) || (factor > 1.0 && maxScale > 2 * maxDownsample)) {
+  QRectF FOV = this->mapToScene(this->rect()).boundingRect();
+  QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
+  float scaleX = static_cast<float>(_img->getDimensions()[0]) / FOVImage.width();
+  float scaleY = static_cast<float>(_img->getDimensions()[1]) / FOVImage.height();
+  float minScale = scaleX > scaleY ? scaleY : scaleX;
+  float maxScale = scaleX > scaleY ? scaleX : scaleY;
+  if ((factor < 1.0 && maxScale < 0.5) || (factor > 1.0 && minScale > maxDownsample)) {
     return;
   }
   scale(factor, factor);
-  QRectF FOV = this->mapToScene(this->rect()).boundingRect();
-  QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  if (this->_filterResult) {
-    _filterResult->setVisible(false);
-  }
   emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()), -1);
   emit updateBBox(FOV);
 }
@@ -171,6 +165,15 @@ void PathologyViewer::addTool(ToolPluginInterface* tool) {
   }
 }
 
+bool PathologyViewer::hasTool(const std::string& toolName) const {
+  if (_tools.find(toolName) != _tools.end()) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void PathologyViewer::setActiveTool(const std::string& toolName) {
   if (_tools.find(toolName) != _tools.end()) {
     _activeTool = _tools[toolName];
@@ -195,63 +198,14 @@ void PathologyViewer::setAutoUpdate(bool autoUpdate) {
 }
 
 void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel) {
-  clearFilterResult();
-  if (_filterthread && _autoUpdate) {
-    updateFilterResult();
-  }
-}
-
-void PathologyViewer::clearFilterResult() {
-  if (_filterResult) {
-    _filterResult->setVisible(false);
-    this->scene()->removeItem(_filterResult);
-    delete _filterResult;
-    _filterResult = NULL;
-  }
-}
-
-void PathologyViewer::updateFilterResult() {
-  if (_img && _filterthread) {
-    float maxDownsample = 1. / this->_sceneScale;
-    QRectF FOV = this->mapToScene(this->rect()).boundingRect();
-    QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-    _filterthread->updateFilterResult(FOVImage, _img, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()), -1);
-  }
-}
-
-void PathologyViewer::onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface> filter) {
-  clearFilterResult();
-  if (_filterthread && filter == NULL) {
-    _filterthread->removeFilter();
-  }
-  else {
-    _filterthread->setFilter(filter);
-  }
-  if (_autoUpdate) {
-    updateFilterResult();
-  }
-}
-
-void PathologyViewer::updateFilteredImage(QGraphicsItem* result, QRectF size) {
-  clearFilterResult();
-  if (result) {
-    result->setVisible(false);
-    _filterResult = result;
-    this->scene()->addItem(_filterResult);
-    _filterResult->setZValue(std::numeric_limits<float>::max() - 1.);
-    _filterResult->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
-    _filterResult->setPos(this->mapToScene(this->rect()).boundingRect().topLeft());
-    _filterResult->setTransform(QTransform::fromScale(static_cast<float>(this->width()) / size.width(), static_cast<float>(this->height()) / size.height()), true);
-    _filterResult->setVisible(true);
-  }
+  _renderthread->clearJobs();
 }
 
 void PathologyViewer::initialize(MultiResolutionImage *img) {
   close();
   _img = img;
   _renderthread = new RenderThread(img);
-  _filterthread = new FilterThread();
-  unsigned int tileSize = 512;
+  unsigned int tileSize = 1024;
 
   QGraphicsScene* scn = new QGraphicsScene();  
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;
@@ -267,7 +221,7 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   setMouseTracking(true);
   QObject::connect(this, SIGNAL(channelChanged(int)), _renderthread, SLOT(onChannelChanged(int)));  
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int, int)), this, SLOT(onFieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int, int)));
-  QObject::connect(_filterthread, SIGNAL(filterResult(QGraphicsItem*, QRectF)), this, SLOT(updateFilteredImage(QGraphicsItem*, QRectF)));
+  setEnabled(true);
 }
 
 void PathologyViewer::onForegroundImageChanged(MultiResolutionImage* for_img) {
@@ -318,7 +272,7 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
       ss << item->pos().x() << "_" << item->pos().y() << "_" << lastLevel;
       std::string key;
       ss >> key;
-      _cache->set(key, item, tileSize*tileSize*_img->getSamplesPerPixel());
+      _cache->set(key, item, tileSize*tileSize*_img->getSamplesPerPixel(), true);
     }
   }
 
@@ -384,10 +338,7 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
 }
 
 void PathologyViewer::close() {
-  if (_filterthread) {
-    _filterthread->deleteLater();
-    _filterthread = NULL;
-  }
+  setEnabled(false);
   if (_prefetchthread) {
     _prefetchthread->deleteLater();
     _prefetchthread = NULL;
@@ -396,9 +347,9 @@ void PathologyViewer::close() {
   QGraphicsScene* oldScene = this->scene();
   this->setScene(new QGraphicsScene);
   oldScene->deleteLater();
-  _filterResult = NULL;
   _img = NULL;
   if (_renderthread) {
+    _renderthread->shutdown();
     _renderthread->deleteLater();
     _renderthread = NULL;
   }
@@ -438,9 +389,6 @@ void PathologyViewer::pan(const QPoint& panTo) {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  if (this->_filterResult) {
-    _filterResult->setVisible(false);
-  }
   emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()), -1);
   emit updateBBox(FOV);
 }

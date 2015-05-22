@@ -36,11 +36,16 @@ void PolyAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
       QPointF scenePos = _viewer->mapToScene(event->pos());
       _activeLine->setPen(QPen(QBrush(Qt::green), 3. / _viewer->transform().m11(), Qt::PenStyle::DashLine));
       _activeLine->setLine(_last.getX(), _last.getY(), scenePos.x(), scenePos.y());
+      if (event->buttons() == Qt::LeftButton) {
+        if (QLineF(_viewer->mapFromScene(scenePos), _viewer->mapFromScene(QPointF(_last.getX(), _last.getY()))).length() > 40) {
+          addCoordinate(scenePos);
+        }
+      }
     }
     else if (_startSelectionMove && event->modifiers() == Qt::AltModifier) {
       QPointF scenePos = _viewer->mapToScene(event->pos());
-      QList<QtAnnotation*> selected = _annotationPlugin->getSelectedAnnotations();
-      for (QList<QtAnnotation*>::iterator it = selected.begin(); it != selected.end(); ++it) {
+      QSet<QtAnnotation*> selected = _annotationPlugin->getSelectedAnnotations();
+      for (QSet<QtAnnotation*>::iterator it = selected.begin(); it != selected.end(); ++it) {
         QPointF delta = (scenePos - _moveStart);
         (*it)->moveCoordinatesBy(Point(delta.x(), delta.y()));
       }
@@ -73,7 +78,7 @@ void PolyAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
           std::vector<Point> coords = active->getAnnotation()->getCoordinates();
           bool hitSeedPoint = false;
           for (std::vector<Point>::const_iterator it = coords.begin(); it != coords.end(); ++it) {
-            if (pow(it->getX()*_viewer->getSceneScale() - scenePos.x(), 2) + pow(it->getY()*_viewer->getSceneScale() - scenePos.y(), 2) < (36. / _viewer->transform().m11())) {
+            if (QLineF(_viewer->mapFromScene(QPointF(it->getX()*_viewer->getSceneScale(), it->getY()*_viewer->getSceneScale())), event->pos()).length() < 20) {
               hitSeedPoint = true;
               break;
             }
@@ -81,7 +86,7 @@ void PolyAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
           if (!hitSeedPoint) {
             // Figure out between which seed points a point should be added
             QPointF imagePos = scenePos / _viewer->getSceneScale();
-            std::pair<int, int> indices = active->seedPointsContaininPathPoint(scenePos);
+            std::pair<int, int> indices = active->seedPointsContainingPathPoint(scenePos);
             if (indices.first >= 0) {
               active->insertCoordinate(indices.second, Point(imagePos.x(), imagePos.y()));
             }
@@ -97,10 +102,14 @@ void PolyAnnotationTool::keyPressEvent(QKeyEvent *event) {
     cancelAnnotation();
   }
   else if (event->key() == Qt::Key::Key_Delete && event->modifiers() == Qt::ShiftModifier) {
-    QList<QtAnnotation*> selectedAnnotations = _annotationPlugin->getSelectedAnnotations();
-    _annotationPlugin->clearSelection();
-    for (QList<QtAnnotation*>::iterator it = selectedAnnotations.begin(); it != selectedAnnotations.end(); ++it) {
-      _annotationPlugin->deleteAnnotation(*it);
+    if (_generating) {
+      cancelAnnotation();
+    }
+    else {
+      QSet<QtAnnotation*> selectedAnnotations = _annotationPlugin->getSelectedAnnotations();
+      for (QSet<QtAnnotation*>::iterator it = selectedAnnotations.begin(); it != selectedAnnotations.end(); ++it) {
+        _annotationPlugin->deleteAnnotation(*it);
+      }
     }
   }
   else if (event->key() == Qt::Key::Key_Delete) {
@@ -119,15 +128,23 @@ void PolyAnnotationTool::keyPressEvent(QKeyEvent *event) {
         }
       }
     }
-    else if (_annotationPlugin->getActiveAnnotation() && _annotationPlugin->getActiveAnnotation()->getActiveSeedPoint() > -1) {
-      int activeSeedPoint = _annotationPlugin->getActiveAnnotation()->getActiveSeedPoint();
-      _annotationPlugin->getActiveAnnotation()->removeCoordinate(activeSeedPoint);
-      if (activeSeedPoint - 1 >= 0) {
-        _annotationPlugin->getActiveAnnotation()->setActiveSeedPoint(activeSeedPoint);
-      }
-    }
     else if (_annotationPlugin->getActiveAnnotation()) {
-      _annotationPlugin->getActiveAnnotation()->removeCoordinate(-1);
+      if (_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() <= 2) {
+        _annotationPlugin->deleteAnnotation(_annotationPlugin->getActiveAnnotation());
+      }
+      else if (_annotationPlugin->getActiveAnnotation()->getActiveSeedPoint() > -1) {
+        int activeSeedPoint = _annotationPlugin->getActiveAnnotation()->getActiveSeedPoint();
+        _annotationPlugin->getActiveAnnotation()->removeCoordinate(activeSeedPoint);
+        if (activeSeedPoint - 1 >= 0) {
+          _annotationPlugin->getActiveAnnotation()->setActiveSeedPoint(activeSeedPoint - 1);
+        }
+        else {
+          _annotationPlugin->getActiveAnnotation()->setActiveSeedPoint(_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() - 1);
+        }
+      }
+      else if (_annotationPlugin->getActiveAnnotation()) {
+        _annotationPlugin->getActiveAnnotation()->removeCoordinate(-1);
+      }
     }
   }
 }
@@ -181,7 +198,7 @@ void PolyAnnotationTool::mousePressEvent(QMouseEvent *event) {
               std::vector<Point> coords = active->getAnnotation()->getCoordinates();
               bool hitSeedPoint = false;
               for (std::vector<Point>::const_iterator it = coords.begin(); it != coords.end(); ++it) {
-                if (pow(it->getX()*_viewer->getSceneScale() - scenePos.x(), 2) + pow(it->getY()*_viewer->getSceneScale() - scenePos.y(), 2) < (36. / _viewer->transform().m11())) {
+                if (QLineF(_viewer->mapFromScene(QPointF(it->getX()*_viewer->getSceneScale(), it->getY()*_viewer->getSceneScale())), event->pos()).length() < 12) {
                   active->setActiveSeedPoint(it - coords.begin());
                   _startSelectionMove = true;
                   _moveStart = scenePos;
@@ -198,7 +215,6 @@ void PolyAnnotationTool::mousePressEvent(QMouseEvent *event) {
         return;
       }
       else {
-        _annotationPlugin->clearSelection();
         _annotationPlugin->startAnnotation(scenePos.x(), scenePos.y(), name());
         _generating = true;
         _start = Point(scenePos.x(), scenePos.y());
@@ -206,23 +222,27 @@ void PolyAnnotationTool::mousePressEvent(QMouseEvent *event) {
       }
     }
     else if (_generating) {
-      if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && pow(scenePos.x() - _start.getX(), 2) + pow(scenePos.y() - _start.getY(), 2) < (36. / _viewer->transform().m11())) {
-        _annotationPlugin->finishAnnotation();
-        if (_activeLine) {
-          _viewer->scene()->removeItem(_activeLine);
-          delete _activeLine;
-          _activeLine = NULL;
-        }
-        _start = Point(-1,-1);
-        _last = _start;
-        _generating = false;
-      }
-      else {
-        _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
-        _last = Point(scenePos.x(), scenePos.y());
-      }
+      addCoordinate(scenePos);
     }
     event->accept();
+  }
+}
+
+void PolyAnnotationTool::addCoordinate(const QPointF& scenePos) {
+  if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && QLineF(_viewer->mapFromScene(QPointF(_start.getX(), _start.getY())), _viewer->mapFromScene(scenePos)).length() < 12) {
+    _annotationPlugin->finishAnnotation();
+    if (_activeLine) {
+      _viewer->scene()->removeItem(_activeLine);
+      delete _activeLine;
+      _activeLine = NULL;
+    }
+    _start = Point(-1, -1);
+    _last = _start;
+    _generating = false;
+  }
+  else {
+    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
+    _last = Point(scenePos.x(), scenePos.y());
   }
 }
 

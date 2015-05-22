@@ -23,10 +23,11 @@
 #include <QToolBar>
 #include <QStyle>
 #include <QActionGroup>
+#include <QSettings>
+#include <QStandardPaths>
 
 #include "pathologyworkstation.h"
 #include "PathologyViewer.h"
-#include "FilterDockWidget.h"
 #include "interfaces/interfaces.h"
 #include "WSITileGraphicsItemCache.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
@@ -38,23 +39,42 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
     QMainWindow(parent),
     _img(NULL),
     _cacheMaxByteSize(1000*512*512*3),
-    _filterDock(NULL),
-    _filters(new std::vector<std::shared_ptr<ImageFilterPluginInterface> >())
+    _settings(NULL)
 {
   setupUi();
   retranslateUi();
   connect(actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_actionOpen_triggered()));
   connect(actionClose, SIGNAL(triggered(bool)), this, SLOT(on_actionClose_triggered()));
 
-  this->initializeDocks();
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   this->loadPlugins();
-  view->setActiveTool("pan");
   view->setCacheSize(_cacheMaxByteSize);
-  QAction* pan = mainToolBar->actions().at(3);
-  if (pan) {
-    pan->setChecked(true);
-  }
+  if (view->hasTool("pan")) {
+    view->setActiveTool("pan");
+    QList<QAction*> toolButtons = mainToolBar->actions();
+    for (QList<QAction*>::iterator it = toolButtons.begin(); it != toolButtons.end(); ++it) {
+      if ((*it)->objectName() == "pan") {
+        (*it)->setChecked(true);
+      }
+    }
+  }  
+  view->setEnabled(false);
+  _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
+  readSettings();
+}
+
+void PathologyWorkstation::writeSettings()
+{
+  _settings->beginGroup("ASAP");
+  _settings->setValue("size", size());
+  _settings->endGroup();
+}
+
+void PathologyWorkstation::readSettings()
+{
+  _settings->beginGroup("ASAP");
+  resize(_settings->value("size", QSize(1037, 786)).toSize());
+  _settings->endGroup();
 }
 
 void PathologyWorkstation::loadPlugins() {
@@ -100,7 +120,15 @@ void PathologyWorkstation::loadPlugins() {
                 this->addToolBar(extension->getToolBar());
               }
               if (extension->getDockWidget()) {
-                this->addDockWidget(Qt::LeftDockWidgetArea, extension->getDockWidget());
+                QDockWidget* extensionDW = extension->getDockWidget();
+                this->addDockWidget(Qt::LeftDockWidgetArea, extensionDW);
+                QMenu* viewMenu = this->findChild<QMenu*>("menuView");
+                QMenu* viewDocksMenu = viewMenu->findChild<QMenu*>("menuViewDocks");
+                if (!viewDocksMenu) {
+                  viewDocksMenu = viewMenu->addMenu("Docks");
+                  viewDocksMenu->setObjectName("menuViewDocks");
+                }
+                viewDocksMenu->addAction(extensionDW->toggleViewAction());
               }
               if (extension->getMenu()) {
                 this->menuBar->addMenu(extension->getMenu());
@@ -124,72 +152,13 @@ void PathologyWorkstation::loadPlugins() {
       }
       _pluginsDir.cdUp();
     }
-    if (_pluginsDir.cd("filters")) {
-      QListWidget* availableFilters = _filterDock->findChild<QListWidget*>("filterListWidget");
-      foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
-        if (fileName.toLower().endsWith(".dll")) {
-          QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
-          QObject *plugin = loader.instance();
-          if (plugin) {
-            std::shared_ptr<ImageFilterPluginInterface> filter(qobject_cast<ImageFilterPluginInterface *>(plugin));
-            if (filter) {
-              _filterPluginFileNames.push_back(fileName.toStdString());
-              if (_filterDock) {
-                QListWidgetItem* filterItem = new QListWidgetItem(filter->icon(), filter->name());
-                filterItem->setData(Qt::ItemDataRole::UserRole, QVariant::fromValue(filter));      
-                availableFilters->addItem(filterItem);
-                filterItem->setHidden(true);
-              }
-            }
-          }
-        }
-      }
-    }
   }
-}
-
-void PathologyWorkstation::initializeDocks()
-{
-  _filterDock = new FilterDockWidget(this);
-  _filterDock->setEnabled(false);
-  _filterDock->setVisible(true);
-  _filterDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-  connect(this, SIGNAL(newImageLoaded(MultiResolutionImage*, std::string)), _filterDock, SLOT(onNewImageLoaded(MultiResolutionImage*)));
-  connect(this, SIGNAL(imageClosed()), _filterDock, SLOT(onImageClosed()));
-  connect(_filterDock, SIGNAL(requestFilterResultUpdate()), this, SLOT(onFilterResultUpdateRequested()));
-  connect(_filterDock, SIGNAL(requestFilterResultClear()), this, SLOT(onFilterResultClearRequested()));
-  connect(_filterDock, SIGNAL(changeAutoUpdateStatus(bool)), this, SLOT(onAutoUpdateStatusChanged(bool)));
-  addDockWidget(Qt::LeftDockWidgetArea, _filterDock);
 }
 
 PathologyWorkstation::~PathologyWorkstation()
 {
-  this->findChild<PathologyViewer*>("pathologyView")->close();
-  delete _img;
-}
-
-void PathologyWorkstation::onFilterResultClearRequested() {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->clearFilterResult();
-  }
-}
-
-void PathologyWorkstation::onFilterResultUpdateRequested() {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->updateFilterResult();
-  }
-}
-
-void PathologyWorkstation::onAutoUpdateStatusChanged(bool autoUpdate) {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->setAutoUpdate(autoUpdate);
-    if (autoUpdate) {
-      view->updateFilterResult();
-    }
-  }
+  on_actionClose_triggered();
+  writeSettings();
 }
 
 void PathologyWorkstation::on_actionClose_triggered()
@@ -197,10 +166,6 @@ void PathologyWorkstation::on_actionClose_triggered()
     emit imageClosed();
     if (_img) {
 		  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-      disconnect(_filterDock, SIGNAL(changeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)), view, SLOT(onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)));
-      _filterDock->onImageClosed();
-      _filterDock->setEnabled(false);
-
 		  view->close();
 		  delete _img;
 		  _img = NULL;
@@ -213,9 +178,10 @@ void PathologyWorkstation::on_actionOpen_triggered()
     if (_img) {
       on_actionClose_triggered();
     }
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "D:\\Demo",  tr("Slide files (*.lif;*.svs;*.mrxs;*.tif;*.tiff)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Slide files (*.lif;*.svs;*.mrxs;*.ndpi;*.tif;*.tiff)"));
     if (!fileName.isEmpty()) {
       std::string fn = fileName.toStdString();
+      _settings->setValue("lastOpenendPath", QDir(fileName).path());
       MultiResolutionImageReader imgReader;
       _img = imgReader.open(fn);
       if (_img) {
@@ -223,8 +189,6 @@ void PathologyWorkstation::on_actionOpen_triggered()
             vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels()-1);
             PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
             view->initialize(_img);
-            _filterDock->setEnabled(true);
-            connect(_filterDock, SIGNAL(changeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)), view, SLOT(onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface>)));
             emit newImageLoaded(_img, fn);
           } else {
             statusBar->showMessage("Unsupported file type version");
@@ -286,8 +250,6 @@ void PathologyWorkstation::setupUi()
   menuBar->setGeometry(QRect(0, 0, 1037, 21));
   menuFile = new QMenu(menuBar);
   menuFile->setObjectName(QStringLiteral("menuFile"));
-  menuEdit = new QMenu(menuBar);
-  menuEdit->setObjectName(QStringLiteral("menuEdit"));
   menuView = new QMenu(menuBar);
   menuView->setObjectName(QStringLiteral("menuView"));
   this->setMenuBar(menuBar);
@@ -303,7 +265,6 @@ void PathologyWorkstation::setupUi()
   this->setStatusBar(statusBar);
 
   menuBar->addAction(menuFile->menuAction());
-  menuBar->addAction(menuEdit->menuAction());
   menuBar->addAction(menuView->menuAction());
   menuFile->addAction(actionOpen);
   menuFile->addAction(actionClose);
@@ -319,6 +280,5 @@ void PathologyWorkstation::retranslateUi()
   actionClose->setShortcut(QApplication::translate("PathologyWorkstation", "Ctrl+C", 0));
   actionClose->setIconText(QApplication::translate("PathologyWorkstation", "Close", 0));
   menuFile->setTitle(QApplication::translate("PathologyWorkstation", "File", 0));
-  menuEdit->setTitle(QApplication::translate("PathologyWorkstation", "Edit", 0));
   menuView->setTitle(QApplication::translate("PathologyWorkstation", "View", 0));
 } 

@@ -8,8 +8,17 @@ Annotation::Annotation() :
   _type(Annotation::Type::NONE),
   _coordinates(),
   _name(""),
-  _group(NULL)
+  _group(NULL),
+  _color("#F4FA58")
 {
+}
+
+std::string Annotation::getColor() const {
+  return _color;
+}
+
+void Annotation::setColor(const std::string& color) {
+  _color = color;
 }
 
 std::string Annotation::getTypeAsString() const {

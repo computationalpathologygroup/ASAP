@@ -22,11 +22,9 @@ set(HEADERS
   RenderThread.h
   RenderWorker.h
   PrefetchThread.h
-  FilterDockWidget.h
   WSITileGraphicsItem.h
   UtilityFunctions.h
   interfaces/interfaces.h
-  FilterThread.h
   QtProgressMonitor.h
 )
 
@@ -39,11 +37,9 @@ set(SOURCE
   RenderThread.cpp
   RenderWorker.cpp
   PrefetchThread.cpp
-  FilterDockWidget.cpp
   WSITileGraphicsItem.cpp
   UtilityFunctions.cpp
   PathologyWorkstation.rc
-  FilterThread.cpp
   QtProgressMonitor.cpp
 )
 

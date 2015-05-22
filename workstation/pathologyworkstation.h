@@ -12,10 +12,9 @@ class QAction;
 class QStatusBar;
 class QMenuBar;
 class PathologyViewer;
-class ImageFilterPluginInterface;
-class FilterDockWidget;
 class WorkstationExtensionPluginInterface;
 class QActionGroup;
+class QSettings;
 
 class PathologyWorkstation : public QMainWindow
 {
@@ -36,20 +35,16 @@ signals:
 private slots:
   void on_actionClose_triggered();
   void on_actionOpen_triggered();
-  void onFilterResultUpdateRequested();
-  void onFilterResultClearRequested();
-  void onAutoUpdateStatusChanged(bool autoUpdate);
 
 private:
   MultiResolutionImage *_img;
   unsigned long long _cacheMaxByteSize;
+  QSettings* _settings;
   
-  // Plugins and filters
+  // Plugins
   QDir _pluginsDir;
   std::vector<std::string> _extensionPluginFileNames;
-  std::vector<std::string> _filterPluginFileNames;
   std::vector<std::string> _toolPluginFileNames;
-  std::shared_ptr<std::vector<std::shared_ptr<ImageFilterPluginInterface> > > _filters;
 
   // GUI object
   QAction *actionOpen;
@@ -60,17 +55,17 @@ private:
   PathologyViewer *pathologyView;
   QMenuBar *menuBar;
   QMenu *menuFile;
-  QMenu *menuEdit;
   QMenu *menuView;
   QToolBar *mainToolBar;
   QStatusBar *statusBar;
-  FilterDockWidget* _filterDock;
 
   // Initialize the GUI
   void initializeDocks();
   void setupUi();
   void retranslateUi();
   void loadPlugins();
+  void readSettings();
+  void writeSettings();
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };

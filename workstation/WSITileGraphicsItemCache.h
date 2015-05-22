@@ -13,7 +13,7 @@ public :
   void clear();
   void refresh();
   void get(const keyType& k, QPointer<WSITileGraphicsItem>& tile, unsigned int& size);
-  int set(const keyType& k, QPointer<WSITileGraphicsItem> v, unsigned int size);
+  int set(const keyType& k, QPointer<WSITileGraphicsItem> v, unsigned int size, bool topLevel = false);
 
 protected:
   void evict();

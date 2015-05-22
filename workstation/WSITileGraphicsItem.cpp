@@ -99,7 +99,6 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
         _topRight->setZValue(1. / ((float)_itemLevel));
         _bottomLeft->setZValue(1. / ((float)_itemLevel));
         _bottomRight->setZValue(1. / ((float)_itemLevel));
-        this->scene()->update();
       }
     }
     if (_item) {

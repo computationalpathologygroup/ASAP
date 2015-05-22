@@ -44,9 +44,13 @@ public:
   void setGroup(AnnotationGroup* parent);
   AnnotationGroup* getGroup() const;
 
+  std::string getColor() const;
+  void setColor(const std::string& color);
+
 private:
   AnnotationGroup* _parent;
   std::string _name;
   std::map<std::string, std::string> _attributes;
+  std::string _color;
 };
 #endif

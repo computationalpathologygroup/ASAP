@@ -40,6 +40,7 @@ public:
   void clearJobs();
   unsigned int numberOfJobs();
   QMutex _senderDeletionMutex;
+  void shutdown();
 
   public slots:
 
