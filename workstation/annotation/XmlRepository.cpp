@@ -19,8 +19,9 @@ bool XmlRepository::save() const
     return false;
   }
 	pugi::xml_document xml;
-	pugi::xml_node nodeAnnotations = xml.append_child("Annotations");
-	pugi::xml_node nodeGroups = xml.append_child("AnnotationGroups");	
+  pugi::xml_node root = xml.append_child("ASAP_Annotations");
+  pugi::xml_node nodeAnnotations = root.append_child("Annotations");
+  pugi::xml_node nodeGroups = root.append_child("AnnotationGroups");
 
   std::vector<Annotation*> annotations = _list->getAnnotations();
   for (std::vector<Annotation*>::const_iterator it = annotations.begin(); it != annotations.end(); ++it) 
@@ -100,12 +101,15 @@ bool XmlRepository::load()
   _list->removeAllAnnotations();
   _list->removeAllGroups();
 
-	pugi::xml_document xml;
-	pugi::xml_parse_result tree = xml.load_file(_source.c_str());
-
+	pugi::xml_document xml_doc;
+  pugi::xml_parse_result tree = xml_doc.load_file(_source.c_str());
+  pugi::xml_node root = xml_doc.child("ASAP_Annotations");
+  if (root.empty()) {
+    root = xml_doc.root();
+  }
   std::map<std::string, AnnotationGroup*> nameToGroup;
   std::map<std::string, std::string> groupToParent;
-  pugi::xml_node groups = xml.child("AnnotationGroups");
+  pugi::xml_node groups = root.child("AnnotationGroups");
   for (pugi::xml_node_iterator it = groups.begin(); it != groups.end(); ++it)
   {
     AnnotationGroup* group = new AnnotationGroup();
@@ -137,7 +141,7 @@ bool XmlRepository::load()
     }
   }
 
-  pugi::xml_node annotations = xml.child("Annotations");
+  pugi::xml_node annotations = root.child("Annotations");
 	for (pugi::xml_node_iterator it = annotations.begin(); it != annotations.end(); ++it)
 	{
 		Annotation* annotation = new Annotation();
