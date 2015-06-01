@@ -105,8 +105,30 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
       //painter->setClipRect(option->exposedRect.marginsAdded(QMargins(1, 1, 1, 1)));
       QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
       painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
-      //painter->setPen(QPen(QColor("white")));
-      //painter->drawRect(QRectF(this->boundingRect().left(), this->boundingRect().top(), _physicalSize, _physicalSize));
+      /*
+      if (_itemLevel == 0) {
+        painter->setPen(QPen(QColor("white")));
+      } 
+      else if (_itemLevel == 1) {
+        painter->setPen(QPen(QColor("red")));
+      }
+      else if (_itemLevel == 2) {
+        painter->setPen(QPen(QColor("blue")));
+      }
+      else if (_itemLevel == 3) {
+        painter->setPen(QPen(QColor("green")));
+      }
+      else if (_itemLevel == 4) {
+        painter->setPen(QPen(QColor("purple")));
+      }
+      else if (_itemLevel == 5) {
+        painter->setPen(QPen(QColor("orange")));
+      }
+      else if (_itemLevel == 6) {
+        painter->setPen(QPen(QColor("black")));
+      }
+      painter->drawRect(QRectF(this->boundingRect().left(), this->boundingRect().top(), _physicalSize, _physicalSize));
+      */
     }
   }
 }

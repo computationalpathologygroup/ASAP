@@ -49,7 +49,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   setBackgroundBrush(QBrush(QColor("black")));
   setAutoFillBackground(true);
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
-  
   setInteractive(false);
   this->setScene(new QGraphicsScene);
   this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
@@ -115,7 +114,7 @@ void PathologyViewer::zoom(float numSteps) {
     _numScheduledScalings = numSteps;
 
   QTimeLine *anim = new QTimeLine(300, this);
-  anim->setUpdateInterval(5);
+  anim->setUpdateInterval(10);
 
   connect(anim, SIGNAL(valueChanged(qreal)), SLOT(scalingTime(qreal)));
   connect(anim, SIGNAL(finished()), SLOT(zoomFinished()));
