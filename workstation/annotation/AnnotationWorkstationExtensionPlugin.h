@@ -15,7 +15,7 @@ class QTreeWidgetItem;
 class QObject;
 class QEvent;
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.AnnotationWorkstationExtensionPlugin/1.0")

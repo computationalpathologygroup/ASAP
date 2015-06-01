@@ -47,6 +47,12 @@
   #  else
   #    define EXPORT_PATHOLOGYANNOTATION __declspec(dllimport)
   #  endif
+  
+  #  ifdef BUILD_PATHOLOGYANNOTATIONPLUGIN
+  #    define EXPORT_PATHOLOGYANNOTATIONPLUGIN __declspec(dllexport)
+  #  else
+  #    define EXPORT_PATHOLOGYANNOTATIONPLUGIN __declspec(dllimport)
+  #  endif  
 
   #  ifdef BUILD_BASICFILTERS
   #    define EXPORT_BASICFILTERS __declspec(dllexport)

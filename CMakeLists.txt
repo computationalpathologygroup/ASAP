@@ -50,6 +50,7 @@ OPTION(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING "Builds image processing routines" O
 OPTION(BUILD_DIAG_PATHOLOGY_TESTS "Builds tests" OFF)
 OPTION(PACKAGE_ON_INSTALL "Copies dependent DLLs and packages install" OFF)
 
+ADD_SUBDIRECTORY(annotation)
 ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(io)
 

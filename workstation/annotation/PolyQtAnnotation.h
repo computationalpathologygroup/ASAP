@@ -4,7 +4,7 @@
 #include <QColor>
 #include "config/pathology_config.h"
 
-class EXPORT_PATHOLOGYANNOTATION PolyQtAnnotation : public QtAnnotation
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN PolyQtAnnotation : public QtAnnotation
 {
   Q_OBJECT
 public:

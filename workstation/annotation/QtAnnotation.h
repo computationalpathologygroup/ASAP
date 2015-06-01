@@ -9,7 +9,7 @@
 class Annotation;
 class Point;
 
-class EXPORT_PATHOLOGYANNOTATION QtAnnotation : public QGraphicsItem, public QObject
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN QtAnnotation : public QGraphicsItem, public QObject
 {
 
 public:
