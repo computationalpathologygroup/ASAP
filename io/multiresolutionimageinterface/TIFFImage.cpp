@@ -1,10 +1,11 @@
 #include "TIFFImage.h"
 #include "tiffio.h"
+#include "JPEG2000Codec.h"
 #include "core/PathologyEnums.h"
 
 using namespace pathology;
 
-TIFFImage::TIFFImage() : MultiResolutionImage(), _tiff(NULL) {
+TIFFImage::TIFFImage() : MultiResolutionImage(), _tiff(NULL), _jp2000(NULL) {
 }
 
 TIFFImage::~TIFFImage() {
@@ -223,6 +224,10 @@ void TIFFImage::cleanup() {
     TIFFClose(_tiff);
     _tiff = NULL;
   }
+  if (_jp2000) {
+    delete _jp2000;
+    _jp2000 = NULL;
+  }
 }
 
 void* TIFFImage::readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width, 
@@ -284,14 +289,26 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
         tile = new T[tileW*tileH*getSamplesPerPixel()];
         std::fill(tile, tile + tileW*tileH*getSamplesPerPixel(), static_cast<T>(0.0));
         _cacheMutex.lock();
-        TIFFSetDirectory(_tiff, level);      
-        unsigned int ycbcr = 0;
-        TIFFGetField(_tiff, TIFFTAG_PHOTOMETRIC, &ycbcr);
-        if (ycbcr == PHOTOMETRIC_YCBCR) {
-          TIFFReadRGBATile(_tiff, ix, iy, (uint32*)tile);
+        TIFFSetDirectory(_tiff, level);
+        unsigned int codec = 0;
+        TIFFGetField(_tiff, TIFFTAG_COMPRESSION, &codec);
+        if (codec == 33005) {
+          if (!_jp2000) {
+            _jp2000 = new JPEG2000Codec();
+          }
+          unsigned int byteSize = tileW*tileH*getSamplesPerPixel()*sizeof(T);
+          unsigned int rawSize = TIFFReadRawTile(_tiff, TIFFComputeTile(_tiff, ix, iy, 0, 0), tile, byteSize);
+          _jp2000->decode((char*)tile, rawSize, byteSize);
         }
         else {
-          TIFFReadTile(_tiff, tile, ix, iy, 0, 0);
+          unsigned int ycbcr = 0;
+          TIFFGetField(_tiff, TIFFTAG_PHOTOMETRIC, &ycbcr);
+          if (ycbcr == PHOTOMETRIC_YCBCR) {
+            TIFFReadRGBATile(_tiff, ix, iy, (uint32*)tile);
+          }
+          else {
+            TIFFReadTile(_tiff, tile, ix, iy, 0, 0);
+          }
         }
         if (boost::static_pointer_cast<TileCache<T> >(_cache)->set(k.str(), tile, tileW*tileH*getSamplesPerPixel()*sizeof(T))) {
           deleteTile = true;

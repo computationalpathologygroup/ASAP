@@ -70,6 +70,15 @@ bool OpenSlideImage::initialize(const std::string& imagePath) {
   }
   return _isValid;
 }
+std::string OpenSlideImage::getOpenSlideProperty(const std::string& propertyName) {
+  std::string propertyValue;
+  if (_slide) {
+    if (openslide_get_property_value(_slide, propertyName.c_str())) {
+      propertyValue = openslide_get_property_value(_slide, propertyName.c_str());
+    }
+  }
+  return propertyValue;
+}
 
 void* OpenSlideImage::readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width, 
     const unsigned long long& height, const unsigned int& level) {

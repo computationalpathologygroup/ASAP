@@ -20,6 +20,8 @@ public:
   const bool getIgnoreAlpha() const;
   void setIgnoreAlpha(const bool ignoreAlpha);
 
+  std::string getOpenSlideProperty(const std::string& propertyName);
+
 protected :
   void cleanup();
   

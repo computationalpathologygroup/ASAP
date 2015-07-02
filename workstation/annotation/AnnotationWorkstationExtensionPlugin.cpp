@@ -7,8 +7,10 @@
 #include "AnnotationGroup.h"
 #include "QtAnnotation.h"
 #include "Annotation.h"
+#include "AnnotationToMask.h"
 #include "DotQtAnnotation.h"
 #include "PolyQtAnnotation.h"
+#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "../PathologyViewer.h"
 #include <QtUiTools>
 #include <QDockWidget>
@@ -183,7 +185,7 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetSelectedItemsChanged() {
 void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string& filePath) {
   QString fileName;
   if (filePath.empty()) {
-    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), "D:\\Temp", tr("XML file (*.xml)"));
+    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), "X:\\Scans\\TIGA\\Projekte\\CureVac\\Study_CV_9104_007\\PIN_HE", tr("Annotation files(*.xml;*.ndpa)"));
   }
   else {
     fileName = QString::fromStdString(filePath);
@@ -296,9 +298,20 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
 }
 
 void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
-  QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), "D:\\Temp", tr("XML file (*.xml)"));
-  _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
-  _annotationService->save();
+  QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), "D:\\Temp", tr("XML file (*.xml), TIF file (*.tif)"));
+  if (_img && fileName.endsWith(".tif")) {
+    std::map<std::string, int> colorToLabel;
+    colorToLabel["#0000ff"] = 1;
+    colorToLabel["#ff0000"] = 2;
+    colorToLabel["#ff00ff"] = 3;
+    colorToLabel["#000000"] = 4;
+    AnnotationToMask maskConverter;
+    maskConverter.convert(_annotationService->getList(), fileName.toStdString(), _img->getDimensions(), _img->getSpacing(), std::map<std::string, int>(), colorToLabel);
+  }
+  else if (!fileName.isEmpty()) {
+    _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
+    _annotationService->save();
+  }
 }
 
 bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent* event) {
@@ -398,6 +411,7 @@ void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage
     core::changeExtension(annotationPath, "xml");
     onLoadButtonPressed(annotationPath);
   }
+  _img = img;
 }
 
 void AnnotationWorkstationExtensionPlugin::onImageClosed() {
@@ -405,6 +419,7 @@ void AnnotationWorkstationExtensionPlugin::onImageClosed() {
     _dockWidget->setEnabled(false);
   }
   onClearButtonPressed();
+  _img = NULL;
 }
 
 bool AnnotationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {

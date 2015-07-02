@@ -117,7 +117,7 @@ AnnotationGroup* Annotation::getGroup() const {
   return _group;
 }
 
-std::vector<Point> Annotation::getImageBoundingBox() {
+std::vector<Point> Annotation::getImageBoundingBox() const {
   std::vector<Point> bbox;
   Point topLeft(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
   Point bottomRight(std::numeric_limits<float>::min(), std::numeric_limits<float>::min());

@@ -2,6 +2,7 @@
 // Include LIBJASPER for JPEG2000 compression
 #include "jasper/jasper.h"
 #include <string>
+#include <vector>
 #include <sstream>
 
 using namespace std;
@@ -14,42 +15,39 @@ JPEG2000Codec::~JPEG2000Codec() {
   jas_cleanup();
 }
 
-void JPEG2000Codec::decode(char* buf, const unsigned int& size) const
+void JPEG2000Codec::decode(char* buf, const unsigned int& inSize, const unsigned int& outSize) const
 {
-      jas_image_t *image=0;
-      jas_stream_t *jpcstream;
-      jas_image_cmpt_t **comps;
-      char *opts=0;
-      jas_matrix_t *red, *green, *blue;
+    jas_image_t *image = NULL;
+    jas_stream_t *jpcstream = NULL;
+    char *opts=0;
+    std::vector<jas_matrix_t*> components;
 
-      jpcstream=jas_stream_memopen(buf,size);
-      image=jpc_decode(jpcstream,opts);
-      red=jas_matrix_create(jas_image_height(image), jas_image_width(image));
-      green=jas_matrix_create(jas_image_height(image), jas_image_width(image));
-      blue=jas_matrix_create(jas_image_height(image), jas_image_width(image));
-      jas_image_readcmpt(image,0,0,0,jas_image_width(image),
-                         jas_image_height(image),red);
-      jas_image_readcmpt(image,1,0,0,jas_image_width(image),
-                         jas_image_height(image),green);
-      jas_image_readcmpt(image,2,0,0,jas_image_width(image),
-                         jas_image_height(image),blue);
-
-      for (int i = 0; i < size; i+=3) {
-        buf[i] = red->data_[i/3];
-        buf[i+1] = green->data_[i/3];
-        buf[i+2] = blue->data_[i/3];
+    jpcstream = jas_stream_memopen(buf, inSize);
+    image=jpc_decode(jpcstream, opts);
+    if (image) {
+      for (int i = 0; i < image->numcmpts_; ++i) {
+        jas_matrix_t* tmp = jas_matrix_create(jas_image_height(image), jas_image_width(image));        
+        jas_image_readcmpt(image, i, 0, 0, jas_image_width(image), jas_image_height(image), tmp);
+        components.push_back(tmp);
       }
-
-      jas_matrix_destroy(red);
-      jas_matrix_destroy(green);
-      jas_matrix_destroy(blue);
-      jas_stream_close(jpcstream);
-      jas_image_destroy(image);
+      for (int j = 0; j < components.size(); ++j) {
+        jas_matrix_t* cmp = components[j];
+        for (int i = j; i < outSize; i += image->numcmpts_) {
+          buf[i] = cmp->data_[i / image->numcmpts_];
+        }
+      }
+    }
+    for (std::vector<jas_matrix_t*>::iterator it = components.begin(); it != components.end(); ++it) {
+      jas_matrix_destroy(*it);
+    }
+    components.clear();
+    jas_stream_close(jpcstream);
+    jas_image_destroy(image);
 }
 
 void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& tileSize, const unsigned int& depth, const unsigned int& nrComponents, float& rate) const
 {
-    jas_image_cmptparm_t component_info[4];
+    jas_image_cmptparm_t* component_info = new jas_image_cmptparm_t[4];
     for( int i = 0; i < nrComponents; i++ )
     {
         component_info[i].tlx = 0;
@@ -61,28 +59,27 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
         component_info[i].prec = depth;
         component_info[i].sgnd = 0;
     }
-    jas_image_t *img = jas_image_create( nrComponents, component_info, (nrComponents == 1) ? JAS_CLRSPC_SGRAY : JAS_CLRSPC_SRGB );
+    jas_image_t *img = jas_image_create(nrComponents, component_info, (nrComponents == 1 || nrComponents == 2) ? JAS_CLRSPC_SGRAY : JAS_CLRSPC_SRGB);
     if(nrComponents == 1) {
-        jas_image_setcmpttype( img, 0, JAS_IMAGE_CT_GRAY_Y );
+      jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
     }
     else if(nrComponents == 2) {
-        jas_image_setcmpttype( img, 0, JAS_IMAGE_CT_GRAY_Y );
-        jas_image_setcmpttype( img, 1, JAS_IMAGE_CT_GRAY_Y );
+      jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
+      jas_image_setcmpttype(img, 1, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
     }
     else if (nrComponents == 3)
     {
-        jas_image_setcmpttype( img, 0, 2 );
-        jas_image_setcmpttype( img, 1, 1 );
-        jas_image_setcmpttype( img, 2, 0 );
+      jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_R));
+      jas_image_setcmpttype(img, 1, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_G));
+      jas_image_setcmpttype(img, 2, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_B));
     }
     else
     {
-        jas_image_setcmpttype( img, 0, 3 );
-        jas_image_setcmpttype( img, 1, 2 );
-        jas_image_setcmpttype( img, 2, 1 );
-        jas_image_setcmpttype( img, 2, 0 );
+      jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_R));
+      jas_image_setcmpttype(img, 1, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_G));
+      jas_image_setcmpttype(img, 2, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_B));
+      jas_image_setcmpttype(img, 3, JAS_IMAGE_CT_COLOR(JAS_IMAGE_CT_OPACITY));
     }
-
     jas_matrix_t *row = jas_matrix_create( 1, tileSize );
     for( int y = 0; y < tileSize; ++y)
     {
@@ -103,7 +100,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
       rate = 1.0;
     }
     if (rate == 1.0) {
-      string opts = std::string("rate=1.0 mode=int");
+      string opts = std::string("mode=int");
       jas_image_encode( img, stream, jas_image_strtofmt( (char*)"jpc" ), (char*)opts.c_str());
     } else {
       std::stringstream ssm;

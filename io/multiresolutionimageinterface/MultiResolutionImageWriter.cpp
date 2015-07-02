@@ -383,28 +383,28 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
       if (level == 1 && (getCompression() == JPEG2000_LOSSY || getCompression() == JPEG2000_LOSSLESS)) {
         int tileNr = TIFFComputeTile(prevLevelTiff, xpos, ypos, 0, 0);
         unsigned int outTileSize = _tileSize*_tileSize*nrsamples*(nrbits/8);
-        TIFFReadRawTile(prevLevelTiff, tileNr, tile1, outTileSize);
-        cod.decode((char*)tile1, outTileSize);
+        unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile1, outTileSize);
+        cod.decode((char*)tile1, rawSize, outTileSize);
         if (xpos+_tileSize>=prevLevelw) {
           std::fill_n(tile2, npixels, 0);
         } else {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos+_tileSize, ypos, 0, 0);
-          TIFFReadRawTile(prevLevelTiff, tileNr, tile2, outTileSize);
-          cod.decode((char*)tile2, outTileSize);
+          unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile2, outTileSize);
+          cod.decode((char*)tile2, rawSize, outTileSize);
         }
         if (ypos+_tileSize>=prevLevelh) {
           std::fill_n(tile3, npixels, 0);
         } else {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos, ypos+_tileSize, 0, 0);
-          TIFFReadRawTile(prevLevelTiff, tileNr, tile3, outTileSize);
-          cod.decode((char*)tile3, outTileSize);
+          unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile3, outTileSize);
+          cod.decode((char*)tile3, rawSize, outTileSize);
         }
         if (xpos+_tileSize>=prevLevelw || ypos+_tileSize>=prevLevelh) {
           std::fill_n(tile4, npixels, 0);
         } else {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos+_tileSize, ypos+_tileSize, 0, 0);
-          TIFFReadRawTile(prevLevelTiff, tileNr, tile4, outTileSize);
-          cod.decode((char*)tile4, outTileSize);
+          unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile4, outTileSize);
+          cod.decode((char*)tile4, rawSize, outTileSize);
         }
       } else {
         TIFFReadTile(prevLevelTiff, tile1, xpos, ypos, 0, 0);

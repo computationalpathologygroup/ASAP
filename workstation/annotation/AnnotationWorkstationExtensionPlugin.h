@@ -64,6 +64,7 @@ private :
     QDockWidget* _dockWidget;
     QTreeWidget* _treeWidget;
     QEvent* _oldEvent;
+    MultiResolutionImage* _img;
 
     void clearTreeWidget();
     void clearAnnotationList();
