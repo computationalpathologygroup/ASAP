@@ -24,6 +24,7 @@
 #include <QStyle>
 #include <QActionGroup>
 #include <QSettings>
+#include <QFileInfo>
 #include <QStandardPaths>
 
 #include "pathologyworkstation.h"
@@ -164,6 +165,8 @@ PathologyWorkstation::~PathologyWorkstation()
 void PathologyWorkstation::on_actionClose_triggered()
 {
     emit imageClosed();
+    _settings->setValue("currentFile", QString());
+    this->setWindowTitle("ASAP");
     if (_img) {
 		  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
 		  view->close();
@@ -181,7 +184,9 @@ void PathologyWorkstation::on_actionOpen_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Slide files (*.lif;*.svs;*.mrxs;*.ndpi;*.tif;*.tiff)"));
     if (!fileName.isEmpty()) {
       std::string fn = fileName.toStdString();
-      _settings->setValue("lastOpenendPath", QDir(fileName).path());
+      _settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
+      _settings->setValue("currentFile", QFileInfo(fileName).fileName());
+      this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
       MultiResolutionImageReader imgReader;
       _img = imgReader.open(fn);
       if (_img) {

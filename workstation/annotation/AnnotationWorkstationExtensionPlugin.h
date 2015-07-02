@@ -14,6 +14,7 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QObject;
 class QEvent;
+class QSettings;
 
 class EXPORT_PATHOLOGYANNOTATIONPLUGIN AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
@@ -72,6 +73,7 @@ private :
 
     static unsigned int _annotationIndex;
     static unsigned int _annotationGroupIndex;
+    QSettings* _settings;
 };
 
 #endif

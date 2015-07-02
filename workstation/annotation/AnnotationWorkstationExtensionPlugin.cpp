@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <QApplication>
 #include <QColorDialog>
+#include <QSettings>
 #include "core/filetools.h"
 
 #include <numeric>
@@ -59,6 +60,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
     connect(_treeWidget, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(resizeOnExpand()));
   }
+  _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
 }
 
 AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
@@ -185,7 +187,7 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetSelectedItemsChanged() {
 void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string& filePath) {
   QString fileName;
   if (filePath.empty()) {
-    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), "X:\\Scans\\TIGA\\Projekte\\CureVac\\Study_CV_9104_007\\PIN_HE", tr("Annotation files(*.xml;*.ndpa)"));
+    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Annotation files(*.xml;*.ndpa)"));
   }
   else {
     fileName = QString::fromStdString(filePath);
@@ -298,15 +300,18 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
 }
 
 void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
-  QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), "D:\\Temp", tr("XML file (*.xml), TIF file (*.tif)"));
+  QDir defaultName = _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
+  QString basename = QFileInfo(_settings->value("currentFile", QString()).toString()).completeBaseName();
+  if (basename.isEmpty()) {
+    basename = QString("annotation.xml");
+  }
+  else {
+    basename += QString(".xml");
+  }
+  QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), defaultName.filePath(basename), tr("XML file (*.xml);TIF file (*.tif)"));
   if (_img && fileName.endsWith(".tif")) {
-    std::map<std::string, int> colorToLabel;
-    colorToLabel["#0000ff"] = 1;
-    colorToLabel["#ff0000"] = 2;
-    colorToLabel["#ff00ff"] = 3;
-    colorToLabel["#000000"] = 4;
     AnnotationToMask maskConverter;
-    maskConverter.convert(_annotationService->getList(), fileName.toStdString(), _img->getDimensions(), _img->getSpacing(), std::map<std::string, int>(), colorToLabel);
+    maskConverter.convert(_annotationService->getList(), fileName.toStdString(), _img->getDimensions(), _img->getSpacing(), std::map<std::string, int>());
   }
   else if (!fileName.isEmpty()) {
     _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
