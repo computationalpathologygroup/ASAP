@@ -21,6 +21,10 @@ public :
   void keyPressEvent(QKeyEvent *event);
   virtual QAction* getToolButton();
 
+private slots:
+  void zoomToAnnotation(qreal val);
+  void zoomToAnnotationFinished();
+
 private :
 
   void addCoordinate(const QPointF& scenePos);
@@ -34,6 +38,8 @@ private :
 
   bool _startSelectionMove;
   QPointF _moveStart;
+  QRectF _start_zoom;
+  QRectF _end_zoom;
 };
 
 #endif

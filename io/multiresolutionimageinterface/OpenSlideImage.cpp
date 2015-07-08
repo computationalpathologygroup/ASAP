@@ -4,7 +4,7 @@
 
 using namespace pathology;
 
-OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _ignoreAlpha(false) {
+OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _ignoreAlpha(true) {
 }
 
 OpenSlideImage::~OpenSlideImage() {

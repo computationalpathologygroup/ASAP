@@ -46,5 +46,7 @@ protected:
   int _activeSeedPoint;
   bool _editable;
 
+  virtual void onCoordinatesChanged();
+
 };
 #endif

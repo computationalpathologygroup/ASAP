@@ -7,10 +7,12 @@
 #include <QGraphicsItem>
 #include "PolyQtAnnotation.h"
 #include "Annotation.h"
+#include "AnnotationZoomer.h"
 #include "../PathologyViewer.h"
 #include <math.h>
 #include <numeric>
 #include <iostream>
+#include <QTimeLine>
 
 PolyAnnotationTool::PolyAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) : 
   ToolPluginInterface(), 
@@ -147,6 +149,29 @@ void PolyAnnotationTool::keyPressEvent(QKeyEvent *event) {
       }
     }
   }
+  else if (event->key() == Qt::Key::Key_Z) {
+    if (_annotationPlugin->getActiveAnnotation()) {
+      QTimeLine * anim = new QTimeLine(500);
+
+      _start_zoom = _viewer->mapToScene(_viewer->viewport()->rect()).boundingRect();
+      _end_zoom = _annotationPlugin->getActiveAnnotation()->mapToScene(_annotationPlugin->getActiveAnnotation()->boundingRect()).boundingRect();
+      anim->setFrameRange(0, 100);
+      anim->setUpdateInterval(5);
+
+      connect(anim, SIGNAL(valueChanged(qreal)), SLOT(zoomToAnnotation(qreal)));
+      connect(anim, SIGNAL(finished()), SLOT(zoomToAnnotationFinished()));
+      anim->start();
+    }
+  }
+}
+
+void PolyAnnotationTool::zoomToAnnotation(qreal val) {
+  QRectF current = QRectF(_start_zoom.topLeft() + val*(_end_zoom.topLeft() - _start_zoom.topLeft()), _start_zoom.bottomRight() + val*(_end_zoom.bottomRight() - _start_zoom.bottomRight()));
+  _viewer->fitInView(current, Qt::AspectRatioMode::KeepAspectRatio);
+}
+
+void PolyAnnotationTool::zoomToAnnotationFinished() {
+  sender()->~QObject();
 }
 
 void PolyAnnotationTool::cancelAnnotation() {

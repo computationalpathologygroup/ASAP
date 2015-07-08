@@ -30,6 +30,7 @@ private:
   float _lineThickness;
   float _lineAnnotationSelectedThickness;
   bool _closed;
+  float _selectionSensitivity;
   QPainterPath _currentPath;
   std::string _type;
   float _currentLoD;
