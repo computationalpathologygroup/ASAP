@@ -7,7 +7,6 @@
 #include <QGraphicsItem>
 #include "PolyQtAnnotation.h"
 #include "Annotation.h"
-#include "AnnotationZoomer.h"
 #include "../PathologyViewer.h"
 #include <math.h>
 #include <numeric>

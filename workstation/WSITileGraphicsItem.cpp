@@ -101,7 +101,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
         _bottomRight->setZValue(1. / ((float)_itemLevel));
       }
     }
-    if (_item) {
+    if (_item) { //&& (requestedLevel == _itemLevel)) {
       //painter->setClipRect(option->exposedRect.marginsAdded(QMargins(1, 1, 1, 1)));
       QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
       painter->drawPixmap(option->exposedRect, *_item, pixmapArea);

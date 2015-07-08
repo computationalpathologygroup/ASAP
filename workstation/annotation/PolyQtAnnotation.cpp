@@ -176,9 +176,8 @@ std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPoint
         else {
           stroker.setWidth(_selectionSensitivity * _lineThickness / _currentLoD);
         }
-        QGraphicsPathItem pth;
-        pth.setPath(stroker.createStroke(tmp).simplified());
-        if (pth.contains(localPos)) {
+        stroker.setCapStyle(Qt::PenCapStyle::FlatCap);
+        if (stroker.createStroke(tmp).contains(localPos)) {
           indexes = std::pair<int, int>(lineIndex, lineIndex + 1);
           break;
         }
