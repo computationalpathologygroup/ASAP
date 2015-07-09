@@ -25,12 +25,19 @@ public:
 
   void debugPrint();
 
+  QPainterPath opaqueArea() const;
+
+  inline bool tileLoaded() {
+    return _item != NULL;
+  }
+
 private:
   // you'll probably want to store information about where you're
   // going to load the pixmap from, too
 
   QPixmap *_item;
   unsigned int _tileSize;
+  float _currentLevel;
   float _itemLevel;
   float _lastRenderLevel;
   float _maxDownsample;

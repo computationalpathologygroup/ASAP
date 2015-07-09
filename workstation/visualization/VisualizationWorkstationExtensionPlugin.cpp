@@ -12,7 +12,8 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   WorkstationExtensionPluginInterface(),
   _dockWidget(NULL),
   _likelihoodCheckBox(NULL),
-  _foreground(NULL)
+  _foreground(NULL),
+  _opacity(1.0)
 {
 
 }
@@ -66,6 +67,9 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionIm
       else {
         emit changeForegroundImage(NULL);
       }
+      if (_viewer) {
+        _viewer->setForegroundOpacity(_opacity);
+      }
     }
   }
 }
@@ -93,6 +97,7 @@ void VisualizationWorkstationExtensionPlugin::onEnableLikelihoodToggled(bool tog
 void VisualizationWorkstationExtensionPlugin::onOpacityChanged(double opacity) {
   if (_viewer) {
     _viewer->setForegroundOpacity(opacity);
+    _opacity = opacity;
   }
 }
 

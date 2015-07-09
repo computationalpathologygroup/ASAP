@@ -204,7 +204,7 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   close();
   _img = img;
   _renderthread = new RenderThread(img);
-  unsigned int tileSize = 1024;
+  unsigned int tileSize = 512;
 
   QGraphicsScene* scn = new QGraphicsScene();  
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;

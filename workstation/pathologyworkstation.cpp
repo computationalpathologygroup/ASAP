@@ -106,6 +106,8 @@ void PathologyWorkstation::loadPlugins() {
       _pluginsDir.cdUp();
     }
     if (_pluginsDir.cd("workstationextension")) {
+      QDockWidget* lastDockWidget = NULL;
+      QDockWidget* firstDockWidget = NULL;
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
         if (fileName.toLower().endsWith(".dll")) {
           QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
@@ -122,7 +124,16 @@ void PathologyWorkstation::loadPlugins() {
               }
               if (extension->getDockWidget()) {
                 QDockWidget* extensionDW = extension->getDockWidget();
-                this->addDockWidget(Qt::LeftDockWidgetArea, extensionDW);
+                extensionDW->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+                if (lastDockWidget) {
+                  this->tabifyDockWidget(lastDockWidget, extensionDW);
+                }
+                else {
+                  this->addDockWidget(Qt::LeftDockWidgetArea, extensionDW);
+                  firstDockWidget = extensionDW;
+                }
+                extensionDW->setTitleBarWidget(new QWidget());
+                lastDockWidget = extensionDW;
                 QMenu* viewMenu = this->findChild<QMenu*>("menuView");
                 QMenu* viewDocksMenu = viewMenu->findChild<QMenu*>("menuViewDocks");
                 if (!viewDocksMenu) {
@@ -152,6 +163,9 @@ void PathologyWorkstation::loadPlugins() {
         }
       }
       _pluginsDir.cdUp();
+      if (firstDockWidget) {
+        firstDockWidget->raise();
+      }
     }
   }
 }
@@ -224,6 +238,8 @@ void PathologyWorkstation::setupUi()
       this->setObjectName(QStringLiteral("ASAP"));
   }
   this->resize(1037, 786);
+  this->setTabPosition(Qt::DockWidgetArea::LeftDockWidgetArea, QTabWidget::East);
+  this->setTabPosition(Qt::DockWidgetArea::RightDockWidgetArea, QTabWidget::West);
   QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   sizePolicy.setHorizontalStretch(0);
   sizePolicy.setVerticalStretch(0);

@@ -62,16 +62,16 @@ QLabel {
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_4">
     <property name="leftMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="bottomMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <item>
      <widget class="QGroupBox" name="ColorDeconvolutionBox">
@@ -86,19 +86,19 @@ QLabel {
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="spacing">
-        <number>3</number>
+        <number>6</number>
        </property>
        <property name="leftMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="topMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="rightMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="bottomMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <item>
         <widget class="QGroupBox" name="ThresholdBox">
@@ -107,19 +107,19 @@ QLabel {
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <property name="spacing">
-           <number>3</number>
+           <number>6</number>
           </property>
           <property name="leftMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="topMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="rightMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="bottomMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <item>
            <widget class="QLabel" name="GlobalThresholdLabel">
@@ -233,19 +233,19 @@ QLabel {
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="spacing">
-           <number>3</number>
+           <number>6</number>
           </property>
           <property name="leftMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="topMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="rightMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="bottomMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <item>
            <widget class="QLabel" name="Stain1Label">
@@ -417,19 +417,19 @@ QLabel {
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <property name="spacing">
-        <number>3</number>
+        <number>6</number>
        </property>
        <property name="leftMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="topMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="rightMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <property name="bottomMargin">
-        <number>3</number>
+        <number>9</number>
        </property>
        <item>
         <widget class="QLabel" name="RadiiLabel">

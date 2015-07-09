@@ -25,15 +25,19 @@ MultiResolutionImage* MultiResolutionImageReader::open(const std::string& fileNa
   else if (ext == "lif") {
     img = new LIFImage();
   }
-  else if (ext == "tif" || ext == "tiff") {
-    img = new TIFFImage();
-  }
   else {
     img = new OpenSlideImage();
   }
-  if (!img->initialize(fileName)) {
+  if (!img->initialize(fileName) || img->getNumberOfLevels() < 2) {
     delete img;
     img = NULL;
+    if (ext == "tif") {
+      img = new TIFFImage();      
+      if (!img->initialize(fileName)) {
+        delete img;
+        img = NULL;
+      }
+    }
   }
   return img;
 }

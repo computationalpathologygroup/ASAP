@@ -16,7 +16,7 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
   _closed(false),
   _type("spline"),
   _currentLoD(1.0),
-  _selectionSensitivity(3.0)
+  _selectionSensitivity(5.0)
 {
 
 }
@@ -129,7 +129,6 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     else {
       painter->setPen(QPen(QBrush(_rectColor), _lineThickness / _currentLoD));
     }
-
     for (unsigned int i = 0; i < coords.size(); ++i) {
       if (i == _activeSeedPoint) {
         painter->save();
@@ -221,6 +220,7 @@ void PolyQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
 QPainterPath PolyQtAnnotation::shape() const {  
   QPainterPath rectPath;
   QPainterPathStroker stroker;
+  stroker.setCurveThreshold(.25 / (_currentLoD / 20.));
   QPainterPath strokePath;
   if (_annotation) {
     std::vector<Point> coords = _annotation->getCoordinates();
@@ -238,5 +238,5 @@ QPainterPath PolyQtAnnotation::shape() const {
       strokePath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
     }
   }
-  return strokePath.simplified();
+  return strokePath;
 }

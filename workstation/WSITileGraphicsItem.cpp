@@ -51,11 +51,20 @@ QRectF WSITileGraphicsItem::boundingRect() const{
   return _boundingRect;
 }
 
+QPainterPath WSITileGraphicsItem::opaqueArea() const {
+  if ((_currentLevel < _itemLevel) && _item) {
+    return shape();
+  }
+  else {
+    return QPainterPath();
+  }
+}
+
 void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                                 QWidget *widget){
   float lod = option->levelOfDetailFromTransform(painter->worldTransform());
-  unsigned int requestedLevel = _img->getBestLevelForDownSample(_maxDownsample / lod) > _lastRenderLevel ? _lastRenderLevel : _img->getBestLevelForDownSample(_maxDownsample / lod);
-  if (requestedLevel <= _itemLevel) {
+  _currentLevel = _img->getBestLevelForDownSample(_maxDownsample / lod) > _lastRenderLevel ? _lastRenderLevel : _img->getBestLevelForDownSample(_maxDownsample / lod);
+  if (_currentLevel <= _itemLevel) {
     if (NULL == _item){
       QRectF brect = _boundingRect;
       brect.translate(this->pos());
@@ -64,7 +73,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
       this->_renderThread->addJob(_tileSize, _img->getSamplesPerPixel(), imgPosX, imgPosY, _itemLevel, QPointer<WSITileGraphicsItem>(this));
       this->setVisible(false);
     }
-    if (requestedLevel < _itemLevel) {
+    if (_currentLevel < _itemLevel) {
       if (!_bottomLeft) {
         unsigned int size;
         _cache->get(generateKey() + "tl", _topLeft, size);
@@ -101,8 +110,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
         _bottomRight->setZValue(1. / ((float)_itemLevel));
       }
     }
-    if (_item) { //&& (requestedLevel == _itemLevel)) {
-      //painter->setClipRect(option->exposedRect.marginsAdded(QMargins(1, 1, 1, 1)));
+    if (_item && (_currentLevel == _itemLevel || !_topLeft || !_bottomRight || !_topRight || !_bottomLeft || !_topLeft->tileLoaded() || !_bottomRight->tileLoaded() || !_topRight->tileLoaded() || !_bottomLeft->tileLoaded())) {
       QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
       painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
       /*
