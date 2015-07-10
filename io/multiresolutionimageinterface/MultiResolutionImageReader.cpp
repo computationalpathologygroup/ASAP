@@ -28,7 +28,7 @@ MultiResolutionImage* MultiResolutionImageReader::open(const std::string& fileNa
   else {
     img = new OpenSlideImage();
   }
-  if (!img->initialize(fileName) || img->getNumberOfLevels() < 2) {
+  if (!img->initialize(fileName) || (dynamic_cast<OpenSlideImage*>(img) && img->getNumberOfLevels() < 2)) {
     delete img;
     img = NULL;
     if (ext == "tif") {

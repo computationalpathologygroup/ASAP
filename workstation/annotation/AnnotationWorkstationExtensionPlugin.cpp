@@ -21,7 +21,13 @@
 #include <QApplication>
 #include <QColorDialog>
 #include <QSettings>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QSpinBox>
 #include "core/filetools.h"
+#include "../QtProgressMonitor.h"
+#include <QProgressDialog>
 
 #include <numeric>
 #include <iostream>
@@ -73,7 +79,15 @@ AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
 
 void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
   if (_generatedAnnotation) {
-    finishAnnotation();
+    PolyQtAnnotation* tmp = dynamic_cast<PolyQtAnnotation*>(_generatedAnnotation);
+    if (tmp) {
+      if (tmp->getInterpolationType() == "spline") {
+        dynamic_cast<SplineAnnotationTool*>(_annotationTools[2])->cancelAnnotation();
+      }
+      else {
+        dynamic_cast<PolyAnnotationTool*>(_annotationTools[1])->cancelAnnotation();
+      }
+    }
   }
   _treeWidget->clearSelection();
   clearTreeWidget();
@@ -272,7 +286,7 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       if (annot) {
         annot->finish();
         _qtAnnotations[QString::fromStdString(key)] = annot;
-        annot->setZValue(std::numeric_limits<float>::max());
+        annot->setZValue(20.);
         _viewer->scene()->addItem(annot);
       }
 
@@ -310,8 +324,65 @@ void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
   }
   QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), defaultName.filePath(basename), tr("XML file (*.xml);TIF file (*.tif)"));
   if (_img && fileName.endsWith(".tif")) {
-    AnnotationToMask maskConverter;
-    maskConverter.convert(_annotationService->getList(), fileName.toStdString(), _img->getDimensions(), _img->getSpacing(), std::map<std::string, int>());
+    std::vector<AnnotationGroup*> grps = this->_annotationService->getList()->getGroups();
+    QDialog* nameToLabel = new QDialog();
+    nameToLabel->setWindowTitle("Assign labels to annotation groups");
+    QVBoxLayout* dialogLayout = new QVBoxLayout();
+    QFormLayout* nameToLabelLayout = new QFormLayout();
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    if (grps.empty()) {
+      QSpinBox* label = new QSpinBox();
+      label->setMinimum(0);
+      label->setValue(1);
+      nameToLabelLayout->addRow("All annotations", label);
+    }
+    else {
+      for (unsigned int i = 0; i < grps.size(); ++i) {
+        if (!grps[i]->getGroup()) {
+          QSpinBox* label = new QSpinBox();
+          QString grpName = QString::fromStdString(grps[i]->getName());
+          label->setObjectName(grpName);
+          label->setMinimum(0);
+          label->setValue(i + 1);
+          nameToLabelLayout->addRow(grpName, label);
+        }
+      }
+    }
+    dialogLayout->addLayout(nameToLabelLayout);
+    QPushButton* cancel = new QPushButton("Cancel");
+    QPushButton* ok = new QPushButton("Ok");
+    cancel->setDefault(true);
+    connect(cancel, SIGNAL(clicked()), nameToLabel, SLOT(reject()));
+    connect(ok, SIGNAL(clicked()), nameToLabel, SLOT(accept()));
+    buttonLayout->addWidget(cancel);
+    buttonLayout->addWidget(ok);
+    dialogLayout->addLayout(buttonLayout);
+    nameToLabel->setLayout(dialogLayout);
+    int rval = nameToLabel->exec();
+    if (rval) {
+      QList<QSpinBox*> assignedLabels = nameToLabel->findChildren<QSpinBox*>();
+      std::map<std::string, int> nameToLab;
+      for (QList<QSpinBox*>::iterator it = assignedLabels.begin(); it != assignedLabels.end(); ++it) {
+        if ((*it)->objectName().toStdString() == "All annotations") {
+          continue;
+        }
+        nameToLab[(*it)->objectName().toStdString()] = (*it)->value();
+      }
+      AnnotationToMask maskConverter;
+      QtProgressMonitor monitor;
+      maskConverter.setProgressMonitor(&monitor);
+      QProgressDialog progressDialog;
+      QObject::connect(&monitor, SIGNAL(progressChanged(int)), &progressDialog, SLOT(setValue(int)));
+      progressDialog.setMinimum(0);
+      progressDialog.setMaximum(100);
+      progressDialog.setCancelButton(NULL);
+      progressDialog.setWindowModality(Qt::WindowModal);
+      progressDialog.setValue(0);
+      progressDialog.show();
+      QApplication::processEvents();
+      maskConverter.convert(_annotationService->getList(), fileName.toStdString(), _img->getDimensions(), _img->getSpacing(), nameToLab);
+      delete nameToLabel;
+    }
   }
   else if (!fileName.isEmpty()) {
     _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
@@ -467,7 +538,7 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
   }
   if (_generatedAnnotation) {
     _treeWidget->clearSelection();
-    _generatedAnnotation->setZValue(std::numeric_limits<float>::max());
+    _generatedAnnotation->setZValue(20.);
     _viewer->scene()->addItem(_generatedAnnotation);
   }
 }

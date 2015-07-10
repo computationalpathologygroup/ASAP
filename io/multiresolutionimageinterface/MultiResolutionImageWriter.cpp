@@ -19,7 +19,7 @@ using namespace pathology;
 MultiResolutionImageWriter::MultiResolutionImageWriter() : _tiff(NULL),
   _codec(LZW), _quality(30),_tileSize(512), _pos(0), _numberOfIndexedColors(0), 
   _interpolation(pathology::Interpolation::Linear), _monitor(NULL), _cType(ColorType::InvalidColorType),
-  _dType(DataType::InvalidDataType)
+  _dType(DataType::InvalidDataType), _min_vals(NULL), _max_vals(NULL)
 {
   TIFFSetWarningHandler(NULL);
 }
@@ -78,94 +78,27 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
       spacing = _overrideSpacing;
     }
     setSpacing(spacing);
-    double* min_values = new double[cDepth];
-    double* max_values = new double[cDepth];
-    for (int i = 0; i < cDepth; ++i) {
-      min_values[i] = std::numeric_limits<double>::max();
-      max_values[i] = std::numeric_limits<double>::min();
-    }
-    unsigned int totalSteps = (dims[0] * dims[1]) / (_tileSize * _tileSize);
-    if (_monitor) {
-      _monitor->setMaximumProgress(2*totalSteps);
-    }
     if (writeImageInformation(dims[0], dims[1]) == 0) {
       for (int y =0; y < dims[1]; y+=_tileSize) {
         for (int x =0; x < dims[0]; x+=_tileSize) {
           unsigned char* data = new unsigned char[_tileSize*_tileSize*cDepth*(nrBits/8)];
           if (_dType == pathology::DataType::UInt32) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(unsigned int*&)data);
-            unsigned int *temp = (unsigned int*)data;
-            for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-              for (int j = 0; j < cDepth; ++j) {
-                unsigned int val = temp[i+j];
-                if (val > max_values[j]) {
-                  max_values[j] = val;
-                }
-                if (val < min_values[j]) {
-                  min_values[j] = val;
-                }
-              }
-            }
           }
           else if (_dType == pathology::DataType::UInt16) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(unsigned short*&)data);
-            unsigned short *temp = (unsigned short*)data;
-            for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-              for (int j = 0; j < cDepth; ++j) {
-                unsigned int val = temp[i + j];
-                if (val > max_values[j]) {
-                  max_values[j] = val;
-                }
-                if (val < min_values[j]) {
-                  min_values[j] = val;
-                }
-              }
-            }
           }
           else if (_dType == pathology::DataType::Float) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(float*&)data);
-            float *temp = (float*)data;
-            for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-              for (int j = 0; j < cDepth; ++j) {
-                unsigned int val = temp[i + j];
-                if (val > max_values[j]) {
-                  max_values[j] = val;
-                }
-                if (val < min_values[j]) {
-                  min_values[j] = val;
-                }
-              }
-            }
           }
           else if (_dType == pathology::DataType::UChar) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,data);            
-            for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-              for (int j = 0; j < cDepth; ++j) {
-                unsigned int val = data[i + j];
-                if (val > max_values[j]) {
-                  max_values[j] = val;
-                }
-                if (val < min_values[j]) {
-                  min_values[j] = val;
-                }
-              }
-            }
           }
           writeBaseImagePart((void*)data);
           delete[] data;
           data = NULL;
-          if (_monitor) {
-            (*_monitor)++;
-          }
         }
       }
-      TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
-      TIFFSetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &min_values[0]);
-      TIFFSetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &max_values[0]);
-      /* Reset to default behavior, if needed. */
-      TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MERGED);
-      delete[] min_values;
-      delete[] max_values;
       finishImage();
     } else {
       cerr << "Could not write image information" << endl;
@@ -189,7 +122,27 @@ int MultiResolutionImageWriter::openFile(const std::string& fileName) {
 
 int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& sizeX, const unsigned long long& sizeY) {
   if (_tiff) {
+    unsigned int cDepth = 1;
+    if (_cType == RGB) {
+      cDepth = 3;
+    }
+    else if (_cType == ARGB) {
+      cDepth = 4;
+    }
+    else if (_cType == Indexed) {
+      cDepth = getNumberOfIndexedColors();
+    }
+    _min_vals = new double[cDepth];
+    _max_vals = new double[cDepth];
+    for (int i = 0; i < cDepth; ++i) {
+      _min_vals[i] = std::numeric_limits<double>::max();
+      _max_vals[i] = std::numeric_limits<double>::min();
+    }
     setPyramidTags(_tiff, sizeX, sizeY);
+    unsigned int totalSteps = (sizeX * sizeY) / (_tileSize * _tileSize);
+    if (_monitor) {
+      _monitor->setMaximumProgress(2 * totalSteps);
+    }
     return 0;
   } else {
     return -1;
@@ -221,6 +174,65 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
     cDepth = _numberOfIndexedColors;
   }
   unsigned int npixels = _tileSize * _tileSize * cDepth;
+
+  //Determine min/max of tile part
+  if (_dType == pathology::DataType::UInt32) {
+    unsigned int *temp = (unsigned int*)data;
+    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (int j = 0; j < cDepth; ++j) {
+        double val = temp[i + j];
+        if (val > _max_vals[j]) {
+          _max_vals[j] = val;
+        }
+        if (val < _min_vals[j]) {
+          _min_vals[j] = val;
+        }
+      }
+    }
+  }
+  else if (_dType == pathology::DataType::UInt16) {
+    unsigned short *temp = (unsigned short*)data;
+    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (int j = 0; j < cDepth; ++j) {
+        double val = temp[i + j];
+        if (val > _max_vals[j]) {
+          _max_vals[j] = val;
+        }
+        if (val < _min_vals[j]) {
+          _min_vals[j] = val;
+        }
+      }
+    }
+  }
+  else if (_dType == pathology::DataType::Float) {
+    float *temp = (float*)data;
+    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (int j = 0; j < cDepth; ++j) {
+        double val = temp[i + j];
+        if (val > _max_vals[j]) {
+          _max_vals[j] = val;
+        }
+        if (val < _min_vals[j]) {
+          _min_vals[j] = val;
+        }
+      }
+    }
+  }
+  else if (_dType == pathology::DataType::UChar) {
+    unsigned char *temp = (unsigned char*)data;
+    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (int j = 0; j < cDepth; ++j) {
+        double val = temp[i + j];
+        if (val > _max_vals[j]) {
+          _max_vals[j] = val;
+        }
+        if (val < _min_vals[j]) {
+          _min_vals[j] = val;
+        }
+      }
+    }
+  }
+
   if (getCompression() == JPEG2000_LOSSLESS || getCompression() == JPEG2000_LOSSY) {
     int depth = 8;
     unsigned int size = npixels * sizeof(unsigned char);
@@ -266,9 +278,21 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       TIFFWriteEncodedTile(_tiff, pos, data, npixels * sizeof(unsigned char));
     }
   }
+  if (_monitor) {
+    (*_monitor)++;
+  }
 }
 
 int MultiResolutionImageWriter::finishImage() {
+  TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
+  TIFFSetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &_min_vals[0]);
+  TIFFSetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &_max_vals[0]);
+  /* Reset to default behavior, if needed. */
+  TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MERGED);
+  delete[] _min_vals;
+  delete[] _max_vals;
+  _min_vals = NULL;
+  _max_vals = NULL;
   if (getDataType() == UInt32) {
     writePyramidToDisk<unsigned int>();
     incorporatePyramid<unsigned int>();

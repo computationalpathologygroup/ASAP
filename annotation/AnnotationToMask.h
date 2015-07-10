@@ -9,11 +9,13 @@
 #include "core/Point.h"
 
 class AnnotationList;
+class ProgressMonitor;
 
 class EXPORT_PATHOLOGYANNOTATION AnnotationToMask {
 
 public :
-  void convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel = std::map<std::string, int>(), const std::map<std::string, int> colorToLabel = std::map<std::string, int>()) const;
+  void convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel = std::map<std::string, int>()) const;
+  void setProgressMonitor(ProgressMonitor* monitor);
 
 private:
 
@@ -25,6 +27,8 @@ private:
 
   int cn_PnPoly(const Point& P, const std::vector<Point>& V) const;
   int wn_PnPoly(const Point& P, const std::vector<Point>& V) const;
+
+  ProgressMonitor* _monitor;
 };
 
 #endif

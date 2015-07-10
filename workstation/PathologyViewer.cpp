@@ -328,7 +328,7 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
         for (int i = 0; i < _img->getSamplesPerPixel(); ++i) {
           if (selectedItem->text() == QString("Channel ") + QString::number(i + 1)) {
             emit channelChanged(i);
-            _cache->clear();
+            _cache->refresh();
           }
         }
       }

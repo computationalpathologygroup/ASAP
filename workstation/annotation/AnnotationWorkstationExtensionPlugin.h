@@ -52,7 +52,7 @@ public slots:
     void onTreeWidgetSelectedItemsChanged();
 
 private slots:
-void resizeOnExpand();
+    void resizeOnExpand();
 
 private :
     std::vector<ToolPluginInterface*> _annotationTools;
