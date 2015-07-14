@@ -1,12 +1,21 @@
 #include "AnnotationToMask.h"
 #include "AnnotationList.h"
 #include "Annotation.h"
+#include "AnnotationGroup.h"
 #include "MultiResolutionImageWriter.h"
 #include "core/Box.h"
+#include "core/ProgressMonitor.h"
 
-void AnnotationToMask::convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel, const std::map<std::string, int> colorToLabel) const {
+void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
+  _monitor = monitor;
+}
+
+void AnnotationToMask::convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel) const {
 	std::vector<Annotation*> annotions = annotationList->getAnnotations();
 	MultiResolutionImageWriter writer;
+  if (_monitor) {
+    writer.setProgressMonitor(_monitor);
+  }
 	if (writer.openFile(maskFile) == 0) {
 		writer.setColorType(pathology::ColorType::Monochrome);
 		writer.setCompression(pathology::Compression::LZW);
@@ -20,6 +29,9 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
 			for (unsigned long long tx = 0; tx < dimensions[0]; tx += 512) {
 				std::fill(buffer, buffer + 512 * 512, 0);
         for (std::vector<Annotation*>::const_iterator annotation = annotions.begin(); annotation != annotions.end(); ++annotation) {
+          if (!nameToLabel.empty() && !(*annotation)->getGroup()) {
+            continue;
+          }
           std::string nm = (*annotation)->getName();
           std::vector<Point> coords = (*annotation)->getCoordinates();
           std::vector<Point> bbox = (*annotation)->getImageBoundingBox();
@@ -28,17 +40,8 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
           }
           int label = 1;
           if (!nameToLabel.empty()) {
-            std::map<std::string, int>::const_iterator it = nameToLabel.find((*annotation)->getName());
+            std::map<std::string, int>::const_iterator it = nameToLabel.find((*annotation)->getGroup()->getName());
             if (it != nameToLabel.end()) {
-              label = it->second;
-            }
-            else {
-              label = 0;
-            }
-          }
-          else if (!colorToLabel.empty()) {
-            std::map<std::string, int>::const_iterator it = colorToLabel.find((*annotation)->getColor());
-            if (it != colorToLabel.end()) {
               label = it->second;
             }
             else {

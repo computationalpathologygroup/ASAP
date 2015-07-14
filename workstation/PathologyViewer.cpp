@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <QResizeEvent>
-#include <QProgressDialog>
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
@@ -37,10 +36,8 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _cache(NULL),
   _cacheSize(100 * 1024 * 1024 * 3),
   _activeTool(NULL),
-  _sceneScale(1.),
-  _autoUpdate(false)
+  _sceneScale(1.)
 {
-  
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setResizeAnchor(QGraphicsView::ViewportAnchor::AnchorViewCenter);
@@ -102,7 +99,6 @@ void PathologyViewer::wheelEvent(QWheelEvent *event) {
   int numDegrees = event->delta() / 8;
   int numSteps = numDegrees / 15;  // see QWheelEvent documentation
   zoom(numSteps);
-  event->accept();
 }
 
 void PathologyViewer::zoom(float numSteps) {
@@ -150,7 +146,6 @@ void PathologyViewer::zoomFinished()
 
 void PathologyViewer::moveTo(const QPointF& pos) {
   this->centerOn(pos);
-  this->update();
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
@@ -190,10 +185,6 @@ void PathologyViewer::changeActiveTool() {
       _activeTool = NULL;
     }
   }
-}
-
-void PathologyViewer::setAutoUpdate(bool autoUpdate) {
-  _autoUpdate = autoUpdate;
 }
 
 void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel) {
@@ -253,14 +244,6 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   float lastLevelHeight = ((lastLevelDimensions[1] / tileSize) + 1) * tileSize;
   float longest = lastLevelWidth > lastLevelHeight ? lastLevelWidth : lastLevelHeight;
   _sceneScale = 1./_img->getLevelDownsample(lastLevel);
-  QProgressDialog progressDialog;
-  progressDialog.setMinimum(0);
-  progressDialog.setMaximum(nrLevels*2);
-  progressDialog.setCancelButton(NULL);
-  progressDialog.setWindowModality(Qt::WindowModal);
-  progressDialog.show();
-  progressDialog.setValue(0);
-  QApplication::processEvents();
   for (float i = 0; i < lastLevelWidth; i += tileSize) {
     for (float j = 0; j < lastLevelHeight; j += tileSize) {
       WSITileGraphicsItem* item = new WSITileGraphicsItem(tileSize, lastLevel, lastLevel, _img, _renderthread, _cache);
@@ -279,7 +262,6 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   this->setScene(scn);
   this->setSceneRect(n);
   this->fitInView(QRectF(0, 0, lastLevelDimensions[0], lastLevelDimensions[1]), Qt::AspectRatioMode::KeepAspectRatio);
-  progressDialog.setValue(nrLevels + nrLevels);
 }
 
 void PathologyViewer::initializeMiniMap(unsigned int level) {
@@ -328,7 +310,7 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
         for (int i = 0; i < _img->getSamplesPerPixel(); ++i) {
           if (selectedItem->text() == QString("Channel ") + QString::number(i + 1)) {
             emit channelChanged(i);
-            _cache->clear();
+            _cache->refresh();
           }
         }
       }
