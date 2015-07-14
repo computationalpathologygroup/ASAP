@@ -202,9 +202,10 @@ void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionIma
 
 void PathologyViewer::initialize(MultiResolutionImage *img) {
   close();
+  setEnabled(true);
   _img = img;
   _renderthread = new RenderThread(img);
-  unsigned int tileSize = 512;
+  unsigned int tileSize = 1024;
 
   QGraphicsScene* scn = new QGraphicsScene();  
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;
@@ -220,7 +221,6 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   setMouseTracking(true);
   QObject::connect(this, SIGNAL(channelChanged(int)), _renderthread, SLOT(onChannelChanged(int)));  
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int, int)), this, SLOT(onFieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int, int)));
-  setEnabled(true);
 }
 
 void PathologyViewer::onForegroundImageChanged(MultiResolutionImage* for_img) {
@@ -337,7 +337,6 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
 }
 
 void PathologyViewer::close() {
-  setEnabled(false);
   if (_prefetchthread) {
     _prefetchthread->deleteLater();
     _prefetchthread = NULL;
@@ -357,6 +356,7 @@ void PathologyViewer::close() {
     _map->deleteLater();
     _map = NULL;
   }
+  setEnabled(false);
 }
 
 void PathologyViewer::togglePan(bool pan, const QPoint& startPos) {
