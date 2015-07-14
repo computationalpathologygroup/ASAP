@@ -334,6 +334,7 @@ void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
       QSpinBox* label = new QSpinBox();
       label->setMinimum(0);
       label->setValue(1);
+      label->setObjectName("All annotations");
       nameToLabelLayout->addRow("All annotations", label);
     }
     else {
