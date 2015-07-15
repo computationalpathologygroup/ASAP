@@ -56,8 +56,17 @@ void MiniMap::paintEvent(QPaintEvent *event) {
       QPen blue = QPen(QColor("blue"));
       blue.setWidth(3);
       painter.setPen(blue);
-      painter.drawRect(width() * (_fieldOfView.left() / _overview->width()) + 1, height() * (_fieldOfView.top() / _overview->height()) + 1,
-                       width() * (_fieldOfView.width() / _overview->width()) - 2, height() * (_fieldOfView.height() / _overview->height()) - 2);
+      float rectX = width() * (_fieldOfView.left() / _overview->width()) + 1;
+      float rectY = height() * (_fieldOfView.top() / _overview->height()) + 1;
+      float rectW = width() * (_fieldOfView.width() / _overview->width()) - 2;
+      float rectH = height() * (_fieldOfView.height() / _overview->height()) - 2;
+      if (rectW > 3 && rectH > 3) {
+        painter.drawRect(rectX, rectY, rectW, rectH);
+      }
+      else {
+        painter.drawLine(rectX + rectW / 2. - 5, rectY + rectH / 2., rectX + rectW / 2. + 5, rectY + rectH / 2.);
+        painter.drawLine(rectX + rectW / 2., rectY + rectH / 2. - 5, rectX + rectW / 2., rectY + rectH / 2. + 5);
+      }
     }
   }
 }

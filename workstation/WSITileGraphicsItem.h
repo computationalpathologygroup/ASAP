@@ -25,7 +25,8 @@ public:
 
   void debugPrint();
 
-  QPainterPath opaqueArea() const;
+  void loadNextLevel(bool loadTiles = false);
+  void loadTile();
 
   inline bool tileLoaded() {
     return _item != NULL;

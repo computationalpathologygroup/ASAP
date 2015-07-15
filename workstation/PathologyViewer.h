@@ -91,6 +91,8 @@ private :
     float _panSensitivity;
     bool _pan;
     QPoint _prevPan;
+    QPointF _zoomToScenePos;
+    QPointF _zoomToViewPos;
 
     RenderThread* _renderthread;
     PrefetchThread* _prefetchthread;
