@@ -16,6 +16,7 @@ private :
   MultiResolutionImage* _foreground;
   QDockWidget* _dockWidget;
   QCheckBox* _likelihoodCheckBox;
+  float _opacity;
 
 public :
     bool initialize(PathologyViewer* viewer);

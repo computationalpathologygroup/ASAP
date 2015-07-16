@@ -66,7 +66,7 @@ Annotation* AnnotationList::getAnnotation(std::string name) {
   return NULL;
 }
 
-std::vector<Annotation*> AnnotationList::getAnnotations() {
+std::vector<Annotation*> AnnotationList::getAnnotations() const {
   return _annotations;
 }
 

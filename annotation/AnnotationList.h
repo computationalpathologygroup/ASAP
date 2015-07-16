@@ -19,7 +19,7 @@ public:
   AnnotationGroup* getGroup(std::string name);
   Annotation* getAnnotation(const int& index);
   Annotation* getAnnotation(std::string name);
-  std::vector<Annotation*> getAnnotations();
+  std::vector<Annotation*> getAnnotations() const;
   std::vector<AnnotationGroup*> getGroups();
   void setAnnotations(std::vector<Annotation*> annotations);
   void setGroups(std::vector<AnnotationGroup*> groups);

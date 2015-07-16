@@ -24,6 +24,7 @@
 #include <QStyle>
 #include <QActionGroup>
 #include <QSettings>
+#include <QFileInfo>
 #include <QStandardPaths>
 
 #include "pathologyworkstation.h"
@@ -105,6 +106,8 @@ void PathologyWorkstation::loadPlugins() {
       _pluginsDir.cdUp();
     }
     if (_pluginsDir.cd("workstationextension")) {
+      QDockWidget* lastDockWidget = NULL;
+      QDockWidget* firstDockWidget = NULL;
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
         if (fileName.toLower().endsWith(".dll")) {
           QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
@@ -121,7 +124,16 @@ void PathologyWorkstation::loadPlugins() {
               }
               if (extension->getDockWidget()) {
                 QDockWidget* extensionDW = extension->getDockWidget();
-                this->addDockWidget(Qt::LeftDockWidgetArea, extensionDW);
+                extensionDW->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+                if (lastDockWidget) {
+                  this->tabifyDockWidget(lastDockWidget, extensionDW);
+                }
+                else {
+                  this->addDockWidget(Qt::LeftDockWidgetArea, extensionDW);
+                  firstDockWidget = extensionDW;
+                }
+                extensionDW->setTitleBarWidget(new QWidget());
+                lastDockWidget = extensionDW;
                 QMenu* viewMenu = this->findChild<QMenu*>("menuView");
                 QMenu* viewDocksMenu = viewMenu->findChild<QMenu*>("menuViewDocks");
                 if (!viewDocksMenu) {
@@ -151,6 +163,9 @@ void PathologyWorkstation::loadPlugins() {
         }
       }
       _pluginsDir.cdUp();
+      if (firstDockWidget) {
+        firstDockWidget->raise();
+      }
     }
   }
 }
@@ -164,6 +179,8 @@ PathologyWorkstation::~PathologyWorkstation()
 void PathologyWorkstation::on_actionClose_triggered()
 {
     emit imageClosed();
+    _settings->setValue("currentFile", QString());
+    this->setWindowTitle("ASAP");
     if (_img) {
 		  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
 		  view->close();
@@ -175,13 +192,15 @@ void PathologyWorkstation::on_actionClose_triggered()
 
 void PathologyWorkstation::on_actionOpen_triggered()
 {
-    if (_img) {
-      on_actionClose_triggered();
-    }
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Slide files (*.lif;*.svs;*.mrxs;*.ndpi;*.tif;*.tiff)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Slide files (*.lif *.svs *.mrxs *.ndpi *.tif *.tiff);;All files (*.*)"));
     if (!fileName.isEmpty()) {
+      if (_img) {
+        on_actionClose_triggered();
+      }
       std::string fn = fileName.toStdString();
-      _settings->setValue("lastOpenendPath", QDir(fileName).path());
+      _settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
+      _settings->setValue("currentFile", QFileInfo(fileName).fileName());
+      this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
       MultiResolutionImageReader imgReader;
       _img = imgReader.open(fn);
       if (_img) {
@@ -219,6 +238,8 @@ void PathologyWorkstation::setupUi()
       this->setObjectName(QStringLiteral("ASAP"));
   }
   this->resize(1037, 786);
+  this->setTabPosition(Qt::DockWidgetArea::LeftDockWidgetArea, QTabWidget::East);
+  this->setTabPosition(Qt::DockWidgetArea::RightDockWidgetArea, QTabWidget::West);
   QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   sizePolicy.setHorizontalStretch(0);
   sizePolicy.setVerticalStretch(0);

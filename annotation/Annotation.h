@@ -46,7 +46,7 @@ public:
   std::string getColor() const;
   void setColor(const std::string& color);
 
-  std::vector<Point> getImageBoundingBox();
+  std::vector<Point> getImageBoundingBox() const;
   std::vector<Point> getLocalBoundingBox();
   Point getCenter();
 

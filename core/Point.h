@@ -5,10 +5,10 @@
 class EXPORT_CORE Point {
 public:
   Point::Point(const float& x, const float& y);
-  float getX() const;
-  float getY() const;
-  void  setX(const float& x);
-  void  setY(const float& y);
+  inline float getX() const { return _x; }
+  inline float getY() const { return _y; };
+  inline void  setX(const float& x) { _x = x; }
+  inline void  setY(const float& y) { _y = y; }
 
 private:
 	float _x;

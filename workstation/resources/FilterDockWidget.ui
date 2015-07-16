@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>406</height>
+    <height>296</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,16 +30,16 @@
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>9</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>9</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>9</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>9</number>
    </property>
    <item>
     <widget class="QListWidget" name="filterListWidget">
@@ -60,12 +60,33 @@
      </property>
      <property name="styleSheet">
       <string notr="true">QListWidget{
-     border: 0px solid grey;
+	background-color: rgb(255, 255, 255);
+     border-top: 1px solid black;
+     border-left: 1px solid black;
+     border-right: 1px solid black;
      border-radius: 0px;
+     padding: 5px
 }
 
-QListWidget:!enabled {
+QListWidget:!enabled { 
 	background-color: rgb(255, 255, 255);
+    padding: 5px
+}
+
+/* For icon only */
+QListView::icon {
+    left: 5px;
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
+}
+
+/* For text only */
+QListView::text {
+    left: 5px;
+    right: 5px;
+    top: 5px;
+    bottom: 5px;
 }</string>
      </property>
      <property name="frameShape">
@@ -91,6 +112,9 @@ QListWidget:!enabled {
      </property>
      <property name="resizeMode">
       <enum>QListView::Adjust</enum>
+     </property>
+     <property name="spacing">
+      <number>0</number>
      </property>
      <property name="gridSize">
       <size>
@@ -122,7 +146,9 @@ QListWidget:!enabled {
      </property>
      <property name="styleSheet">
       <string notr="true"> QProgressBar {
-     border: 0px solid grey;
+     border-left: 1px solid black;
+     border-right: 1px solid black;
+     border-bottom: 1px solid black;
      border-radius: 0px;
  }
 
@@ -149,6 +175,18 @@ QListWidget:!enabled {
      </property>
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <property name="leftMargin">
+      <number>9</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>9</number>
+     </property>
+     <property name="bottomMargin">
+      <number>9</number>
      </property>
      <item>
       <widget class="QCheckBox" name="autoUpdateCheckBox">

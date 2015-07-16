@@ -4,7 +4,7 @@
 #include "QtAnnotation.h"
 #include "config/pathology_config.h"
 
-class EXPORT_PATHOLOGYANNOTATION DotQtAnnotation : public QtAnnotation
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN DotQtAnnotation : public QtAnnotation
 {
   Q_OBJECT
 public:

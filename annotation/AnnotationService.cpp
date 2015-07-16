@@ -1,6 +1,7 @@
 #include "AnnotationService.h"
 #include "AnnotationList.h"
 #include "XmlRepository.h"
+#include "NDPARepository.h"
 
 AnnotationService::AnnotationService() :
   _list(NULL),
@@ -31,8 +32,12 @@ void AnnotationService::setRepositoryFromSourceFile(const std::string& source) {
   if (_repo) {
     delete _repo;
   }
-  if (source.find_last_of(".xml") != source.npos) {
+  if (source.rfind(std::string(".xml")) != source.npos) {
     _repo = new XmlRepository(_list);
+    _repo->setSource(source);
+  }
+  else if (source.rfind(std::string(".ndpa")) != source.npos) {
+    _repo = new NDPARepository(_list);
     _repo->setSource(source);
   }
 }

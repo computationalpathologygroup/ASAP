@@ -7,6 +7,8 @@
 struct tiff;
 typedef struct tiff TIFF;
 
+class JPEG2000Codec;
+
 class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE TIFFImage : public MultiResolutionImage {
 
 public:
@@ -32,6 +34,8 @@ protected :
 
   std::vector<double> _minValues;
   std::vector<double> _maxValues;
+
+  JPEG2000Codec* _jp2000;
 
 };
 

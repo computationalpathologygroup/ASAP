@@ -53,6 +53,10 @@ protected:
   //! Pixel spacing (normally taken from original image, but can be overwritten or provided when not specified)
   std::vector<double> _overrideSpacing;
 
+  //! Min and max values of the image that is written to disk
+  double* _min_vals;
+  double* _max_vals;
+
   //! Positions in currently opened file
   unsigned int _pos;
 

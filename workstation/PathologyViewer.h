@@ -91,6 +91,8 @@ private :
     float _panSensitivity;
     bool _pan;
     QPoint _prevPan;
+    QPointF _zoomToScenePos;
+    QPointF _zoomToViewPos;
 
     RenderThread* _renderthread;
     PrefetchThread* _prefetchthread;
@@ -99,7 +101,6 @@ private :
     WSITileGraphicsItemCache* _cache;
 
     std::map<std::string, ToolPluginInterface*> _tools;
-    bool _autoUpdate;
 
 private slots :
     void showContextMenu(const QPoint& pos);

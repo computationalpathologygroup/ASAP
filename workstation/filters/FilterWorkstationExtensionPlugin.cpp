@@ -93,11 +93,11 @@ void FilterWorkstationExtensionPlugin::updateFilteredImage(QGraphicsItem* result
     result->setVisible(false);
     _filterResult = result;
     this->_viewer->scene()->addItem(_filterResult);
-    _filterResult->setZValue(std::numeric_limits<float>::max() - 1.);
     _filterResult->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
     _filterResult->setPos(this->_viewer->mapToScene(this->_viewer->rect()).boundingRect().topLeft());
     _filterResult->setTransform(QTransform::fromScale(static_cast<float>(this->_viewer->width()) / size.width(), static_cast<float>(this->_viewer->height()) / size.height()), true);
     _filterResult->setVisible(true);
+    _filterResult->setZValue(10.);
   }
 }
 

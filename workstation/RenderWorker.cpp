@@ -114,7 +114,7 @@ void RenderWorker::run()
           else if (_bck_img->getDataType() == pathology::DataType::UInt16) {
             unsigned short *imgBuf = new unsigned short[currentJob._tileSize*currentJob._tileSize*currentJob._samplesPerPixel];
             _bck_img->getRawRegion(currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-            renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _channel, currentJob._samplesPerPixel, 0, 3072);//_img->getMinValue(), _img->getMaxValue());
+            renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _channel, currentJob._samplesPerPixel, _bck_img->getMinValue(), _bck_img->getMaxValue());
             temp = QPixmap::fromImage(renderedImg);
             delete[] imgBuf;
           }

@@ -46,6 +46,7 @@ void QtAnnotation::addCoordinate(const float& x, const float& y) {
   if (_annotation) {
     _annotation->addCoordinate(x, y);
   }
+  onCoordinatesChanged();
 }
 
 void QtAnnotation::addCoordinate(const Point& xy) {
@@ -53,6 +54,7 @@ void QtAnnotation::addCoordinate(const Point& xy) {
   if (_annotation) {
     _annotation->addCoordinate(xy);
   }
+  onCoordinatesChanged();
 }
 
 void QtAnnotation::insertCoordinate(const int& index, const float& x, const float& y) {
@@ -60,6 +62,7 @@ void QtAnnotation::insertCoordinate(const int& index, const float& x, const floa
   if (_annotation) {
     _annotation->insertCoordinate(index, x, y);
   }
+  onCoordinatesChanged();
 }
 
 void QtAnnotation::insertCoordinate(const int& index, const Point& xy){
@@ -67,6 +70,7 @@ void QtAnnotation::insertCoordinate(const int& index, const Point& xy){
   if (_annotation) {
     _annotation->insertCoordinate(index, xy);
   }
+  onCoordinatesChanged();
 }
 
 void QtAnnotation::removeCoordinate(const int& index) {
@@ -79,6 +83,7 @@ void QtAnnotation::removeCoordinate(const int& index) {
       this->setPos(center.getX()*_scale, center.getY()*_scale);
     }
   }
+  onCoordinatesChanged();
 }
 
 void QtAnnotation::setCoordinates(const std::vector<Point>& coordinates) {
@@ -91,6 +96,11 @@ void QtAnnotation::setCoordinates(const std::vector<Point>& coordinates) {
       this->setPos(center.getX()*_scale, center.getY()*_scale);
     }
   }
+  onCoordinatesChanged();
+}
+
+void QtAnnotation::onCoordinatesChanged() {
+  return;
 }
 
 Annotation* QtAnnotation::getAnnotation() const {

@@ -15,14 +15,16 @@ using namespace pathology;
 namespace
 {
   SUITE(MultiResolutionImageInterface)
-  {
-	  
+  {    
+
     TEST(TestCanOpen)
     {
       MultiResolutionImageReader test;
       MultiResolutionImage* img = test.open(g_dataPath + "/images/OpenSlideInterfaceTestImage.svs");
-  		CHECK(img);
-      CHECK(img->valid());
+  		CHECK(img!=NULL);
+      if (img) {
+        CHECK(img->valid());
+      }
       delete img;
 	  }
 
@@ -336,6 +338,45 @@ namespace
         }
       }
       testWrite.finishImage();
+      delete img;
+    }
+
+    TEST(TestReadWriteMultiResJPEG2000Lossless)
+    {
+      MultiResolutionImageReader testRead;
+      MultiResolutionImageWriter testWrite;
+      MultiResolutionImage* img = testRead.open(g_dataPath + "/images/OpenSlideInterfaceTestImage.tif");
+      testWrite.openFile(g_dataPath + "/images/OpenSlideInterfaceMultiResOutJPEG2000Lossless.tif");
+      testWrite.setTileSize(512);
+      testWrite.setCompression(JPEG2000_LOSSLESS);
+      testWrite.setDataType(UChar);
+      testWrite.setColorType(RGB);
+      vector<unsigned long long> dims = img->getDimensions();
+      testWrite.writeImageInformation(dims[0], dims[1]);
+      for (int y = 0; y < dims[1]; y += 512) {
+        for (int x = 0; x < dims[0]; x += 512) {
+          unsigned char* data = new unsigned char[512 * 512 * 3];
+          img->getRawRegion(x, y, 512, 512, 0, data);
+          testWrite.writeBaseImagePart((void*)data);
+          delete data;
+          data = NULL;
+        }
+      }
+      testWrite.finishImage();
+      unsigned char* dataOrg = new unsigned char[512 * 512 * 3];
+      img->getRawRegion(17515, 8710, 512, 512, 0, dataOrg);
+      delete img;
+      MultiResolutionImageReader testRead2;
+      img = testRead2.open(g_dataPath + "/images/OpenSlideInterfaceMultiResOutJPEG2000Lossless.tif");
+      unsigned char* dataWritten = new unsigned char[512 * 512 * 3];
+      img->getRawRegion(17515, 8710, 512, 512, 0, dataWritten);
+      int diffSum = 0;
+      for (unsigned int i = 0; i < 512 * 512 * 3; ++i) {
+        int val = abs(dataWritten[i] - dataOrg[i]);
+        diffSum += val;
+      }
+      CHECK_EQUAL(diffSum, 0);
+      delete[] dataOrg, dataWritten;
       delete img;
     }
   }

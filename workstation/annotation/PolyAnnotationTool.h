@@ -21,10 +21,16 @@ public :
   void keyPressEvent(QKeyEvent *event);
   virtual QAction* getToolButton();
 
+public slots:
+  void cancelAnnotation();
+
+private slots:
+  void zoomToAnnotation(qreal val);
+  void zoomToAnnotationFinished();
+
 private :
 
   void addCoordinate(const QPointF& scenePos);
-  void cancelAnnotation();
 
   AnnotationWorkstationExtensionPlugin* _annotationPlugin;
   bool _generating;
@@ -34,6 +40,8 @@ private :
 
   bool _startSelectionMove;
   QPointF _moveStart;
+  QRectF _start_zoom;
+  QRectF _end_zoom;
 };
 
 #endif

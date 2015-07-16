@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <QResizeEvent>
-#include <QProgressDialog>
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
@@ -35,21 +34,17 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _prevPan(0,0),
   _map(NULL), 
   _cache(NULL),
-  _cacheSize(100 * 1024 * 1024 * 3),
+  _cacheSize(1000 * 1024 * 1024 * 3),
   _activeTool(NULL),
-  _sceneScale(1.),
-  _autoUpdate(false)
+  _sceneScale(1.)
 {
-  
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setResizeAnchor(QGraphicsView::ViewportAnchor::AnchorViewCenter);
   setDragMode(QGraphicsView::DragMode::NoDrag);
   setContentsMargins(0,0,0,0);
-  setBackgroundBrush(QBrush(QColor("black")));
   setAutoFillBackground(true);
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
-  
   setInteractive(false);
   this->setScene(new QGraphicsScene);
   this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
@@ -102,8 +97,9 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
 void PathologyViewer::wheelEvent(QWheelEvent *event) {
   int numDegrees = event->delta() / 8;
   int numSteps = numDegrees / 15;  // see QWheelEvent documentation
+  _zoomToScenePos = this->mapToScene(event->pos());
+  _zoomToViewPos = event->pos();
   zoom(numSteps);
-  event->accept();
 }
 
 void PathologyViewer::zoom(float numSteps) {
@@ -125,7 +121,7 @@ void PathologyViewer::zoom(float numSteps) {
 void PathologyViewer::scalingTime(qreal x)
 {
   qreal factor = 1.0 + qreal(_numScheduledScalings) / 300.0;
-  float maxDownsample = _img->getLevelDownsample(_img->getNumberOfLevels() - 1);
+  float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
   float scaleX = static_cast<float>(_img->getDimensions()[0]) / FOVImage.width();
@@ -136,6 +132,10 @@ void PathologyViewer::scalingTime(qreal x)
     return;
   }
   scale(factor, factor);
+  centerOn(_zoomToScenePos);
+  QPointF delta_viewport_pos = _zoomToViewPos - QPointF(width() / 2.0, height() / 2.0);
+  QPointF viewport_center = mapFromScene(_zoomToScenePos) - delta_viewport_pos;
+  centerOn(mapToScene(viewport_center.toPoint()));
   emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()), -1);
   emit updateBBox(FOV);
 }
@@ -151,7 +151,6 @@ void PathologyViewer::zoomFinished()
 
 void PathologyViewer::moveTo(const QPointF& pos) {
   this->centerOn(pos);
-  this->update();
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
@@ -193,10 +192,6 @@ void PathologyViewer::changeActiveTool() {
   }
 }
 
-void PathologyViewer::setAutoUpdate(bool autoUpdate) {
-  _autoUpdate = autoUpdate;
-}
-
 void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel) {
   _renderthread->clearJobs();
 }
@@ -207,7 +202,6 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   _renderthread = new RenderThread(img);
   unsigned int tileSize = 1024;
 
-  QGraphicsScene* scn = new QGraphicsScene();  
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;
   for (int i = lastLevel; i >= 0; --i) {
     std::vector<unsigned long long> lastLevelDimensions = _img->getLevelDimensions(i);
@@ -216,7 +210,7 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
       break;
     }
   }
-  initializeImage(scn, tileSize, lastLevel);
+  initializeImage(scene(), tileSize, lastLevel);
   initializeMiniMap(lastLevel);
   setMouseTracking(true);
   QObject::connect(this, SIGNAL(channelChanged(int)), _renderthread, SLOT(onChannelChanged(int)));  
@@ -254,14 +248,6 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   float lastLevelHeight = ((lastLevelDimensions[1] / tileSize) + 1) * tileSize;
   float longest = lastLevelWidth > lastLevelHeight ? lastLevelWidth : lastLevelHeight;
   _sceneScale = 1./_img->getLevelDownsample(lastLevel);
-  QProgressDialog progressDialog;
-  progressDialog.setMinimum(0);
-  progressDialog.setMaximum(nrLevels*2);
-  progressDialog.setCancelButton(NULL);
-  progressDialog.setWindowModality(Qt::WindowModal);
-  progressDialog.show();
-  progressDialog.setValue(0);
-  QApplication::processEvents();
   for (float i = 0; i < lastLevelWidth; i += tileSize) {
     for (float j = 0; j < lastLevelHeight; j += tileSize) {
       WSITileGraphicsItem* item = new WSITileGraphicsItem(tileSize, lastLevel, lastLevel, _img, _renderthread, _cache);
@@ -273,14 +259,16 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
       std::string key;
       ss >> key;
       _cache->set(key, item, tileSize*tileSize*_img->getSamplesPerPixel(), true);
+      item->loadTile();
+      item->loadNextLevel(true);
     }
+  }
+  while (_renderthread->numberOfJobs() > 0) {
   }
 
   QRectF n((lastLevelDimensions[0] / 2) - 1.5*longest, (lastLevelDimensions[1] / 2) - 1.5*longest, 3 * longest, 3 * longest);
-  this->setScene(scn);
   this->setSceneRect(n);
   this->fitInView(QRectF(0, 0, lastLevelDimensions[0], lastLevelDimensions[1]), Qt::AspectRatioMode::KeepAspectRatio);
-  progressDialog.setValue(nrLevels + nrLevels);
 }
 
 void PathologyViewer::initializeMiniMap(unsigned int level) {
@@ -329,7 +317,7 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
         for (int i = 0; i < _img->getSamplesPerPixel(); ++i) {
           if (selectedItem->text() == QString("Channel ") + QString::number(i + 1)) {
             emit channelChanged(i);
-            _cache->clear();
+            _cache->refresh();
           }
         }
       }
@@ -343,10 +331,8 @@ void PathologyViewer::close() {
     _prefetchthread->deleteLater();
     _prefetchthread = NULL;
   }
+  scene()->clear();
   _cache->clear();
-  QGraphicsScene* oldScene = this->scene();
-  this->setScene(new QGraphicsScene);
-  oldScene->deleteLater();
   _img = NULL;
   if (_renderthread) {
     _renderthread->shutdown();

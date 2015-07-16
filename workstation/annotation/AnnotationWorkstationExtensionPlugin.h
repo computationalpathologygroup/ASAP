@@ -14,8 +14,9 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QObject;
 class QEvent;
+class QSettings;
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.AnnotationWorkstationExtensionPlugin/1.0")
@@ -51,7 +52,7 @@ public slots:
     void onTreeWidgetSelectedItemsChanged();
 
 private slots:
-void resizeOnExpand();
+    void resizeOnExpand();
 
 private :
     std::vector<ToolPluginInterface*> _annotationTools;
@@ -64,6 +65,7 @@ private :
     QDockWidget* _dockWidget;
     QTreeWidget* _treeWidget;
     QEvent* _oldEvent;
+    MultiResolutionImage* _img;
 
     void clearTreeWidget();
     void clearAnnotationList();
@@ -71,6 +73,7 @@ private :
 
     static unsigned int _annotationIndex;
     static unsigned int _annotationGroupIndex;
+    QSettings* _settings;
 };
 
 #endif

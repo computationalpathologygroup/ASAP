@@ -4,7 +4,7 @@
 #include <QColor>
 #include "config/pathology_config.h"
 
-class EXPORT_PATHOLOGYANNOTATION PolyQtAnnotation : public QtAnnotation
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN PolyQtAnnotation : public QtAnnotation
 {
   Q_OBJECT
 public:
@@ -30,6 +30,7 @@ private:
   float _lineThickness;
   float _lineAnnotationSelectedThickness;
   bool _closed;
+  float _selectionSensitivity;
   QPainterPath _currentPath;
   std::string _type;
   float _currentLoD;

@@ -10,7 +10,7 @@ public:
   ~JPEG2000Codec();
 
   void encode(char* data, unsigned int& size, const unsigned int& tileSize, const unsigned int& depth, const unsigned int& nrComponents, float& rate) const;
-  void decode(char* buf, const unsigned int& size) const;
+  void decode(char* buf, const unsigned int& inSize, const unsigned int& outSize) const;
 };
 
 #endif

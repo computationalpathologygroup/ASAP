@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
         .positional(positionalOptions).run(),
         vm);
       if (!vm.count("input")) {
-        cout << "MultiResolutionImageConverter v1.35" << endl;
+        cout << "MultiResolutionImageConverter v1.36" << endl;
         cout << "Usage: MultiResImageConverter.exe input output [options]" << endl;
       }
       if (vm.count("help")) {
@@ -166,8 +166,12 @@ int main(int argc, char *argv[]) {
         else {
           core::changeExtension(outPth, "tif");
         }
-        float rate = 100.;
-        convertImage(fls[i],outPth, svs, codec, rate);
+        if (!vm["spacingX"].defaulted() || !vm["spacingY"].defaulted()) {
+          convertImage(fls[i], outPth, svs, codec, rate, spacingX, spacingY);
+        }
+        else {
+          convertImage(fls[i], outPth, svs, codec, rate);
+        }
       }
     }
   } 

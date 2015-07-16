@@ -15,7 +15,8 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
   _rectSelectedColor(QColor("red")),
   _closed(false),
   _type("spline"),
-  _currentLoD(1.0)
+  _currentLoD(1.0),
+  _selectionSensitivity(5.0)
 {
 
 }
@@ -115,8 +116,6 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     std::vector<Point> coords = _annotation->getCoordinates();
     if (coords.size() > 1) {
       _currentPath = getCurrentPath(coords);
-      painter->setRenderHints(QPainter::Antialiasing);
-      painter->setRenderHints(QPainter::HighQualityAntialiasing);
       if (isSelected()) {
         painter->strokePath(_currentPath, QPen(QBrush(lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
       }
@@ -147,6 +146,7 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPointF& point) {
   std::pair<int, int> indexes = std::pair<int, int>(-1, -1);
   QPointF localPos = this->mapFromScene(point);
+  _currentPath = getCurrentPath(_annotation->getCoordinates());
   if (_currentPath.elementCount() > 0) {
     QPointF prev(_currentPath.elementAt(0).x, _currentPath.elementAt(0).y);
     unsigned int lineIndex = 0;
@@ -154,13 +154,14 @@ std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPoint
       QPainterPath::Element elm = _currentPath.elementAt(el);
       if (elm.type == 1) {
         QGraphicsLineItem line;
-        line.setPen(QPen(QBrush(), _lineThickness / _currentLoD));
+        line.setPen(QPen(QBrush(), _selectionSensitivity * _lineThickness / _currentLoD));
         line.setLine(prev.x(), prev.y(), elm.x, elm.y);
         if (line.contains(localPos)) {
           indexes = std::pair<int, int>(lineIndex, lineIndex + 1);
           break;
         }
         lineIndex += 1;
+        prev = QPointF(elm.x, elm.y);
       }
       else if (elm.type == 2) {
         QPainterPath::Element cp2 = _currentPath.elementAt(el + 1);
@@ -168,16 +169,21 @@ std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPoint
         QPainterPath tmp(prev);
         tmp.cubicTo(QPointF(elm.x, elm.y), QPointF(cp2.x, cp2.y), QPointF(ep.x, ep.y));
         QPainterPathStroker stroker;
-        stroker.setWidth(_lineThickness / _currentLoD);
-        QGraphicsPathItem pth;
-        pth.setPath(stroker.createStroke(tmp));
-        if (pth.contains(localPos)) {
+        if (isSelected()) {
+          stroker.setWidth(_selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
+        }
+        else {
+          stroker.setWidth(_selectionSensitivity * _lineThickness / _currentLoD);
+        }
+        stroker.setCapStyle(Qt::PenCapStyle::FlatCap);
+        if (stroker.createStroke(tmp).contains(localPos)) {
           indexes = std::pair<int, int>(lineIndex, lineIndex + 1);
           break;
         }
         lineIndex += 1;
+        prev = QPointF(ep.x, ep.y);
+        el += 2;
       }
-      prev = QPointF(elm.x, elm.y);
     }
   }
   return indexes;
@@ -214,6 +220,7 @@ void PolyQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
 QPainterPath PolyQtAnnotation::shape() const {  
   QPainterPath rectPath;
   QPainterPathStroker stroker;
+  stroker.setCurveThreshold(.25 / (_currentLoD / 20.));
   QPainterPath strokePath;
   if (_annotation) {
     std::vector<Point> coords = _annotation->getCoordinates();
@@ -221,15 +228,15 @@ QPainterPath PolyQtAnnotation::shape() const {
       rectPath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
     }
     if (isSelected()) {
-      stroker.setWidth(_lineAnnotationSelectedThickness / _currentLoD);
+      stroker.setWidth(_selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
     }
     else {
-      stroker.setWidth(_lineThickness / _currentLoD);
+      stroker.setWidth(_selectionSensitivity * _lineThickness / _currentLoD);
     }
     strokePath = stroker.createStroke(_currentPath).subtracted(rectPath);
     for (unsigned int i = 0; i < coords.size(); ++i) {
       strokePath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
     }
   }
-  return strokePath.simplified();
+  return strokePath;
 }

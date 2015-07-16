@@ -1,7 +1,6 @@
 #include "Repository.h"
 #include <string>
 #include <vector>
-#include <qdebug.h>
 
 Repository::Repository(AnnotationList* list) :
   _list(list),

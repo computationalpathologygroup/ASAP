@@ -57,16 +57,16 @@ QLabel {
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_4">
     <property name="leftMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <property name="bottomMargin">
-     <number>0</number>
+     <number>9</number>
     </property>
     <item>
      <widget class="QGroupBox" name="LikelihoodmapGroupBox">

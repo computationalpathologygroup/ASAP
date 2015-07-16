@@ -77,8 +77,8 @@ void AperioSVSWriter::writeThumbnail() {
     for (unsigned int tileX = 0; tileX < w; tileX += tileW) {
       if (getCompression() == JPEG2000_LOSSLESS || getCompression() == JPEG2000_LOSSY) {
         unsigned int no = TIFFComputeTile(lowestResTiff, tileX, tileY, 0, 0);
-        TIFFReadRawTile(lowestResTiff, no, tile, tileW*tileH*nrsamples*sizeof(T));
-        cod.decode((char*)tile, tileW*tileH*nrsamples*sizeof(T));
+        unsigned int rawSize = TIFFReadRawTile(lowestResTiff, no, tile, tileW*tileH*nrsamples*sizeof(T));
+        cod.decode((char*)tile, rawSize, tileW*tileH*nrsamples*sizeof(T));
       }
       else {
         TIFFReadTile(lowestResTiff, tile, tileX, tileY, 0, 0);
