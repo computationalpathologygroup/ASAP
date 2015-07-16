@@ -31,7 +31,7 @@ ELSE()
   add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
   qt5_use_modules(VisualizationWorkstationExtensionPlugin Core Widgets UiTools)
 ENDIF()
-TARGET_LINK_LIBRARIES(VisualizationWorkstationExtensionPlugin ASAP multiresolutionimageinterface core)
+TARGET_LINK_LIBRARIES(VisualizationWorkstationExtensionPlugin ASAP multiresolutionimageinterface core annotation)
 SET_TARGET_PROPERTIES(VisualizationWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 
 INSTALL(TARGETS VisualizationWorkstationExtensionPlugin
