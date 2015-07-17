@@ -105,14 +105,6 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
   if (!_polygons.empty()) {
     removeSegmentationsFromViewer();
   }
-  if (_annotations) {
-    delete _annotations;
-    _annotations = NULL;
-  }
-  if (_lst) {
-    delete _lst;
-    _lst = NULL;
-  }
   if (_foreground) {
     emit changeForegroundImage(NULL);
     delete _foreground;
@@ -151,8 +143,19 @@ void VisualizationWorkstationExtensionPlugin::onEnableSegmentationToggled(bool t
 void VisualizationWorkstationExtensionPlugin::addSegmentationsToViewer() {
   if (_lst) {
     std::vector<Annotation*> tmp = _lst->getAnnotations();
+    float scl = _viewer->getSceneScale();
     for (std::vector<Annotation*>::iterator it = tmp.begin(); it != tmp.end(); ++it) {
-      
+      QPolygonF poly;
+      std::vector<Point> coords = (*it)->getCoordinates();
+      for (std::vector<Point>::iterator pt = coords.begin(); pt != coords.end(); ++pt) {
+        poly.append(QPointF(pt->getX()*scl, pt->getY()*scl));
+      }
+      QGraphicsPolygonItem* cur = new QGraphicsPolygonItem(poly);
+      cur->setBrush(QBrush());
+      cur->setPen(QPen(QBrush(QColor("red")), 1.));
+      _viewer->scene()->addItem(cur);
+      cur->setZValue(std::numeric_limits<float>::max());
+      _polygons.append(cur);
     }
   }
 }

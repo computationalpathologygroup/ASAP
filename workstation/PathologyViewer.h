@@ -17,6 +17,10 @@ class EXPORT_PATHOLOGYWORKSTATION PathologyViewer : public QGraphicsView
     Q_OBJECT
     
 public:
+
+  QPointF _zoomToScenePos;
+  QPointF _zoomToViewPos;
+
     PathologyViewer(QWidget *parent = 0);
     ~PathologyViewer();
 
@@ -91,8 +95,6 @@ private :
     float _panSensitivity;
     bool _pan;
     QPoint _prevPan;
-    QPointF _zoomToScenePos;
-    QPointF _zoomToViewPos;
 
     RenderThread* _renderthread;
     PrefetchThread* _prefetchthread;

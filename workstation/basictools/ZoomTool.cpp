@@ -32,6 +32,8 @@ void ZoomTool::mousePressEvent(QMouseEvent *event) {
     _accumZoom = 0;
     _prevZoomPoint = event->pos();
     _viewer->setCursor(QCursor(Qt::CursorShape::SizeVerCursor));
+    _viewer->_zoomToViewPos = event->pos();
+    _viewer->_zoomToScenePos = _viewer->mapToScene(event->pos());
     event->accept();
   }
 }
