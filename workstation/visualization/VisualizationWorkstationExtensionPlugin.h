@@ -5,6 +5,9 @@
 #include "config/pathology_config.h"
 
 class QCheckBox;
+class XmlRepository;
+class QGraphicsPolygonItem;
+class AnnotationList;
 
 class EXPORT_VISUALIZATIONPLUGIN VisualizationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
@@ -13,16 +16,24 @@ class EXPORT_VISUALIZATIONPLUGIN VisualizationWorkstationExtensionPlugin : publi
     Q_INTERFACES(WorkstationExtensionPluginInterface)
 
 private :
+
+  void addSegmentationsToViewer();
+  void removeSegmentationsFromViewer();
+
   MultiResolutionImage* _foreground;
   QDockWidget* _dockWidget;
   QCheckBox* _likelihoodCheckBox;
+  QCheckBox* _segmentationCheckBox;
   float _opacity;
+  XmlRepository* _annotations;
+  AnnotationList* _lst;
+  QList<QGraphicsPolygonItem*> _polygons;
 
 public :
     bool initialize(PathologyViewer* viewer);
     VisualizationWorkstationExtensionPlugin();
     ~VisualizationWorkstationExtensionPlugin();
-    QDockWidget* getDockWidget();
+    QDockWidget* getDockWidget();    
 
 public slots:
     void onNewImageLoaded(MultiResolutionImage* img, std::string fileName);
