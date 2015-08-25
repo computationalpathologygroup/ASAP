@@ -2,6 +2,7 @@
 #include "AnnotationList.h"
 #include "XmlRepository.h"
 #include "NDPARepository.h"
+#include "ImageScopeRepository.h"
 
 AnnotationService::AnnotationService() :
   _list(NULL),
@@ -28,7 +29,30 @@ AnnotationList* AnnotationService::getList() const {
 Repository* AnnotationService::getRepository() const {
   return _repo;
 }
-void AnnotationService::setRepositoryFromSourceFile(const std::string& source) {
+
+bool AnnotationService::loadRepositoryFromFile(const std::string& source) {
+  if (_repo) {
+    delete _repo;
+  }
+  if (source.rfind(std::string(".xml")) != source.npos) {
+    _repo = new XmlRepository(_list);
+    _repo->setSource(source);
+    if (!_repo->load()) {
+      delete _repo;
+      _list->removeAllAnnotations();
+      _list->removeAllGroups();
+      _repo = new ImageScopeRepository(_list);
+      _repo->setSource(source);
+    }
+  }
+  else if (source.rfind(std::string(".ndpa")) != source.npos) {
+    _repo = new NDPARepository(_list);
+    _repo->setSource(source);
+  }
+  return _repo->load();
+}
+
+bool AnnotationService::saveRepositoryToFile(const std::string& source) {
   if (_repo) {
     delete _repo;
   }
@@ -40,6 +64,7 @@ void AnnotationService::setRepositoryFromSourceFile(const std::string& source) {
     _repo = new NDPARepository(_list);
     _repo->setSource(source);
   }
+  return _repo->save();
 }
 
 bool AnnotationService::load() {

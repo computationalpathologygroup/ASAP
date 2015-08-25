@@ -8,7 +8,6 @@
 
 PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) : 
   QtAnnotation(annotation, scale),
-  _rectSize(10),
   _lineThickness(3),
   _lineAnnotationSelectedThickness(4.5),
   _rectColor(QColor("blue")),
@@ -16,7 +15,10 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
   _closed(false),
   _type("spline"),
   _currentLoD(1.0),
-  _selectionSensitivity(5.0)
+  _selectionSensitivity(100.0),
+  _lastClickedLinePoint(QPointF()),
+  _lastClickedFirstCoordinateIndex(-1),
+  _lastClickedSecondCoordinateIndex(-1)
 {
 
 }
@@ -24,12 +26,22 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
 QRectF PolyQtAnnotation::boundingRect() const {
   QRectF bRect;
   if (_annotation) {
-      QRectF cpRect = getCurrentPath(_annotation->getCoordinates()).controlPointRect();
-      QPointF tl = cpRect.topLeft() - QPointF(_rectSize, _rectSize);
-      QPointF br = cpRect.bottomRight() + QPointF(_rectSize, _rectSize);
+      QRectF cpRect = _currentPath.controlPointRect();
+      QPointF tl = cpRect.topLeft() - QPointF(3 * _lineAnnotationSelectedThickness, 3 * _lineAnnotationSelectedThickness);
+      QPointF br = cpRect.bottomRight() + QPointF(3 * _lineAnnotationSelectedThickness, 3 * _lineAnnotationSelectedThickness);
       bRect = bRect.united(QRectF(tl, br));
   }
   return bRect;
+}
+
+void PolyQtAnnotation::onCoordinatesChanged() {
+  _currentPath = getCurrentPath(_annotation->getCoordinates());
+  if (_type == "spline") {
+    _polys = _currentPath.toFillPolygon();
+    if (!_closed && _polys.isClosed()) {
+      _polys.pop_back();
+    }
+  }
 }
 
 std::vector<QPointF> PolyQtAnnotation::catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3) const
@@ -70,39 +82,46 @@ std::string PolyQtAnnotation::getInterpolationType() {
 QPainterPath PolyQtAnnotation::getCurrentPath(const std::vector<Point>& coords) const {
   QPainterPath pth;
   pth.moveTo(0, 0);
-  for (unsigned int i = 0; i < coords.size() - 1; ++i) {
-    if (_type != "spline") {
-      pth.lineTo(this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale));
-    }
-    else {
-      QPointF p1 = this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale);
-      QPointF p2 = this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale);
-      QPointF p0 = p1 - (p2 - p1);
-      if (i > 0) {
-        p0 = this->mapFromScene(coords[i - 1].getX()*_scale, coords[i - 1].getY()*_scale);
+  if (coords.size() > 1) {
+    for (unsigned int i = 0; i < coords.size() - 1; ++i) {
+      if (_type != "spline") {
+        pth.lineTo(this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale));
       }
-      else if (i == 0 && _closed && coords.size() > 2) {
-        p0 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
+      else {
+        QPointF p1 = this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale);
+        QPointF p2 = this->mapFromScene(coords[i + 1].getX()*_scale, coords[i + 1].getY()*_scale);
+        QPointF p0 = p1 - (p2 - p1);
+        if (i > 0) {
+          p0 = this->mapFromScene(coords[i - 1].getX()*_scale, coords[i - 1].getY()*_scale);
+        }
+        else if (i == 0 && _closed && coords.size() > 2) {
+          p0 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
+        }
+        QPointF p3 = p2 + (p2 - p1);
+        if (i < coords.size() - 2) {
+          p3 = this->mapFromScene(coords[i + 2].getX()*_scale, coords[i + 2].getY()*_scale);
+        }
+        std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
+        pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
       }
-      QPointF p3 = p2 + (p2 - p1);
-      if (i < coords.size() - 2) {
-        p3 = this->mapFromScene(coords[i + 2].getX()*_scale, coords[i + 2].getY()*_scale);
+    }
+    if (_closed) {
+      if (_type != "spline") {
+        pth.lineTo(0, 0);
       }
-      std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
-      pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
-    }
-  }
-  if (_closed) {
-    if (_type != "spline") {
-      pth.lineTo(0, 0);
-    }
-    else {
-      QPointF p0 = this->mapFromScene(coords[coords.size() - 2].getX()*_scale, coords[coords.size() - 2].getY()*_scale);
-      QPointF p1 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
-      QPointF p2 = this->mapFromScene(coords[0].getX()*_scale, coords[0].getY()*_scale);
-      QPointF p3 = this->mapFromScene(coords[1].getX()*_scale, coords[1].getY()*_scale);
-      std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
-      pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
+      else {
+        if (coords.size() > 1) {
+          QPointF p1 = this->mapFromScene(coords[coords.size() - 1].getX()*_scale, coords[coords.size() - 1].getY()*_scale);
+          QPointF p2 = this->mapFromScene(coords[0].getX()*_scale, coords[0].getY()*_scale);
+          QPointF p0 = p1 - (p2 - p1);
+          if (coords.size() > 2) {
+            QPointF p0 = this->mapFromScene(coords[coords.size() - 2].getX()*_scale, coords[coords.size() - 2].getY()*_scale);
+          }
+          QPointF p3 = this->mapFromScene(coords[1].getX()*_scale, coords[1].getY()*_scale);
+          std::vector<QPointF> bezierPoints = catmullRomToBezier(p0, p1, p2, p3);
+          pth.cubicTo(bezierPoints[1], bezierPoints[2], bezierPoints[3]);
+        }
+      }
     }
   }
   return pth;
@@ -115,83 +134,43 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     _currentLoD = option->levelOfDetailFromTransform(painter->worldTransform());
     std::vector<Point> coords = _annotation->getCoordinates();
     if (coords.size() > 1) {
-      _currentPath = getCurrentPath(coords);
       if (isSelected()) {
-        painter->strokePath(_currentPath, QPen(QBrush(lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
+        painter->setPen(QPen(QBrush(lineColor.lighter(150)), _lineAnnotationSelectedThickness / _currentLoD));
       }
       else {
-        painter->strokePath(_currentPath, QPen(QBrush(lineColor), _lineThickness / _currentLoD));
+        painter->setPen(QPen(QBrush(lineColor), _lineThickness / _currentLoD));
+      }
+      if (_type == "spline") {
+        painter->drawPolyline(_polys);
+      }
+      else {
+        painter->drawPath(_currentPath);
       }
     }
     if (isSelected()) {
-      painter->setPen(QPen(QBrush(_rectColor.lighter(150)), _lineThickness / _currentLoD));
+      painter->setPen(QPen(QBrush(_rectColor.lighter(150)), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
     }
     else {
-      painter->setPen(QPen(QBrush(_rectColor), _lineThickness / _currentLoD));
+      painter->setPen(QPen(QBrush(_rectColor), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
     }
     for (unsigned int i = 0; i < coords.size(); ++i) {
       if (i == _activeSeedPoint) {
         painter->save();
-        painter->setPen(QPen(QBrush(_rectSelectedColor), _lineThickness / _currentLoD));
-        painter->drawRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - (_rectSize / _currentLoD) / 2., coords[i].getY()*_scale - (_rectSize / _currentLoD) / 2.), QSizeF(_rectSize / _currentLoD, _rectSize / _currentLoD)));
+        painter->setPen(QPen(QBrush(_rectSelectedColor), 3 * _lineAnnotationSelectedThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        painter->drawPoint(this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale));
         painter->restore();
       }
       else {
-        painter->drawRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - (_rectSize / _currentLoD) / 2., coords[i].getY()*_scale - (_rectSize / _currentLoD) / 2.), QSizeF(_rectSize / _currentLoD, _rectSize / _currentLoD)));
+        painter->drawPoint(this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale));
       }
     }
   }
-}
-
-std::pair<int, int> PolyQtAnnotation::seedPointsContainingPathPoint(const QPointF& point) {
-  std::pair<int, int> indexes = std::pair<int, int>(-1, -1);
-  QPointF localPos = this->mapFromScene(point);
-  _currentPath = getCurrentPath(_annotation->getCoordinates());
-  if (_currentPath.elementCount() > 0) {
-    QPointF prev(_currentPath.elementAt(0).x, _currentPath.elementAt(0).y);
-    unsigned int lineIndex = 0;
-    for (unsigned int el = 1; el < _currentPath.elementCount(); ++el) {
-      QPainterPath::Element elm = _currentPath.elementAt(el);
-      if (elm.type == 1) {
-        QGraphicsLineItem line;
-        line.setPen(QPen(QBrush(), _selectionSensitivity * _lineThickness / _currentLoD));
-        line.setLine(prev.x(), prev.y(), elm.x, elm.y);
-        if (line.contains(localPos)) {
-          indexes = std::pair<int, int>(lineIndex, lineIndex + 1);
-          break;
-        }
-        lineIndex += 1;
-        prev = QPointF(elm.x, elm.y);
-      }
-      else if (elm.type == 2) {
-        QPainterPath::Element cp2 = _currentPath.elementAt(el + 1);
-        QPainterPath::Element ep = _currentPath.elementAt(el + 2);
-        QPainterPath tmp(prev);
-        tmp.cubicTo(QPointF(elm.x, elm.y), QPointF(cp2.x, cp2.y), QPointF(ep.x, ep.y));
-        QPainterPathStroker stroker;
-        if (isSelected()) {
-          stroker.setWidth(_selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
-        }
-        else {
-          stroker.setWidth(_selectionSensitivity * _lineThickness / _currentLoD);
-        }
-        stroker.setCapStyle(Qt::PenCapStyle::FlatCap);
-        if (stroker.createStroke(tmp).contains(localPos)) {
-          indexes = std::pair<int, int>(lineIndex, lineIndex + 1);
-          break;
-        }
-        lineIndex += 1;
-        prev = QPointF(ep.x, ep.y);
-        el += 2;
-      }
-    }
-  }
-  return indexes;
 }
 
 void PolyQtAnnotation::finish() {
   prepareGeometryChange();
   _closed = true;
+  onCoordinatesChanged();
 }
 
 void PolyQtAnnotation::moveCoordinateBy(unsigned int index, const Point& moveBy) {
@@ -205,6 +184,7 @@ void PolyQtAnnotation::moveCoordinateBy(unsigned int index, const Point& moveBy)
       this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
     }
   }
+  onCoordinatesChanged();
 }
 
 void PolyQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
@@ -215,28 +195,111 @@ void PolyQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
   }
   this->getAnnotation()->setCoordinates(coords);
   this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
+  onCoordinatesChanged();
 }
 
-QPainterPath PolyQtAnnotation::shape() const {  
-  QPainterPath rectPath;
-  QPainterPathStroker stroker;
-  stroker.setCurveThreshold(.25 / (_currentLoD / 20.));
-  QPainterPath strokePath;
-  if (_annotation) {
+bool PolyQtAnnotation::collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode) const {
+  return contains(path.currentPosition());
+}
+
+bool PolyQtAnnotation::contains(const QPointF & point) const {
+  if (shape().controlPointRect().contains(point)) {
+    QPointF imgPoint = this->mapToScene(point) / _scale;
+    double curSelectionSensitivity = (_selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
+    double curSelectionSensitivitySquared = curSelectionSensitivity * curSelectionSensitivity;
+    double imgX = imgPoint.x();
+    double imgY = imgPoint.y();
     std::vector<Point> coords = _annotation->getCoordinates();
+    double minDist = std::numeric_limits<double>::max();
+    _lastClickedFirstCoordinateIndex = -1;
+    _lastClickedSecondCoordinateIndex = -1;
+
+    // Quickly check if a seed point was hit
     for (unsigned int i = 0; i < coords.size(); ++i) {
-      rectPath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
+      Point pt1 = coords[i];
+      double coord1X = pt1.getX(); double coord1Y = pt1.getY();
+      double distSquared = pow(imgX - coord1X, 2) + pow(imgY - coord1Y, 2);
+      if (distSquared < curSelectionSensitivitySquared && distSquared < minDist) {
+        _lastClickedFirstCoordinateIndex = i;
+        _lastClickedSecondCoordinateIndex = -1;
+        _lastClickedLinePoint = QPointF();
+        minDist = distSquared;
+      }
     }
-    if (isSelected()) {
-      stroker.setWidth(_selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
+    if (_lastClickedFirstCoordinateIndex >= 0) {
+      return true;
+    }
+
+    minDist = std::numeric_limits<double>::max();
+    // If not, check if a line was hit
+    std::vector<QPointF> polyInImgCoords;
+    unsigned int polyIndex = 0;
+    if (_type == "spline") {
+      for (QPolygonF::const_iterator it = _polys.begin(); it != _polys.end(); ++it) {
+        polyInImgCoords.push_back(this->mapToScene(*it) / _scale);
+      }
+    }
+    for (unsigned int i = 0; i < coords.size(); ++i) {
+      Point pt1 = coords[i];
+      Point pt2 = i == coords.size() -1 ? coords[0] : coords[i + 1];
+      double coord1X = pt1.getX(); double coord1Y = pt1.getY();
+      double coord2X = pt2.getX(); double coord2Y = pt2.getY();
+      QRectF hitbox(imgX - curSelectionSensitivity / 2., imgY - curSelectionSensitivity / 2., curSelectionSensitivity * 2., curSelectionSensitivity * 2.);
+      QRectF lineBox(QPointF(std::min(coord1X, coord2X), std::max(coord1Y, coord2Y)), QPointF(std::max(coord1X, coord2X), std::min(coord1Y, coord2Y)));       
+      if (hitbox.intersects(lineBox)) {
+        if (_type == "spline") {
+          for (unsigned int j = 0; j < polyInImgCoords.size(); ++j) {
+            QPointF polyPt1 = polyInImgCoords[polyIndex];
+            QPointF polyPt2 = polyIndex == polyInImgCoords.size() - 1 ? polyInImgCoords[0] : polyInImgCoords[polyIndex + 1];
+            if (QPoint(polyPt1.x(), polyPt1.y()) == QPoint(coord2X, coord2Y)) {
+              break;
+            }
+            double polyCoord1X = polyPt1.x(); double polyCoord1Y = polyPt1.y();
+            double polyCoord2X = polyPt2.x(); double polyCoord2Y = polyPt2.y();
+            QRectF polyBox(QPointF(std::min(polyCoord1X, polyCoord2X), std::max(polyCoord1Y, polyCoord2Y)), QPointF(std::max(polyCoord1X, polyCoord2X), std::min(polyCoord1Y, polyCoord2Y)));
+            if (hitbox.intersects(polyBox)) {
+              double lineLengthSquared = pow(polyCoord1X - polyCoord2X, 2) + pow(polyCoord1Y - polyCoord2Y, 2);
+              double t = ((imgX - polyCoord2X) * (polyCoord1X - polyCoord2X) + (imgY - polyCoord2Y) * (polyCoord1Y - polyCoord2Y)) / lineLengthSquared;
+              double projX = polyCoord2X + t * (polyCoord1X - polyCoord2X);
+              double projY = polyCoord2Y + t * (polyCoord1Y - polyCoord2Y);
+              double distSquared = pow(imgX - projX, 2) + pow(imgY - projY, 2);
+              if (distSquared < curSelectionSensitivitySquared && distSquared < minDist) {
+                _lastClickedFirstCoordinateIndex = i;
+                _lastClickedSecondCoordinateIndex = i + 1 == coords.size() ? 0 : i + 1;
+                _lastClickedLinePoint = QPointF(projX, projY);
+              }
+            }
+            ++polyIndex;
+          }
+        }
+        else {
+          double lineLengthSquared = pow(coord1X - coord2X, 2) + pow(coord1Y - coord2Y, 2);
+          double t = ((imgX - coord2X) * (coord1X - coord2X) + (imgY - coord2Y) * (coord1Y - coord2Y)) / lineLengthSquared;
+          double projX = coord2X + t * (coord1X - coord2X);
+          double projY = coord2Y + t * (coord1Y - coord2Y);
+          double distSquared = pow(imgX - projX, 2) + pow(imgY - projY, 2);
+          if (distSquared < curSelectionSensitivitySquared && distSquared < minDist) {
+            _lastClickedFirstCoordinateIndex = i;
+            _lastClickedSecondCoordinateIndex = i + 1 == coords.size() ? 0 : i + 1;
+            _lastClickedLinePoint = QPointF(projX, projY);
+          }
+        }
+      }
+    }
+    if (_lastClickedFirstCoordinateIndex < 0) {
+      return false;
     }
     else {
-      stroker.setWidth(_selectionSensitivity * _lineThickness / _currentLoD);
-    }
-    strokePath = stroker.createStroke(_currentPath).subtracted(rectPath);
-    for (unsigned int i = 0; i < coords.size(); ++i) {
-      strokePath.addRect(QRectF(this->mapFromScene(coords[i].getX()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2., coords[i].getY()*_scale - ((_rectSize + _lineThickness) / _currentLoD) / 2.), QSizeF((_rectSize + _lineThickness) / _currentLoD, (_rectSize + _lineThickness) / _currentLoD)));
+      return true;
     }
   }
-  return strokePath;
+  return false;
+}
+
+QPointF PolyQtAnnotation::getLastClickedLinePoint() {
+  return _lastClickedLinePoint;
+}
+
+std::pair<int, int> PolyQtAnnotation::getLastClickedCoordinateIndices() {
+  return std::pair<int, int>(_lastClickedFirstCoordinateIndex, _lastClickedSecondCoordinateIndex);
 }

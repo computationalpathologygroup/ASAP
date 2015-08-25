@@ -15,14 +15,16 @@ public:
   AnnotationList* getList() const;
 
   Repository* getRepository() const;
-  void setRepositoryFromSourceFile(const std::string& source);
-
-  bool load();
-  bool save();
+  bool loadRepositoryFromFile(const std::string& source);
+  bool saveRepositoryToFile(const std::string& source);
 
 private:
   AnnotationList* _list;
   Repository* _repo;
+
+  bool load();
+  bool save();
+
 };
 
 #endif

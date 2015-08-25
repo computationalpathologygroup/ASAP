@@ -28,6 +28,7 @@
 #include "core/filetools.h"
 #include "../QtProgressMonitor.h"
 #include <QProgressDialog>
+#include <QMessageBox>
 
 #include <numeric>
 #include <iostream>
@@ -208,9 +209,11 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
   }
   if (!fileName.isEmpty()) {
     onClearButtonPressed();
-    _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
-    _annotationService->load();
-
+    if (!_annotationService->loadRepositoryFromFile(fileName.toStdString())) {
+      int ret = QMessageBox::warning(NULL, tr("ASAP"),
+        tr("The annotations could not be loaded."),
+        QMessageBox::Ok);
+    }
     // Add loaded groups to treewidget
     std::map<std::string, AnnotationGroup*> childGroups;
     std::map<AnnotationGroup*, QTreeWidgetItem*> annotToWidget;
@@ -386,8 +389,11 @@ void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
     }
   }
   else if (!fileName.isEmpty()) {
-    _annotationService->setRepositoryFromSourceFile(fileName.toStdString());
-    _annotationService->save();
+    if (!_annotationService->saveRepositoryToFile(fileName.toStdString())) {
+      int ret = QMessageBox::warning(NULL, tr("ASAP"),
+        tr("The annotations could not be saved."),
+        QMessageBox::Ok);
+    }
   }
 }
 

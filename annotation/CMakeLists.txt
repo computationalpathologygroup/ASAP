@@ -21,6 +21,7 @@ SET(ANNOTATION_HEADERS
   AnnotationService.h
   XmlRepository.h
   NDPARepository.h
+  ImageScopeRepository.h
   Repository.h
 )
 
@@ -32,6 +33,7 @@ SET(ANNOTATION_SOURCE
   AnnotationService.cpp
   XmlRepository.cpp
   NDPARepository.cpp
+  ImageScopeRepository.cpp
   Repository.cpp
 )
 
