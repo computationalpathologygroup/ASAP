@@ -22,6 +22,14 @@ bool NDPARepository::save() const
   return false;
 }
 
+void NDPARepository::setNDPISourceFile(const std::string& ndpiSourcefile) {
+  _ndpiSourceFile = ndpiSourcefile;
+}
+
+std::string NDPARepository::NDPISourceFile() const {
+  return _ndpiSourceFile;
+}
+
 bool NDPARepository::load()
 {
   if (!_list || _source.empty()) {

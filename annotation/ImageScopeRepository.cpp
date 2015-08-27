@@ -54,9 +54,6 @@ bool ImageScopeRepository::load()
 
     AnnotationGroup* grp = new AnnotationGroup();
     grp->setColor(groupColorAsHex);
-    grp->setName(groupName + "_" + core::tostring(group_nr));
-    _list->addGroup(grp);
-    group_nr += 1;
     std::map<unsigned int, std::vector<std::pair<double, double> > > idToCoords;
     std::map<unsigned int, std::string> idToName;
     pugi::xml_node regions = grpIt.child("Regions");
@@ -136,6 +133,9 @@ bool ImageScopeRepository::load()
           }
         }
       }
+      if (groupName.empty() && !curName.empty()) {
+        groupName = curName;
+      }
       Annotation* annot = new Annotation();
       annot->setName(curName + "_" + core::tostring(annot_nr));
       annot->setTypeFromString("Spline");
@@ -146,5 +146,8 @@ bool ImageScopeRepository::load()
       annot->setGroup(grp);
       _list->addAnnotation(annot);
     }
+    grp->setName(groupName + "_" + core::tostring(group_nr));
+    _list->addGroup(grp);
+    group_nr += 1;
 	}
 }

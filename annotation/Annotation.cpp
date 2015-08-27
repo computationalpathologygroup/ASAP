@@ -1,5 +1,6 @@
 #include "Annotation.h"
 #include "AnnotationGroup.h"
+#include "psimpl.h"
 #include <limits>
 
 const char* Annotation::_typeStrings[5] = { "None", "Dot", "Polygon", "Spline"};
@@ -146,6 +147,25 @@ std::vector<Point> Annotation::getImageBoundingBox() const {
   bbox.push_back(topLeft);
   bbox.push_back(bottomRight);
   return bbox;
+}
+
+void Annotation::simplify(unsigned int nrPoints) {
+  std::vector<float> inPoints;
+  std::vector<float> outPoints;
+  for (std::vector<Point>::iterator it = _coordinates.begin(); it != _coordinates.end(); ++it) {
+    inPoints.push_back(it->getX());
+    inPoints.push_back(it->getY());
+  }
+  std::vector<float>::const_iterator begin = inPoints.begin();
+  std::vector<float>::const_iterator end = inPoints.end();
+  psimpl::simplify_douglas_peucker_n<2>(begin, end, nrPoints, std::back_inserter(outPoints));
+  _coordinates.clear();
+  for (std::vector<float>::iterator it = outPoints.begin(); it != outPoints.end(); ++it) {
+    float x = *it;
+    ++it;
+    float y = *it;
+    _coordinates.push_back(Point(x,y));
+  }
 }
 
 Point Annotation::getCenter() {

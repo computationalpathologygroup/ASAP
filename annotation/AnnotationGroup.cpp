@@ -41,3 +41,7 @@ std::map<std::string, std::string> AnnotationGroup::getAttributes() const {
 void AnnotationGroup::setAttributes(std::map<std::string, std::string> attributes) {
   _attributes = attributes;
 }
+
+void AnnotationGroup::clearAttributes() {
+  _attributes.clear();
+}

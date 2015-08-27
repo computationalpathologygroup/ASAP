@@ -22,4 +22,4 @@ protected:
   std::string _source;
 };
 
-#endif REPOSITORY_H
+#endif

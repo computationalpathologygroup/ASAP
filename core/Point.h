@@ -4,6 +4,7 @@
 
 class EXPORT_CORE Point {
 public:
+  Point::Point();
   Point::Point(const float& x, const float& y);
   inline float getX() const { return _x; }
   inline float getY() const { return _y; };

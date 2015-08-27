@@ -91,7 +91,7 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  ENDIF(PYTHON_CONFIG_INCLUDE_DIR)
 
 	  SWIG_ADD_MODULE(multiresolutionimageinterface python multiresolutionimageinterface.i)
-	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface core) 
+	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER pathology/diag/io)
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
