@@ -15,16 +15,17 @@ public:
     QWidget *widget);
 
   void finish();
-  QPainterPath shape() const;
   void moveCoordinateBy(unsigned int index, const Point& moveBy);
   void moveCoordinatesBy(const Point& moveBy);
   void setInterpolationType(const std::string& interpolationType);
   std::string getInterpolationType();
-  std::pair<int, int> seedPointsContainingPathPoint(const QPointF& point);
   QPainterPath getCurrentPath(const std::vector<Point>& coords) const;
+  bool contains(const QPointF & point) const;
+  bool collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
+  QPointF getLastClickedLinePoint();
+  std::pair<int, int> getLastClickedCoordinateIndices();
 
 private:
-  float _rectSize;
   QColor _rectColor;
   QColor _rectSelectedColor;
   float _lineThickness;
@@ -32,10 +33,16 @@ private:
   bool _closed;
   float _selectionSensitivity;
   QPainterPath _currentPath;
+  QPolygonF _polys;
   std::string _type;
   float _currentLoD;
+  mutable QPointF _lastClickedLinePoint;
+  mutable int _lastClickedFirstCoordinateIndex;
+  mutable int _lastClickedSecondCoordinateIndex;
 
   std::vector<QPointF> catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3) const;
+
+  void onCoordinatesChanged();
 
 };
 #endif

@@ -5,19 +5,38 @@
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImageWriter.h"
 #include "MultiResolutionImage.h"
+#include "../../core/Point.h"
+#include "../../core/ProgressMonitor.h"
+#include "../../core/CmdLineProgressMonitor.h"
+#include "../../annotation/Annotation.h"
+#include "../../annotation/AnnotationGroup.h"
+#include "../../annotation/AnnotationList.h"
+#include "../../annotation/AnnotationService.h"
+#include "../../annotation/AnnotationToMask.h"
+#include "../../annotation/Repository.h"
+#include "../../annotation/XmlRepository.h"
+#include "../../annotation/NDPARepository.h"
+#include "../../annotation/ImageScopeRepository.h"
 %}
 
 %include "std_string.i"
 %include "std_vector.i"
+%include "std_map.i"
 
 namespace std {
   %template(vector_int) vector<int>;
   %template(vector_uint) vector<unsigned int>;
   %template(vector_float) vector<float>;
+  %template(vector_double) vector<double>;
+  %template(vector_annotation) vector<Annotation*>;
+  %template(vector_annotation_group) vector<AnnotationGroup*>;
   %template(vector_unsigned_long_long) vector<unsigned long long>;
   %template(vector_long_long) vector<long long>;
+  %template(vector_string) vector<string>;
+  %template(vector_point) vector<Point>;
+  %template(map_int_string) map<int, string>;
+  %template(map_string_int) map<string, int>;
 }
-
 %include "numpy.i"
 
 %init %{
@@ -27,12 +46,25 @@ import_array();
 #ifdef SWIG
 #define EXPORT_MULTIRESOLUTIONIMAGEINTERFACE
 #define EXPORT_CORE
+#define EXPORT_PATHOLOGYANNOTATION
 #endif
 
 %ignore swap(ImageSource& first, ImageSource& second);
 
+%include "../../core/Point.h"
 %include "../../core/pathologyEnums.h"
 %include "../../core/ImageSource.h"
+%include "../../core/CmdLineProgressMonitor.h"
+
+%include "../../annotation/Annotation.h"
+%include "../../annotation/AnnotationGroup.h"
+%include "../../annotation/AnnotationList.h"
+%include "../../annotation/AnnotationService.h"
+%include "../../annotation/AnnotationToMask.h"
+%include "../../annotation/Repository.h"
+%include "../../annotation/XmlRepository.h"
+%include "../../annotation/NDPARepository.h"
+%include "../../annotation/ImageScopeRepository.h"
 
 
 %numpy_typemaps(void, NPY_NOTYPE, int)

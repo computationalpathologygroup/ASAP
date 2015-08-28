@@ -50,12 +50,14 @@ public:
   std::vector<Point> getLocalBoundingBox();
   Point getCenter();
 
+  void simplify(unsigned int nrPoints);
+
 private:
   Type _type;
 	std::vector<Point> _coordinates;
   std::string _name;
   AnnotationGroup* _group;
-  const static char* _typeStrings[5];
+  static const char* _typeStrings[5];
   std::string _color;
 };
 #endif

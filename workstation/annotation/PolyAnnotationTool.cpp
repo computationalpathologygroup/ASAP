@@ -76,20 +76,11 @@ void PolyAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
       PolyQtAnnotation* active = dynamic_cast<PolyQtAnnotation*>(_annotationPlugin->getActiveAnnotation());
       if (active && active->getEditable()) {
         if (active == selected) {
-          std::vector<Point> coords = active->getAnnotation()->getCoordinates();
-          bool hitSeedPoint = false;
-          for (std::vector<Point>::const_iterator it = coords.begin(); it != coords.end(); ++it) {
-            if (QLineF(_viewer->mapFromScene(QPointF(it->getX()*_viewer->getSceneScale(), it->getY()*_viewer->getSceneScale())), event->pos()).length() < 20) {
-              hitSeedPoint = true;
-              break;
-            }
-          }
-          if (!hitSeedPoint) {
-            // Figure out between which seed points a point should be added
-            QPointF imagePos = scenePos / _viewer->getSceneScale();
-            std::pair<int, int> indices = active->seedPointsContainingPathPoint(scenePos);
+          QPointF lineLocation = active->getLastClickedLinePoint();
+          if (!lineLocation.isNull()) {
+            std::pair<int, int> indices = active->getLastClickedCoordinateIndices();
             if (indices.first >= 0) {
-              active->insertCoordinate(indices.second, Point(imagePos.x(), imagePos.y()));
+              active->insertCoordinate(indices.second, Point(lineLocation.x(), lineLocation.y()));
             }
           }
         }
@@ -219,18 +210,13 @@ void PolyAnnotationTool::mousePressEvent(QMouseEvent *event) {
           PolyQtAnnotation* active = dynamic_cast<PolyQtAnnotation*>(_annotationPlugin->getActiveAnnotation());
           if (active) {
             if (active == selected) {
-              std::vector<Point> coords = active->getAnnotation()->getCoordinates();
-              bool hitSeedPoint = false;
-              for (std::vector<Point>::const_iterator it = coords.begin(); it != coords.end(); ++it) {
-                if (QLineF(_viewer->mapFromScene(QPointF(it->getX()*_viewer->getSceneScale(), it->getY()*_viewer->getSceneScale())), event->pos()).length() < 12) {
-                  active->setActiveSeedPoint(it - coords.begin());
-                  _startSelectionMove = true;
-                  _moveStart = scenePos;
-                  hitSeedPoint = true;
-                  break;
-                }
+              std::pair<int, int> indices = active->getLastClickedCoordinateIndices();
+              if (indices.first >= 0 && indices.second < 0) {
+                active->setActiveSeedPoint(indices.first);
+                _startSelectionMove = true;
+                _moveStart = scenePos;
               }
-              if (!hitSeedPoint) {
+              if ((indices.first < 0 && indices.second < 0) || (indices.first >= 0 && indices.second >= 0)) {
                 active->clearActiveSeedPoint();
               }
             }

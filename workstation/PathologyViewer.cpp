@@ -128,7 +128,7 @@ void PathologyViewer::scalingTime(qreal x)
   float scaleY = static_cast<float>(_img->getDimensions()[1]) / FOVImage.height();
   float minScale = scaleX > scaleY ? scaleY : scaleX;
   float maxScale = scaleX > scaleY ? scaleX : scaleY;
-  if ((factor < 1.0 && maxScale < 0.5) || (factor > 1.0 && minScale > maxDownsample)) {
+  if ((factor < 1.0 && maxScale < 0.5) || (factor > 1.0 && minScale > 2*maxDownsample)) {
     return;
   }
   scale(factor, factor);

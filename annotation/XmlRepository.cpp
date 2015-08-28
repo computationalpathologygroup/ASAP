@@ -20,6 +20,9 @@ bool XmlRepository::save() const
   }
 	pugi::xml_document xml;
   pugi::xml_node root = xml.append_child("ASAP_Annotations");
+  if (root.empty()) {
+    return false;
+  }
   pugi::xml_node nodeAnnotations = root.append_child("Annotations");
   pugi::xml_node nodeGroups = root.append_child("AnnotationGroups");
 
