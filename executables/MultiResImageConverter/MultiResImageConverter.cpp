@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
         .positional(positionalOptions).run(),
         vm);
       if (!vm.count("input")) {
-        cout << "MultiResolutionImageConverter v1.36" << endl;
+        cout << "MultiResolutionImageConverter v1.4" << endl;
         cout << "Usage: MultiResImageConverter.exe input output [options]" << endl;
       }
       if (vm.count("help")) {
