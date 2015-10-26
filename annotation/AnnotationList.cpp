@@ -70,7 +70,7 @@ std::vector<Annotation*> AnnotationList::getAnnotations() const {
   return _annotations;
 }
 
-std::vector<AnnotationGroup*> AnnotationList::getGroups() {
+std::vector<AnnotationGroup*> AnnotationList::getGroups() const {
   return _groups;
 }
 

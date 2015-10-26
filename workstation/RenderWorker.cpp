@@ -70,6 +70,13 @@ void RenderWorker::run()
             QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, 0, 1, 0, 255, 0);
             _foreground = QPixmap::fromImage(renderedImage);
           }
+          else if (_for_img->getDataType() == pathology::DataType::UInt32) {
+            // Label map
+            unsigned int* imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize];
+            _for_img->getRawRegion<unsigned int>(currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
+            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, 0, 1, 0, 255, 0);
+            _foreground = QPixmap::fromImage(renderedImage);
+          }
           else if (_for_img->getDataType() == pathology::DataType::Float) {
             //Likelihood map
             float* imgBuf = new float[currentJob._tileSize*currentJob._tileSize];

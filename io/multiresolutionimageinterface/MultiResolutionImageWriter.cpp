@@ -142,6 +142,7 @@ int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& 
     unsigned int totalSteps = (sizeX * sizeY) / (_tileSize * _tileSize);
     if (_monitor) {
       _monitor->setMaximumProgress(2 * totalSteps);
+      _monitor->setProgress(0);
     }
     return 0;
   } else {

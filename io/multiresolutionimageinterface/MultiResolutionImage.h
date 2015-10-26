@@ -19,8 +19,8 @@ public :
   virtual bool initialize(const std::string& imagePath) = 0;
 
   //! Gets/Sets the maximum size of the cache
-  const unsigned long long getCacheSize();
-  void setCacheSize(const unsigned long long cacheSize);
+  virtual const unsigned long long getCacheSize();
+  virtual void setCacheSize(const unsigned long long cacheSize);
 
   //! Gets the number of levels in the slide pyramid
   virtual const int getNumberOfLevels() const;

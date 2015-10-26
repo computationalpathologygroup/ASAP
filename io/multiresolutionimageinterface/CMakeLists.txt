@@ -97,9 +97,13 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  
 	  # Cross-platform copying and installing instructions
-	  # ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/multiresolutionimageinterface.py ${LIBRARY_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}) 
-	  # ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/multiresolutionimageinterface.py ${CMAKE_CURRENT_SOURCE_DIR}/../../mevislab/DIAG/Pathology/Modules/Scripts/python/multiresolutionimageinterface/multiresolutionimageinterface.py) 
-	  # ADD_CUSTOM_COMMAND(TARGET ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}>" "${CMAKE_CURRENT_SOURCE_DIR}/../../mevislab/DIAG/Pathology/Modules/Scripts/python/multiresolutionimageinterface/$<TARGET_FILE_NAME:${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}>")
+	  INSTALL(FILES ${PROJECT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
+
+      INSTALL(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION bin
+        ARCHIVE DESTINATION lib
+      )
 	ENDIF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON AND SWIG_FOUND)  
 ENDIF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 

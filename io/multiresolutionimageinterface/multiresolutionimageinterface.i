@@ -1,3 +1,24 @@
+%begin %{
+#if defined(_DEBUG) && defined(SWIG_PYTHON_INTERPRETER_NO_DEBUG)
+/* https://github.com/swig/swig/issues/325 */
+# include <basetsd.h>
+# include <assert.h>
+# include <ctype.h>
+# include <errno.h>
+# include <io.h>
+# include <math.h>
+# include <sal.h>
+# include <stdarg.h>
+# include <stddef.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <sys/stat.h>
+# include <time.h>
+# include <wchar.h>
+#endif
+%}
+
 %module multiresolutionimageinterface
 
 %{
@@ -66,38 +87,74 @@ import_array();
 %include "../../annotation/NDPARepository.h"
 %include "../../annotation/ImageScopeRepository.h"
 
-
 %numpy_typemaps(void, NPY_NOTYPE, int)
-%numpy_typemaps(float             , NPY_FLOAT    , long long)
-%numpy_typemaps(unsigned char     , NPY_UBYTE    , long long)
-
-%apply (unsigned char*& INPLACE_ARRAY1, long long DIM1) {(unsigned char*& data, long long size)};
-%apply (float*& INPLACE_ARRAY1, long long DIM1) {(float*& data, long long size)};
 %include "MultiResolutionImage.h";
 %extend MultiResolutionImage {
-     void getUCharPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
-						const unsigned long long& height, const unsigned int& level, unsigned char*& data, long long size) { 
-		if (width*height*self->getSamplesPerPixel() == size) {
-		    unsigned char* tmp = new unsigned char[size];
-			self->getRawRegion<unsigned char>(startX, startY, width, height, level, tmp);
-			std::copy(tmp, tmp + size, data);
-			delete[] tmp;
-	    } else {
-		    PyErr_Format(PyExc_IndexError, "array not the same size as requested image");
-		}
+     PyObject* getUCharPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
+						     const unsigned long long& height, const unsigned int& level) { 
+		unsigned int nrSamples = self->getSamplesPerPixel();
+        npy_intp dimsDesc[3];
+		dimsDesc[0] = height;
+		dimsDesc[1] = width;
+		dimsDesc[2] = nrSamples;
+		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UBYTE);
+		unsigned char* tmp = new unsigned char[height*width*nrSamples];
+		self->getRawRegion<unsigned char>(startX, startY, width, height, level, tmp);
+		unsigned char* array_data = (unsigned char*)PyArray_DATA((PyArrayObject*)patch);
+		std::copy(tmp, tmp + height*width*nrSamples, array_data);
+		delete[] tmp;
+		return patch;
 	}
 };
 %extend MultiResolutionImage {
-     void getFloatPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
-						const unsigned long long& height, const unsigned int& level, float*& data, long long size) { 
-		if (width*height*self->getSamplesPerPixel() == size) {
-			float* tmp = new float[size];
-			self->getRawRegion<float>(startX, startY, width, height, level, tmp);
-			std::copy(tmp, tmp + size, data);
-			delete[] tmp;
-	    } else {
-		    PyErr_Format(PyExc_IndexError, "array not the same size as requested image");
-		}
+     PyObject* getUInt16Patch(const long long& startX, const long long& startY, const unsigned long long& width, 
+						     const unsigned long long& height, const unsigned int& level) { 
+		unsigned int nrSamples = self->getSamplesPerPixel();
+        npy_intp dimsDesc[3];
+		dimsDesc[0] = height;
+		dimsDesc[1] = width;
+		dimsDesc[2] = nrSamples;
+		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UINT16);
+		unsigned short* tmp = new unsigned short[height*width*nrSamples];
+		self->getRawRegion<unsigned short>(startX, startY, width, height, level, tmp);
+		unsigned short* array_data = (unsigned short*)PyArray_DATA((PyArrayObject*)patch);
+		std::copy(tmp, tmp + height*width*nrSamples, array_data);
+		delete[] tmp;
+		return patch;
+	}
+};
+%extend MultiResolutionImage {
+     PyObject* getUInt32Patch(const long long& startX, const long long& startY, const unsigned long long& width, 
+						     const unsigned long long& height, const unsigned int& level) { 
+		unsigned int nrSamples = self->getSamplesPerPixel();
+        npy_intp dimsDesc[3];
+		dimsDesc[0] = height;
+		dimsDesc[1] = width;
+		dimsDesc[2] = nrSamples;
+		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UINT32);
+		unsigned int* tmp = new unsigned int[height*width*nrSamples];
+		self->getRawRegion<unsigned int>(startX, startY, width, height, level, tmp);
+		unsigned int* array_data = (unsigned int*)PyArray_DATA((PyArrayObject*)patch);
+		std::copy(tmp, tmp + height*width*nrSamples, array_data);
+		delete[] tmp;
+		return patch;
+	}
+};
+%extend MultiResolutionImage {
+     PyObject* getFloatPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
+						     const unsigned long long& height, const unsigned int& level) { 
+		unsigned int nrSamples = self->getSamplesPerPixel();
+        npy_intp dimsDesc[3];
+		dimsDesc[0] = height;
+		dimsDesc[1] = width;
+		dimsDesc[2] = nrSamples;
+		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_FLOAT);
+		float* tmp = new float[height*width*nrSamples];
+		self->getRawRegion<float>(startX, startY, width, height, level, tmp);
+		float* array_data = (float*)PyArray_DATA((PyArrayObject*)patch);
+		std::copy(tmp, tmp + height*width*nrSamples, array_data);
+		delete[] tmp;
+		return patch;
 	}
 };
 %include "MultiResolutionImageReader.h"

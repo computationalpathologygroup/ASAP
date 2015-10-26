@@ -120,6 +120,12 @@
 #    define EXPORT_FILTEREXTENSIONNPLUGIN __declspec(dllimport)
 #  endif
 
+# ifdef BUILD_WHOLESLIDEFILTERS
+#    define EXPORT_WHOLESLIDEFILTERS __declspec(dllexport)
+#  else
+#    define EXPORT_WHOLESLIDEFILTERS __declspec(dllimport)
+#  endif
+
 #else
   #  define EXPORT_CORE
   #  define EXPORT_MULTIRESOLUTIONIMAGEINTERFACE
@@ -132,6 +138,7 @@
   #  define EXPORT_GRAPHTOOLS
   #  define EXPORT_OBJECTFEATURE
   #  define EXPORT_BASICFILTERS
+  #  define EXPORT_WHOLESLIDEFILTERS
 #endif
 
 #ifdef __WIN32__

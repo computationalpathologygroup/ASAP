@@ -12,6 +12,7 @@ void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
 
 void AnnotationToMask::convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel) const {
 	std::vector<Annotation*> annotions = annotationList->getAnnotations();
+  bool hasGroups = !annotationList->getGroups().empty();
 	MultiResolutionImageWriter writer;
   if (_monitor) {
     writer.setProgressMonitor(_monitor);
@@ -29,7 +30,7 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
 			for (unsigned long long tx = 0; tx < dimensions[0]; tx += 512) {
 				std::fill(buffer, buffer + 512 * 512, 0);
         for (std::vector<Annotation*>::const_iterator annotation = annotions.begin(); annotation != annotions.end(); ++annotation) {
-          if (!nameToLabel.empty() && !(*annotation)->getGroup()) {
+          if (!nameToLabel.empty() && !(*annotation)->getGroup() && hasGroups) {
             continue;
           }
           std::string nm = (*annotation)->getName();
@@ -40,7 +41,13 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
           }
           int label = 1;
           if (!nameToLabel.empty()) {
-            std::map<std::string, int>::const_iterator it = nameToLabel.find((*annotation)->getGroup()->getName());
+            std::map<std::string, int>::const_iterator it;
+            if (hasGroups) {
+              it = nameToLabel.find((*annotation)->getGroup()->getName());
+            }
+            else {
+              it = nameToLabel.find(nm);
+            }
             if (it != nameToLabel.end()) {
               label = it->second;
             }
@@ -52,10 +59,8 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
             if (ty + y > bbox[0].getY() && ty + y < bbox[1].getY()) {
               for (unsigned int x = 0; x < 512; ++x) {
                 if (tx + x > bbox[0].getX() && tx + x < bbox[1].getX()) {                  
-                  if (buffer[y * 512 + x] == 0) {
-                    int in_poly = wn_PnPoly(Point(tx + x, ty + y), coords) != 0 ? 1 : 0;
-                    buffer[y * 512 + x] = in_poly * label;
-                  }
+                  int in_poly = wn_PnPoly(Point(tx + x, ty + y), coords) != 0 ? 1 : 0;
+                  buffer[y * 512 + x] = in_poly * label > buffer[y * 512 + x] ? in_poly * label : buffer[y * 512 + x];
                 }
               }
             }

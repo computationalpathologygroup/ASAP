@@ -5,7 +5,7 @@ static int trafficlightLUT[255][4] = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0
 
 inline unsigned int applyLUT(const float& val, int LUT) {
   if (LUT == 0) {
-    int ind = val;
+    int ind = static_cast<unsigned int>(val) % 256;
     if (255 >= ind >= 0) {
       return qRgba(labelLUT[ind][0], labelLUT[ind][1], labelLUT[ind][2], labelLUT[ind][3]);
     }
