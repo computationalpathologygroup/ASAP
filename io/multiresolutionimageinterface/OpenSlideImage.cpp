@@ -19,9 +19,11 @@ const bool OpenSlideImage::getIgnoreAlpha() const {
 
 void OpenSlideImage::setCacheSize(const unsigned long long cacheSize) {
   MultiResolutionImage::setCacheSize(cacheSize);
+#ifdef CUSTOM_OPENSLIDE
   if (_slide) {
     openslide_set_cache_size(_slide, cacheSize);
   }
+#endif
 }
 
 void OpenSlideImage::setIgnoreAlpha(const bool ignoreAlpha) {
