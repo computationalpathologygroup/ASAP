@@ -36,6 +36,7 @@ private:
   QPolygonF _polys;
   std::string _type;
   float _currentLoD;
+  bool _fill;
   mutable QPointF _lastClickedLinePoint;
   mutable int _lastClickedFirstCoordinateIndex;
   mutable int _lastClickedSecondCoordinateIndex;

@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
         vm);
       if (!vm.count("input")) {
         cout << "WSIDistanceTransform v1.0" << endl;
-        cout << "Usage: WSIConnectedComponents.exe input output [options]" << endl;
+        cout << "Usage: WSIDistanceTransform.exe input output [options]" << endl;
       }
       if (vm.count("help")) {
         std::cout << desc << std::endl;
@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
       fltr.setInput(input);
       fltr.setOutput(outputPth);
       fltr.setProgressMonitor(&monitor);
+      fltr.setProcessedLevel(processedLevel);
       if (!fltr.process()) {
         std::cerr << "ERROR: Processing failed" << std::endl;
       }

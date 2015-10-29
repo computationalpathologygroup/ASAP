@@ -3,7 +3,7 @@
 
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImage.h"
-#include "ThresholdWholeSlideFilter.h"
+#include "ArithmeticWholeSlideFilter.h"
 #include "core/filetools.h"
 #include "core/CmdLineProgressMonitor.h"
 
@@ -17,15 +17,12 @@ int main(int argc, char *argv[]) {
   try {
     std::string inputPth, outputPth;
     unsigned int processedLevel;
-    int component;
-    float lowerThreshold, upperThreshold;
+    std::string expression;
     po::options_description desc("Options");
     desc.add_options()
       ("help,h", "Displays this message")
       ("level,l", po::value<unsigned int>(&processedLevel)->default_value(0), "Set the level to be processed")
-      ("component,c", po::value<int>(&component)->default_value(-1), "Color component to select for threshold, if none, threshold all.")
-      ("lower_threshold,ll", po::value<float>(&lowerThreshold)->default_value(std::numeric_limits<float>::min()), "Set the lower threshold")
-      ("upper_threshold,ul", po::value<float>(&upperThreshold)->default_value(std::numeric_limits<float>::max()), "Set the upper threshold")
+      ("expression,e", po::value<std::string>(&expression)->default_value(""), "Set the arithmetical expression")
       ;
   
     po::positional_options_description positionalOptions;
@@ -48,8 +45,8 @@ int main(int argc, char *argv[]) {
         .positional(positionalOptions).run(),
         vm);
       if (!vm.count("input")) {
-        cout << "WSIThreshold v1.0" << endl;
-        cout << "Usage: WSIThreshold.exe input output [options]" << endl;
+        cout << "WSILabelStatistics v1.0" << endl;
+        cout << "Usage: WSIConnectedComponents.exe input output [options]" << endl;
       }
       if (vm.count("help")) {
         std::cout << desc << std::endl;
@@ -66,13 +63,11 @@ int main(int argc, char *argv[]) {
     MultiResolutionImage* input = reader.open(inputPth);
     CmdLineProgressMonitor monitor;
     if (input) {
-      ThresholdWholeSlideFilter fltr;
+      ArithmeticWholeSlideFilter fltr;
       fltr.setInput(input);
       fltr.setOutput(outputPth);
       fltr.setProgressMonitor(&monitor);
-      fltr.setLowerThreshold(lowerThreshold);
-      fltr.setUpperThreshold(upperThreshold);
-      fltr.setProcessedLevel(processedLevel);
+      fltr.setExpression(expression);
       if (!fltr.process()) {
         std::cerr << "ERROR: Processing failed" << std::endl;
       }

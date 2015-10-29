@@ -17,6 +17,13 @@ const bool OpenSlideImage::getIgnoreAlpha() const {
   return _ignoreAlpha;
 }
 
+void OpenSlideImage::setCacheSize(const unsigned long long cacheSize) {
+  MultiResolutionImage::setCacheSize(cacheSize);
+  if (_slide) {
+    openslide_set_cache_size(_slide, cacheSize);
+  }
+}
+
 void OpenSlideImage::setIgnoreAlpha(const bool ignoreAlpha) {
   if (ignoreAlpha) {
     _samplesPerPixel = 3;

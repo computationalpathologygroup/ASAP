@@ -22,6 +22,8 @@ public:
 
   std::string getOpenSlideProperty(const std::string& propertyName);
 
+  void setCacheSize(const unsigned long long cacheSize);
+
 protected :
   void cleanup();
   

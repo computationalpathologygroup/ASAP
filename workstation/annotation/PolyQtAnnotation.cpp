@@ -18,7 +18,8 @@ PolyQtAnnotation::PolyQtAnnotation(Annotation* annotation, float scale) :
   _selectionSensitivity(100.0),
   _lastClickedLinePoint(QPointF()),
   _lastClickedFirstCoordinateIndex(-1),
-  _lastClickedSecondCoordinateIndex(-1)
+  _lastClickedSecondCoordinateIndex(-1),
+  _fill(false)
 {
 
 }
@@ -131,6 +132,8 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
   QWidget *widget) {
   if (_annotation) {
     QColor lineColor = this->getDrawingColor();
+    QColor fillColor = this->getDrawingColor();
+    fillColor.setAlphaF(0.3);
     _currentLoD = option->levelOfDetailFromTransform(painter->worldTransform());
     std::vector<Point> coords = _annotation->getCoordinates();
     if (coords.size() > 1) {
@@ -142,9 +145,17 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
       }
       if (_type == "spline") {
         painter->drawPolyline(_polys);
+        if (_fill) {
+          QPainterPath path;
+          path.addPolygon(_polys);
+          painter->fillPath(path, QBrush(fillColor));
+        }
       }
       else {
         painter->drawPath(_currentPath);
+        if (_fill) {
+          painter->fillPath(_currentPath, QBrush(fillColor));
+        }
       }
     }
     if (isSelected()) {

@@ -19,6 +19,8 @@ SET(WHOLESLIDEFILTERS_SRCS
   LabelStatisticsWholeSlideFilter.cpp
   ThresholdWholeSlideFilter.h
   ThresholdWholeSlideFilter.cpp
+  ArithmeticWholeSlideFilter.h
+  ArithmeticWholeSlideFilter.cpp
 )
 
 ADD_LIBRARY(wholeslidefilters SHARED ${WHOLESLIDEFILTERS_SRCS})
@@ -29,7 +31,7 @@ IF(WIN32)
   SET_TARGET_PROPERTIES(wholeslidefilters PROPERTIES FOLDER pathology/diag/imgproc)    
 ENDIF(WIN32)
 
-INSTALL(FILES ConnectedComponentsWholeSlideFilter.h DESTINATION include/wholeslidefilters)
+INSTALL(FILES ConnectedComponentsWholeSlideFilter.h DistanceTransformWholeSlideFilter.h LabelStatisticsWholeSlideFilter.h ThresholdWholeSlideFilter.h ArithmeticWholeSlideFilter.h DESTINATION include/wholeslidefilters)
 
 INSTALL(TARGETS wholeslidefilters
   RUNTIME DESTINATION bin

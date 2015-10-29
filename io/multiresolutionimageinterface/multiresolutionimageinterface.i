@@ -90,6 +90,11 @@ import_array();
 %numpy_typemaps(void, NPY_NOTYPE, int)
 %include "MultiResolutionImage.h";
 %extend MultiResolutionImage {
+     void close() { 
+		self->~MultiResolutionImage();
+	}
+};
+%extend MultiResolutionImage {
      PyObject* getUCharPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
 						     const unsigned long long& height, const unsigned int& level) { 
 		unsigned int nrSamples = self->getSamplesPerPixel();

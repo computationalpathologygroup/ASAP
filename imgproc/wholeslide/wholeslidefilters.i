@@ -27,6 +27,7 @@
 #include "ConnectedComponentsWholeSlideFilter.h"
 #include "LabelStatisticsWholeSlideFilter.h"
 #include "ThresholdWholeSlideFilter.h"
+#include "ArithmeticWholeSlideFilter.h"
 %}
 
 %include "std_string.i"
@@ -53,3 +54,4 @@ namespace std {
 %include "ConnectedComponentsWholeSlideFilter.h"
 %include "LabelStatisticsWholeSlideFilter.h"
 %include "ThresholdWholeSlideFilter.h"
+%include "ArithmeticWholeSlideFilter.h"
