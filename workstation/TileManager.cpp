@@ -47,7 +47,7 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
           for (int y = topLeftTile.y(); y <= bottomRightTile.y(); ++y) {
             if (y >= 0) {
               if (!providesCoverage(level, x, y)) {
-                _renderThread->addJob(_tileSize, x * levelDownsample * _tileSize, y * levelDownsample * _tileSize, level);
+                _renderThread->addJob(_tileSize, x, y, level);
               }
             }
           }
@@ -103,10 +103,10 @@ bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
     return providesCoverage(level);
   }
   else {
-    return (providesCoverage(level + 1, 2 * tile_x, 2 * tile_y) &&
-            providesCoverage(level + 1, 2 * tile_x, 2 * tile_y + 1) &&
-            providesCoverage(level + 1, 2 * tile_x + 1, 2 * tile_y) &&
-            providesCoverage(level + 1, 2 * tile_x + 1, 2 * tile_y + 1));
+    return (providesCoverage(level - 1, 2 * tile_x, 2 * tile_y) &&
+            providesCoverage(level - 1, 2 * tile_x, 2 * tile_y + 1) &&
+            providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y) &&
+            providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y + 1));
   }
 }
 
