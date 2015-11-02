@@ -13,7 +13,7 @@ class RenderWorker : public QThread
   Q_OBJECT
     
 public:
-  RenderWorker(RenderThread* thread, MultiResolutionImage* _bck_img, MultiResolutionImage* _for_img = NULL, QObject *parent = NULL);
+  RenderWorker(RenderThread* thread, MultiResolutionImage* _bck_img, unsigned int lastRenderLevel, MultiResolutionImage* _for_img = NULL, QObject *parent = NULL);
   ~RenderWorker();
   void abort();
   void setChannel(int channel);
@@ -32,6 +32,11 @@ private :
   bool _abort;
   int _channel;
   float _opacity;
+  unsigned int _lastRenderLevel;
+
+signals:
+  void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, unsigned int lastRenderLevel);
+
 };
   
 

@@ -11,6 +11,7 @@ class PrefetchThread;
 class ToolPluginInterface;
 class MiniMap;
 class WSITileGraphicsItemCache;
+class TileManager;
 
 class EXPORT_PATHOLOGYWORKSTATION PathologyViewer : public QGraphicsView
 {
@@ -99,6 +100,7 @@ private :
     RenderThread* _renderthread;
     PrefetchThread* _prefetchthread;
 
+    TileManager* _manager;
     unsigned long long _cacheSize;
     WSITileGraphicsItemCache* _cache;
 

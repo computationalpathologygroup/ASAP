@@ -15,11 +15,9 @@ class RenderWorker;
 
 struct RenderJob {
   unsigned int _tileSize;
-  unsigned int _samplesPerPixel;
   long long _imgPosX;
   long long _imgPosY;
   unsigned int _level;
-  QPointer<WSITileGraphicsItem> _sender;
 };
 
 class RenderThread : public QObject
@@ -27,10 +25,10 @@ class RenderThread : public QObject
   Q_OBJECT
     
 public:
-  RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* for_img = NULL, unsigned int nrThreads = 2, QObject *parent = 0);
+  RenderThread(MultiResolutionImage* bck_img, unsigned int lastRenderLevel, MultiResolutionImage* for_img = NULL, unsigned int nrThreads = 2, QObject *parent = 0);
   ~RenderThread();
 
-  void addJob(const unsigned int tileSize, const unsigned int samplesPerPixel, const long long imgPosX, const long long imgPosY, const unsigned int level, QPointer<WSITileGraphicsItem> sender);
+  void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level);
   void setForegroundImage(MultiResolutionImage* for_img);
   
   void setForegroundOpacity(const float& opacity);
@@ -39,8 +37,9 @@ public:
   RenderJob getJob();
   void clearJobs();
   unsigned int numberOfJobs();
-  QMutex _senderDeletionMutex;
   void shutdown();
+
+  std::vector<RenderWorker*> getWorkers();
 
   public slots:
 
@@ -59,6 +58,7 @@ private :
   std::vector<RenderWorker*> _workers;
   int _channel;
   float _opacity;
+  unsigned int _lastRenderLevel;
 };
   
 

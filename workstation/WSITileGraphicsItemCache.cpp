@@ -2,48 +2,55 @@
 #include "WSITileGraphicsItem.h"
 
 WSITileGraphicsItemCache::~WSITileGraphicsItemCache() {
+  /*
   for (std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
     if (it->second.first.first) {
       it->second.first.first->deleteLater();
     }
   }
+  */
 }
 
 void WSITileGraphicsItemCache::evict() {
   // Identify least recently used key 
-  std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, keyTypeList::iterator> >::iterator it = _cache.find(_LRU.front());
+  std::map<keyType, std::pair<std::pair<WSITileGraphicsItem*, unsigned int>, keyTypeList::iterator> >::iterator it = _cache.find(_LRU.front());
 
   // Erase both elements to completely purge record 
   _cacheCurrentByteSize -= it->second.first.second;
+  /*
   if (it->second.first.first) {
     it->second.first.first->deleteLater();
-  }
+  }*/
   _cache.erase(it);
   _LRU.pop_front();
 }
 
 void WSITileGraphicsItemCache::refresh() {
+  /*
   for (std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
     if (it->second.first.first) {
       it->second.first.first->refreshItem();
     }
   }
+  */
 }
 
 void WSITileGraphicsItemCache::clear() {
+  /*
   for (std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
     if (it->second.first.first) {
       it->second.first.first->deleteLater();
     }
   }
+  */
   _cache.clear();
   _LRU.clear();
   _cacheCurrentByteSize = 0;
 }
 
-void WSITileGraphicsItemCache::get(const keyType& k, QPointer<WSITileGraphicsItem>& tile, unsigned int& size) {
+void WSITileGraphicsItemCache::get(const keyType& k, WSITileGraphicsItem* tile, unsigned int& size) {
 
-  std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, keyTypeList::iterator> >::iterator it = _cache.find(k);
+  std::map<keyType, std::pair<std::pair<WSITileGraphicsItem*, unsigned int>, keyTypeList::iterator> >::iterator it = _cache.find(k);
 
   if (it == _cache.end()) {
     tile = NULL;
@@ -63,7 +70,7 @@ void WSITileGraphicsItemCache::get(const keyType& k, QPointer<WSITileGraphicsIte
   }
 }
 
-int WSITileGraphicsItemCache::set(const keyType& k, QPointer<WSITileGraphicsItem> v, unsigned int size, bool topLevel) {
+int WSITileGraphicsItemCache::set(const keyType& k, WSITileGraphicsItem* v, unsigned int size, bool topLevel) {
   if (_cache.find(k) != _cache.end()) {
     return 1;
   }
