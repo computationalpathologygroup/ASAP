@@ -2,13 +2,6 @@
 #include "WSITileGraphicsItem.h"
 
 WSITileGraphicsItemCache::~WSITileGraphicsItemCache() {
-  /*
-  for (std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
-    if (it->second.first.first) {
-      it->second.first.first->deleteLater();
-    }
-  }
-  */
 }
 
 void WSITileGraphicsItemCache::evict() {
@@ -16,33 +9,14 @@ void WSITileGraphicsItemCache::evict() {
   std::map<keyType, std::pair<std::pair<WSITileGraphicsItem*, unsigned int>, keyTypeList::iterator> >::iterator it = _cache.find(_LRU.front());
 
   // Erase both elements to completely purge record 
+  WSITileGraphicsItem* itemToEvict = it->second.first.first;
   _cacheCurrentByteSize -= it->second.first.second;
-  /*
-  if (it->second.first.first) {
-    it->second.first.first->deleteLater();
-  }*/
   _cache.erase(it);
   _LRU.pop_front();
-}
-
-void WSITileGraphicsItemCache::refresh() {
-  /*
-  for (std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
-    if (it->second.first.first) {
-      it->second.first.first->refreshItem();
-    }
-  }
-  */
+  emit itemEvicted(itemToEvict);
 }
 
 void WSITileGraphicsItemCache::clear() {
-  /*
-  for (std::map<keyType, std::pair<std::pair<QPointer<WSITileGraphicsItem>, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
-    if (it->second.first.first) {
-      it->second.first.first->deleteLater();
-    }
-  }
-  */
   _cache.clear();
   _LRU.clear();
   _cacheCurrentByteSize = 0;

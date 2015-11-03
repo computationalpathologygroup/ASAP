@@ -25,7 +25,7 @@ class RenderThread : public QObject
   Q_OBJECT
     
 public:
-  RenderThread(MultiResolutionImage* bck_img, unsigned int lastRenderLevel, MultiResolutionImage* for_img = NULL, unsigned int nrThreads = 2, QObject *parent = 0);
+  RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* for_img = NULL, unsigned int nrThreads = 2, QObject *parent = 0);
   ~RenderThread();
 
   void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level);
@@ -40,6 +40,7 @@ public:
   void shutdown();
 
   std::vector<RenderWorker*> getWorkers();
+  unsigned int getWaitingThreads();
 
   public slots:
 
@@ -58,7 +59,7 @@ private :
   std::vector<RenderWorker*> _workers;
   int _channel;
   float _opacity;
-  unsigned int _lastRenderLevel;
+  unsigned int _threadsWaiting;
 };
   
 

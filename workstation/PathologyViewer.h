@@ -51,14 +51,14 @@ public:
     void setAutoUpdate(bool autoUpdate);
 
 signals :
-    void fieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel);
+    void fieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
     void updateBBox(const QRectF& FOV);
     void channelChanged(int channelNr);
 
 public slots :
     void moveTo(const QPointF& pos);
     void changeActiveTool();
-    void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel);
+    void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
     void onForegroundImageChanged(MultiResolutionImage* for_img);
 
 private :

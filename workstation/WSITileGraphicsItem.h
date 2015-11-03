@@ -21,6 +21,10 @@ public:
              QWidget *widget);
 
   void debugPrint();
+  unsigned int getTileX() { return _tileX; }
+  unsigned int getTileY() { return _tileY; }
+  unsigned int getTileLevel() { return _itemLevel; }
+  unsigned int getTileSize() { return _tileSize; }
 
 private:
   // you'll probably want to store information about where you're

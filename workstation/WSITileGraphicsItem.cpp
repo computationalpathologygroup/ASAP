@@ -61,7 +61,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
   unsigned int currentLevel = _img->getBestLevelForDownSample(maxDownsample / lod) > _lastRenderLevel ? _lastRenderLevel : _img->getBestLevelForDownSample(maxDownsample / lod);
   if (currentLevel <= _itemLevel) {
     if (_item) {
-      //if (!_manager->isCovered(_itemLevel, _tileX, _tileY)) {
+      if (!_manager->isCovered(_itemLevel, _tileX, _tileY) || currentLevel == _itemLevel) {
         QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
         painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
         /*
@@ -93,7 +93,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
         painter->setFont(font);
         painter->drawText(QPointF(0, 0), location);
         */
-      //}
+      }
     }
   }
 }

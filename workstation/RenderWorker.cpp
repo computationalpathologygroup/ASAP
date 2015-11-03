@@ -8,15 +8,14 @@
 
 using namespace pathology;
 
-RenderWorker::RenderWorker(RenderThread* thread, MultiResolutionImage* bck_img, unsigned int lastRenderLevel, MultiResolutionImage* for_img, QObject *parent) :
+RenderWorker::RenderWorker(RenderThread* thread, MultiResolutionImage* bck_img, MultiResolutionImage* for_img, QObject *parent) :
   QThread(parent),
   _thread(thread),
   _bck_img(bck_img),
   _for_img(for_img),
   _abort(false),
   _channel(0),
-  _opacity(1.0),
-  _lastRenderLevel(lastRenderLevel)
+  _opacity(1.0)
 {
 }
 
@@ -139,7 +138,7 @@ void RenderWorker::run()
         painter.setOpacity(_opacity);
         painter.drawPixmap(0, 0, _foreground);
       }
-      emit tileLoaded(new QPixmap(temp), currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize*currentJob._tileSize*samplesPerPixel, currentJob._level, _lastRenderLevel);
+      emit tileLoaded(new QPixmap(temp), currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize*currentJob._tileSize*samplesPerPixel, currentJob._level);
       mutex.unlock();
     }
   }

@@ -9,16 +9,16 @@
 
 using namespace pathology;
 
-RenderThread::RenderThread(MultiResolutionImage* bck_img, unsigned int lastRenderLevel, MultiResolutionImage* for_img, unsigned int nrThreads, QObject *parent) :
+RenderThread::RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* for_img, unsigned int nrThreads, QObject *parent) :
   QObject(parent),
   _bck_img(bck_img),
   _for_img(for_img),
   _abort(false),
   _channel(0),
-  _lastRenderLevel(lastRenderLevel)
+  _threadsWaiting(0)
 {
   for (int i = 0; i < nrThreads; ++i) {
-    RenderWorker* worker = new RenderWorker(this, _bck_img, lastRenderLevel, _for_img);
+    RenderWorker* worker = new RenderWorker(this, _bck_img, _for_img);
     worker->start(QThread::HighPriority);
     _workers.push_back(worker);
   }
@@ -84,10 +84,16 @@ void RenderThread::setForegroundImage(MultiResolutionImage* for_img) {
   }
 }
 
+unsigned int RenderThread::getWaitingThreads() {
+  return _threadsWaiting;
+}
+
 RenderJob RenderThread::getJob() {
   _jobListMutex.lock();
   while (_jobList.empty() && !_abort) {
+    _threadsWaiting++;
     _condition.wait(&_jobListMutex);
+    _threadsWaiting--;
   }
   if (_abort) {
     _jobListMutex.unlock();
