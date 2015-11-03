@@ -196,9 +196,6 @@ void PathologyViewer::changeActiveTool() {
 }
 
 void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel) {
-  if (_renderthread) {
-    _renderthread->clearJobs();
-  }
   if (_manager) {
     _manager->loadTilesForFieldOfView(FOV, level, channel);
   }

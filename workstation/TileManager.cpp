@@ -26,14 +26,14 @@ TileManager::~TileManager() {
 }
 
 void TileManager::resetCoverage(unsigned int level) {
-  _coverage[level] = std::map<int, std::map<int, bool> >();
+  _coverage[level] = std::map<int, std::map<int, unsigned char> >();
 }
 
 QPoint TileManager::pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level) {
   return QPoint(std::floor((coordinate.x() / _img->getLevelDownsample(level)) / this->_tileSize), std::floor((coordinate.y() / _img->getLevelDownsample(level)) / this->_tileSize));
 }
 
-void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level, const unsigned int channel) {
+void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level, const int channel) {
   if (_img && _renderThread) {
     QPoint topLeftTile = this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
     QPoint bottomRightTile = this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
@@ -46,7 +46,8 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
         if (x >= 0) {
           for (int y = topLeftTile.y(); y <= bottomRightTile.y(); ++y) {
             if (y >= 0) {
-              if (!providesCoverage(level, x, y)) {
+              if (providesCoverage(level, x, y) < 1) {
+                setCoverage(level, x, y, 1);
                 _renderThread->addJob(_tileSize, x, y, level);
               }
             }
@@ -63,8 +64,8 @@ void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int t
   ss << tileX << "_" << tileY << "_" << tileLevel;
   std::string key;
   ss >> key;
-  setCoverage(tileLevel, tileX, tileY, true);
   if (_scene) {
+    setCoverage(tileLevel, tileX, tileY, 2);
     float tileDownsample = _img->getLevelDownsample(tileLevel);
     float maxDownsample = _img->getLevelDownsample(lastRenderLevel);
     float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
@@ -74,25 +75,25 @@ void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int t
     _scene->addItem(item);
   }
   if (_cache) {
-    _cache->set(key, item, tileByteSize);
+    //_cache->set(key, item, tileByteSize);
   }
 }
 
-bool TileManager::providesCoverage(unsigned int level, int tile_x, int tile_y) {
-  std::map<int, std::map<int, bool> >& cover_level = _coverage[level];
+unsigned char TileManager::providesCoverage(unsigned int level, int tile_x, int tile_y) {
+  std::map<int, std::map<int, unsigned char> >& cover_level = _coverage[level];
   if (cover_level.empty()) {
-    return false;
+    return 0;
   }
 
   if (tile_x < 0 || tile_y < 0) {
-    for (std::map<int, std::map<int, bool> >::iterator it_x = cover_level.begin(); it_x != cover_level.end(); ++it_x) {
-      for (std::map<int, bool>::iterator it_y = it_x->second.begin(); it_y != it_x->second.end(); ++it_y) {
-        if (!it_y->second) {
-          return false;
+    for (std::map<int, std::map<int, unsigned char> >::iterator it_x = cover_level.begin(); it_x != cover_level.end(); ++it_x) {
+      for (std::map<int, unsigned char>::iterator it_y = it_x->second.begin(); it_y != it_x->second.end(); ++it_y) {
+        if (it_y->second != 2) {
+          return 0;
         }
       }
     }
-    return true;
+    return 2;
   }
 
   return cover_level[tile_x][tile_y];
@@ -100,16 +101,16 @@ bool TileManager::providesCoverage(unsigned int level, int tile_x, int tile_y) {
 
 bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
   if (tile_x < 0 || tile_y < 0) {
-    return providesCoverage(level);
+    return providesCoverage(level) == 2;
   }
   else {
-    return (providesCoverage(level - 1, 2 * tile_x, 2 * tile_y) &&
-            providesCoverage(level - 1, 2 * tile_x, 2 * tile_y + 1) &&
-            providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y) &&
-            providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y + 1));
+    return (providesCoverage(level - 1, 2 * tile_x, 2 * tile_y) == 2 &&
+      providesCoverage(level - 1, 2 * tile_x, 2 * tile_y + 1) == 2 &&
+      providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y) == 2 &&
+      providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y + 1) == 2);
   }
 }
 
-void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, bool covers) {
+void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers) {
   _coverage[level][tile_x][tile_y] = covers;
 }

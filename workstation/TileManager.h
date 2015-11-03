@@ -19,7 +19,7 @@ private:
   unsigned int _tileSize;
   QRect _lastFOV;
   unsigned int _lastLevel;
-  std::map<unsigned int, std::map<int, std::map<int, bool> > > _coverage;
+  std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;
   RenderThread* _renderThread;
   WSITileGraphicsItemCache* _cache;
   QGraphicsScene* _scene;
@@ -34,15 +34,16 @@ public:
   TileManager(MultiResolutionImage* img, unsigned int tileSize, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
   ~TileManager();
 
-  void loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level, const unsigned int channel = -1);
+  void loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level, const int channel = -1);
 
   void resetCoverage(unsigned int level);
-  bool providesCoverage(unsigned int level, int tile_x = -1, int tile_y = -1);
+  unsigned char providesCoverage(unsigned int level, int tile_x = -1, int tile_y = -1);
   bool isCovered(unsigned int level, int tile_x = -1, int tile_y = -1);
-  void setCoverage(unsigned int level, int tile_x, int tile_y, bool covers);
+  void setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers);
 
 public slots:
   void onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, unsigned int lastRenderLevel);
+  void onTileRemoved();
 
 };
 

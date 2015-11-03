@@ -61,7 +61,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
   unsigned int currentLevel = _img->getBestLevelForDownSample(maxDownsample / lod) > _lastRenderLevel ? _lastRenderLevel : _img->getBestLevelForDownSample(maxDownsample / lod);
   if (currentLevel <= _itemLevel) {
     if (_item) {
-      if (!_manager->isCovered(_itemLevel, _tileX, _tileY)) {
+      //if (!_manager->isCovered(_itemLevel, _tileX, _tileY)) {
         QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
         painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
         /*
@@ -87,8 +87,13 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
         painter->setPen(QPen(QColor("black")));
         }
         painter->drawRect(QRectF(this->boundingRect().left(), this->boundingRect().top(), _physicalSize, _physicalSize));
+        QString location = QString("%1_%2_%3").arg(_tileX).arg(_tileY).arg(_itemLevel);
+        QFont font = painter->font();
+        font.setPointSizeF(2 * font.pointSizeF() * (_physicalSize / _tileSize));
+        painter->setFont(font);
+        painter->drawText(QPointF(0, 0), location);
         */
-      }
+      //}
     }
   }
 }
