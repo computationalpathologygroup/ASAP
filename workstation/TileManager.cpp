@@ -4,6 +4,7 @@
 #include "WSITileGraphicsItem.h"
 #include "WSITileGraphicsItemCache.h"
 #include <QGraphicsScene>
+#include <QPainterPath>
 
 TileManager::TileManager(MultiResolutionImage* img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 _img(img),
@@ -14,9 +15,9 @@ _lastFOV(),
 _lastLevel(),
 _coverage(),
 _cache(cache),
-_scene(scene)
+_scene(scene),
+_coverageMaps()
 {
-
 }
 
 TileManager::~TileManager() {
@@ -28,6 +29,9 @@ TileManager::~TileManager() {
 
 void TileManager::resetCoverage(unsigned int level) {
   _coverage[level] = std::map<int, std::map<int, unsigned char> >();
+  if (_coverageMaps.size() > level) {
+    _coverageMaps[level] = QPainterPath();
+  }
 }
 
 QPoint TileManager::pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level) {
@@ -139,6 +143,26 @@ bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
 
 void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers) {
   _coverage[level][tile_x][tile_y] = covers;
+  if (_coverageMaps.empty()) {
+    _coverageMaps.resize(_lastRenderLevel);
+  }
+  if (level != _lastRenderLevel) {
+    if (covers == 2 || covers == 0) {
+      float rectSize = _tileSize / (_img->getLevelDownsample(_lastRenderLevel) / _img->getLevelDownsample(level));
+      QPainterPath rect;
+      rect.addRect(QRectF(tile_x * rectSize, tile_y * rectSize, rectSize, rectSize));
+      if (covers == 2) {
+        _coverageMaps[level] = _coverageMaps[level].united(rect);
+      }
+      else if (covers == 0) {
+        _coverageMaps[level] = _coverageMaps[level].subtracted(rect);
+      }
+    }
+  }
+}
+
+std::vector<QPainterPath> TileManager::getCoverageMaps() {
+  return _coverageMaps;
 }
 
 void TileManager::clear() {
@@ -155,6 +179,7 @@ void TileManager::clear() {
     }
   }
   _coverage.clear();
+  _coverageMaps.clear();
 }
 
 void TileManager::refresh() {

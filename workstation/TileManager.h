@@ -11,6 +11,7 @@ class RenderThread;
 class WSITileGraphicsItemCache;
 class WSITileGraphicsItem;
 class QGraphicsScene;
+class QPainterPath;
 
 class TileManager : public QObject {
   Q_OBJECT
@@ -25,6 +26,7 @@ private:
   RenderThread* _renderThread;
   WSITileGraphicsItemCache* _cache;
   QGraphicsScene* _scene;
+  std::vector<QPainterPath> _coverageMaps;
   
   QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
   QPointF tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level);
@@ -45,6 +47,7 @@ public:
   unsigned char providesCoverage(unsigned int level, int tile_x = -1, int tile_y = -1);
   bool isCovered(unsigned int level, int tile_x = -1, int tile_y = -1);
   void setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers);
+  std::vector<QPainterPath> getCoverageMaps();
   
   void clear();
   void refresh();

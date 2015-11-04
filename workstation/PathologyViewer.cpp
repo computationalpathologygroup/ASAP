@@ -301,6 +301,7 @@ void PathologyViewer::initializeMiniMap(unsigned int level) {
   Vlayout->addStretch(4);
   Vlayout->addWidget(_map, 1);
   _map->updateFieldOfView(QRectF(0, 0, overviewDimensions[0], overviewDimensions[1]));
+  _map->setTileManager(_manager);
   QObject::connect(this, SIGNAL(updateBBox(const QRectF&)), _map, SLOT(updateFieldOfView(const QRectF&)));
   QObject::connect(_map, SIGNAL(positionClicked(QPointF)), this, SLOT(moveTo(const QPointF&)));
 }
