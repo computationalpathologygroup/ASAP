@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 #include <QIcon>
 #include <QWidget>
+#include <QMutex>
 
 #include <memory>
 #include <vector>

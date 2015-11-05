@@ -23,7 +23,7 @@ public:
   FRST();
   virtual ~FRST();
 
-  void frst2D(const cv::Mat& image, cv::Mat& S, const std::vector<float>& radii, const unsigned int& alpha = 2, const float& beta = 0.0, std::vector<float>& kappa = std::vector<float>());
+  void frst2D(const cv::Mat& image, cv::Mat& S, const std::vector<float>& radii, const unsigned int& alpha = 2, const float& beta = 0.0, std::vector<float> kappa = std::vector<float>());
 
   enum TransformType {
     OrientationOnly,

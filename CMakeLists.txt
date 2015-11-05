@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT(DIAGPathology)
 
-SET(CMAKE_MODULE_PATH ${DIAGPathology_SOURCE_DIR}/CMakeModules)
+SET(CMAKE_MODULE_PATH ${DIAGPathology_SOURCE_DIR}/cmakemodules)
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Use boost for cross-platform use of threading, file system and date_time handling
 FIND_PACKAGE(Boost REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
 
 # Jasper for JPEG2000 codec
-FIND_PACKAGE(JASPER REQUIRED)
+FIND_PACKAGE(Jasper REQUIRED)
 
 # TIFF is the main multi-tiled format used in this package
 FIND_PACKAGE(TIFF REQUIRED)

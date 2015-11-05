@@ -54,7 +54,7 @@ namespace core
   {
     try
     {
-      path p(name, native);
+      path p(name);
       if (!exists(p)) return false;
       if (is_directory(p)) return false;
       return true;
@@ -71,7 +71,7 @@ namespace core
   {
     try
     {
-      path p(name, native);
+      path p(name);
       bool ex = exists(p);
       if (!ex) return false;
       ex = is_directory(p);
@@ -105,7 +105,7 @@ namespace core
     if (!fileExists(name)) return false;
     try
     {
-      remove(path(uniformSlashes(name), native));
+      remove(path(uniformSlashes(name)));
     }
     catch (...)
     {
@@ -138,7 +138,7 @@ namespace core
       if (!dirExists(name)) return false;
       if(!deleteNonEmpty)
         if (!emptyDir(name)) return false;
-      return DeleteDirectory(path(name, native).string().c_str());
+      return DeleteDirectory(path(name).string().c_str());
     }
 
     bool DeleteDirectory(LPCTSTR lpszDir, bool noRecycleBin)
@@ -177,8 +177,8 @@ namespace core
     if (!dirExists(name)) return false;
     if (!deleteNonEmpty)
       if (!emptyDir(name)) return false;
-    return 0 != remove_all(path(uniformSlashes(name), native));
-//    return remove(path(name, native));
+    return 0 != remove_all(path(uniformSlashes(name)));
+//    return remove(path(name));
   }
 //#endif
 
@@ -188,7 +188,7 @@ namespace core
   bool emptyDir(const std::string &name)
   {
     if (!dirExists(name)) return false;
-    return boost::filesystem::is_empty(path(name, native));
+    return boost::filesystem::is_empty(path(name));
   }
 
 //---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ namespace core
     if (!copyAttributes)
     {
       //now we can safely copy
-      //create_file( path(target, native));
+      //create_file( path(target));
       //this trick is needed to prevent attributes from being copied
       ifstream ifs(source.c_str());
       std::ofstream ofs(target.c_str());
@@ -238,7 +238,7 @@ namespace core
     }
     else
     {
-      copy_file(path(source, native), path(target, native));
+      copy_file(path(source), path(target));
     }
     return fileExists(target);
   }
@@ -309,7 +309,7 @@ namespace core
     string dir = extractFilePath(t);
     createDirectory(dir);
     //BvG: if target is on a different drive, source will also be deleted
-    rename(path(s, native), path(t, native));
+    rename(path(s), path(t));
     return fileExists(t);
   }
 
@@ -323,7 +323,7 @@ namespace core
     if (isOnlyDirectory(name))
       s = stripTrailingSlash(s);
 
-    path p(s, native);
+    path p(s);
     return p.branch_path().string();
   }
 
@@ -336,7 +336,7 @@ namespace core
     if (isOnlyDirectory(name))
       s = stripTrailingSlash(s);
 
-    path p(s, native);
+    path p(s);
     if (nrOfLevels == 1)
       return p.branch_path().string();
     else
@@ -349,7 +349,7 @@ namespace core
     string s(name);
     if (isOnlyDirectory(s))
     {
-      path p(s, native);
+      path p(s);
       if (isRoot(name))
         return p.string();
       else
@@ -358,7 +358,7 @@ namespace core
     else
     {
       cleanFileName(s);
-      path p(s, native);
+      path p(s);
       if (isRoot(name)) // CM: needed for "\\\\machine\\" see testFileTools.cpp
         return p.string();
       return string(p.parent_path().string());
@@ -371,7 +371,7 @@ namespace core
     string s(name);
     if (isOnlyDirectory(s)) return string();
     cleanFileName(s);
-    path p(s, native);
+    path p(s);
     if (isRoot(name)) return string();
     return p.leaf().string();
   }
@@ -385,7 +385,7 @@ namespace core
 //  cleanDirName(s);
 //  if (! isOnlyDirectory(s)) return string();
     s = stripTrailingSlash(s);
-    path p(s, native);
+    path p(s);
     return p.leaf().string();
   }
 
@@ -419,7 +419,7 @@ namespace core
     cleanDirName(s);
     try
     {
-      path p(s, native);
+      path p(s);
       create_directories(p);
     }
     catch ( ... )
@@ -491,14 +491,14 @@ namespace core
 //---------------------------------------------------------------------------
   std::string rootName(const std::string &spath)
   {
-    path p(spath, native);
+    path p(spath);
     return p.root_name().string();
   }
 
   bool isRoot(const std::string &spath)
   {
     if (spath.empty()) return false;
-    path p(spath, native);
+    path p(spath);
     string s1 = p.string();
     string s2 = p.root_path().string();
     return (s1 == s2);
@@ -528,7 +528,7 @@ namespace core
     cleanDirName(s);
     try
     {
-      path p(s, native);
+      path p(s);
       if (p.leaf() == p.root_name())
         return true;
     }
@@ -544,7 +544,7 @@ namespace core
   {
     try
     {
-      path mypath(spath, native);
+      path mypath(spath);
       if (is_directory(mypath))
         return true;
     }
@@ -621,7 +621,7 @@ namespace core
 
     std::string cpath(spath);
     cleanDirName(cpath);
-    path pp(cpath, native);
+    path pp(cpath);
     if (pp.is_complete())
     {
       // CM: this fiddling about is based on the tests in testFileTools.cpp, maybe we should revise these tests?
@@ -638,7 +638,7 @@ namespace core
 
     std::string s(base);
     cleanDirName(s);
-    path pb(s, native);
+    path pb(s);
 
     path cp;
     if (! pp.empty())
@@ -672,7 +672,7 @@ namespace core
 
     cp = path();
     for (int i = v.size()-1; i >= 0; --i)
-     cp /= path(v[i], native);
+     cp /= path(v[i]);
 
     // cp.normalize();
     // when updating to Boost 1.32 this function could replace the above code
@@ -706,7 +706,7 @@ namespace core
     if (!dirExists(pa)) return;
 
     vector<path> vp;
-    vp.push_back(path(pa, native));
+    vp.push_back(path(pa));
     unsigned int i = 0;
 
     //to create a proper regular expression, any non literal should be preceded by \:
@@ -769,7 +769,7 @@ namespace core
 #else
           string subdir = itr->path().string() + dirsep;
 #endif
-          vp.push_back(path(subdir, native));
+          vp.push_back(path(subdir));
         }
       }
       ++i; // move to the next directory to process
@@ -789,7 +789,7 @@ namespace core
     v.clear();
     string pa = thepath;
     vector<path> vp;
-    path p(pa, native);
+    path p(pa);
     vp.push_back(p);
     v.push_back(p.string());
 
@@ -822,7 +822,7 @@ namespace core
 #endif
           v.push_back(subdir);
           if (recurse)
-            vp.push_back(path(subdir, native));
+            vp.push_back(path(subdir));
         }
       }
       ++i; // move to the next directory to process
@@ -877,7 +877,7 @@ namespace core
     {
       // this is for uniformity - it returns name in boost format
       // if name is "./dir" it returns ".\\dir" instead of "./dir"
-      name = path(name, native).string();
+      name = path(name).string();
       if (!name.empty() && !isRoot(name))
         name = stripTrailingSlash(name);
     }
@@ -901,7 +901,7 @@ namespace core
     {
       // this is for uniformity - it returns name in boost format
       // if name is "./dir" it returns ".\\dir" instead of "./dir"
-      name = path(name, native).string();
+      name = path(name).string();
       if (!name.empty() && !isRoot(name))
         name = stripTrailingSlash(name);
     }
@@ -913,7 +913,7 @@ namespace core
   {
     if (!newpath.empty())
     {
-      string spath = path(newpath, native).string();
+      string spath = path(newpath).string();
 //    if ((!isRoot(spath)) && (extractFileName(name) != ""))
 //      spath += dirsep;
       if (extractFileName(name) != "")
@@ -1088,7 +1088,7 @@ namespace core
 
   bool equivalentPaths(const string path1, const string path2)
   {
-    return equivalent(path(path1, native), path(path2, native));
+    return equivalent(path(path1), path(path2));
   }
 
   void cleanFileName(std::string &file)
@@ -1119,7 +1119,7 @@ namespace core
   {
     year = month = day = hour = min = sec = -1;
     if (!fileExists(file)) return;
-    path p(file, native);
+    path p(file);
     std::time_t t = last_write_time(p);
 
     struct tm *tb;

@@ -10,7 +10,7 @@
 
 #include "interfaces/interfaces.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
-#include "PathologyWorkstation.h"
+#include "pathologyworkstation.h"
 #include "QtProgressMonitor.h"
 
 FilterDockWidget::FilterDockWidget(QWidget *parent, Qt::WindowFlags flags) : 

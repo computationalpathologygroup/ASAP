@@ -57,15 +57,15 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
         }
         ++outPtr;
       }
-      if (shouldCancel()) {
-        updateProgress(100);
+      if (this->shouldCancel()) {
+        this->updateProgress(100);
         return false;
       }
       else {
-        updateProgress(100*y/static_cast<float>(dims[0]));
+        this->updateProgress(100*y/static_cast<float>(dims[0]));
       }
     }
-    updateProgress(100);
+    this->updateProgress(100);
     return true;
   }
 
@@ -162,8 +162,8 @@ public:
     _rgbThresholds(std::vector<double>(3,0.2)),
     _maxVal(0.0)
   {
-    _samplesPerPixel = 1;
-    _colorType = pathology::Monochrome;
+    this->_samplesPerPixel = 1;
+    this->_colorType = pathology::Monochrome;
     revertToDefaultStain();
   };
 

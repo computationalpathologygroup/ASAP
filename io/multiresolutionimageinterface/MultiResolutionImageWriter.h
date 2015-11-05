@@ -2,7 +2,7 @@
 #ifndef _MultiResolutionImageWriter
 #define _MultiResolutionImageWriter
 #include "config/pathology_config.h"
-#include "core/pathologyEnums.h"
+#include "core/PathologyEnums.h"
 #include <string>
 #include <vector>
 

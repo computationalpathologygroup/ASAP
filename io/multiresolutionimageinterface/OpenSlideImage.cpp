@@ -144,7 +144,7 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
       }
       else {
         _cacheMutex.lock();
-        boost::static_pointer_cast<TileCache<unsigned int>>(_cache)->get(k.str(), tile, cachedTileSize);
+        boost::static_pointer_cast<TileCache<unsigned int> >(_cache)->get(k.str(), tile, cachedTileSize);
         _cacheMutex.unlock();
         if (!tile) {
           tile = new unsigned int[tileW*tileH];
@@ -152,7 +152,7 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
 
           // If tile did not fit in the cache, delete it at the end
           _cacheMutex.lock();
-          if (boost::static_pointer_cast<TileCache<unsigned int>>(_cache)->set(k.str(), tile, tileW*tileH*sizeof(unsigned int))) {
+          if (boost::static_pointer_cast<TileCache<unsigned int> >(_cache)->set(k.str(), tile, tileW*tileH*sizeof(unsigned int))) {
             deleteTile = true;
           }
           _cacheMutex.unlock();

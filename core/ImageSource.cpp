@@ -34,7 +34,7 @@ const ColorType ImageSource::getColorType() const {
   if (_isValid) {
     return _colorType;
   } else {
-    return ColorType::InvalidColorType;
+    return InvalidColorType;
   }
 }
 
@@ -46,6 +46,6 @@ const DataType ImageSource::getDataType() const {
   if (_isValid) {
     return _dataType;
   } else {
-    return DataType::InvalidDataType;
+    return InvalidDataType;
   }
  }

@@ -18,7 +18,7 @@ private:
   void calculateStrides();
 
   void swap(Patch<T>& first, Patch<T>& second);
-  friend void Patch<T>::swap(Patch<T>& first, Patch<T>& second);
+  //friend void Patch<T>::swap(Patch<T>& first, Patch<T>& second);
 
 public :
 
@@ -26,7 +26,7 @@ public :
   ~Patch();
   Patch(const Patch& rhs);
   Patch& operator=(const Patch rhs);
-  Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& ctype = pathology::ColorType::Monochrome, T* data = NULL, bool ownData = true);
+  Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& ctype = pathology::Monochrome, T* data = NULL, bool ownData = true);
 
   // Arithmetic operators
   Patch<T> operator*(const T& val);

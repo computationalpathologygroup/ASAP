@@ -96,7 +96,7 @@ void AnnotationList::removeGroup(const int& index) {
 }
 
 void AnnotationList::removeGroup(std::string name) {
-  for (std::vector<AnnotationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
+  for (std::vector<AnnotationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
     if ((*it) && (*it)->getName() == name) {
       delete (*it);
       _groups.erase(it);
@@ -117,7 +117,7 @@ void AnnotationList::removeAnnotation(const int& index) {
 }
 
 void AnnotationList::removeAnnotation(std::string name) {
-  for (std::vector<Annotation*>::const_iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
+  for (std::vector<Annotation*>::iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
     if ((*it) && (*it)->getName() == name) {
       delete (*it);
       _annotations.erase(it);

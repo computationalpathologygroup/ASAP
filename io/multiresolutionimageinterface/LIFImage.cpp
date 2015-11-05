@@ -3,7 +3,7 @@
 #include <iostream>
 #include "core/filetools.h"
 #include "core/stringconversion.h"
-#include "core/pathologyEnums.h"
+#include "core/PathologyEnums.h"
 
 using namespace pathology;
 
@@ -220,8 +220,8 @@ void LIFImage::translateMetaData(pugi::xml_document& doc) {
   _imageCount = std::vector<unsigned int>(images.size(), 0);
   _seriesDimensions = std::vector<std::map<std::string, unsigned long long> >(images.size(), std::map<std::string, unsigned long long>());
   _dimensionOrder = std::vector<std::string >(images.size(), "");
-  _colorTypes = std::vector<pathology::ColorType>(images.size(), ColorType::InvalidColorType);
-  _dataTypes = std::vector<pathology::DataType>(images.size(), DataType::InvalidDataType);
+  _colorTypes = std::vector<pathology::ColorType>(images.size(), pathology::InvalidColorType);
+  _dataTypes = std::vector<pathology::DataType>(images.size(), pathology::InvalidDataType);
 
   _expTimes = std::vector<std::vector<double> >(images.size(), std::vector<double>());
   _gains = std::vector<std::vector<double> >(images.size(), std::vector<double>());
@@ -579,7 +579,7 @@ void LIFImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
   }
 
   _imageCount[imageNr] = serieDimensions["z"] * serieDimensions["t"];
-  if (_colorTypes[imageNr] != ColorType::RGB) {
+  if (_colorTypes[imageNr] != pathology::RGB) {
     _imageCount[imageNr] *= serieDimensions["c"];
   }
 

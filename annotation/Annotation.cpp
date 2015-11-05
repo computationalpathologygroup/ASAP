@@ -6,7 +6,7 @@
 const char* Annotation::_typeStrings[5] = { "None", "Dot", "Polygon", "Spline"};
 
 Annotation::Annotation() :
-  _type(Annotation::Type::NONE),
+  _type(Annotation::NONE),
   _coordinates(),
   _name(""),
   _group(NULL),

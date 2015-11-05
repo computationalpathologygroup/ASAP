@@ -8,8 +8,8 @@ using namespace cv;
 
 FRST::FRST() : 
   _S(NULL),
-  _transform(TransformType::OrientationAndMagnitude),
-  _symmetry(SymmetryType::DarkAndLight)
+  _transform(OrientationAndMagnitude),
+  _symmetry(DarkAndLight)
 {
   _S = new Mat();
 }
@@ -21,9 +21,9 @@ FRST::~FRST() {
   }
 }
 
-void FRST::frst2D(const Mat& image, Mat& S, const std::vector<float>& radii, const unsigned int& alpha, const float& beta, std::vector<float>& kappa)
+void FRST::frst2D(const Mat& image, Mat& S, const std::vector<float>& radii, const unsigned int& alpha, const float& beta, std::vector<float> kappa)
 {
-	if (kappa.empty()) {
+  if (kappa.empty()) {
     kappa.push_back(9.9);
   }
 
@@ -74,7 +74,7 @@ void FRST::frst2D(const Mat& image, Mat& S, const std::vector<float>& radii, con
         if (*(magniPtr  +  + curRowStep + x) < magniThreshold) {
           continue;
         }
-        if (_symmetry == SymmetryType::OnlyLight || _symmetry == SymmetryType::DarkAndLight) {
+        if (_symmetry == OnlyLight || _symmetry == DarkAndLight) {
           int posX = x + floor(0.5 + currentRadius * *(gradXPtr + curRowStep + x));
           int posY = y + floor(0.5 + currentRadius * *(gradYPtr + curRowStep + x));
           posX = posX >= 0 ? posX : 0; 
@@ -86,7 +86,7 @@ void FRST::frst2D(const Mat& image, Mat& S, const std::vector<float>& radii, con
           *(MnPtr + posInd) += *(magniPtr + posInd);
         }
 
-        if (_symmetry == SymmetryType::OnlyDark || _symmetry == SymmetryType::DarkAndLight) {
+        if (_symmetry == OnlyDark || _symmetry == DarkAndLight) {
           int negX = x - floor(0.5 + currentRadius * *(gradXPtr + curRowStep + x));
           int negY = y - floor(0.5 + currentRadius * *(gradYPtr + curRowStep + x));
           negX = negX >= 0 ? negX : 0; 
@@ -106,7 +106,7 @@ void FRST::frst2D(const Mat& image, Mat& S, const std::vector<float>& radii, con
     double* FnPtr = Fn.ptr<double>(0);
     for (int i = 0; i < (On.rows * On.cols); ++i) {
       double OnTilde = *(OnPtr+i) < currentKappa ? *(OnPtr+i) : currentKappa;
-      if (_transform == TransformType::OrientationAndMagnitude) {
+      if (_transform == OrientationAndMagnitude) {
         *(FnPtr+i) =  ((*(MnPtr+i)) / currentKappa)  * pow(OnTilde/currentKappa,alpha);
       } else {
         int OnSign = (0. < OnTilde) - (OnTilde < 0.);

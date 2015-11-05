@@ -29,12 +29,12 @@ public:
 
   template<typename T>
   T getAttribute(const std::string& key) {
-    return fromstring<T>(_attributes["key"])
+    return core::fromstring<T>(_attributes["key"]);
   }
 
   template<typename T>
   std::vector<T> getAttribute(const std::string& key) {
-    return fromstring<T>(_attributes["key"], ";")
+    return core::fromstring<T>(_attributes["key"], ";");
   }
 
   std::map<std::string, std::string> getAttributes() const;

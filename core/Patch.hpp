@@ -7,32 +7,32 @@
 
 template<>
 inline const pathology::DataType Patch<unsigned char>::getDataType() const {
-  return pathology::DataType::UChar;
+  return pathology::UChar;
 }
 
 template<>
 inline const pathology::DataType Patch<float>::getDataType() const {
-  return pathology::DataType::Float;
+  return pathology::Float;
 }
 
 template<>
 inline const pathology::DataType Patch<unsigned int>::getDataType() const {
-  return pathology::DataType::UInt32;
+  return pathology::UInt32;
 }
 
 template<>
 inline const pathology::DataType Patch<unsigned short>::getDataType() const {
-  return pathology::DataType::UInt16;
+  return pathology::UInt16;
 }
 
 template<>
 inline const pathology::DataType Patch<double>::getDataType() const {
-  return pathology::DataType::Float;
+  return pathology::Float;
 }
 
 template<typename T>
 const pathology::DataType Patch<T>::getDataType() const {
-  return pathology::DataType::InvalidDataType;
+  return pathology::InvalidDataType;
 }
 
 template<typename T>
@@ -60,7 +60,7 @@ Patch<T>::~Patch()
 }
 
 template<typename T>
-double Patch<T>::getMinValue(int channel = -1) {
+double Patch<T>::getMinValue(int channel) {
   double min = std::numeric_limits<double>::max();
   if (_buffer) {
     for (int i = 0; i < _bufferSize; ++i) {
@@ -73,7 +73,7 @@ double Patch<T>::getMinValue(int channel = -1) {
 }
 
 template<typename T>
-double Patch<T>::getMaxValue(int channel = -1) {
+double Patch<T>::getMaxValue(int channel) {
   double max = std::numeric_limits<double>::min();
   if (_buffer) {
     for (int i = 0; i < _bufferSize; ++i) {
@@ -124,8 +124,8 @@ Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const patholo
     _buffer = new T[_bufferSize];
   }
   if (!dimensions.empty()) {
-    if ((_colorType == pathology::ColorType::ARGB && dimensions.back() != 4) || (_colorType == pathology::ColorType::RGB && dimensions.back() != 3) || (_colorType == pathology::ColorType::Monochrome && dimensions.back() != 1)) {
-      _colorType == pathology::ColorType::Indexed;
+    if ((_colorType == pathology::ARGB && dimensions.back() != 4) || (_colorType == pathology::RGB && dimensions.back() != 3) || (_colorType == pathology::Monochrome && dimensions.back() != 1)) {
+      _colorType == pathology::Indexed;
     }
   }
   calculateStrides();

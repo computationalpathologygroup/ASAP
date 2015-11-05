@@ -36,8 +36,6 @@ public :
 
   void swap(ImageSource& first, ImageSource& second);
 
-  friend void ImageSource::swap(ImageSource& first, ImageSource& second);
-
 protected :
 
   // Properties of an image

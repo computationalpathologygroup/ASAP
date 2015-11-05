@@ -51,7 +51,7 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
 )
 
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface ${DCMTKJPEG_LIBRARY} libtiff ${OPENSLIDE_LIBRARY} core libjasper ${Boost_THREAD_LIBRARY} libjpeg zlib pugixml)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface ${DCMTKJPEG_LIBRARY} libtiff ${OPENSLIDE_LIBRARY} core libjasper ${Boost_LIBRARIES} libjpeg zlib pugixml)
 
 SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
 

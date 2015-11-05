@@ -18,6 +18,7 @@ SET(core_src filetools.cpp stringconversion.cpp ImageSource.cpp Patch.hpp Box.cp
 SET(core_headers filetools.h stringconversion.h PathologyEnums.h ImageSource.h Patch.h Box.h Point.h ProgressMonitor.h CmdLineProgressMonitor.h)
 
 ADD_LIBRARY(core SHARED ${core_src} ${core_headers})
+TARGET_Link_libraries(core ${Boost_LIBRARIES})
 
 SET_TARGET_PROPERTIES(core PROPERTIES DEBUG_POSTFIX _d)
 IF(WIN32)  

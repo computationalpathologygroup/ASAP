@@ -31,7 +31,7 @@ public:
   void cancel();
   void start();
   void finish();
-  inline bool shouldCancel() {
+  bool shouldCancel() {
     if (_running && _cancel) {
       finish();
       return true;

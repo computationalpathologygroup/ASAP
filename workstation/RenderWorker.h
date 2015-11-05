@@ -2,6 +2,7 @@
 #define RENDERWORKER_H
 
 #include <QThread>
+#include <QMutex>
 
 class MultiResolutionImage;
 class FilterInterface;

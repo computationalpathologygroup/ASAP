@@ -18,8 +18,8 @@ using namespace pathology;
 
 MultiResolutionImageWriter::MultiResolutionImageWriter() : _tiff(NULL),
   _codec(LZW), _quality(30),_tileSize(512), _pos(0), _numberOfIndexedColors(0), 
-  _interpolation(pathology::Interpolation::Linear), _monitor(NULL), _cType(ColorType::InvalidColorType),
-  _dType(DataType::InvalidDataType), _min_vals(NULL), _max_vals(NULL)
+  _interpolation(pathology::Linear), _monitor(NULL), _cType(pathology::InvalidColorType),
+  _dType(pathology::InvalidDataType), _min_vals(NULL), _max_vals(NULL)
 {
   TIFFSetWarningHandler(NULL);
 }
@@ -82,16 +82,16 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
       for (int y =0; y < dims[1]; y+=_tileSize) {
         for (int x =0; x < dims[0]; x+=_tileSize) {
           unsigned char* data = new unsigned char[_tileSize*_tileSize*cDepth*(nrBits/8)];
-          if (_dType == pathology::DataType::UInt32) {
+          if (_dType == pathology::UInt32) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(unsigned int*&)data);
           }
-          else if (_dType == pathology::DataType::UInt16) {
+          else if (_dType == pathology::UInt16) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(unsigned short*&)data);
           }
-          else if (_dType == pathology::DataType::Float) {
+          else if (_dType == pathology::Float) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(float*&)data);
           }
-          else if (_dType == pathology::DataType::UChar) {
+          else if (_dType == pathology::UChar) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,data);            
           }
           writeBaseImagePart((void*)data);
@@ -177,7 +177,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
   unsigned int npixels = _tileSize * _tileSize * cDepth;
 
   //Determine min/max of tile part
-  if (_dType == pathology::DataType::UInt32) {
+  if (_dType == pathology::UInt32) {
     unsigned int *temp = (unsigned int*)data;
     for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
       for (int j = 0; j < cDepth; ++j) {
@@ -191,7 +191,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       }
     }
   }
-  else if (_dType == pathology::DataType::UInt16) {
+  else if (_dType == pathology::UInt16) {
     unsigned short *temp = (unsigned short*)data;
     for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
       for (int j = 0; j < cDepth; ++j) {
@@ -205,7 +205,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       }
     }
   }
-  else if (_dType == pathology::DataType::Float) {
+  else if (_dType == pathology::Float) {
     float *temp = (float*)data;
     for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
       for (int j = 0; j < cDepth; ++j) {
@@ -219,7 +219,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       }
     }
   }
-  else if (_dType == pathology::DataType::UChar) {
+  else if (_dType == pathology::UChar) {
     unsigned char *temp = (unsigned char*)data;
     for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
       for (int j = 0; j < cDepth; ++j) {
@@ -280,7 +280,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
     }
   }
   if (_monitor) {
-    (*_monitor)++;
+    ++(*_monitor);
   }
 }
 
@@ -533,6 +533,8 @@ template <typename T> int MultiResolutionImageWriter::incorporatePyramid() {
   return 0;
 }
 
+template int MultiResolutionImageWriter::incorporatePyramid<unsigned int>();
+
 void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
   TIFFSetField(levelTiff, TIFFTAG_SUBFILETYPE, 0);
   if (_cType == Monochrome || _cType == Indexed) {
@@ -606,7 +608,7 @@ template <typename T> T* MultiResolutionImageWriter::downscaleTile(T* inTile, un
       for (unsigned long long s = 0; s < nrSamples; ++s) {
         unsigned int index = (2*y*tileSize*nrSamples)+(2*x*nrSamples) + s;
         unsigned int dsIndex = (y*dsSize*nrSamples)+(x*nrSamples) + s;
-        if (_interpolation == pathology::Interpolation::Linear) {
+        if (_interpolation == pathology::Linear) {
           *(dsTile+dsIndex) = (T)(*(inTile+index)/4. + *(inTile+index+tileSize*nrSamples)/4. + *(inTile+index+nrSamples)/4. + *(inTile+index+tileSize*nrSamples+nrSamples)/4.);
         } else {
           *(dsTile+dsIndex) = (T)(*(inTile+index));

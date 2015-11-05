@@ -5,15 +5,9 @@ INCLUDE_DIRECTORIES(
   ../../
   ${MultiResImageConverter_SOURCE_DIR}/../../io/multiresolutionimageinterface
   ${Boost_INCLUDE_DIRS}
-${BOOST_INCLUDE_DIRS}
 )
 ADD_DEFINITIONS(${Boost_DEFINITIONS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
-
-# This specifies all the linking directories that are used additionally (i.e. BOOST)
-LINK_DIRECTORIES(
-  ${BOOST_LIBRARY_DIR}
-)
 
 ADD_DEFINITIONS(${BOOST_DEFINITIONS})
 
@@ -36,7 +30,7 @@ ENDIF()
 ADD_EXECUTABLE(MultiResImageConverter ${MultiResImageConverter_src})
 
 SET_TARGET_PROPERTIES(MultiResImageConverter PROPERTIES DEBUG_POSTFIX _d)
-TARGET_LINK_LIBRARIES(MultiResImageConverter multiresolutionimageinterface)
+TARGET_LINK_LIBRARIES(MultiResImageConverter multiresolutionimageinterface ${Boost_LIBRARIES})
 
 INSTALL(
   TARGETS MultiResImageConverter

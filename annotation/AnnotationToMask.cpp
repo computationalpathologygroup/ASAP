@@ -18,11 +18,11 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
     writer.setProgressMonitor(_monitor);
   }
 	if (writer.openFile(maskFile) == 0) {
-		writer.setColorType(pathology::ColorType::Monochrome);
-		writer.setCompression(pathology::Compression::LZW);
+		writer.setColorType(pathology::Monochrome);
+		writer.setCompression(pathology::LZW);
 		writer.setTileSize(512);
-		writer.setDataType(pathology::DataType::UChar);
-		writer.setInterpolation(pathology::Interpolation::NearestNeighbor);
+		writer.setDataType(pathology::UChar);
+		writer.setInterpolation(pathology::NearestNeighbor);
 		writer.setOverrideSpacing(spacing);
 		writer.writeImageInformation(dimensions[0], dimensions[1]);
 		unsigned char* buffer = new unsigned char[512 * 512];

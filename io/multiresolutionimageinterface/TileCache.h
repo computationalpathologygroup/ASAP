@@ -2,6 +2,7 @@
 #define TILECACHE_H
 #include <list>
 #include <map>
+#include <string>
 
 template <typename T>
 class TileCache {
@@ -25,17 +26,17 @@ public :
 
   virtual ~TileCache()
   {
-    for (std::map<keyType,std::pair<std::pair<T*, unsigned int>,std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
+    for (key_iterator it = _cache.begin(); it != _cache.end(); ++it) {
       delete[] it->second.first.first;
     }
   }
 
   typedef std::string keyType;
   typedef std::list<keyType> keyTypeList;
+  typedef typename std::map<keyType,std::pair<std::pair<T*, unsigned int>,std::list<keyType>::iterator> >::iterator key_iterator;  
 
   virtual void get(const keyType& k, T*& tile, unsigned int& size) {
-
-    std::map<keyType,std::pair<std::pair<T*, unsigned int>,keyTypeList::iterator> >::iterator it  = _cache.find(k);
+    key_iterator it  = _cache.find(k);
  
     if (it == _cache.end()) {  
       tile = NULL;
@@ -79,7 +80,7 @@ public :
   }
 
   virtual void clear() {
-    for (std::map<keyType, std::pair<std::pair<T*, unsigned int>, std::list<keyType>::iterator> >::iterator it = _cache.begin(); it != _cache.end(); ++it) {
+    for (key_iterator it = _cache.begin(); it != _cache.end(); ++it) {
       delete[] it->second.first.first;
     }
     _cache.clear();
@@ -105,7 +106,7 @@ protected :
   virtual void evict() {
 
     // Identify least recently used key 
-    std::map<keyType,std::pair<std::pair<T*, unsigned int>,keyTypeList::iterator> >::iterator it =_cache.find(_LRU.front()); 
+    key_iterator it =_cache.find(_LRU.front()); 
 
     // Erase both elements to completely purge record 
     _cacheCurrentByteSize -= it->second.first.second;
