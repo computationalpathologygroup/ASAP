@@ -97,6 +97,18 @@ public :
       }
     }
 
+  template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+    const unsigned long long& height, const unsigned int& level, unsigned char*& data);
+
+  template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+    const unsigned long long& height, const unsigned int& level, unsigned short*& data);
+
+  template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+    const unsigned long long& height, const unsigned int& level, unsigned int*& data);
+
+  template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+    const unsigned long long& height, const unsigned int& level, float*& data);
+
 protected :
 
   //! To make MultiResolutionImage thread-safe
