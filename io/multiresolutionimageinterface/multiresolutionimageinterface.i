@@ -73,7 +73,7 @@ import_array();
 %ignore swap(ImageSource& first, ImageSource& second);
 
 %include "../../core/Point.h"
-%include "../../core/pathologyEnums.h"
+%include "../../core/PathologyEnums.h"
 %include "../../core/ImageSource.h"
 %include "../../core/CmdLineProgressMonitor.h"
 

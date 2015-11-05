@@ -1,5 +1,5 @@
 <RCC>
-  <qresource>
+  <qresource prefix="VisualizationWorkstationExtensionPlugin_ui">
     <file>VisualizationWorkstationExtensionPlugin.ui</file>
   </qresource>
 </RCC>

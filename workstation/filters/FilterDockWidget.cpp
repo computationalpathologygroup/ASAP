@@ -27,8 +27,8 @@ FilterDockWidget::FilterDockWidget(QWidget *parent, Qt::WindowFlags flags) :
   _autoUpdate(false)
 {
   QUiLoader loader;
-  QFile file(":/FilterDockWidget.ui");
-  file.open(QFile::ReadOnly);
+  QFile file(":/FilterWorkstationExtensionPlugin_ui/FilterDockWidget.ui");
+  file.open(QFile::ReadOnly | QFile::Text);
   QWidget* contents = loader.load(&file);
   file.close();
   _layout = contents->layout();

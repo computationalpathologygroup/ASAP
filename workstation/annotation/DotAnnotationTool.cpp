@@ -35,7 +35,7 @@ QAction* DotAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("DotAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/dot.png")));
+    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/dot.png")));
   }
   return _button;
 }

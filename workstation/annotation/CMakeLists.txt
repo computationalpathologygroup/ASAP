@@ -32,18 +32,18 @@ SET(ANNOTATION_PLUGIN_SOURCE
 )
 
 IF(BUILD_USING_QT4)
-  set(RESOURCE
+  set(ANNOTATION_WORKSTATION_EXTENSION_RESOURCE
     resources/icons.qrc
   )
-  qt4_add_resources(RESOURCE_ADDED ${RESOURCE})
+  qt4_add_resources(ANNOTATION_RESOURCE_ADDED ${ANNOTATION_WORKSTATION_EXTENSION_RESOURCE})
   add_library(AnnotationPlugin SHARED ${ANNOTATION_PLUGIN_SOURCE} ${ANNOTATION_PLUGIN_HEADERS} ${ANNOTATION_RESOURCE_ADDED})
   TARGET_LINK_LIBRARIES(AnnotationPlugin ${QT_LIBRARIES})
 ELSE()
   find_package(Qt5 COMPONENTS Core Widgets Gui)
-  set(RESOURCE
-    resources/icons.qrc
+  set(ANNOTATION_WORKSTATION_EXTENSION_RESOURCE
+    resources/AnnotationWorkstationExtensionPlugin_resources.qrc
   )
-  qt5_add_resources(ANNOTATION_RESOURCE_ADDED ${RESOURCE})
+  qt5_add_resources(ANNOTATION_RESOURCE_ADDED ${ANNOTATION_WORKSTATION_EXTENSION_RESOURCE})
   add_library(AnnotationPlugin SHARED ${ANNOTATION_PLUGIN_SOURCE} ${ANNOTATION_PLUGIN_HEADERS} ${ANNOTATION_RESOURCE_ADDED})
   qt5_use_modules(AnnotationPlugin Core Widgets UiTools)
 ENDIF()
@@ -52,7 +52,7 @@ SET_TARGET_PROPERTIES(AnnotationPlugin PROPERTIES DEBUG_POSTFIX _d)
 
 INSTALL(TARGETS AnnotationPlugin
   RUNTIME DESTINATION bin/plugins/workstationextension
-  LIBRARY DESTINATION lib/plugins/workstationextension
+  LIBRARY DESTINATION bin/plugins/workstationextension
   ARCHIVE DESTINATION lib/plugins/workstationextension
 )
 

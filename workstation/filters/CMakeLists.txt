@@ -42,13 +42,14 @@ IF(BUILD_USING_QT4)
   TARGET_LINK_LIBRARIES(ColorDeconvolutionFilterPlugin ${QT_LIBRARIES} )  
 ELSE()
   find_package(Qt5 COMPONENTS Core Widgets Gui)  
-  qt5_add_resources(COLORDECONVOLUTION_RESOURCE ColorDeconvolutionFilterPlugin.qrc)
-  qt5_add_resources(NUCLEIDETECTION_RESOURCE NucleiDetectionFilterPlugin.qrc)
+  qt5_add_resources(COLORDECONVOLUTION_RESOURCE ${FilterPlugins_SOURCE_DIR}/resources/ColorDeconvolutionFilterPlugin.qrc)
+  qt5_add_resources(NUCLEIDETECTION_RESOURCE ${FilterPlugins_SOURCE_DIR}/resources/NucleiDetectionFilterPlugin.qrc)
+  qt5_add_resources(FILTERWORKSTATIONEXTENSIONPLUGIN_RESOURCE ${FilterPlugins_SOURCE_DIR}/resources/FilterWorkstationExtensionPlugin_resources.qrc)
   ADD_LIBRARY(NucleiDetectionFilterPlugin SHARED ${NucleiDetection_SOURCE} ${NUCLEIDETECTION_RESOURCE})
   QT5_USE_MODULES(NucleiDetectionFilterPlugin Core Widgets UiTools)  
   ADD_LIBRARY(ColorDeconvolutionFilterPlugin SHARED ${ColorDeconvolutionPlugin_SOURCE} ${COLORDECONVOLUTION_RESOURCE})  
   QT5_USE_MODULES(ColorDeconvolutionFilterPlugin Core Widgets UiTools)
-  add_library(FilterWorkstationExtensionPlugin SHARED ${FilterWorkstationExtensionPlugin_SOURCE})
+  add_library(FilterWorkstationExtensionPlugin SHARED ${FilterWorkstationExtensionPlugin_SOURCE} ${FILTERWORKSTATIONEXTENSIONPLUGIN_RESOURCE})
   qt5_use_modules(FilterWorkstationExtensionPlugin Core Widgets UiTools)
 ENDIF()
 
@@ -61,13 +62,13 @@ SET_TARGET_PROPERTIES(FilterWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX 
 
 INSTALL(TARGETS ColorDeconvolutionFilterPlugin NucleiDetectionFilterPlugin
   RUNTIME DESTINATION bin/plugins/filters
-  LIBRARY DESTINATION lib/plugins/filters
+  LIBRARY DESTINATION bin/plugins/filters
   ARCHIVE DESTINATION lib/plugins/filters
 )
 
 INSTALL(TARGETS FilterWorkstationExtensionPlugin
   RUNTIME DESTINATION bin/plugins/workstationextension
-  LIBRARY DESTINATION lib/plugins/workstationextension
+  LIBRARY DESTINATION bin/plugins/workstationextension
   ARCHIVE DESTINATION lib/plugins/workstationextension
 )
 

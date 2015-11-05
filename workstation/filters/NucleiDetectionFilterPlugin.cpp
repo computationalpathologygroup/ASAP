@@ -52,7 +52,7 @@ QString NucleiDetectionFilterPlugin::name() const {
 }
 
 QIcon NucleiDetectionFilterPlugin::icon() const {
-  return QIcon(QPixmap(":/icons/NucleiDetectionIcon.png"));
+  return QIcon(QPixmap(":/NucleiDetectionFilter_icons/NucleiDetectionIcon.png"));
 }
 
 bool NucleiDetectionFilterPlugin::initialize(const ImageSource* img) {
@@ -110,7 +110,7 @@ void NucleiDetectionFilterPlugin::initializeSettingsPanel() {
     _settingsPanel->deleteLater();
   }
   QUiLoader loader;
-  QFile file(":/NucleiDetectionFilter.ui");
+  QFile file(":/NucleiDetectionFilter_ui/NucleiDetectionFilter.ui");
   file.open(QFile::ReadOnly);
   _settingsPanel = loader.load(&file);
   file.close();

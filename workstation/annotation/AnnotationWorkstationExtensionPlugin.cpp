@@ -45,9 +45,13 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
   _treeWidget(NULL),
   _oldEvent(NULL)
 {
+  QDirIterator it(":", QDirIterator::Subdirectories);
+  while (it.hasNext()) {
+      qDebug() << it.next();
+  }
   QUiLoader loader;
-  QFile file(":/AnnotationDockWidget.ui");
-  file.open(QFile::ReadOnly);
+  QFile file(":/AnnotationWorkstationExtensionPlugin_ui/AnnotationDockWidget.ui");
+  bool openend = file.open(QFile::ReadOnly);
   _dockWidget = qobject_cast<QDockWidget*>(loader.load(&file));
   if (_dockWidget) {
     _dockWidget->setEnabled(false);

@@ -51,7 +51,7 @@ QAction* ZoomTool::getToolButton() {
   if (!_button) {
     _button = new QAction("Zoom", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/zoom.png")));
+    _button->setIcon(QIcon(QPixmap(":/basictools_icons/zoom.png")));
   }
   return _button;
 }

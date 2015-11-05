@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="basictools_icons">
+      <file alias="zoom.png">zoom.png</file>
+      <file alias="pan.png">pan.png</file>	
+    </qresource>
+</RCC>

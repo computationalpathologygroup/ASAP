@@ -29,7 +29,7 @@ QAction* PanTool::getToolButton() {
   if (!_button) {
     _button = new QAction("Pan", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/pan.png")));
+    _button->setIcon(QIcon(QPixmap(":/basictools_icons/pan.png")));
   }
   return _button;
 }

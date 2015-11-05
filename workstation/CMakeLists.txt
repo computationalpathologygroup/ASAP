@@ -54,7 +54,7 @@ IF(BUILD_USING_QT4)
 ELSE()
   find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL)
   set(RESOURCE
-    resources/icons.qrc
+    resources/ASAP_resources.qrc
   )
   qt5_add_resources(RESOURCE_ADDED ${RESOURCE})      
   ADD_EXECUTABLE(ASAP WIN32 ${SOURCE} ${HEADERS} ${RESOURCE_ADDED})

@@ -16,18 +16,18 @@ SET(VisualizationWorkstationExtensionPlugin_SOURCE
 )
 
 IF(BUILD_USING_QT4)
-  set(RESOURCE
-    VisualizationWorkstationExtensionPlugin.qrc
+  set(VisualizationWorkstationExtensionPlugin_RESOURCE
+    resources/VisualizationWorkstationExtensionPlugin_resources.qrc
   )
-  qt4_add_resources(VISUALIZATION_RESOURCE_ADDED ${RESOURCE})
+  qt4_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
   add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
   TARGET_LINK_LIBRARIES(VisualizationWorkstationExtensionPlugin ${QT_LIBRARIES})
 ELSE()
   find_package(Qt5 COMPONENTS Core Widgets Gui)
-  set(RESOURCE
-    VisualizationWorkstationExtensionPlugin.qrc
+  set(VisualizationWorkstationExtensionPlugin_RESOURCE
+    resources/VisualizationWorkstationExtensionPlugin_resources.qrc
   )
-  qt5_add_resources(VISUALIZATION_RESOURCE_ADDED ${RESOURCE})
+  qt5_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
   add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
   qt5_use_modules(VisualizationWorkstationExtensionPlugin Core Widgets UiTools)
 ENDIF()
@@ -36,7 +36,7 @@ SET_TARGET_PROPERTIES(VisualizationWorkstationExtensionPlugin PROPERTIES DEBUG_P
 
 INSTALL(TARGETS VisualizationWorkstationExtensionPlugin
   RUNTIME DESTINATION bin/plugins/workstationextension
-  LIBRARY DESTINATION lib/plugins/workstationextension
+  LIBRARY DESTINATION bin/plugins/workstationextension
   ARCHIVE DESTINATION lib/plugins/workstationextension
 )
 

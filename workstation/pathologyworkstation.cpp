@@ -34,8 +34,14 @@
 #include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 
-using namespace std;
+#ifdef WIN32
+const char* PathologyWorkstation::sharedLibraryExtensions = ".dll";
+#else
+const char* PathologyWorkstation::sharedLibraryExtensions = ".so";
+#endif
 
+using namespace std;
+// 
 PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
     QMainWindow(parent),
     _img(NULL),
@@ -84,7 +90,7 @@ void PathologyWorkstation::loadPlugins() {
   if (_pluginsDir.cd("plugins")) {
     if (_pluginsDir.cd("tools")) {
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
-        if (fileName.toLower().endsWith(".dll")) {
+        if (fileName.toLower().endsWith(sharedLibraryExtensions)) {
           QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
           QObject *plugin = loader.instance();
           if (plugin) {
@@ -109,7 +115,7 @@ void PathologyWorkstation::loadPlugins() {
       QDockWidget* lastDockWidget = NULL;
       QDockWidget* firstDockWidget = NULL;
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
-        if (fileName.toLower().endsWith(".dll")) {
+        if (fileName.toLower().endsWith(sharedLibraryExtensions)) {
           QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
           QObject *plugin = loader.instance();
           if (plugin) {
@@ -249,8 +255,8 @@ void PathologyWorkstation::setupUi()
   actionOpen->setObjectName(QStringLiteral("actionOpen"));
   actionClose = new QAction(this);
   actionClose->setObjectName(QStringLiteral("actionClose"));
-  actionOpen->setIcon(QIcon(QPixmap(":/icons/open.png")));
-  actionClose->setIcon(QIcon(QPixmap(":/icons/close.png")));
+  actionOpen->setIcon(QIcon(QPixmap(":/ASAP_icons/open.png")));
+  actionClose->setIcon(QIcon(QPixmap(":/ASAP_icons/close.png")));
   centralWidget = new QWidget(this);
   centralWidget->setObjectName(QStringLiteral("centralWidget"));
   sizePolicy.setHeightForWidth(centralWidget->sizePolicy().hasHeightForWidth());

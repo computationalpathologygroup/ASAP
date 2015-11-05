@@ -64,7 +64,7 @@ QString ColorDeconvolutionFilterPlugin::name() const {
 }
 
 QIcon ColorDeconvolutionFilterPlugin::icon() const {
-  return QIcon(QPixmap(":/icons/ColorDeconvolutionIcon.png"));
+  return QIcon(QPixmap(":/ColorDeconvolutionFilter_icons/ColorDeconvolutionIcon.png"));
 }
 
 void ColorDeconvolutionFilterPlugin::filter(const Patch<double> &input, QVariant &output) {
@@ -92,7 +92,7 @@ void ColorDeconvolutionFilterPlugin::initializeSettingsPanel() {
     _settingsPanel->deleteLater();
   }
   QUiLoader loader;
-  QFile file(":/ColorDeconvolutionFilter.ui");
+  QFile file(":/ColorDeconvolutionFilter_ui/ColorDeconvolutionFilter.ui");
   file.open(QFile::ReadOnly);
   _settingsPanel = loader.load(&file);
   file.close();

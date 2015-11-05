@@ -1,15 +1,17 @@
 <RCC>
-    <qresource prefix="/">
-	  <file alias="dot.png">dot.png</file>
-	  <file alias="poly.png">poly.png</file>
+    <qresource prefix="AnnotationWorkstationExtensionPlugin_icons">
+    <file alias="dot.png">dot.png</file>
+    <file alias="poly.png">poly.png</file>
     <file alias="freehand.xpm">freehand.xpm</file>
-	  <file alias="spline.png">spline.png</file>
+    <file alias="spline.png">spline.png</file>
     <file alias="xml.xpm">xml.xpm</file>
     <file alias="inactive_dot.xpm">inactive_dot.xpm</file>
     <file alias="inactive_poly.xpm">inactive_poly.xpm</file>
     <file alias="inactive_freehand.xpm">inactive_freehand.xpm</file>
     <file alias="inactive_spline.xpm">inactive_spline.xpm</file>
     <file alias="inactive_xml.xpm">xml.xpm</file>
+    </qresource>
+    <qresource prefix="AnnotationWorkstationExtensionPlugin_ui">
     <file>AnnotationDockWidget.ui</file>
     </qresource>
 </RCC>

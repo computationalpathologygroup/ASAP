@@ -270,7 +270,7 @@ QAction* PolyAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("PolyAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/poly.png")));
+    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/poly.png")));
   }
   return _button;
 }

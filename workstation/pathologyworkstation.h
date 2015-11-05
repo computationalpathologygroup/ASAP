@@ -37,6 +37,7 @@ private slots:
   void on_actionOpen_triggered();
 
 private:
+  static const char* sharedLibraryExtensions;
   MultiResolutionImage *_img;
   unsigned long long _cacheMaxByteSize;
   QSettings* _settings;
