@@ -45,10 +45,6 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
   _treeWidget(NULL),
   _oldEvent(NULL)
 {
-  QDirIterator it(":", QDirIterator::Subdirectories);
-  while (it.hasNext()) {
-      qDebug() << it.next();
-  }
   QUiLoader loader;
   QFile file(":/AnnotationWorkstationExtensionPlugin_ui/AnnotationDockWidget.ui");
   bool openend = file.open(QFile::ReadOnly);
@@ -496,7 +492,9 @@ void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage
   if (!fileName.empty()) {
     std::string annotationPath = fileName;
     core::changeExtension(annotationPath, "xml");
-    onLoadButtonPressed(annotationPath);
+    if (core::fileExists(annotationPath)) {
+      onLoadButtonPressed(annotationPath);
+    }
   }
   _img = img;
 }

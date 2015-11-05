@@ -32,7 +32,11 @@ FilterWorkstationExtensionPlugin::FilterWorkstationExtensionPlugin() :
   if (pluginsDir.cd("filters")) {
     QListWidget* availableFilters = _dockWidget->findChild<QListWidget*>("filterListWidget");
     foreach(QString fileName, pluginsDir.entryList(QDir::Files)) {
+#ifdef WIN32
       if (fileName.toLower().endsWith(".dll")) {
+#else
+      if (fileName.toLower().endsWith(".so")) {
+#endif
         QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
         QObject *plugin = loader.instance();
         if (plugin) {
@@ -54,14 +58,14 @@ FilterWorkstationExtensionPlugin::FilterWorkstationExtensionPlugin() :
 FilterWorkstationExtensionPlugin::~FilterWorkstationExtensionPlugin() {
   _dockWidget = NULL;
   if (_filterThread) {
-    _filterThread->deleteLater();
+    delete _filterThread;
     _filterThread = NULL;
   }
 }
 
 bool FilterWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _viewer = viewer;
-  connect(_viewer, SIGNAL(fieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int, int)), this, SLOT(onFieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int, int)));
+  connect(_viewer, SIGNAL(fieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int)));
   return true;
 }
 
@@ -134,7 +138,7 @@ void FilterWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage* im
   }
 }
 
-void FilterWorkstationExtensionPlugin::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel) {
+void FilterWorkstationExtensionPlugin::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level) {
   onFilterResultClearRequested();
   if (_filterThread && _autoUpdate) {
     onFilterResultUpdateRequested();
