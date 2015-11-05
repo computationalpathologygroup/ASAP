@@ -33,6 +33,10 @@ private :
   bool _abort;
   int _channel;
   float _opacity;
+
+signals:
+  void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);
+
 };
   
 

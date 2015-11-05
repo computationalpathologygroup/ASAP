@@ -1,6 +1,9 @@
 #include "UnitTest++.h"
+#include "XmlTestReporter.h"
+#include "TestReporterStdout.h"
 #include "TestData.h"
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -23,5 +26,20 @@ int main(int argc, char* argv[])
 	std::cout << "Testing only suite " << suite << endl;
   }
   g_dataPath = argv[1];
-  return UnitTest::RunAllTests(xmlOutput.c_str(), suite.empty() ? NULL : suite.c_str());
+  if (xmlOutput.empty()) {
+    UnitTest::TestReporterStdout reporter;
+    UnitTest::TestRunner runner(reporter);
+    runner.RunTestsIf(UnitTest::Test::GetTestList(), suite.empty() ? NULL : suite.c_str(), UnitTest::True(), 0);
+  }
+  else {
+    std::ofstream f(xmlOutput);
+    if (f.good()) {
+      UnitTest::XmlTestReporter reporter(f);
+      UnitTest::TestRunner runner(reporter);
+      runner.RunTestsIf(UnitTest::Test::GetTestList(), suite.empty() ? NULL : suite.c_str(), UnitTest::True(), 0);
+    }
+    else {
+      std::cout << "Opening of XML file failed!" << endl;
+    }
+  }
 }

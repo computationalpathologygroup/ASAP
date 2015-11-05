@@ -14,7 +14,8 @@ RenderThread::RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* 
   _bck_img(bck_img),
   _for_img(for_img),
   _abort(false),
-  _channel(0)
+  _channel(0),
+  _threadsWaiting(0)
 {
   for (int i = 0; i < nrThreads; ++i) {
     RenderWorker* worker = new RenderWorker(this, _bck_img, _for_img);
@@ -62,9 +63,13 @@ void RenderThread::onChannelChanged(int channel) {
   _jobListMutex.unlock();
 }
 
-void RenderThread::addJob(const unsigned int tileSize, const unsigned int samplesPerPixel, const long long imgPosX, const long long imgPosY, const unsigned int level, QPointer<WSITileGraphicsItem> sender) 
+std::vector<RenderWorker*> RenderThread::getWorkers() {
+  return _workers;
+}
+
+void RenderThread::addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level) 
 {
-    RenderJob job = {tileSize, samplesPerPixel, imgPosX, imgPosY, level, sender};
+    RenderJob job = {tileSize, imgPosX, imgPosY, level};
 
     QMutexLocker locker(&_jobListMutex);
     _jobList.push_front(job);
@@ -79,10 +84,16 @@ void RenderThread::setForegroundImage(MultiResolutionImage* for_img) {
   }
 }
 
+unsigned int RenderThread::getWaitingThreads() {
+  return _threadsWaiting;
+}
+
 RenderJob RenderThread::getJob() {
   _jobListMutex.lock();
   while (_jobList.empty() && !_abort) {
+    _threadsWaiting++;
     _condition.wait(&_jobListMutex);
+    _threadsWaiting--;
   }
   if (_abort) {
     _jobListMutex.unlock();
@@ -96,13 +107,6 @@ RenderJob RenderThread::getJob() {
 
 void RenderThread::clearJobs() {
   QMutexLocker locker(&_jobListMutex);
-  for (std::list<RenderJob>::iterator it = _jobList.begin(); it != _jobList.end(); ++it) {
-    _senderDeletionMutex.lock();
-    if (it->_sender) {
-      it->_sender->setVisible(true);
-    }
-    _senderDeletionMutex.unlock();
-  }
   _jobList.clear();
 }
 

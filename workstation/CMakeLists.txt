@@ -21,6 +21,7 @@ set(HEADERS
   MiniMap.h
   RenderThread.h
   RenderWorker.h
+  TileManager.h
   PrefetchThread.h
   WSITileGraphicsItem.h
   UtilityFunctions.h
@@ -37,6 +38,7 @@ set(SOURCE
   RenderThread.cpp
   RenderWorker.cpp
   PrefetchThread.cpp
+  TileManager.cpp
   WSITileGraphicsItem.cpp
   UtilityFunctions.cpp
   PathologyWorkstation.rc

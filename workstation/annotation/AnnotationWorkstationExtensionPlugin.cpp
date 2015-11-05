@@ -293,8 +293,8 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       if (annot) {
         annot->finish();
         _qtAnnotations[QString::fromStdString(key)] = annot;
-        annot->setZValue(20.);
         _viewer->scene()->addItem(annot);
+        annot->setZValue(20.);
       }
 
       _annotationIndex += 1;
@@ -549,8 +549,8 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
   }
   if (_generatedAnnotation) {
     _treeWidget->clearSelection();
-    _generatedAnnotation->setZValue(20.);
     _viewer->scene()->addItem(_generatedAnnotation);
+    _generatedAnnotation->setZValue(20.);
   }
 }
 

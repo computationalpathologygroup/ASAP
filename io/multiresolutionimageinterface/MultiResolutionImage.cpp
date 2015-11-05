@@ -164,14 +164,14 @@ const int MultiResolutionImage::getBestLevelForDownSample(const double& downsamp
       double currentDownSample = (double)_levelDimensions[0][0]/(double)_levelDimensions[i][0];
       double previousDownSample = (double)_levelDimensions[0][0] / (double)_levelDimensions[i-1][0];
       if (downsample<currentDownSample) {
-        /*
+        
         if (abs(currentDownSample - downsample) > abs(previousDownSample - downsample)) {
           return i - 1;
         }
         else {
           return i;
         }
-        */
+        
         return i - 1;
       }
     }

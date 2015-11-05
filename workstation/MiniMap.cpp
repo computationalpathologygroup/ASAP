@@ -4,12 +4,16 @@
 #include <QPainter>
 #include <QSizePolicy>
 #include <QMouseEvent>
+#include "TileManager.h"
+
+const char* const MiniMap::coverageColors[] = { "red", "green", "yellow", "black", "purple", "orange" };
 
 MiniMap::MiniMap(QPixmap* overview, QWidget *parent) 
   : QWidget(parent),
     _overview(overview),
     _fieldOfView(QRectF()),
-    _aspectRatio(1)
+    _aspectRatio(1),
+    _manager(NULL)
 {
   //setAttribute(Qt::WA_StaticContents);
   QSizePolicy policy;
@@ -26,6 +30,10 @@ MiniMap::~MiniMap() {
   if (_overview) {
     delete _overview;
   }
+}
+
+void MiniMap::setTileManager(TileManager* manager) {
+  _manager = manager;
 }
 
 void MiniMap::updateFieldOfView(const QRectF& fieldOfView) {
@@ -52,6 +60,27 @@ void MiniMap::paintEvent(QPaintEvent *event) {
     painter.drawRect(1, 1, width() - 2, height() - 2);
     painter.setPen(QPen(Qt::black, 1));
     painter.drawRect(0, 0, width() - 1, height() - 1);
+    if (_manager) {
+      painter.save();
+      std::vector<QPainterPath> pths = _manager->getCoverageMaps();
+      QPainterPath bck;
+      bck.addRect(QRectF(0, 0, width() - 1., height() - 1.));
+      painter.setPen(Qt::PenStyle::NoPen);
+      painter.setBrush(QBrush(QColor(0, 0, 0, 50)));
+      painter.drawPath(bck);
+      for (std::vector<QPainterPath>::const_iterator it = pths.begin(); it != pths.end(); ++it) {
+        if (!it->isEmpty()) {
+          QTransform trans;
+          trans = trans.scale(width() / static_cast<float>(_overview->width()), height() / static_cast<float>(_overview->height()));
+          QPainterPath qpf2 = trans.map(*it);
+          unsigned int colorIndex = (it - pths.begin()) % 6;
+          painter.setPen(QPen(QColor(coverageColors[colorIndex])));
+          painter.setBrush(QBrush(QColor(255, 255, 255, 50 / (it - pths.begin() + 1))));
+          painter.drawPath(qpf2);
+        }
+      }
+      painter.restore();
+    }
     if (_fieldOfView.isValid() && !_fieldOfView.isEmpty()) {
       QPen blue = QPen(QColor("blue"));
       blue.setWidth(3);

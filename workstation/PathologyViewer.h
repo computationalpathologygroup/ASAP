@@ -11,6 +11,7 @@ class PrefetchThread;
 class ToolPluginInterface;
 class MiniMap;
 class WSITileGraphicsItemCache;
+class TileManager;
 
 class EXPORT_PATHOLOGYWORKSTATION PathologyViewer : public QGraphicsView
 {
@@ -50,14 +51,14 @@ public:
     void setAutoUpdate(bool autoUpdate);
 
 signals :
-    void fieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel);
+    void fieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
     void updateBBox(const QRectF& FOV);
     void channelChanged(int channelNr);
 
 public slots :
     void moveTo(const QPointF& pos);
     void changeActiveTool();
-    void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel);
+    void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
     void onForegroundImageChanged(MultiResolutionImage* for_img);
 
 private :
@@ -99,6 +100,7 @@ private :
     RenderThread* _renderthread;
     PrefetchThread* _prefetchthread;
 
+    TileManager* _manager;
     unsigned long long _cacheSize;
     WSITileGraphicsItemCache* _cache;
 
