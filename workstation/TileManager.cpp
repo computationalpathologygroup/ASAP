@@ -130,14 +130,23 @@ unsigned char TileManager::providesCoverage(unsigned int level, int tile_x, int 
 }
 
 bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
-  if (tile_x < 0 || tile_y < 0) {
-    return providesCoverage(level) == 2;
+  if (level > 0) {
+    if (tile_x < 0 || tile_y < 0) {
+      return providesCoverage(level) == 2;
+    }
+    else {
+      bool covered = true;
+      unsigned int downsample = _img->getLevelDownsample(level) / _img->getLevelDownsample(level - 1);
+      for (unsigned int x = 0; x < downsample; ++x) {
+        for (unsigned int y = 0; y < downsample; ++y) {
+          covered &= providesCoverage(level - 1, downsample * tile_x + x, downsample * tile_y + y) == 2;
+        }
+      }
+      return covered;
+    }
   }
   else {
-    return (providesCoverage(level - 1, 2 * tile_x, 2 * tile_y) == 2 &&
-      providesCoverage(level - 1, 2 * tile_x, 2 * tile_y + 1) == 2 &&
-      providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y) == 2 &&
-      providesCoverage(level - 1, 2 * tile_x + 1, 2 * tile_y + 1) == 2);
+    return false;
   }
 }
 
@@ -150,7 +159,7 @@ void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsign
     if (covers == 2 || covers == 0) {
       float rectSize = _tileSize / (_img->getLevelDownsample(_lastRenderLevel) / _img->getLevelDownsample(level));
       QPainterPath rect;
-      rect.addRect(QRectF(tile_x * rectSize, tile_y * rectSize, rectSize, rectSize));
+      rect.addRect(QRectF(tile_x * rectSize - 1, tile_y * rectSize - 1, rectSize + 1, rectSize + 1));
       if (covers == 2) {
         _coverageMaps[level] = _coverageMaps[level].united(rect);
       }

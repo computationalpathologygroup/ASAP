@@ -34,7 +34,7 @@ WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsi
   if (img) {
     _img = img;
   }
-  _physicalSize = _tileSize / static_cast<float>(pow(2, _lastRenderLevel - _itemLevel));
+  _physicalSize = _tileSize / (_img->getLevelDownsample(_lastRenderLevel) / _img->getLevelDownsample(_itemLevel));
   this->setFlag(QGraphicsItem::ItemUsesExtendedStyleOption);
   _boundingRect = QRectF(-_physicalSize / 2., -_physicalSize / 2., _physicalSize, _physicalSize);
 }
