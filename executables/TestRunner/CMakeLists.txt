@@ -42,7 +42,7 @@ PROJECT(Tests)
   ENDIF()
 
   ADD_EXECUTABLE(patholTestRunner ${unittest_src})
-  TARGET_LINK_LIBRARIES(patholTestRunner ${UNITTEST_LIBRARY} multiresolutionimageinterface)
+  TARGET_LINK_LIBRARIES(patholTestRunner optimized ${UNITTEST_LIBRARY} debug ${UNITTEST_LIBRARY_DEBUG} multiresolutionimageinterface)
   IF(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING)
     TARGET_LINK_LIBRARIES(patholTestRunner basicfilters NucleiSegmentation ${OpenCV_LIBS})
   ENDIF()
