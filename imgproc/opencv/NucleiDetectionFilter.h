@@ -103,6 +103,13 @@ class NucleiDetectionFilter : public FilterBase {
     updateProgress(5);
     Patch<double> outp;    
     std::vector<double> spacing = input.getSpacing();
+    if (spacing.empty()) {
+      spacing.push_back(1.);
+      spacing.push_back(1.);
+    }
+    else if (spacing.size() == 1) {
+      spacing.push_back(1.);
+    }
     _colorDeconvolutionFilter->filter(input, outp);
     if (shouldCancel()) {
       updateProgress(100);

@@ -5,13 +5,17 @@
 #include <QResizeEvent>
 #include <QApplication>
 #include <QMenu>
+#include <QAction>
 #include <QMessageBox>
 #include <QGLWidget>
 #include <QTimeLine>
 #include <QScrollBar>
 #include <QHBoxLayout>
+#include <QSettings>
+#include <QGuiApplication>
 
 #include "MiniMap.h"
+#include "ScaleBar.h"
 #include "RenderThread.h"
 #include "PrefetchThread.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
@@ -39,7 +43,8 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _cacheSize(1000 * 512 * 512 * 3),
   _activeTool(NULL),
   _sceneScale(1.),
-  _manager(NULL)
+  _manager(NULL),
+  _scaleBar(NULL)
 {
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -58,6 +63,24 @@ PathologyViewer::PathologyViewer(QWidget *parent):
           this, SLOT(showContextMenu(const QPoint&)));
   _cache = new WSITileGraphicsItemCache();
   _cache->setMaxCacheSize(_cacheSize);
+  _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
+  _settings->beginGroup("ASAP");
+  if (this->window()) {
+    QMenu* viewMenu = this->window()->findChild<QMenu*>("menuView");
+    QAction* action;
+    if (viewMenu) {
+      action = viewMenu->addAction("Toggle scale bar");
+      action->setCheckable(true);
+      action->setChecked(_settings->value("scaleBarToggled", true).toBool());
+      action = viewMenu->addAction("Toggle coverage view");
+      action->setCheckable(true);
+      action->setChecked(_settings->value("coverageViewToggled", true).toBool());
+      action = viewMenu->addAction("Toggle mini-map");
+      action->setCheckable(true);
+      action->setChecked(_settings->value("miniMapToggled", true).toBool());
+    }
+  }
+  _settings->endGroup();
 }
 
 PathologyViewer::~PathologyViewer()
@@ -225,11 +248,14 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   for (int i = 0; i < workers.size(); ++i) {
     QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)));
   }
+  initializeImage(scene(), tileSize, lastLevel);
+  initializeGUIComponents(lastLevel);
   QObject::connect(this, SIGNAL(channelChanged(int)), _renderthread, SLOT(onChannelChanged(int)));
   QObject::connect(_cache, SIGNAL(itemEvicted(WSITileGraphicsItem*)), _manager, SLOT(onTileRemoved(WSITileGraphicsItem*)));
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, MultiResolutionImage*, const unsigned int)));
-  initializeImage(scene(), tileSize, lastLevel);
-  initializeMiniMap(lastLevel);
+  QRectF FOV = this->mapToScene(this->rect()).boundingRect();
+  QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
+  emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
 }
 
 void PathologyViewer::onForegroundImageChanged(MultiResolutionImage* for_img) {
@@ -275,7 +301,8 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   }
 }
 
-void PathologyViewer::initializeMiniMap(unsigned int level) {
+void PathologyViewer::initializeGUIComponents(unsigned int level) {
+  // Initialize the minimap
   std::vector<unsigned long long> overviewDimensions = _img->getLevelDimensions(level);
   unsigned int size = overviewDimensions[0] * overviewDimensions[1] * _img->getSamplesPerPixel();
   unsigned char* overview = new unsigned char[size];
@@ -289,21 +316,73 @@ void PathologyViewer::initializeMiniMap(unsigned int level) {
   }
   QPixmap *ovPixMap = new QPixmap(QPixmap::fromImage(ovImg));
   delete[] overview;
+  if (_map) {
+    _map->deleteLater();
+    _map = NULL;
+  }
   _map = new MiniMap(ovPixMap, this);
+  if (_scaleBar) {
+    _scaleBar->deleteLater();
+    _scaleBar = NULL;
+  }
+  std::vector<double> spacing = _img->getSpacing();
+  if (!spacing.empty()) {
+    _scaleBar = new ScaleBar(spacing[0], this);
+  }
+  else {
+    _scaleBar = new ScaleBar(-1, this);
+  }
   if (this->layout()) {
     delete this->layout();
   }
   QHBoxLayout * Hlayout = new QHBoxLayout(this);
   QVBoxLayout * Vlayout = new QVBoxLayout();
+  QVBoxLayout * Vlayout2 = new QVBoxLayout();
+  Vlayout2->addStretch(4);
+  Hlayout->addLayout(Vlayout2);
   Hlayout->addStretch(4);
   Hlayout->setContentsMargins(30, 30, 30, 30);
   Hlayout->addLayout(Vlayout, 1);
   Vlayout->addStretch(4);
-  Vlayout->addWidget(_map, 1);
-  _map->updateFieldOfView(QRectF(0, 0, overviewDimensions[0], overviewDimensions[1]));
+  if (_map) {
+    Vlayout->addWidget(_map, 1);
+  }
+  if (_scaleBar) {
+    Vlayout2->addWidget(_scaleBar);
+  }
   _map->setTileManager(_manager);
   QObject::connect(this, SIGNAL(updateBBox(const QRectF&)), _map, SLOT(updateFieldOfView(const QRectF&)));
+  QObject::connect(_manager, SIGNAL(coverageUpdated()), _map, SLOT(onCoverageUpdated()));
   QObject::connect(_map, SIGNAL(positionClicked(QPointF)), this, SLOT(moveTo(const QPointF&)));
+  QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int)), _scaleBar, SLOT(updateForFieldOfView(const QRectF&)));
+  if (this->window()) {
+    _settings->beginGroup("ASAP");
+    QMenu* viewMenu = this->window()->findChild<QMenu*>("menuView");
+    if (viewMenu)  {
+      QList<QAction*> actions = viewMenu->actions();
+      for (QList<QAction*>::iterator it = actions.begin(); it != actions.end(); ++it) {
+        if ((*it)->text() == "Toggle scale bar" && _scaleBar) {
+          QObject::connect((*it), SIGNAL(toggled(bool)), _scaleBar, SLOT(setVisible(bool)));
+          bool showComponent = _settings->value("scaleBarToggled", true).toBool();
+          (*it)->setChecked(showComponent);
+          _scaleBar->setVisible(showComponent);
+        }
+        else if ((*it)->text() == "Toggle mini-map" && _map) {
+          QObject::connect((*it), SIGNAL(toggled(bool)), _map, SLOT(setVisible(bool)));
+          bool showComponent = _settings->value("miniMapToggled", true).toBool();
+          (*it)->setChecked(showComponent);
+          _map->setVisible(showComponent);
+        }
+        else if ((*it)->text() == "Toggle coverage view" && _map) {
+          QObject::connect((*it), SIGNAL(toggled(bool)), _map, SLOT(toggleCoverageMap(bool)));
+          bool showComponent = _settings->value("coverageViewToggled", true).toBool();
+          (*it)->setChecked(showComponent);
+          _map->toggleCoverageMap(showComponent);
+        }
+      }
+    }
+    _settings->endGroup();
+  }
 }
 
 void PathologyViewer::showContextMenu(const QPoint& pos)
@@ -331,6 +410,25 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
 }
 
 void PathologyViewer::close() {
+  if (this->window()) {
+    QMenu* viewMenu = this->window()->findChild<QMenu*>("menuView");
+    _settings->beginGroup("ASAP");
+    if (viewMenu) {
+      QList<QAction*> actions = viewMenu->actions();
+      for (QList<QAction*>::iterator it = actions.begin(); it != actions.end(); ++it) {
+        if ((*it)->text() == "Toggle scale bar" && _scaleBar) {
+          _settings->setValue("scaleBarToggled", (*it)->isChecked());
+        }
+        else if ((*it)->text() == "Toggle mini-map" && _map) {
+          _settings->setValue("miniMapToggled", (*it)->isChecked());
+        }
+        else if ((*it)->text() == "Toggle coverage view" && _map) {
+          _settings->setValue("coverageViewToggled", (*it)->isChecked());
+        }
+      }
+    }
+    _settings->endGroup();
+  }
   if (_prefetchthread) {
     _prefetchthread->deleteLater();
     _prefetchthread = NULL;
@@ -352,6 +450,11 @@ void PathologyViewer::close() {
     _map->setHidden(true);
     _map->deleteLater();
     _map = NULL;
+  }
+  if (_scaleBar) {
+    _scaleBar->setHidden(true);
+    _scaleBar->deleteLater();
+    _scaleBar = NULL;
   }
   setEnabled(false);
 }

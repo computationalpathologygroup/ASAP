@@ -173,8 +173,10 @@ bool LIFImage::initialize(const std::string& imagePath) {
     dims.push_back(_seriesDimensions[_selectedSeries]["y"]);
     dims.push_back(_seriesDimensions[_selectedSeries]["x"]);
     _spacing.clear();
-    _spacing.push_back(_physicalSizeXs[0]);
-    _spacing.push_back(_physicalSizeYs[0]);
+    if (!_physicalSizeXs.empty() && !_physicalSizeYs.empty()) {
+      _spacing.push_back(_physicalSizeXs[0]);
+      _spacing.push_back(_physicalSizeYs[0]);
+    }
     _levelDimensions.push_back(dims);
     _colorType = _colorTypes[_selectedSeries];
     _dataType = _dataTypes[_selectedSeries];

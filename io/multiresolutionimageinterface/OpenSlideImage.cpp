@@ -63,14 +63,20 @@ bool OpenSlideImage::initialize(const std::string& imagePath) {
       _levelDimensions.push_back(tmp);
     }
     std::stringstream ssm;
-    ssm <<  (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X) ? openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X) : "1.0");
-    float tmp;
-    ssm >> tmp;
-    _spacing[0] = tmp;
-    ssm.clear();
-    ssm <<  (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y) ? openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X) : "1.0");
-    ssm >> tmp;
-    _spacing[1] = tmp;
+    if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X)) {
+      ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X);
+      float tmp;
+      ssm >> tmp;
+      _spacing.push_back(tmp);
+      ssm.clear();
+    }
+    if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y)) {
+      ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y);
+      float tmp;
+      ssm >> tmp;
+      _spacing.push_back(tmp);
+      ssm.clear();
+    }
     _fileType = openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_VENDOR);
     _isValid = true;
     createCache<unsigned int>();

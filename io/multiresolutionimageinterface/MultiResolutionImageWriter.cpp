@@ -34,12 +34,7 @@ MultiResolutionImageWriter::~MultiResolutionImageWriter() {
 void MultiResolutionImageWriter::setSpacing(std::vector<double>& spacing) {
   if (_tiff) {
     TIFFSetField(_tiff, TIFFTAG_RESOLUTIONUNIT, RESUNIT_CENTIMETER);
-    if (spacing.empty()) {
-      double defaultSpacing = 1.0;
-      TIFFSetField(_tiff, TIFFTAG_XRESOLUTION, defaultSpacing);
-      TIFFSetField(_tiff, TIFFTAG_YRESOLUTION, defaultSpacing);
-    }
-    else {
+    if (!spacing.empty()) {
       double pixPerCmX = (1. / spacing[0]) * 10000;
       double pixPerCmY = (1. / spacing[1]) * 10000;
       TIFFSetField(_tiff, TIFFTAG_XRESOLUTION, pixPerCmX);
@@ -337,10 +332,12 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
   TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &h);
   TIFFGetField(_tiff, TIFFTAG_SAMPLESPERPIXEL, &nrsamples);
   TIFFGetField(_tiff, TIFFTAG_BITSPERSAMPLE, &nrbits);
-  TIFFGetField(_tiff, TIFFTAG_XRESOLUTION, &spacingX);
-  TIFFGetField(_tiff, TIFFTAG_YRESOLUTION, &spacingY);
-  spacing.push_back(1. / (spacingX / (10000.)));
-  spacing.push_back(1. / (spacingY / (10000.)));
+  if (TIFFGetField(_tiff, TIFFTAG_XRESOLUTION, &spacingX) == 1) {
+    if (TIFFGetField(_tiff, TIFFTAG_YRESOLUTION, &spacingY) == 1) {
+      spacing.push_back(1. / (spacingX / (10000.)));
+      spacing.push_back(1. / (spacingY / (10000.)));
+    }
+  }
   // Determine the amount of pyramid levels
   unsigned int pyramidlevels = 1;
   unsigned int lowestwidth = w;
@@ -488,13 +485,15 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
     if (level != 1) {
       TIFFClose(prevLevelTiff);
     }
-    spacing[0] *= 2.;
-    spacing[1] *= 2.;
     TIFFSetField(_tiff, TIFFTAG_RESOLUTIONUNIT, RESUNIT_CENTIMETER);
-    double pixPerCmX = (1. / spacing[0]) * 10000;
-    double pixPerCmY = (1. / spacing[1]) * 10000;
-    TIFFSetField(levelTiff, TIFFTAG_XRESOLUTION, pixPerCmX);
-    TIFFSetField(levelTiff, TIFFTAG_YRESOLUTION, pixPerCmY);
+    if (!spacing.empty()) {
+      spacing[0] *= 2.;
+      spacing[1] *= 2.;
+      double pixPerCmX = (1. / spacing[0]) * 10000;
+      double pixPerCmY = (1. / spacing[1]) * 10000;
+      TIFFSetField(levelTiff, TIFFTAG_XRESOLUTION, pixPerCmX);
+      TIFFSetField(levelTiff, TIFFTAG_YRESOLUTION, pixPerCmY);
+    }
     TIFFClose(levelTiff);
   }
   //! Write base directory to disk
@@ -514,10 +513,12 @@ template <typename T> int MultiResolutionImageWriter::incorporatePyramid() {
 
     float spacingX = 0, spacingY = 0;
     std::vector<double> spacing;
-    TIFFGetField(level, TIFFTAG_XRESOLUTION, &spacingX);
-    TIFFGetField(level, TIFFTAG_YRESOLUTION, &spacingY);
-    spacing.push_back(1. / (spacingX / (10000.)));
-    spacing.push_back(1. / (spacingY / (10000.)));
+    if (TIFFGetField(level, TIFFTAG_XRESOLUTION, &spacingX) == 1) {
+      if (TIFFGetField(level, TIFFTAG_YRESOLUTION, &spacingY) == 1) {
+        spacing.push_back(1. / (spacingX / (10000.)));
+        spacing.push_back(1. / (spacingY / (10000.)));
+      }
+    }
 
     unsigned int levelw, levelh;
     TIFFGetField(level, TIFFTAG_IMAGEWIDTH, &levelw);

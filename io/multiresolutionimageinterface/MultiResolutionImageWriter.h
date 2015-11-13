@@ -144,9 +144,6 @@ public:
     return _numberOfIndexedColors;
   }
 
-  // Sets the pixel spacing of the image, if spacing is an empty vector, writes 1, 1
-  virtual void setSpacing(std::vector<double>& spacing);
-
   //! Gets the compression
   const pathology::ColorType getColorType() const 
   {return _cType;}
@@ -154,6 +151,9 @@ public:
   void setTileSize(const unsigned int& tileSize) {
     _tileSize = tileSize;
   }
+
+  // Sets the pixel spacing of the image
+  virtual void setSpacing(std::vector<double>& spacing);
 
   const unsigned int getTileSize() const {
     return _tileSize;

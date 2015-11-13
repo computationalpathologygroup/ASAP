@@ -25,6 +25,7 @@ set(HEADERS
   PrefetchThread.h
   WSITileGraphicsItem.h
   UtilityFunctions.h
+  ScaleBar.h
   interfaces/interfaces.h
   QtProgressMonitor.h
 )
@@ -40,6 +41,7 @@ set(SOURCE
   PrefetchThread.cpp
   TileManager.cpp
   WSITileGraphicsItem.cpp
+  ScaleBar.cpp
   UtilityFunctions.cpp
   PathologyWorkstation.rc
   QtProgressMonitor.cpp

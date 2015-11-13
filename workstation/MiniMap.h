@@ -17,8 +17,10 @@ public:
   int heightForWidth(int w) const;
   void setTileManager(TileManager* manager);
 
-  public slots:
+public slots:
   void updateFieldOfView(const QRectF& fieldOfView);
+  void toggleCoverageMap(bool drawCoverageMap);
+  void onCoverageUpdated();
 
 protected:
   void mousePressEvent(QMouseEvent *event);
@@ -31,6 +33,7 @@ private:
   TileManager* _manager;
   float _aspectRatio; //Width / height
   static const char* const coverageColors[];
+  bool _drawCoverageMap;
 
 signals :
   void positionClicked(QPointF position);

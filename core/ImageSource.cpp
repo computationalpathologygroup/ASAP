@@ -3,7 +3,7 @@
 using namespace pathology;
 
 ImageSource::ImageSource() :
-  _spacing(2, 1.),
+  _spacing(),
   _samplesPerPixel(0),
   _colorType(InvalidColorType),
   _dataType(InvalidDataType),

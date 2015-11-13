@@ -16,7 +16,8 @@ public:
     NONE,
     DOT,
     POLYGON,
-    SPLINE
+    SPLINE,
+    POINTSET
   };
 
   Annotation();

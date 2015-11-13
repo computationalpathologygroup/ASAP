@@ -138,15 +138,13 @@ bool TIFFImage::initialize(const std::string& imagePath) {
   TIFFSetDirectory(_tiff, 0);
   float spacingX;
   float spacingY;
-  if (!TIFFGetField(_tiff, TIFFTAG_XRESOLUTION, &spacingX)) {
-    spacingX = 1.;
+  if (TIFFGetField(_tiff, TIFFTAG_XRESOLUTION, &spacingX) == 1) {
+    _spacing.push_back(1. / (spacingX / (10000.)));
   }
-  if (!TIFFGetField(_tiff, TIFFTAG_YRESOLUTION, &spacingY)) {
-    spacingY = 1.; 
+  if (TIFFGetField(_tiff, TIFFTAG_YRESOLUTION, &spacingY) == 1) {
+    _spacing.push_back(1. / (spacingY / (10000.)));
   }
-  _spacing[0] = 1. / (spacingX / (10000.));
-  _spacing[1] = 1. / (spacingY / (10000.));
-
+  
   TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
   double* min_values;  
   if (TIFFGetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &min_values)) {

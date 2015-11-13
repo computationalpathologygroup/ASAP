@@ -13,9 +13,9 @@ MiniMap::MiniMap(QPixmap* overview, QWidget *parent)
     _overview(overview),
     _fieldOfView(QRectF()),
     _aspectRatio(1),
-    _manager(NULL)
+    _manager(NULL),
+    _drawCoverageMap(true)
 {
-  //setAttribute(Qt::WA_StaticContents);
   QSizePolicy policy;
   policy.setHeightForWidth(true);
   policy.setHorizontalPolicy(QSizePolicy::Fixed);
@@ -32,12 +32,27 @@ MiniMap::~MiniMap() {
   }
 }
 
+void MiniMap::toggleCoverageMap(bool drawCoverageMap) {
+  bool repaintNeeded = false;
+  if (_drawCoverageMap != drawCoverageMap) {
+    repaintNeeded = true;
+  }
+  _drawCoverageMap = drawCoverageMap;
+  if (repaintNeeded) {
+    this->repaint();
+  }
+}
+
 void MiniMap::setTileManager(TileManager* manager) {
   _manager = manager;
 }
 
 void MiniMap::updateFieldOfView(const QRectF& fieldOfView) {
   _fieldOfView = fieldOfView;
+  this->update();
+}
+
+void MiniMap::onCoverageUpdated() {
   this->update();
 }
 
@@ -60,7 +75,7 @@ void MiniMap::paintEvent(QPaintEvent *event) {
     painter.drawRect(1, 1, width() - 2, height() - 2);
     painter.setPen(QPen(Qt::black, 1));
     painter.drawRect(0, 0, width() - 1, height() - 1);
-    if (_manager) {
+    if (_manager && _drawCoverageMap) {
       painter.save();
       std::vector<QPainterPath> pths = _manager->getCoverageMaps();
       QPainterPath bck;

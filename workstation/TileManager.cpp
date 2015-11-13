@@ -16,7 +16,8 @@ _lastLevel(),
 _coverage(),
 _cache(cache),
 _scene(scene),
-_coverageMaps()
+_coverageMaps(),
+_coverageMapCacheMode(false)
 {
 }
 
@@ -57,6 +58,9 @@ void TileManager::loadAllTilesForLevel(unsigned int level) {
 }
 
 void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level) {
+  if (level > _lastRenderLevel) {
+    return;
+  }
   if (_img && _renderThread) {
     QPoint topLeftTile = this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
     QPoint bottomRightTile = this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
@@ -109,6 +113,13 @@ void TileManager::onTileRemoved(WSITileGraphicsItem* tile) {
   delete tile;
 }
 
+void TileManager::setCoverageMapModeToCache() {
+  _coverageMapCacheMode = true;
+}
+void TileManager::setCoverageMapModeToVisited() {
+  _coverageMapCacheMode = false;
+}
+
 unsigned char TileManager::providesCoverage(unsigned int level, int tile_x, int tile_y) {
   std::map<int, std::map<int, unsigned char> >& cover_level = _coverage[level];
   if (cover_level.empty()) {
@@ -153,7 +164,7 @@ bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
 void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers) {
   _coverage[level][tile_x][tile_y] = covers;
   if (_coverageMaps.empty()) {
-    _coverageMaps.resize(_lastRenderLevel);
+    _coverageMaps.resize(_lastRenderLevel + 1);
   }
   if (level != _lastRenderLevel) {
     if (covers == 2 || covers == 0) {
@@ -164,10 +175,13 @@ void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsign
         _coverageMaps[level] = _coverageMaps[level].united(rect);
       }
       else if (covers == 0) {
-        _coverageMaps[level] = _coverageMaps[level].subtracted(rect);
+        if (_coverageMapCacheMode) {
+          _coverageMaps[level] = _coverageMaps[level].subtracted(rect);
+        }
       }
     }
   }
+  emit coverageUpdated();
 }
 
 std::vector<QPainterPath> TileManager::getCoverageMaps() {
@@ -189,6 +203,7 @@ void TileManager::clear() {
   }
   _coverage.clear();
   _coverageMaps.clear();
+  emit coverageUpdated();
 }
 
 void TileManager::refresh() {

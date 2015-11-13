@@ -27,6 +27,7 @@ private:
   WSITileGraphicsItemCache* _cache;
   QGraphicsScene* _scene;
   std::vector<QPainterPath> _coverageMaps;
+  bool _coverageMapCacheMode;
   
   QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
   QPointF tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level);
@@ -34,6 +35,9 @@ private:
 
 
   TileManager(const TileManager& that);
+
+signals:
+  void coverageUpdated();
 
 public:
   // make sure to set `item` to NULL in the constructor
@@ -48,6 +52,8 @@ public:
   bool isCovered(unsigned int level, int tile_x = -1, int tile_y = -1);
   void setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers);
   std::vector<QPainterPath> getCoverageMaps();
+  void setCoverageMapModeToCache();
+  void setCoverageMapModeToVisited();
   
   void clear();
   void refresh();

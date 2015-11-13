@@ -12,6 +12,8 @@ class ToolPluginInterface;
 class MiniMap;
 class WSITileGraphicsItemCache;
 class TileManager;
+class ScaleBar;
+class QSettings;
 
 class EXPORT_PATHOLOGYWORKSTATION PathologyViewer : public QGraphicsView
 {
@@ -19,8 +21,8 @@ class EXPORT_PATHOLOGYWORKSTATION PathologyViewer : public QGraphicsView
     
 public:
 
-  QPointF _zoomToScenePos;
-  QPointF _zoomToViewPos;
+    QPointF _zoomToScenePos;
+    QPointF _zoomToViewPos;
 
     PathologyViewer(QWidget *parent = 0);
     ~PathologyViewer();
@@ -75,7 +77,7 @@ private :
     void wheelEvent(QWheelEvent *event);    
 
     // Functions for overviewmap
-    void initializeMiniMap(unsigned int level);
+    void initializeGUIComponents(unsigned int level);
     void initializeImage(QGraphicsScene *scn, unsigned int tileSize, unsigned int lastLevel);
     float _sceneScale;
 
@@ -86,6 +88,12 @@ private :
 
     // Minimap
     MiniMap *_map; 
+
+    // ScaleBar
+    ScaleBar* _scaleBar;
+
+    // QSettings
+    QSettings* _settings;
 
     // Tools
     ToolPluginInterface* _activeTool;

@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="AnnotationWorkstationExtensionPlugin_icons">
     <file alias="dot.png">dot.png</file>
+	<file alias="pointset.png">pointset.png</file>
     <file alias="poly.png">poly.png</file>
     <file alias="freehand.xpm">freehand.xpm</file>
     <file alias="spline.png">spline.png</file>

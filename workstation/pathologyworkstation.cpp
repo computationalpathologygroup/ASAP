@@ -41,7 +41,7 @@ const char* PathologyWorkstation::sharedLibraryExtensions = ".so";
 #endif
 
 using namespace std;
-// 
+
 PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
     QMainWindow(parent),
     _img(NULL),
@@ -74,6 +74,7 @@ void PathologyWorkstation::writeSettings()
 {
   _settings->beginGroup("ASAP");
   _settings->setValue("size", size());
+  _settings->setValue("maximized", isMaximized());
   _settings->endGroup();
 }
 
@@ -81,6 +82,9 @@ void PathologyWorkstation::readSettings()
 {
   _settings->beginGroup("ASAP");
   resize(_settings->value("size", QSize(1037, 786)).toSize());
+  if (_settings->value("maximized", false).toBool()) {
+    this->setWindowState(Qt::WindowMaximized);
+  }
   _settings->endGroup();
 }
 
@@ -257,21 +261,6 @@ void PathologyWorkstation::setupUi()
   actionClose->setObjectName(QStringLiteral("actionClose"));
   actionOpen->setIcon(QIcon(QPixmap(":/ASAP_icons/open.png")));
   actionClose->setIcon(QIcon(QPixmap(":/ASAP_icons/close.png")));
-  centralWidget = new QWidget(this);
-  centralWidget->setObjectName(QStringLiteral("centralWidget"));
-  sizePolicy.setHeightForWidth(centralWidget->sizePolicy().hasHeightForWidth());
-  centralWidget->setSizePolicy(sizePolicy);
-  centralWidget->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
-  horizontalLayout_2 = new QHBoxLayout(centralWidget);
-  horizontalLayout_2->setSpacing(6);
-  horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
-  horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-  pathologyView = new PathologyViewer(centralWidget);
-  pathologyView->setObjectName(QStringLiteral("pathologyView"));
-
-  horizontalLayout_2->addWidget(pathologyView);
-
-  this->setCentralWidget(centralWidget);
   menuBar = new QMenuBar(this);
   menuBar->setObjectName(QStringLiteral("menuBar"));
   menuBar->setGeometry(QRect(0, 0, 1037, 21));
@@ -295,6 +284,21 @@ void PathologyWorkstation::setupUi()
   menuBar->addAction(menuView->menuAction());
   menuFile->addAction(actionOpen);
   menuFile->addAction(actionClose);
+  centralWidget = new QWidget(this);
+  centralWidget->setObjectName(QStringLiteral("centralWidget"));
+  sizePolicy.setHeightForWidth(centralWidget->sizePolicy().hasHeightForWidth());
+  centralWidget->setSizePolicy(sizePolicy);
+  centralWidget->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+  horizontalLayout_2 = new QHBoxLayout(centralWidget);
+  horizontalLayout_2->setSpacing(6);
+  horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
+  horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+  pathologyView = new PathologyViewer(centralWidget);
+  pathologyView->setObjectName(QStringLiteral("pathologyView"));
+
+  horizontalLayout_2->addWidget(pathologyView);
+
+  this->setCentralWidget(centralWidget);
 }
 
 void PathologyWorkstation::retranslateUi()

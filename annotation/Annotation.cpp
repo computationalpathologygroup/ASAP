@@ -3,7 +3,7 @@
 #include "psimpl.h"
 #include <limits>
 
-const char* Annotation::_typeStrings[5] = { "None", "Dot", "Polygon", "Spline"};
+const char* Annotation::_typeStrings[5] = { "None", "Dot", "Polygon", "Spline", "PointSet"};
 
 Annotation::Annotation() :
   _type(Annotation::NONE),
