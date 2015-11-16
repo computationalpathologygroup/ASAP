@@ -67,6 +67,7 @@ private:
   void loadPlugins();
   void readSettings();
   void writeSettings();
+  void openFile(const QString& fileName);
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };
