@@ -68,6 +68,10 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
   view->setEnabled(false);
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
   readSettings();
+  QStringList args = QApplication::arguments();
+  if (args.size() > 1) {
+    openFile(args[1]);
+  }
 }
 
 void PathologyWorkstation::writeSettings()
@@ -200,32 +204,38 @@ void PathologyWorkstation::on_actionClose_triggered()
     }
 }
 
+void PathologyWorkstation::openFile(const QString& fileName) {
+  if (!fileName.isEmpty()) {
+    if (_img) {
+      on_actionClose_triggered();
+    }
+    std::string fn = fileName.toStdString();
+    _settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
+    _settings->setValue("currentFile", QFileInfo(fileName).fileName());
+    this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
+    MultiResolutionImageReader imgReader;
+    _img = imgReader.open(fn);
+    if (_img) {
+      if (_img->valid()) {
+        vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
+        PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
+        view->initialize(_img);
+        emit newImageLoaded(_img, fn);
+      }
+      else {
+        statusBar->showMessage("Unsupported file type version");
+      }
+    }
+    else {
+      statusBar->showMessage("Invalid file type");
+    }
+  }
+}
+
 void PathologyWorkstation::on_actionOpen_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Slide files (*.lif *.svs *.mrxs *.ndpi *.tif *.tiff);;All files (*.*)"));
-    if (!fileName.isEmpty()) {
-      if (_img) {
-        on_actionClose_triggered();
-      }
-      std::string fn = fileName.toStdString();
-      _settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
-      _settings->setValue("currentFile", QFileInfo(fileName).fileName());
-      this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
-      MultiResolutionImageReader imgReader;
-      _img = imgReader.open(fn);
-      if (_img) {
-          if (_img->valid()) {
-            vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels()-1);
-            PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-            view->initialize(_img);
-            emit newImageLoaded(_img, fn);
-          } else {
-            statusBar->showMessage("Unsupported file type version");
-          }
-      } else {
-          statusBar->showMessage("Invalid file type");
-      }
-    }
+    openFile(fileName);
 }
 
 void PathologyWorkstation::setCacheSize(const unsigned long long& cacheMaxByteSize) {
