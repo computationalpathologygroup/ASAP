@@ -24,6 +24,10 @@ public:
 
   void setCacheSize(const unsigned long long cacheSize);
 
+  // Reimplementation of getRawRegion to allow direct use of openslide without copy for better performance
+  void getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+    const unsigned long long& height, const unsigned int& level, unsigned char*& data);
+
 protected :
   void cleanup();
   

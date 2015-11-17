@@ -38,6 +38,21 @@ void OpenSlideImage::setIgnoreAlpha(const bool ignoreAlpha) {
   _ignoreAlpha = ignoreAlpha;
 }
 
+void OpenSlideImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+  const unsigned long long& height, const unsigned int& level, unsigned char*& data) {
+  if (level >= getNumberOfLevels()) {
+    return;
+  }
+  if (_slide && this->getDataType() == pathology::UChar) {
+    if (this->_ignoreAlpha) {
+      MultiResolutionImage::getRawRegion<unsigned char>(startX, startY, width, height, level, data);
+    }
+    else {
+      openslide_read_region(_slide, reinterpret_cast<unsigned int*>(data), startX, startY, level, width, height);
+    }
+  }
+}
+
 bool OpenSlideImage::initialize(const std::string& imagePath) {
   boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
   cleanup();
