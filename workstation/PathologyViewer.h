@@ -61,7 +61,7 @@ public slots :
     void moveTo(const QPointF& pos);
     void changeActiveTool();
     void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
-    void onForegroundImageChanged(MultiResolutionImage* for_img);
+    void onForegroundImageChanged(MultiResolutionImage* for_img, float scale);
 
 private :
     

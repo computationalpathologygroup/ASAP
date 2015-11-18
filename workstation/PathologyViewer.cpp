@@ -258,9 +258,9 @@ void PathologyViewer::initialize(MultiResolutionImage *img) {
   emit fieldOfViewChanged(FOVImage, _img, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
 }
 
-void PathologyViewer::onForegroundImageChanged(MultiResolutionImage* for_img) {
+void PathologyViewer::onForegroundImageChanged(MultiResolutionImage* for_img, float scale) {
   if (_renderthread) {
-    _renderthread->setForegroundImage(for_img);
+    _renderthread->setForegroundImage(for_img, scale);
     _manager->refresh();
   }
 }

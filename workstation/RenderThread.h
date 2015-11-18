@@ -29,7 +29,7 @@ public:
   ~RenderThread();
 
   void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level);
-  void setForegroundImage(MultiResolutionImage* for_img);
+  void setForegroundImage(MultiResolutionImage* for_img, float scale = 1.);
   
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
@@ -59,6 +59,7 @@ private :
   std::vector<RenderWorker*> _workers;
   int _channel;
   float _opacity;
+  float _foregroundImageScale;
   unsigned int _threadsWaiting;
 };
   

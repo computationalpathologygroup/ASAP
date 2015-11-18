@@ -15,7 +15,8 @@ RenderThread::RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* 
   _for_img(for_img),
   _abort(false),
   _channel(0),
-  _threadsWaiting(0)
+  _threadsWaiting(0),
+  _foregroundImageScale(1.)
 {
   for (int i = 0; i < nrThreads; ++i) {
     RenderWorker* worker = new RenderWorker(this, _bck_img, _for_img);
@@ -76,11 +77,11 @@ void RenderThread::addJob(const unsigned int tileSize, const long long imgPosX, 
     _condition.wakeOne();
 }
 
-void RenderThread::setForegroundImage(MultiResolutionImage* for_img) {
+void RenderThread::setForegroundImage(MultiResolutionImage* for_img, float scale) {
   QMutexLocker locker(&_jobListMutex);
   _for_img = for_img;
   for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setForegroundImage(for_img);
+    _workers[i]->setForegroundImage(for_img, scale);
   }
 }
 

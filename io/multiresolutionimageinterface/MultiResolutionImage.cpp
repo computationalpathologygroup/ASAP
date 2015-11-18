@@ -2,8 +2,8 @@
 
 using namespace pathology;
 
-// Subsequent overload specialization to not re-copy data when datatypes are the same
-void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
+// Subsequent specialization to not re-copy data when datatypes are the same
+template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, float*& data) {
     if (level >= getNumberOfLevels()) {
       return;
@@ -30,7 +30,7 @@ void MultiResolutionImage::getRawRegion(const long long& startX, const long long
     }
 }
 
-void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
+template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned char*& data) {
     if (level >= getNumberOfLevels()) {
       return;
@@ -57,7 +57,7 @@ void MultiResolutionImage::getRawRegion(const long long& startX, const long long
     }
 }
 
-void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
+template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned short*& data) {
     if (level >= getNumberOfLevels()) {
       return;
@@ -84,7 +84,7 @@ void MultiResolutionImage::getRawRegion(const long long& startX, const long long
     }
 }
 
-void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
+template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned int*& data) {
     if (level >= getNumberOfLevels()) {
       return;

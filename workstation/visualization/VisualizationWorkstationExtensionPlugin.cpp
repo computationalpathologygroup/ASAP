@@ -18,6 +18,7 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _dockWidget(NULL),
   _likelihoodCheckBox(NULL),
   _foreground(NULL),
+  _foregroundScale(1.),
   _opacity(1.0),
   _annotations(NULL),
   _lst(NULL)
@@ -37,7 +38,8 @@ VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugi
   }
   
   if (_foreground) {
-    emit changeForegroundImage(NULL);
+    _foregroundScale = 1.;
+    emit changeForegroundImage(NULL, _foregroundScale);
     _foreground = NULL;
   }
   _dockWidget = NULL;
@@ -45,7 +47,7 @@ VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugi
 
 bool VisualizationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _viewer = viewer;
-  connect(this, SIGNAL(changeForegroundImage(MultiResolutionImage*)), viewer, SLOT(onForegroundImageChanged(MultiResolutionImage*)));
+  connect(this, SIGNAL(changeForegroundImage(MultiResolutionImage*, float)), viewer, SLOT(onForegroundImageChanged(MultiResolutionImage*, float)));
   return true;
 }
 
@@ -77,18 +79,26 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionIm
     if (core::fileExists(likImgPth)) {
       MultiResolutionImageReader reader;
       if (_foreground) {
-        emit changeForegroundImage(NULL);
+        _foregroundScale = 1;
+        emit changeForegroundImage(NULL, _foregroundScale);
         _foreground = NULL;
       }
       _foreground = reader.open(likImgPth);
-      if (_foreground && _likelihoodCheckBox && _likelihoodCheckBox->isChecked()) {
-        emit changeForegroundImage(_foreground);
-      }
-      else {
-        emit changeForegroundImage(NULL);
-      }
-      if (_viewer) {
-        _viewer->setForegroundOpacity(_opacity);
+      if (_foreground) {
+        std::vector<unsigned long long> dimsBG = img->getDimensions();
+        std::vector<unsigned long long> dimsFG = _foreground->getDimensions();
+        if (dimsBG[0] / dimsFG[0] == dimsBG[1] / dimsFG[1]) {
+          _foregroundScale = dimsBG[0] / dimsFG[0];
+          if (_likelihoodCheckBox && _likelihoodCheckBox->isChecked()) {
+            emit changeForegroundImage(_foreground, _foregroundScale);
+          }
+          else {
+            emit changeForegroundImage(NULL, _foregroundScale);
+          }
+          if (_viewer) {
+            _viewer->setForegroundOpacity(_opacity);
+          }
+        }
       }
     }
     if (core::fileExists(segmXMLPth)) {
@@ -106,7 +116,8 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
     removeSegmentationsFromViewer();
   }
   if (_foreground) {
-    emit changeForegroundImage(NULL);
+    _foregroundScale = 1;
+    emit changeForegroundImage(NULL, _foregroundScale);
     delete _foreground;
     _foreground = NULL;
   }
@@ -117,10 +128,10 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
 
 void VisualizationWorkstationExtensionPlugin::onEnableLikelihoodToggled(bool toggled) {
   if (!toggled) {
-    emit changeForegroundImage(NULL);
+    emit changeForegroundImage(NULL, _foregroundScale);
   }
   else {
-    emit changeForegroundImage(_foreground);
+    emit changeForegroundImage(_foreground, _foregroundScale);
   }
 }
 

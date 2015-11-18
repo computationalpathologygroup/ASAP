@@ -33,6 +33,7 @@
 #include "WSITileGraphicsItemCache.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "io/multiresolutionimageinterface/OpenSlideImage.h"
 
 #ifdef WIN32
 const char* PathologyWorkstation::sharedLibraryExtensions = ".dll";
@@ -217,6 +218,9 @@ void PathologyWorkstation::openFile(const QString& fileName) {
     _img = imgReader.open(fn);
     if (_img) {
       if (_img->valid()) {
+        if (dynamic_cast<OpenSlideImage*>(_img)) {
+          dynamic_cast<OpenSlideImage*>(_img)->setIgnoreAlpha(false);
+        }
         vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
         PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
         view->initialize(_img);

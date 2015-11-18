@@ -18,7 +18,7 @@ public:
   ~RenderWorker();
   void abort();
   void setChannel(int channel);
-  void setForegroundImage(MultiResolutionImage* for_img);
+  void setForegroundImage(MultiResolutionImage* for_img, float scale = 1.);
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
 
@@ -33,6 +33,7 @@ private :
   bool _abort;
   int _channel;
   float _opacity;
+  float _foregroundImageScale;
 
 signals:
   void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);

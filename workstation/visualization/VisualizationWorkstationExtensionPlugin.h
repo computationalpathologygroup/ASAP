@@ -25,6 +25,7 @@ private :
   QCheckBox* _likelihoodCheckBox;
   QCheckBox* _segmentationCheckBox;
   float _opacity;
+  float _foregroundScale;
   XmlRepository* _annotations;
   AnnotationList* _lst;
   QList<QGraphicsPolygonItem*> _polygons;
@@ -43,7 +44,7 @@ public slots:
     void onEnableSegmentationToggled(bool toggled);
 
 signals: 
-    void changeForegroundImage(MultiResolutionImage*);
+    void changeForegroundImage(MultiResolutionImage*, float scale);
 };
 
 #endif

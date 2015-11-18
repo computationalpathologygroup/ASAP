@@ -15,7 +15,8 @@ RenderWorker::RenderWorker(RenderThread* thread, MultiResolutionImage* bck_img, 
   _for_img(for_img),
   _abort(false),
   _channel(0),
-  _opacity(1.0)
+  _opacity(1.0),
+  _foregroundImageScale(1.)
 {
 }
 
@@ -34,9 +35,10 @@ void RenderWorker::setChannel(int channel) {
   mutex.unlock();
 }
 
-void RenderWorker::setForegroundImage(MultiResolutionImage* for_img) {
+void RenderWorker::setForegroundImage(MultiResolutionImage* for_img, float scale) {
   mutex.lock();
   _for_img = for_img;
+  _foregroundImageScale = scale;
   mutex.unlock();
 }
 
@@ -62,26 +64,37 @@ void RenderWorker::run()
     QPixmap _foreground;
     if (_for_img) {
       if (_for_img->getColorType() == pathology::ColorType::Monochrome) {
-        if (_for_img->getDataType() == pathology::DataType::UChar) {
-          // Label map
-          unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize];
-          _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, 0, 1, 0, 255, 0);
-          _foreground = QPixmap::fromImage(renderedImage);
-        }
-        else if (_for_img->getDataType() == pathology::DataType::UInt32) {
-          // Label map
-          unsigned int* imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize];
-          _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, 0, 1, 0, 255, 0);
-          _foreground = QPixmap::fromImage(renderedImage);
-        }
-        else if (_for_img->getDataType() == pathology::DataType::Float) {
-          //Likelihood map
-          float* imgBuf = new float[currentJob._tileSize*currentJob._tileSize];
-          _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, 0, 1, 0, 1.2, 1);
-          _foreground = QPixmap::fromImage(renderedImage);
+        if (currentJob._level < _for_img->getNumberOfLevels()) {
+          if (_for_img->getDataType() == pathology::DataType::UChar) {
+            // Label map
+            unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize];
+            _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._imgPosY * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._level, imgBuf);
+            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, 0, 1, 0, 255, 0);
+            if (_foregroundImageScale != 1) {
+              renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
+            }
+            _foreground = QPixmap::fromImage(renderedImage);
+          }
+          else if (_for_img->getDataType() == pathology::DataType::UInt32) {
+            // Label map
+            unsigned int* imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize];
+            _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._imgPosY * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._level, imgBuf);
+            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, 0, 1, 0, 255, 0);
+            if (_foregroundImageScale != 1) {
+              renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
+            }
+            _foreground = QPixmap::fromImage(renderedImage);
+          }
+          else if (_for_img->getDataType() == pathology::DataType::Float) {
+            //Likelihood map
+            float* imgBuf = new float[currentJob._tileSize*currentJob._tileSize];
+            _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._imgPosY * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._level, imgBuf);
+            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, 0, 1, 0, 255, 0);
+            if (_foregroundImageScale != 1) {
+              renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
+            }
+            _foreground = QPixmap::fromImage(renderedImage);
+          }
         }
       }
     }
