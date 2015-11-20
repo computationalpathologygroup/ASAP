@@ -5,11 +5,17 @@
 #include "Repository.h"
 
 class EXPORT_PATHOLOGYANNOTATION ImageScopeRepository : public Repository {
+private:
+  float _closingDistance;
+
 public:
   ImageScopeRepository(AnnotationList* list);
 
   virtual bool save() const;
   virtual bool load();
+
+  void setClosingDistance(const float& closingDistance);
+  float getClosingDistance();
 };
 
 #endif

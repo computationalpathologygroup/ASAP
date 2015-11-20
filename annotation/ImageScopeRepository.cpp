@@ -13,8 +13,17 @@
 #include "pugixml.hpp"
 
 ImageScopeRepository::ImageScopeRepository(AnnotationList* list) :
-  Repository(list)
+  Repository(list),
+  _closingDistance(30.)
 {
+}
+
+void ImageScopeRepository::setClosingDistance(const float& closingDistance) {
+  _closingDistance = closingDistance;
+}
+
+float ImageScopeRepository::getClosingDistance() {
+  return _closingDistance;
 }
 
 bool ImageScopeRepository::save() const
@@ -85,7 +94,7 @@ bool ImageScopeRepository::load()
       std::string curName = idToName[curId];
       std::vector<std::pair<double, double> > closedCoordList = coordIt->second;
       double dist = sqrt(pow(closedCoordList.begin()->first - closedCoordList.back().first, 2) + pow(closedCoordList.begin()->second - closedCoordList.back().second, 2));
-      if (dist > 30) {
+      if (dist > _closingDistance) {
         bool isOpen = true;
         for (std::map<unsigned int, std::vector<std::pair<double, double> > >::const_iterator coordIt2 = idToCoords.begin(); coordIt2 != idToCoords.end(); ++coordIt2) {
           if (usedIds[coordIt2->first] == 1) {
@@ -95,7 +104,7 @@ bool ImageScopeRepository::load()
           double distFirstLast = sqrt(pow(closedCoordList.begin()->first - coordIt2->second.back().first, 2) + pow(closedCoordList.begin()->second - coordIt2->second.back().second, 2));
           double distLastFirst = sqrt(pow(closedCoordList.back().first - coordIt2->second.begin()->first, 2) + pow(closedCoordList.back().second - coordIt2->second.begin()->second, 2));
           double distLastLast = sqrt(pow(closedCoordList.back().first - coordIt2->second.back().first, 2) + pow(closedCoordList.back().second - coordIt2->second.back().first, 2));
-          if (distLastFirst < 30) {
+          if (distLastFirst < _closingDistance) {
             closedCoordList.insert(closedCoordList.end(), coordIt2->second.begin(), coordIt2->second.end());
             usedIds[coordIt2->first] = 1;
             if (curName.empty()) {
@@ -103,7 +112,7 @@ bool ImageScopeRepository::load()
             }
             coordIt2 = idToCoords.begin();
           }
-          else if (distLastLast < 30) {
+          else if (distLastLast < _closingDistance) {
             std::vector< std::pair<double, double> > reversed = coordIt2->second;
             std::reverse(reversed.begin(), reversed.end());
             closedCoordList.insert(closedCoordList.end(), reversed.begin(), reversed.end());
@@ -113,7 +122,7 @@ bool ImageScopeRepository::load()
             }
             coordIt2 = idToCoords.begin();
           }
-          else if (distFirstLast < 30) {
+          else if (distFirstLast < _closingDistance) {
             closedCoordList.insert(closedCoordList.begin(), coordIt2->second.begin(), coordIt2->second.end());
             usedIds[coordIt2->first] = 1;
             if (curName.empty()) {
@@ -121,7 +130,7 @@ bool ImageScopeRepository::load()
             }
             coordIt2 = idToCoords.begin();
           }
-          else if (distFirstFirst < 30) {
+          else if (distFirstFirst < _closingDistance) {
             std::vector< std::pair<double, double> > reversed = coordIt2->second;
             std::reverse(reversed.begin(), reversed.end());
             closedCoordList.insert(closedCoordList.begin(), reversed.begin(), reversed.end());
@@ -138,7 +147,7 @@ bool ImageScopeRepository::load()
       }
       Annotation* annot = new Annotation();
       annot->setName(curName + "_" + core::tostring(annot_nr));
-      annot->setTypeFromString("Spline");
+      annot->setTypeFromString("Polygon");
       annot_nr += 1;
       for (std::vector<std::pair<double, double> >::iterator pointIt = closedCoordList.begin(); pointIt != closedCoordList.end(); ++pointIt) {
         annot->addCoordinate(Point(pointIt->first, pointIt->second));

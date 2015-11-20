@@ -7,6 +7,7 @@
 #include "AnnotationGroup.h"
 #include "QtAnnotation.h"
 #include "Annotation.h"
+#include "ImageScopeRepository.h"
 #include "AnnotationToMask.h"
 #include "DotQtAnnotation.h"
 #include "PolyQtAnnotation.h"
@@ -29,6 +30,7 @@
 #include "../QtProgressMonitor.h"
 #include <QProgressDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include <numeric>
 #include <iostream>
@@ -213,6 +215,18 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       int ret = QMessageBox::warning(NULL, tr("ASAP"),
         tr("The annotations could not be loaded."),
         QMessageBox::Ok);
+    }
+    // Check if it is an ImageScopeRepository, if so, offer the user the chance to reload with new closing distance
+    if (dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())) {
+      bool ok = false;
+      float newClosingDistance = QInputDialog::getDouble(_viewer, tr("Enter the annotation closing distance."), tr("Please provide the maximal distance for which annotations are automatically closed by ASAP if they remain open."), 30., 0, 1000, 1, &ok);
+      float closingDistance = dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())->getClosingDistance();
+      if (ok && newClosingDistance != closingDistance) {
+        _annotationService->getList()->removeAllAnnotations();
+        _annotationService->getList()->removeAllGroups();
+        dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())->setClosingDistance(newClosingDistance);
+        dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())->load();
+      }
     }
     // Add loaded groups to treewidget
     std::map<std::string, AnnotationGroup*> childGroups;
