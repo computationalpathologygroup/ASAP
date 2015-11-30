@@ -138,9 +138,8 @@ void PathologyViewer::zoom(float numSteps) {
     _numScheduledScalings = numSteps;
   }
 
-  QTimeLine *anim = new QTimeLine(350, this);
-  anim->setCurveShape(QTimeLine::CurveShape::EaseOutCurve);
-  anim->setUpdateInterval(10);
+  QTimeLine *anim = new QTimeLine(300, this);
+  anim->setUpdateInterval(5);
 
   connect(anim, SIGNAL(valueChanged(qreal)), SLOT(scalingTime(qreal)));
   connect(anim, SIGNAL(finished()), SLOT(zoomFinished()));
@@ -149,7 +148,7 @@ void PathologyViewer::zoom(float numSteps) {
 
 void PathologyViewer::scalingTime(qreal x)
 {
-  qreal factor = 1.0 + qreal(_numScheduledScalings) * x / 200;
+  qreal factor = 1.0 + qreal(_numScheduledScalings) * x / 300.;
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
