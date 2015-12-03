@@ -217,22 +217,23 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         QMessageBox::Ok);
     }
     // Check if it is an ImageScopeRepository, if so, offer the user the chance to reload with new closing distance
-    if (dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())) {
+    std::shared_ptr<ImageScopeRepository> imscRepo = std::dynamic_pointer_cast<ImageScopeRepository>(_annotationService->getRepository());
+    if (imscRepo) {
       bool ok = false;
       float newClosingDistance = QInputDialog::getDouble(_viewer, tr("Enter the annotation closing distance."), tr("Please provide the maximal distance for which annotations are automatically closed by ASAP if they remain open."), 30., 0, 1000, 1, &ok);
-      float closingDistance = dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())->getClosingDistance();
+      float closingDistance = imscRepo->getClosingDistance();
       if (ok && newClosingDistance != closingDistance) {
         _annotationService->getList()->removeAllAnnotations();
         _annotationService->getList()->removeAllGroups();
-        dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())->setClosingDistance(newClosingDistance);
-        dynamic_cast<ImageScopeRepository*>(_annotationService->getRepository())->load();
+        imscRepo->setClosingDistance(newClosingDistance);
+        imscRepo->load();
       }
     }
     // Add loaded groups to treewidget
-    std::map<std::string, AnnotationGroup*> childGroups;
-    std::map<AnnotationGroup*, QTreeWidgetItem*> annotToWidget;
-    std::vector<AnnotationGroup*> grps = _annotationService->getList()->getGroups();
-    for (std::vector<AnnotationGroup*>::const_iterator it = grps.begin(); it != grps.end(); ++it) {
+    std::map<std::string, std::shared_ptr<AnnotationGroup> > childGroups;
+    std::map<std::shared_ptr<AnnotationGroup>, QTreeWidgetItem*> annotToWidget;
+    std::vector<std::shared_ptr<AnnotationGroup> > grps = _annotationService->getList()->getGroups();
+    for (std::vector<std::shared_ptr<AnnotationGroup> >::const_iterator it = grps.begin(); it != grps.end(); ++it) {
       if ((*it)->getGroup() == NULL) {
         std::string key = "Annotation Group " + QString::number(_annotationGroupIndex).toStdString() + "_group";
         _annotationGroupIndex += 1;
@@ -255,7 +256,7 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       }
     }
     while (!childGroups.empty()) {
-      for (std::map<std::string, AnnotationGroup*>::iterator it = childGroups.begin(); it != childGroups.end();) {
+      for (std::map<std::string, std::shared_ptr<AnnotationGroup> >::iterator it = childGroups.begin(); it != childGroups.end();) {
         if (annotToWidget.find((*it).second->getGroup()) != annotToWidget.end()) {
           std::string key = "Annotation Group " + QString::number(_annotationGroupIndex).toStdString() + "_group";
           _annotationGroupIndex += 1;
@@ -279,8 +280,8 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         }
       }
     }
-    std::vector<Annotation*> annots = _annotationService->getList()->getAnnotations();
-    for (std::vector<Annotation*>::const_iterator it = annots.begin(); it != annots.end(); ++it) {
+    std::vector<std::shared_ptr<Annotation> > annots = _annotationService->getList()->getAnnotations();
+    for (std::vector<std::shared_ptr<Annotation> >::const_iterator it = annots.begin(); it != annots.end(); ++it) {
       QTreeWidgetItem* prnt = _treeWidget->invisibleRootItem();
       if ((*it)->getGroup()) {
         prnt = annotToWidget[(*it)->getGroup()];
@@ -341,7 +342,7 @@ void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
   }
   QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), defaultName.filePath(basename), tr("XML file (*.xml);TIF file (*.tif)"));
   if (_img && fileName.endsWith(".tif")) {
-    std::vector<AnnotationGroup*> grps = this->_annotationService->getList()->getGroups();
+    std::vector<std::shared_ptr<AnnotationGroup> > grps = this->_annotationService->getList()->getGroups();
     QDialog* nameToLabel = new QDialog();
     nameToLabel->setWindowTitle("Assign labels to annotation groups");
     QVBoxLayout* dialogLayout = new QVBoxLayout();
@@ -473,7 +474,7 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
 
 void AnnotationWorkstationExtensionPlugin::addAnnotationGroup() {
   if (_treeWidget && _annotationService) {
-    AnnotationGroup* grp = new AnnotationGroup();
+    std::shared_ptr<AnnotationGroup> grp = std::make_shared<AnnotationGroup>();
     grp->setName("Annotation Group " + QString::number(_annotationGroupIndex).toStdString());
     _annotationGroupIndex += 1;
     QString grpUID = QString::fromStdString(grp->getName() + "_group");
@@ -538,7 +539,7 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
   if (_generatedAnnotation) {
     return;
   }
-  Annotation* annot = new Annotation();
+  std::shared_ptr<Annotation> annot = std::make_shared<Annotation>();
   annot->addCoordinate(x / _viewer->getSceneScale(), y / _viewer->getSceneScale());
   if (type == "dotannotation") {
     annot->setType(Annotation::Type::DOT);
@@ -595,7 +596,6 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
     }
     else {
       _viewer->scene()->removeItem(_generatedAnnotation);
-      delete _generatedAnnotation->getAnnotation();
       _generatedAnnotation->deleteLater();
       _generatedAnnotation = NULL;
     }
@@ -628,7 +628,7 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
   }
 }
 
-void AnnotationWorkstationExtensionPlugin::deleteAnnotationGroup(AnnotationGroup* group) {
+void AnnotationWorkstationExtensionPlugin::deleteAnnotationGroup(std::shared_ptr<AnnotationGroup> group) {
   if (_treeWidget) {
     QTreeWidgetItemIterator it(_treeWidget);
     while (*it) {

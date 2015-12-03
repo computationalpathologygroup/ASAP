@@ -281,7 +281,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
       unsigned int cachedTileSize = 0;
       T* tile = NULL;
       _cacheMutex.lock();
-      boost::static_pointer_cast<TileCache<T> >(_cache)->get(k.str(), tile, cachedTileSize);
+      std::static_pointer_cast<TileCache<T> >(_cache)->get(k.str(), tile, cachedTileSize);
       _cacheMutex.unlock();
       if (!tile) {
         tile = new T[tileW*tileH*getSamplesPerPixel()];
@@ -308,7 +308,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
             TIFFReadTile(_tiff, tile, ix, iy, 0, 0);
           }
         }
-        if (boost::static_pointer_cast<TileCache<T> >(_cache)->set(k.str(), tile, tileW*tileH*getSamplesPerPixel()*sizeof(T))) {
+        if (std::static_pointer_cast<TileCache<T> >(_cache)->set(k.str(), tile, tileW*tileH*getSamplesPerPixel()*sizeof(T))) {
           deleteTile = true;
         }
         _cacheMutex.unlock();

@@ -19,24 +19,13 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _likelihoodCheckBox(NULL),
   _foreground(NULL),
   _foregroundScale(1.),
-  _opacity(1.0),
-  _annotations(NULL),
-  _lst(NULL)
+  _opacity(1.0)
 {
-  _lst = new AnnotationList();
-  _annotations = new XmlRepository(_lst);
+  _lst = std::make_shared<AnnotationList>();
+  _xmlRepo = std::make_shared<XmlRepository>(_lst);
 }
 
-VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugin() {
-  if (_annotations) {
-    delete _annotations;
-    _annotations = NULL;
-  }
-  if (_lst) {
-    delete _lst;
-    _lst = NULL;
-  }
-  
+VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugin() { 
   if (_foreground) {
     _foregroundScale = 1.;
     emit changeForegroundImage(NULL, _foregroundScale);
@@ -102,8 +91,8 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionIm
       }
     }
     if (core::fileExists(segmXMLPth)) {
-      _annotations->setSource(segmXMLPth);
-      _annotations->load();
+      _xmlRepo->setSource(segmXMLPth);
+      _xmlRepo->load();
       if (_segmentationCheckBox && _segmentationCheckBox->isChecked()) {
         addSegmentationsToViewer();
       }
@@ -153,9 +142,9 @@ void VisualizationWorkstationExtensionPlugin::onEnableSegmentationToggled(bool t
 
 void VisualizationWorkstationExtensionPlugin::addSegmentationsToViewer() {
   if (_lst) {
-    std::vector<Annotation*> tmp = _lst->getAnnotations();
+    std::vector<std::shared_ptr<Annotation> > tmp = _lst->getAnnotations();
     float scl = _viewer->getSceneScale();
-    for (std::vector<Annotation*>::iterator it = tmp.begin(); it != tmp.end(); ++it) {
+    for (std::vector<std::shared_ptr<Annotation> >::iterator it = tmp.begin(); it != tmp.end(); ++it) {
       QPolygonF poly;
       std::vector<Point> coords = (*it)->getCoordinates();
       for (std::vector<Point>::iterator pt = coords.begin(); pt != coords.end(); ++pt) {

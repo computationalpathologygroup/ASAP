@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "pugixml.hpp"
 
-ImageScopeRepository::ImageScopeRepository(AnnotationList* list) :
+ImageScopeRepository::ImageScopeRepository(const std::shared_ptr<AnnotationList>& list) :
   Repository(list),
   _closingDistance(30.)
 {
@@ -61,7 +61,7 @@ bool ImageScopeRepository::load()
     }
     groupColorAsHex = "#" + groupColorAsHex;
 
-    AnnotationGroup* grp = new AnnotationGroup();
+    std::shared_ptr<AnnotationGroup> grp = std::make_shared<AnnotationGroup>();
     grp->setColor(groupColorAsHex);
     std::map<unsigned int, std::vector<std::pair<double, double> > > idToCoords;
     std::map<unsigned int, std::string> idToName;
@@ -145,7 +145,7 @@ bool ImageScopeRepository::load()
       if (groupName.empty() && !curName.empty()) {
         groupName = curName;
       }
-      Annotation* annot = new Annotation();
+      std::shared_ptr<Annotation> annot = std::make_shared<Annotation>();
       annot->setName(curName + "_" + core::tostring(annot_nr));
       annot->setTypeFromString("Polygon");
       annot_nr += 1;

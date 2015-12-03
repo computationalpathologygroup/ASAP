@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "pugixml.hpp"
 
-XmlRepository::XmlRepository(AnnotationList* list) : 
+XmlRepository::XmlRepository(const std::shared_ptr<AnnotationList>& list) :
   Repository(list)
 {
 }
@@ -26,14 +26,14 @@ bool XmlRepository::save() const
   pugi::xml_node nodeAnnotations = root.append_child("Annotations");
   pugi::xml_node nodeGroups = root.append_child("AnnotationGroups");
 
-  std::vector<Annotation*> annotations = _list->getAnnotations();
-  for (std::vector<Annotation*>::const_iterator it = annotations.begin(); it != annotations.end(); ++it) 
+  std::vector<std::shared_ptr<Annotation> > annotations = _list->getAnnotations();
+  for (std::vector<std::shared_ptr<Annotation> >::const_iterator it = annotations.begin(); it != annotations.end(); ++it)
 	{
 		saveAnnotation(*it, &nodeAnnotations);
 	}
 
-  std::vector<AnnotationGroup*> groups = _list->getGroups();
-  for (std::vector<AnnotationGroup*>::const_iterator it = groups.begin(); it != groups.end(); ++it)
+  std::vector<std::shared_ptr<AnnotationGroup> > groups = _list->getGroups();
+  for (std::vector<std::shared_ptr<AnnotationGroup>>::const_iterator it = groups.begin(); it != groups.end(); ++it)
   {
     saveGroup(*it, &nodeGroups);
   }
@@ -41,7 +41,7 @@ bool XmlRepository::save() const
   return xml.save_file(_source.c_str());
 }
 
-void XmlRepository::saveAnnotation(const Annotation* annotation, pugi::xml_node* node) const
+void XmlRepository::saveAnnotation(const std::shared_ptr<Annotation>& annotation, pugi::xml_node* node) const
 {
 	pugi::xml_node nodeAnnotation = node->append_child("Annotation");
   pugi::xml_attribute attributeName = nodeAnnotation.append_attribute("Name");
@@ -71,7 +71,7 @@ void XmlRepository::saveAnnotation(const Annotation* annotation, pugi::xml_node*
   }
 }
 
-void XmlRepository::saveGroup(const AnnotationGroup* group, pugi::xml_node* node) const
+void XmlRepository::saveGroup(const std::shared_ptr<AnnotationGroup>& group, pugi::xml_node* node) const
 {
   pugi::xml_node nodeGroup = node->append_child("Group");
   pugi::xml_attribute attributeName = nodeGroup.append_attribute("Name");
@@ -110,12 +110,12 @@ bool XmlRepository::load()
   if (root.empty()) {
     root = xml_doc.root();
   }
-  std::map<std::string, AnnotationGroup*> nameToGroup;
+  std::map<std::string, std::shared_ptr<AnnotationGroup> > nameToGroup;
   std::map<std::string, std::string> groupToParent;
   pugi::xml_node groups = root.child("AnnotationGroups");
   for (pugi::xml_node_iterator it = groups.begin(); it != groups.end(); ++it)
   {
-    AnnotationGroup* group = new AnnotationGroup();
+    std::shared_ptr<AnnotationGroup> group = std::make_shared<AnnotationGroup>();
     std::string groupName = it->attribute("Name").value();
     group->setName(groupName);
     std::string groupColor = it->attribute("Color").value();
@@ -137,8 +137,8 @@ bool XmlRepository::load()
   }
 
   // Now add the parent groups to each group
-  std::vector<AnnotationGroup*> grps = _list->getGroups();
-  for (std::vector<AnnotationGroup*>::iterator it = grps.begin(); it != grps.end(); ++it) {
+  std::vector<std::shared_ptr<AnnotationGroup> > grps = _list->getGroups();
+  for (std::vector<std::shared_ptr<AnnotationGroup> >::iterator it = grps.begin(); it != grps.end(); ++it) {
     if (groupToParent.find((*it)->getName()) != groupToParent.end()) {
       (*it)->setGroup(nameToGroup[groupToParent[(*it)->getName()]]);
     }
@@ -147,7 +147,7 @@ bool XmlRepository::load()
   pugi::xml_node annotations = root.child("Annotations");
 	for (pugi::xml_node_iterator it = annotations.begin(); it != annotations.end(); ++it)
 	{
-		Annotation* annotation = new Annotation();
+		std::shared_ptr<Annotation> annotation = std::make_shared<Annotation>();
 
 		annotation->setName(it->attribute("Name").value());
     annotation->setTypeFromString(it->attribute("Type").value());

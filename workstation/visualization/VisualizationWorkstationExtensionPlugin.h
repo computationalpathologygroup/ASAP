@@ -1,6 +1,7 @@
 #ifndef VISUALIZATIONWORKSTATIONEXTENSIONPLUGIN_H
 #define VISUALIZATIONWORKSTATIONEXTENSIONPLUGIN_H
 
+#include <memory>
 #include "../interfaces/interfaces.h"
 #include "config/pathology_config.h"
 
@@ -26,8 +27,8 @@ private :
   QCheckBox* _segmentationCheckBox;
   float _opacity;
   float _foregroundScale;
-  XmlRepository* _annotations;
-  AnnotationList* _lst;
+  std::shared_ptr<XmlRepository> _xmlRepo;
+  std::shared_ptr<AnnotationList> _lst;
   QList<QGraphicsPolygonItem*> _polygons;
 
 public :

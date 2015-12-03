@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-DotQtAnnotation::DotQtAnnotation(Annotation* annotation, float scale) : 
+DotQtAnnotation::DotQtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale) : 
   QtAnnotation(annotation, scale),
   _rectSize(10),
   _rectColor(QColor("blue"))

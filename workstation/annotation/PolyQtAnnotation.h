@@ -2,13 +2,14 @@
 #define POLYQTANNOTATION_H
 #include "QtAnnotation.h"
 #include <QColor>
+#include <memory>
 #include "config/pathology_config.h"
 
 class EXPORT_PATHOLOGYANNOTATIONPLUGIN PolyQtAnnotation : public QtAnnotation
 {
   Q_OBJECT
 public:
-  PolyQtAnnotation(Annotation* annotation, float scale = 1.0);
+  PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale = 1.0);
   QRectF boundingRect() const;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,

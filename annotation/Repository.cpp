@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-Repository::Repository(AnnotationList* list) :
+Repository::Repository(const std::shared_ptr<AnnotationList>& list) :
   _list(list),
   _source("")
 {}

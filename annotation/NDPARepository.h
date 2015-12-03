@@ -6,7 +6,7 @@
 
 class EXPORT_PATHOLOGYANNOTATION NDPARepository : public Repository {
 public:
-  NDPARepository(AnnotationList* list);
+  NDPARepository(const std::shared_ptr<AnnotationList>& list);
 
   void setNDPISourceFile(const std::string& ndpiSourcefile);
   std::string NDPISourceFile() const;
