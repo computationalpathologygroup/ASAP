@@ -18,7 +18,6 @@ private:
   void calculateStrides();
 
   void swap(Patch<T>& first, Patch<T>& second);
-  //friend void Patch<T>::swap(Patch<T>& first, Patch<T>& second);
 
 public :
 

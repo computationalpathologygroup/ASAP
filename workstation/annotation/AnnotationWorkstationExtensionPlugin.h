@@ -3,6 +3,7 @@
 
 #include "../interfaces/interfaces.h"
 #include "config/pathology_config.h"
+#include <memory>
 #include <QString>
 #include <QMap>
 
@@ -37,7 +38,7 @@ public :
     void removeAnnotationFromSelection(QtAnnotation* annotation);
     bool eventFilter(QObject* watched, QEvent* event);
     void deleteAnnotation(QtAnnotation* annotation);
-    void deleteAnnotationGroup(AnnotationGroup* group);
+    void deleteAnnotationGroup(std::shared_ptr<AnnotationGroup> group);
     void clearSelection();
 
 public slots:
@@ -61,7 +62,7 @@ private :
     QtAnnotation* _activeAnnotation;
     QSet<QtAnnotation*> _selectedAnnotations;
     QMap<QString, QtAnnotation*> _qtAnnotations;
-    QMap<QString, AnnotationGroup*> _qtAnnotationGroups;
+    QMap<QString, std::shared_ptr<AnnotationGroup> > _qtAnnotationGroups;
     QDockWidget* _dockWidget;
     QTreeWidget* _treeWidget;
     QEvent* _oldEvent;

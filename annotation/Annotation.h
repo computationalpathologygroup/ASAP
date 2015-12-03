@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include "core/Point.h"
 #include "config/pathology_config.h"
 
@@ -41,8 +42,8 @@ public:
 	void setName(const std::string& name);
   std::string getName() const;
 
-  void setGroup(AnnotationGroup* group);
-  AnnotationGroup* getGroup() const;
+  void setGroup(const std::shared_ptr<AnnotationGroup>& group);
+  std::shared_ptr<AnnotationGroup> getGroup() const;
 
   std::string getColor() const;
   void setColor(const std::string& color);
@@ -57,7 +58,7 @@ private:
   Type _type;
 	std::vector<Point> _coordinates;
   std::string _name;
-  AnnotationGroup* _group;
+  std::weak_ptr<AnnotationGroup> _group;
   static const char* _typeStrings[5];
   std::string _color;
 };

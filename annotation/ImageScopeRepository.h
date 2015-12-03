@@ -9,7 +9,7 @@ private:
   float _closingDistance;
 
 public:
-  ImageScopeRepository(AnnotationList* list);
+  ImageScopeRepository(const std::shared_ptr<AnnotationList>& list);
 
   virtual bool save() const;
   virtual bool load();

@@ -43,6 +43,20 @@
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_map.i"
+%include "std_shared_ptr.i"
+
+%shared_ptr(MultiResolutionImage)
+%shared_ptr(OpenSlideImage)
+%shared_ptr(VSIImage)
+%shared_ptr(TIFFImage)
+%shared_ptr(LIFImage)
+%shared_ptr(Annotation)
+%shared_ptr(AnnotationGroup)
+%shared_ptr(AnnotationList)
+%shared_ptr(Repository)
+%shared_ptr(XmlRepository)
+%shared_ptr(NDPARepository)
+%shared_ptr(ImageScopeRepository)
 
 namespace std {
   %template(vector_int) vector<int>;

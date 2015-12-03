@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include "core/stringconversion.h"
 #include "config/pathology_config.h"
 
@@ -11,6 +12,7 @@ class EXPORT_PATHOLOGYANNOTATION AnnotationGroup {
 public:
 
   AnnotationGroup();
+  ~AnnotationGroup();
 
 	void setName(const std::string& name);
 	std::string getName() const;
@@ -41,14 +43,14 @@ public:
 
   void setAttributes(std::map<std::string, std::string> attributes);
 
-  void setGroup(AnnotationGroup* parent);
-  AnnotationGroup* getGroup() const;
+  void setGroup(const std::shared_ptr<AnnotationGroup>& parent);
+  std::shared_ptr<AnnotationGroup> getGroup() const;
 
   std::string getColor() const;
   void setColor(const std::string& color);
 
 private:
-  AnnotationGroup* _parent;
+  std::weak_ptr<AnnotationGroup> _parent;
   std::string _name;
   std::map<std::string, std::string> _attributes;
   std::string _color;

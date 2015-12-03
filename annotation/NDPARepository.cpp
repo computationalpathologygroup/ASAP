@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "pugixml.hpp"
 
-NDPARepository::NDPARepository(AnnotationList* list) :
+NDPARepository::NDPARepository(const std::shared_ptr<AnnotationList>& list) :
   Repository(list)
 {
 }
@@ -39,13 +39,13 @@ bool NDPARepository::load()
   _list->removeAllAnnotations();
   _list->removeAllGroups();
 
-  OpenSlideImage* ndpi = NULL;
+  std::shared_ptr<OpenSlideImage> ndpi;
   if (_ndpiSourceFile.empty()) {
     std::vector<std::string> ndpaParts;
     core::split(_source, ndpaParts, ".ndpa");
     if (core::fileExists(ndpaParts[0])) {
       MultiResolutionImageReader reader;
-      ndpi = dynamic_cast<OpenSlideImage*>(reader.open(ndpaParts[0]));
+      ndpi.reset(dynamic_cast<OpenSlideImage*>(reader.open(ndpaParts[0])));
       if (!ndpi) {
         return false;
       }
@@ -70,7 +70,7 @@ bool NDPARepository::load()
     for (pugi::xml_node annotation_xml = it.child("annotation"); annotation_xml; annotation_xml = annotation_xml.next_sibling("annotation"))
     {
       if (std::string(annotation_xml.attribute("type").value()) == std::string("freehand")) {
-        Annotation* annotation = new Annotation();
+        std::shared_ptr<Annotation> annotation = std::make_shared<Annotation>();
 
         annotation->setName(std::string(it.child_value("title")) + "_" + core::tostring(annotation_nr));
         annotation->setTypeFromString("Polygon");

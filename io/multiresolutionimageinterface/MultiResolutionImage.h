@@ -1,10 +1,10 @@
 #ifndef _MultiResolutionImage
 #define _MultiResolutionImage
 #include <string>
+#include <memory>
 #include "config/pathology_config.h"
 #include "TileCache.h"
 #include "boost/thread.hpp"
-#include "boost/shared_ptr.hpp"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
@@ -102,7 +102,7 @@ protected :
   //! To make MultiResolutionImage thread-safe
   boost::shared_mutex _openCloseMutex;
   boost::mutex _cacheMutex;
-  boost::shared_ptr<void> _cache;
+  std::shared_ptr<void> _cache;
 
   // Aditional properties of a multi-resolution image
   std::vector<std::vector<unsigned long long> > _levelDimensions;

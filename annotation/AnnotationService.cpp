@@ -8,60 +8,45 @@ AnnotationService::AnnotationService() :
   _list(NULL),
   _repo(NULL)
 {
-  _list = new AnnotationList();
+  _list = std::make_shared<AnnotationList>();
 }
 
 AnnotationService::~AnnotationService() {
-  if (_repo) {
-    delete _repo;
-    _repo = NULL;
-  }
-  if (_list) {
-    delete _list;
-    _list = NULL;
-  }
 }
 
-AnnotationList* AnnotationService::getList() const {
+std::shared_ptr<AnnotationList> AnnotationService::getList() const {
   return _list;
 }
 
-Repository* AnnotationService::getRepository() const {
+std::shared_ptr<Repository> AnnotationService::getRepository() const {
   return _repo;
 }
 
 bool AnnotationService::loadRepositoryFromFile(const std::string& source) {
-  if (_repo) {
-    delete _repo;
-  }
   if (source.rfind(std::string(".xml")) != source.npos) {
-    _repo = new XmlRepository(_list);
+    _repo = std::make_shared<XmlRepository>(_list);
     _repo->setSource(source);
     if (!_repo->load()) {
-      delete _repo;
       _list->removeAllAnnotations();
       _list->removeAllGroups();
-      _repo = new ImageScopeRepository(_list);
+      _repo = std::make_shared<ImageScopeRepository>(_list);
       _repo->setSource(source);
     }
   }
   else if (source.rfind(std::string(".ndpa")) != source.npos) {
-    _repo = new NDPARepository(_list);
+    _repo = std::make_shared<NDPARepository>(_list);
     _repo->setSource(source);
   }
   return _repo->load();
 }
 
 bool AnnotationService::saveRepositoryToFile(const std::string& source) {
-  if (_repo) {
-    delete _repo;
-  }
   if (source.rfind(std::string(".xml")) != source.npos) {
-    _repo = new XmlRepository(_list);
+    _repo = std::make_shared<XmlRepository>(_list);
     _repo->setSource(source);
   }
   else if (source.rfind(std::string(".ndpa")) != source.npos) {
-    _repo = new NDPARepository(_list);
+    _repo = std::make_shared<NDPARepository>(_list);
     _repo->setSource(source);
   }
   return _repo->save();
