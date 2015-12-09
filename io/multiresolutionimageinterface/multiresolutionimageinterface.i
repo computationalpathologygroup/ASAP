@@ -45,6 +45,7 @@
 %include "std_map.i"
 %include "std_shared_ptr.i"
 
+%shared_ptr(ImageSource)
 %shared_ptr(MultiResolutionImage)
 %shared_ptr(OpenSlideImage)
 %shared_ptr(VSIImage)
@@ -63,8 +64,8 @@ namespace std {
   %template(vector_uint) vector<unsigned int>;
   %template(vector_float) vector<float>;
   %template(vector_double) vector<double>;
-  %template(vector_annotation) vector<Annotation*>;
-  %template(vector_annotation_group) vector<AnnotationGroup*>;
+  %template(vector_annotation) vector<shared_ptr<Annotation> >;
+  %template(vector_annotation_group) vector<shared_ptr<AnnotationGroup> >;
   %template(vector_unsigned_long_long) vector<unsigned long long>;
   %template(vector_long_long) vector<long long>;
   %template(vector_string) vector<string>;

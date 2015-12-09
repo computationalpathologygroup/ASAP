@@ -607,7 +607,7 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
     if (_treeWidget) {
       QTreeWidgetItemIterator it(_treeWidget);
       while (*it) {
-        if ((*it)->text(1) == QString::fromStdString(annotation->getAnnotation()->getName())) {
+        if ((*it)->text(1) == QString::fromStdString(annotation->getAnnotation()->getName()) && (*it)->data(1, Qt::UserRole).value<QString>().endsWith("_annotation")) {
           QString annotUID = (*it)->data(1, Qt::UserRole).value<QString>();
           _qtAnnotations.remove(annotUID);
           if (_viewer) {
@@ -632,7 +632,7 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotationGroup(std::shared_ptr
   if (_treeWidget) {
     QTreeWidgetItemIterator it(_treeWidget);
     while (*it) {
-      if ((*it)->text(1) == QString::fromStdString(group->getName())) {
+      if ((*it)->text(1) == QString::fromStdString(group->getName()) && (*it)->data(1, Qt::UserRole).value<QString>().endsWith("_group")) {
         if ((*it)->childCount() > 0) {
           for (int i = (*it)->childCount() - 1; i >= 0; --i) {
             QTreeWidgetItem* itm = (*it)->child(i);

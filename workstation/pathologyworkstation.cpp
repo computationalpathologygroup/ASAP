@@ -206,6 +206,7 @@ void PathologyWorkstation::on_actionClose_triggered()
 }
 
 void PathologyWorkstation::openFile(const QString& fileName) {
+  statusBar->clearMessage();
   if (!fileName.isEmpty()) {
     if (_img) {
       on_actionClose_triggered();
