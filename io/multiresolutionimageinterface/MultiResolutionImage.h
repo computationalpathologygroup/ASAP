@@ -46,7 +46,7 @@ public :
   //! Obtains data as a patch, which is a basic image class containing all relevant information for further processing,
   //! like data and colortype
   template <typename T> 
-  Patch<T>* getPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
+  Patch<T> getPatch(const long long& startX, const long long& startY, const unsigned long long& width,
     const unsigned long long& height, const unsigned int& level) 
   {
     std::vector<unsigned long long> dims(3,0);
@@ -60,8 +60,8 @@ public :
     for (unsigned int i = 0; i < _spacing.size(); ++i) {
       patchSpacing[i] = _spacing[i] * levelDownsample;
     }
-    Patch<T>* patch = new Patch<T>(dims, this->getColorType(), data, true);
-    patch->setSpacing(patchSpacing);
+    Patch<T> patch = Patch<T>(dims, this->getColorType(), data, true);
+    patch.setSpacing(patchSpacing);
     return patch;
   }
 

@@ -5,6 +5,7 @@
 #include "WSITileGraphicsItemCache.h"
 #include <QGraphicsScene>
 #include <QPainterPath>
+#include <QCoreApplication>
 
 TileManager::TileManager(MultiResolutionImage* img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 _img(img),
@@ -189,9 +190,10 @@ std::vector<QPainterPath> TileManager::getCoverageMaps() {
 }
 
 void TileManager::clear() {
+  _renderThread->clearJobs();
   while (_renderThread->getWaitingThreads() != _renderThread->getWorkers().size()) {
   }
-  _renderThread->clearJobs();
+  QCoreApplication::processEvents();
   _cache->clear();
   QList<QGraphicsItem *> itms = _scene->items();
   for (QList<QGraphicsItem *>::iterator it = itms.begin(); it != itms.end(); ++it) {

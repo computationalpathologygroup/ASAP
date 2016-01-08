@@ -70,6 +70,7 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionIm
       if (_foreground) {
         _foregroundScale = 1;
         emit changeForegroundImage(NULL, _foregroundScale);
+        delete _foreground;
         _foreground = NULL;
       }
       _foreground = reader.open(likImgPth);

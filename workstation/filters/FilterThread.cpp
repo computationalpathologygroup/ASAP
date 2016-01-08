@@ -110,13 +110,11 @@ void FilterThread::run()
         float downsample = img->getLevelDownsample(level);
         unsigned int width = FOV.width() / downsample;
         unsigned int height = FOV.height() / downsample;
-        Patch<double>* input = img->getPatch<double>(FOV.left(), FOV.top(), width, height, level);
+        Patch<double> input = img->getPatch<double>(FOV.left(), FOV.top(), width, height, level);
         QVariant variant;
         if (!_restart) {
-          _filterPlugin->filter(*input, variant);
+          _filterPlugin->filter(input, variant);
         }
-        delete input;
-        input = NULL;
 
         if (variant.isValid() && !variant.isNull()) {
           Patch<double>* output = variant.value<Patch<double>*>();

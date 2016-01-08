@@ -63,38 +63,51 @@ void RenderWorker::run()
     float levelDownsample = _bck_img->getLevelDownsample(currentJob._level);
     QPixmap _foreground;
     if (_for_img) {
+      int levelDifference = _bck_img->getBestLevelForDownSample(_foregroundImageScale);
+      int fgImageLevel = currentJob._level - levelDifference;
+      float fgImageScale = 1;
+      if (fgImageLevel < 0) {
+        fgImageScale = pow(2,-1*fgImageLevel);
+        fgImageLevel = 0;
+      }
+      if (fgImageLevel > _for_img->getNumberOfLevels()) {
+        int fgMaxLevelDifference = _for_img->getNumberOfLevels() - fgImageLevel + 1;
+        fgImageLevel = _for_img->getNumberOfLevels() - 1;
+        fgImageScale = 1. / pow(2, fgMaxLevelDifference);
+      }
+      float fgImageLevelDownsample = _for_img->getLevelDownsample(fgImageLevel);
       if (_for_img->getColorType() == pathology::ColorType::Monochrome) {
-        if (currentJob._level < _for_img->getNumberOfLevels()) {
-          if (_for_img->getDataType() == pathology::DataType::UChar) {
-            // Label map
-            unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize];
-            _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._imgPosY * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._level, imgBuf);
-            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, 0, 1, 0, 255, 0);
-            if (_foregroundImageScale != 1) {
-              renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
-            }
-            _foreground = QPixmap::fromImage(renderedImage);
+        if (_for_img->getDataType() == pathology::DataType::UChar) {
+          // Label map
+          unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize];
+          _for_img->getRawRegion(currentJob._imgPosX * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._imgPosY * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, fgImageLevel, imgBuf);
+          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, 0, 1, 0, 255, 0);
+          if (_foregroundImageScale != 1) {
+            renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
           }
-          else if (_for_img->getDataType() == pathology::DataType::UInt32) {
-            // Label map
-            unsigned int* imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize];
-            _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._imgPosY * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._level, imgBuf);
-            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, 0, 1, 0, 255, 0);
-            if (_foregroundImageScale != 1) {
-              renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
-            }
-            _foreground = QPixmap::fromImage(renderedImage);
+          _foreground = QPixmap::fromImage(renderedImage);
+        }
+        else if (_for_img->getDataType() == pathology::DataType::UInt32) {
+          // Label map
+          unsigned int* imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize];
+          _for_img->getRawRegion(currentJob._imgPosX * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._imgPosY * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, fgImageLevel, imgBuf);
+          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, 0, 1, 0, 255, 0);
+          if (_foregroundImageScale != 1) {
+            renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
           }
-          else if (_for_img->getDataType() == pathology::DataType::Float) {
-            //Likelihood map
-            float* imgBuf = new float[currentJob._tileSize*currentJob._tileSize];
-            _for_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._imgPosY * levelDownsample * currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, currentJob._level, imgBuf);
-            QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / _foregroundImageScale, currentJob._tileSize / _foregroundImageScale, 0, 1, 0, 255, 0);
-            if (_foregroundImageScale != 1) {
-              renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
-            }
-            _foreground = QPixmap::fromImage(renderedImage);
+          _foreground = QPixmap::fromImage(renderedImage);
+        }
+        else if (_for_img->getDataType() == pathology::DataType::Float) {
+          //Likelihood map
+          float* imgBuf = new float[currentJob._tileSize*currentJob._tileSize];
+          _for_img->getRawRegion(currentJob._imgPosX * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._imgPosY * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, fgImageLevel, imgBuf);
+          float minValue = std::numeric_limits<double>::min() == _for_img->getMinValue() ? 0 : _for_img->getMinValue();
+          float maxValue = std::numeric_limits<double>::max() == _for_img->getMaxValue() ? 1. : _for_img->getMaxValue();
+          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, 0, 1, minValue, maxValue, 1);
+          if (_foregroundImageScale != 1) {
+            renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
           }
+          _foreground = QPixmap::fromImage(renderedImage);
         }
       }
     }
