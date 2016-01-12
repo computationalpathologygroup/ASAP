@@ -8,7 +8,7 @@
 
 const char* const MiniMap::coverageColors[] = { "red", "green", "yellow", "black", "purple", "orange" };
 
-MiniMap::MiniMap(QPixmap* overview, QWidget *parent) 
+MiniMap::MiniMap(const QPixmap& overview, QWidget *parent) 
   : QWidget(parent),
     _overview(overview),
     _fieldOfView(QRectF()),
@@ -21,14 +21,8 @@ MiniMap::MiniMap(QPixmap* overview, QWidget *parent)
   policy.setHorizontalPolicy(QSizePolicy::Fixed);
   policy.setVerticalPolicy(QSizePolicy::Fixed);
   setSizePolicy(policy);
-  if (_overview) {
-    _aspectRatio = static_cast<float>(_overview->width()) / _overview->height();
-  }
-}
-
-MiniMap::~MiniMap() {
-  if (_overview) {
-    delete _overview;
+  if (!overview.isNull()) {
+    _aspectRatio = static_cast<float>(_overview.width()) / _overview.height();
   }
 }
 
@@ -59,7 +53,7 @@ void MiniMap::onCoverageUpdated() {
 void MiniMap::mousePressEvent(QMouseEvent *event) {
   float posX = event->pos().x();
   float posY = event->pos().y();
-  QPointF pos((_overview->width() * posX) / width() + 1, (_overview->height() * posY) / height() + 1);
+  QPointF pos((_overview.width() * posX) / width() + 1, (_overview.height() * posY) / height() + 1);
   emit positionClicked(pos);
 }
 
@@ -69,8 +63,8 @@ void MiniMap::mouseMoveEvent(QMouseEvent *event) {
 
 void MiniMap::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
-  if (_overview) {
-    painter.drawPixmap(1, 1, width(), height(), *_overview);
+  if (!_overview.isNull()) {
+    painter.drawPixmap(1, 1, width(), height(), _overview);
     painter.setPen(QPen(Qt::white, 2));
     painter.drawRect(1, 1, width() - 2, height() - 2);
     painter.setPen(QPen(Qt::black, 1));
@@ -86,7 +80,7 @@ void MiniMap::paintEvent(QPaintEvent *event) {
       for (std::vector<QPainterPath>::const_iterator it = pths.begin(); it != pths.end(); ++it) {
         if (!it->isEmpty()) {
           QTransform trans;
-          trans = trans.scale(width() / static_cast<float>(_overview->width()), height() / static_cast<float>(_overview->height()));
+          trans = trans.scale(width() / static_cast<float>(_overview.width()), height() / static_cast<float>(_overview.height()));
           QPainterPath qpf2 = trans.map(*it);
           unsigned int colorIndex = (it - pths.begin()) % 6;
           painter.setPen(QPen(QColor(coverageColors[colorIndex])));
@@ -100,10 +94,10 @@ void MiniMap::paintEvent(QPaintEvent *event) {
       QPen blue = QPen(QColor("blue"));
       blue.setWidth(3);
       painter.setPen(blue);
-      float rectX = width() * (_fieldOfView.left() / _overview->width()) + 1;
-      float rectY = height() * (_fieldOfView.top() / _overview->height()) + 1;
-      float rectW = width() * (_fieldOfView.width() / _overview->width()) - 2;
-      float rectH = height() * (_fieldOfView.height() / _overview->height()) - 2;
+      float rectX = width() * (_fieldOfView.left() / _overview.width()) + 1;
+      float rectY = height() * (_fieldOfView.top() / _overview.height()) + 1;
+      float rectW = width() * (_fieldOfView.width() / _overview.width()) - 2;
+      float rectH = height() * (_fieldOfView.height() / _overview.height()) - 2;
       if (rectW > 3 && rectH > 3) {
         painter.drawRect(rectX, rectY, rectW, rectH);
       }
@@ -118,8 +112,8 @@ void MiniMap::paintEvent(QPaintEvent *event) {
 QSize MiniMap::sizeHint() const {
   QSize size(0, 0);
   unsigned int baseSize = 250;
-  if (_overview) {    
-    if (_overview->width() > _overview->height()) {
+  if (!_overview.isNull()) {    
+    if (_overview.width() > _overview.height()) {
       size = QSize(baseSize, baseSize / _aspectRatio);
     }
     else {

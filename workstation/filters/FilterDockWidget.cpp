@@ -37,8 +37,8 @@ FilterDockWidget::FilterDockWidget(QWidget *parent, Qt::WindowFlags flags) :
   connect(_availableFilters, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onItemClicked(QListWidgetItem*)));
   _progressBar = contents->findChild<QProgressBar*>("progressBar");
   QObject::connect(_progressBar, SIGNAL(valueChanged(int)), this, SLOT(onProcessing()));
-  _monitor = new QtProgressMonitor();
-  QObject::connect(_monitor, SIGNAL(progressChanged(int)), _progressBar, SLOT(setValue(int)), Qt::QueuedConnection);
+  _monitor.reset(new QtProgressMonitor());
+  QObject::connect(_monitor.get(), SIGNAL(progressChanged(int)), _progressBar, SLOT(setValue(int)), Qt::QueuedConnection);
   _applyFilter = contents->findChild<QPushButton*>("applyFilterButton");
   _clearFilter = contents->findChild<QPushButton*>("clearFilterButton");
   _autoUpdateCheckBox = contents->findChild<QCheckBox*>("autoUpdateCheckBox");
@@ -141,13 +141,14 @@ void FilterDockWidget::stopProgressTracking() {
   }
 }
 
-void FilterDockWidget::onNewImageLoaded(MultiResolutionImage* img) {
+void FilterDockWidget::onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img) {
   if (_availableFilters) {
     for (int row = 0; row < _availableFilters->count(); row++)
     {
       QListWidgetItem *item = _availableFilters->item(row);
       std::shared_ptr<ImageFilterPluginInterface> filter = item->data(Qt::UserRole).value<std::shared_ptr<ImageFilterPluginInterface> >();
-      if (!filter->initialize(img)) {
+      std::shared_ptr<MultiResolutionImage> local_img = img.lock();
+      if (!filter->initialize(local_img.get())) {
         item->setHidden(true);
       }
       else {

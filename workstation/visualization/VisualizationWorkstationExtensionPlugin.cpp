@@ -28,15 +28,15 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
 VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugin() { 
   if (_foreground) {
     _foregroundScale = 1.;
-    emit changeForegroundImage(NULL, _foregroundScale);
-    _foreground = NULL;
+    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+    _foreground.reset();
   }
   _dockWidget = NULL;
 }
 
 bool VisualizationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _viewer = viewer;
-  connect(this, SIGNAL(changeForegroundImage(MultiResolutionImage*, float)), viewer, SLOT(onForegroundImageChanged(MultiResolutionImage*, float)));
+  connect(this, SIGNAL(changeForegroundImage(std::weak_ptr<MultiResolutionImage>, float)), viewer, SLOT(onForegroundImageChanged(std::weak_ptr<MultiResolutionImage>, float)));
   return true;
 }
 
@@ -57,7 +57,7 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   return _dockWidget;
 }
 
-void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage* img, std::string fileName) {
+void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName) {
   if (_dockWidget) {
     _dockWidget->setEnabled(true);
   }
@@ -69,13 +69,13 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionIm
       MultiResolutionImageReader reader;
       if (_foreground) {
         _foregroundScale = 1;
-        emit changeForegroundImage(NULL, _foregroundScale);
-        delete _foreground;
-        _foreground = NULL;
+        emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+        _foreground.reset();
       }
-      _foreground = reader.open(likImgPth);
+      _foreground.reset(reader.open(likImgPth));
       if (_foreground) {
-        std::vector<unsigned long long> dimsBG = img->getDimensions();
+        std::shared_ptr<MultiResolutionImage> local_img = img.lock();
+        std::vector<unsigned long long> dimsBG = local_img->getDimensions();
         std::vector<unsigned long long> dimsFG = _foreground->getDimensions();
         if (dimsBG[0] / dimsFG[0] == dimsBG[1] / dimsFG[1]) {
           _foregroundScale = dimsBG[0] / dimsFG[0];
@@ -83,7 +83,7 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionIm
             emit changeForegroundImage(_foreground, _foregroundScale);
           }
           else {
-            emit changeForegroundImage(NULL, _foregroundScale);
+            emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
           }
           if (_viewer) {
             _viewer->setForegroundOpacity(_opacity);
@@ -107,9 +107,8 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
   }
   if (_foreground) {
     _foregroundScale = 1;
-    emit changeForegroundImage(NULL, _foregroundScale);
-    delete _foreground;
-    _foreground = NULL;
+    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+    _foreground.reset();
   }
   if (_dockWidget) {
     _dockWidget->setEnabled(false);
@@ -118,7 +117,7 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
 
 void VisualizationWorkstationExtensionPlugin::onEnableLikelihoodToggled(bool toggled) {
   if (!toggled) {
-    emit changeForegroundImage(NULL, _foregroundScale);
+    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
   }
   else {
     emit changeForegroundImage(_foreground, _foregroundScale);

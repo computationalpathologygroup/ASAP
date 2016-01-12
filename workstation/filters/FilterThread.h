@@ -27,7 +27,7 @@ public:
 
 public slots :
   void updateFilterResult();
-  void updateFilterResult(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel = -1);
+  void updateFilterResult(const QRectF& FOV, std::weak_ptr<MultiResolutionImage> img, const unsigned int level, int channel = -1);
 
 signals:
   void filterResult(QGraphicsItem* result, QRectF size);
@@ -43,7 +43,7 @@ private:
   QWaitCondition _condition;
   QRectF _FOV;
   unsigned int _level;
-  MultiResolutionImage *_img;
+  std::weak_ptr<MultiResolutionImage> _img;
 
   // Pointer to Workstation-filter that needs to be applied
   std::shared_ptr<ImageFilterPluginInterface> _filterPlugin;

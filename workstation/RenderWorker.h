@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <memory>
 
 class MultiResolutionImage;
 class FilterInterface;
@@ -14,11 +15,12 @@ class RenderWorker : public QThread
   Q_OBJECT
     
 public:
-  RenderWorker(RenderThread* thread, MultiResolutionImage* _bck_img, MultiResolutionImage* _for_img = NULL, QObject *parent = NULL);
+  RenderWorker(RenderThread* thread);
   ~RenderWorker();
   void abort();
   void setChannel(int channel);
-  void setForegroundImage(MultiResolutionImage* for_img, float scale = 1.);
+  void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
+  void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
 
@@ -27,9 +29,8 @@ protected :
 
 private :
   QMutex mutex;
-  MultiResolutionImage *_bck_img;
-  MultiResolutionImage *_for_img;
-  RenderThread *_thread;
+  std::weak_ptr<MultiResolutionImage> _bck_img;
+  std::weak_ptr<MultiResolutionImage> _for_img;
   bool _abort;
   int _channel;
   float _opacity;

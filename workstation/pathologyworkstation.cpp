@@ -45,7 +45,6 @@ using namespace std;
 
 PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
     QMainWindow(parent),
-    _img(NULL),
     _cacheMaxByteSize(1000*512*512*3),
     _settings(NULL)
 {
@@ -103,7 +102,7 @@ void PathologyWorkstation::loadPlugins() {
           QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
           QObject *plugin = loader.instance();
           if (plugin) {
-            ToolPluginInterface* tool = qobject_cast<ToolPluginInterface*>(plugin);
+            std::shared_ptr<ToolPluginInterface> tool(qobject_cast<ToolPluginInterface*>(plugin));
             if (tool) {
               tool->setViewer(viewer);
               QAction* toolAction = tool->getToolButton();
@@ -131,7 +130,7 @@ void PathologyWorkstation::loadPlugins() {
             std::unique_ptr<WorkstationExtensionPluginInterface> extension(qobject_cast<WorkstationExtensionPluginInterface*>(plugin));
             if (extension) {
               _extensionPluginFileNames.push_back(fileName.toStdString());
-              connect(this, SIGNAL(newImageLoaded(MultiResolutionImage*, std::string)), &*extension, SLOT(onNewImageLoaded(MultiResolutionImage*, std::string)));
+              connect(this, SIGNAL(newImageLoaded(std::weak_ptr<MultiResolutionImage>, std::string)), &*extension, SLOT(onNewImageLoaded(std::weak_ptr<MultiResolutionImage>, std::string)));
               connect(this, SIGNAL(imageClosed()), &*extension, SLOT(onImageClosed()));
               extension->initialize(viewer);
               if (extension->getToolBar()) {
@@ -160,7 +159,7 @@ void PathologyWorkstation::loadPlugins() {
               if (extension->getMenu()) {
                 this->menuBar->addMenu(extension->getMenu());
               }
-              std::vector<ToolPluginInterface*> tools = extension->getTools();
+              std::vector<std::shared_ptr<ToolPluginInterface> > tools = extension->getTools();
               if (!tools.empty()) {
                 mainToolBar->addSeparator();
                 for (unsigned int i = 0; i < tools.size(); ++i) {
@@ -199,8 +198,7 @@ void PathologyWorkstation::on_actionClose_triggered()
     if (_img) {
 		  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
 		  view->close();
-		  delete _img;
-		  _img = NULL;
+		  _img.reset();
 		  statusBar->showMessage("Closed file!", 5);
     }
 }
@@ -216,11 +214,11 @@ void PathologyWorkstation::openFile(const QString& fileName) {
     _settings->setValue("currentFile", QFileInfo(fileName).fileName());
     this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
     MultiResolutionImageReader imgReader;
-    _img = imgReader.open(fn);
+    _img.reset(imgReader.open(fn));
     if (_img) {
       if (_img->valid()) {
-        if (dynamic_cast<OpenSlideImage*>(_img)) {
-          dynamic_cast<OpenSlideImage*>(_img)->setIgnoreAlpha(false);
+        if (std::shared_ptr<OpenSlideImage> openslide_img = dynamic_pointer_cast<OpenSlideImage>(_img)) {
+          openslide_img->setIgnoreAlpha(false);
         }
         vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
         PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");

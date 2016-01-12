@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QRectF>
 #include <QPointF>
+#include <QPointer>
 #include <map>
+#include <memory>
 
 class MultiResolutionImage;
 class RenderThread;
@@ -17,22 +19,22 @@ class TileManager : public QObject {
   Q_OBJECT
 
 private:
-  MultiResolutionImage* _img;
+  std::vector<float> _levelDownsamples;
+  std::vector<std::vector<unsigned long long> > _levelDimensions;
   unsigned int _tileSize;
   QRect _lastFOV;
   unsigned int _lastLevel;
   unsigned int _lastRenderLevel;
   std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;
-  RenderThread* _renderThread;
-  WSITileGraphicsItemCache* _cache;
-  QGraphicsScene* _scene;
+  QPointer<RenderThread> _renderThread;
+  QPointer<WSITileGraphicsItemCache> _cache;
+  QPointer<QGraphicsScene> _scene;
   std::vector<QPainterPath> _coverageMaps;
   bool _coverageMapCacheMode;
   
   QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
   QPointF tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level);
   QPoint getLevelTiles(unsigned int level);
-
 
   TileManager(const TileManager& that);
 
@@ -41,7 +43,7 @@ signals:
 
 public:
   // make sure to set `item` to NULL in the constructor
-  TileManager(MultiResolutionImage* img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
+  TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
   ~TileManager();
 
   void loadAllTilesForLevel(unsigned int level);

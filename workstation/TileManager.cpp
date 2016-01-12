@@ -7,8 +7,7 @@
 #include <QPainterPath>
 #include <QCoreApplication>
 
-TileManager::TileManager(MultiResolutionImage* img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
-_img(img),
+TileManager::TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 _renderThread(renderThread),
 _tileSize(tileSize),
 _lastRenderLevel(lastRenderLevel),
@@ -20,11 +19,14 @@ _scene(scene),
 _coverageMaps(),
 _coverageMapCacheMode(false)
 {
+  for (unsigned int i = 0; i < img->getNumberOfLevels(); ++i) {
+    _levelDownsamples.push_back(img->getLevelDownsample(i));
+    _levelDimensions.push_back(img->getLevelDimensions(i));
+  }
 }
 
 TileManager::~TileManager() {
   _renderThread = NULL;
-  _img = NULL;
   _cache = NULL;
   _scene = NULL;
 }
@@ -37,24 +39,39 @@ void TileManager::resetCoverage(unsigned int level) {
 }
 
 QPoint TileManager::pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level) {
-  return QPoint(std::floor((coordinate.x() / _img->getLevelDownsample(level)) / this->_tileSize), std::floor((coordinate.y() / _img->getLevelDownsample(level)) / this->_tileSize));
+  if (level < _levelDownsamples.size()) {
+    return QPoint(std::floor((coordinate.x() / _levelDownsamples[level]) / this->_tileSize), std::floor((coordinate.y() / _levelDownsamples[level]) / this->_tileSize));
+  }
+  else {
+    return QPoint();
+  }
 }
 
-QPointF TileManager::tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level) {
-  return QPointF(coordinate.x() * _img->getLevelDownsample(level) * this->_tileSize, coordinate.y() * _img->getLevelDownsample(level) * this->_tileSize);
+QPointF TileManager::tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level) {  
+  if (level < _levelDownsamples.size()) {
+    return QPointF(coordinate.x() * _levelDownsamples[level] * this->_tileSize, coordinate.y() * _levelDownsamples[level] * this->_tileSize);
+  }
+  else {
+    return QPoint();
+  }
 }
 
 QPoint TileManager::getLevelTiles(unsigned int level) {
-  if (_img) {
-    std::vector<unsigned long long> dims = _img->getLevelDimensions(level);
+  if (level < _levelDimensions.size()) {
+    std::vector<unsigned long long> dims = _levelDimensions[level];
     return QPoint(std::ceil(dims[0] / static_cast<float>(_tileSize)), std::ceil(dims[1] / static_cast<float>(_tileSize)));
+  }
+  else {
+    return QPoint();
   }
 }
 
 void TileManager::loadAllTilesForLevel(unsigned int level) {
-  if (_img && _renderThread) {
-    std::vector<unsigned long long> baseLevelDims = _img->getLevelDimensions(0);
-    this->loadTilesForFieldOfView(QRectF(0, 0, baseLevelDims[0], baseLevelDims[1]), level);
+  if (_renderThread) {
+    if (level < _levelDownsamples.size()) {
+      std::vector<unsigned long long> baseLevelDims = _levelDimensions[0];
+      this->loadTilesForFieldOfView(QRectF(0, 0, baseLevelDims[0], baseLevelDims[1]), level);
+    }
   }
 }
 
@@ -62,12 +79,12 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
   if (level > _lastRenderLevel) {
     return;
   }
-  if (_img && _renderThread) {
+  if (_renderThread) {
     QPoint topLeftTile = this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
     QPoint bottomRightTile = this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
     QRect FOVTile = QRect(topLeftTile, bottomRightTile);
     QPoint nrTiles = getLevelTiles(level);
-    float levelDownsample = _img->getLevelDownsample(level);
+    float levelDownsample = _levelDownsamples[level];
     if (FOVTile != _lastFOV || level != _lastLevel) {
       _lastLevel = level;
       _lastFOV = FOVTile;
@@ -88,15 +105,15 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 }
 
 void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel) {
-  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _img, this);
+  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this);
   std::stringstream ss;
   ss << tileX << "_" << tileY << "_" << tileLevel;
   std::string key;
   ss >> key;
   if (_scene) {
     setCoverage(tileLevel, tileX, tileY, 2);
-    float tileDownsample = _img->getLevelDownsample(tileLevel);
-    float maxDownsample = _img->getLevelDownsample(_lastRenderLevel);
+    float tileDownsample = _levelDownsamples[tileLevel];
+    float maxDownsample = _levelDownsamples[_lastRenderLevel];
     float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
     float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
     _scene->addItem(item);
@@ -148,7 +165,7 @@ bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
     }
     else {
       bool covered = true;
-      unsigned int downsample = _img->getLevelDownsample(level) / _img->getLevelDownsample(level - 1);
+      unsigned int downsample = _levelDownsamples[level] / _levelDownsamples[level - 1];
       for (unsigned int x = 0; x < downsample; ++x) {
         for (unsigned int y = 0; y < downsample; ++y) {
           covered &= providesCoverage(level - 1, downsample * tile_x + x, downsample * tile_y + y) == 2;
@@ -169,7 +186,7 @@ void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsign
   }
   if (level != _lastRenderLevel) {
     if (covers == 2 || covers == 0) {
-      float rectSize = _tileSize / (_img->getLevelDownsample(_lastRenderLevel) / _img->getLevelDownsample(level));
+      float rectSize = _tileSize / (_levelDownsamples[_lastRenderLevel] / _levelDownsamples[level]);
       QPainterPath rect;
       rect.addRect(QRectF(tile_x * rectSize - 1, tile_y * rectSize - 1, rectSize + 1, rectSize + 1));
       if (covers == 2) {

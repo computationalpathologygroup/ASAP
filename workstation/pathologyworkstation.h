@@ -40,7 +40,7 @@ public:
   unsigned long long getCacheSize() const;
 
 signals:
-  void newImageLoaded(MultiResolutionImage*, std::string);
+  void newImageLoaded(std::weak_ptr<MultiResolutionImage>, const std::string&);
   void imageClosed();
 
 private slots:
@@ -49,7 +49,7 @@ private slots:
 
 private:
   static const char* sharedLibraryExtensions;
-  MultiResolutionImage *_img;
+  std::shared_ptr<MultiResolutionImage> _img;
   unsigned long long _cacheMaxByteSize;
   QSettings* _settings;
   
