@@ -27,7 +27,7 @@ Q_DECLARE_METATYPE(Patch<double>*)
 ColorDeconvolutionFilterPlugin::ColorDeconvolutionFilterPlugin() :
   ImageFilterPluginInterface()
 {
-  _filter = new ColorDeconvolutionFilter<double>();
+  _filter.reset(new ColorDeconvolutionFilter<double>());
 }
 
 bool ColorDeconvolutionFilterPlugin::initialize(const ImageSource* img) {
@@ -49,12 +49,11 @@ ColorDeconvolutionFilterPlugin::ColorDeconvolutionFilterPlugin(const ColorDeconv
 {
   _mutex.lock();
   if (_filter) {
-    delete _filter;
-    _filter = NULL;
+    _filter.reset();
   }
-  ColorDeconvolutionFilter<double>* otherFilter = dynamic_cast<ColorDeconvolutionFilter<double>* >(other._filter);
+  const ColorDeconvolutionFilter<double>*  otherFilter = dynamic_cast<const ColorDeconvolutionFilter<double>* >(other._filter.get());
   if (otherFilter) {
-    _filter = new ColorDeconvolutionFilter<double>(*otherFilter);
+    _filter.reset(new ColorDeconvolutionFilter<double>(*otherFilter));
   }
   _mutex.unlock();
 }
@@ -69,7 +68,7 @@ QIcon ColorDeconvolutionFilterPlugin::icon() const {
 
 void ColorDeconvolutionFilterPlugin::filter(const Patch<double> &input, QVariant &output) {
   Patch<double>* outImg = new Patch<double>();
-  ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter);
+  ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter.get());
   if (filter) {
     if (filter->filter(input, *outImg)) {
       output = QVariant::fromValue<Patch<double>*>(outImg);
@@ -131,7 +130,7 @@ void ColorDeconvolutionFilterPlugin::initializeSettingsPanel() {
 
 void ColorDeconvolutionFilterPlugin::revertStainToDefault() {
   if (_filter) {
-    ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter);
+    ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter.get());
     if (filter) {
       filter->revertToDefaultStain();
       updateSettingsPanelFromFilter();
@@ -141,7 +140,7 @@ void ColorDeconvolutionFilterPlugin::revertStainToDefault() {
 }
 
 void ColorDeconvolutionFilterPlugin::updateFilterFromSettingsPanel() {
-  ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter);
+  ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter.get());
   if (_settingsPanel && filter) {
     QDoubleSpinBox* stain1R = _settingsPanel->findChild<QDoubleSpinBox*>("Stain1RSpinBox");
     QDoubleSpinBox* stain1G = _settingsPanel->findChild<QDoubleSpinBox*>("Stain1GSpinBox");
@@ -180,7 +179,7 @@ void ColorDeconvolutionFilterPlugin::updateFilterFromSettingsPanel() {
 }
 
 void ColorDeconvolutionFilterPlugin::updateSettingsPanelFromFilter() {
-  ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter);
+  ColorDeconvolutionFilter<double>* filter = dynamic_cast<ColorDeconvolutionFilter<double>* >(_filter.get());
   if (_settingsPanel && filter) {
     _mutex.lock();
     QDoubleSpinBox* stain1R = _settingsPanel->findChild<QDoubleSpinBox*>("Stain1RSpinBox");

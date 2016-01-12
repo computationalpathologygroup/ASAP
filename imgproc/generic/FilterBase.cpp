@@ -1,7 +1,8 @@
+#include <memory>
 #include "FilterBase.h"
 #include "core/ProgressMonitor.h"
 
-FilterBase::FilterBase() : _monitor(NULL), _cancel(false), _running(false) {
+FilterBase::FilterBase() : _cancel(false), _running(false) {
 
 }
 
@@ -41,22 +42,18 @@ void FilterBase::finish() {
 }
 
 
-const ProgressMonitor* const FilterBase::progressMonitor() const {
+std::weak_ptr<ProgressMonitor> FilterBase::progressMonitor() const {
   return _monitor;
 }
 
-void FilterBase::setProgressMonitor(ProgressMonitor* monitor) {
-  _monitorMutex.lock();
+void FilterBase::setProgressMonitor(std::shared_ptr<ProgressMonitor> monitor) {
   _monitor = monitor;
-  _monitorMutex.unlock();
 }
 
 void FilterBase::updateProgress(float progress) {
-  _monitorMutex.lock();
-  if (_monitor) {
-    _monitor->setProgress(progress);
+  if (std::shared_ptr<ProgressMonitor> shared_monitor = _monitor.lock()) {
+    shared_monitor->setProgress(progress);
   }
-  _monitorMutex.unlock();
 }
 
 void FilterBase::cancel() {

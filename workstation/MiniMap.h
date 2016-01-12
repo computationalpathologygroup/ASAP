@@ -2,6 +2,7 @@
 #define MINIMAP_H
 
 #include <QWidget>
+#include <QPointer>
 
 class QPixmap;
 class TileManager;
@@ -10,8 +11,7 @@ class MiniMap : public QWidget {
   Q_OBJECT
 
 public:
-  MiniMap(QPixmap* overview, QWidget *parent = 0);
-  ~MiniMap();
+  MiniMap(const QPixmap& overview, QWidget *parent);
 
   QSize sizeHint() const;
   int heightForWidth(int w) const;
@@ -28,9 +28,9 @@ protected:
   void paintEvent(QPaintEvent *event);
 
 private:
-  QPixmap* _overview;
+  QPixmap _overview;
   QRectF _fieldOfView;
-  TileManager* _manager;
+  QPointer<TileManager> _manager;
   float _aspectRatio; //Width / height
   static const char* const coverageColors[];
   bool _drawCoverageMap;

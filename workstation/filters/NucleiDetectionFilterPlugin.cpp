@@ -28,7 +28,7 @@ Q_DECLARE_METATYPE(std::vector<Point>)
 NucleiDetectionFilterPlugin::NucleiDetectionFilterPlugin() : 
   ImageFilterPluginInterface()
 {
-  _filter = new NucleiDetectionFilter<double>();
+  _filter.reset(new NucleiDetectionFilter<double>());
 }
 
 ImageFilterPluginInterface* NucleiDetectionFilterPlugin::clone() const {
@@ -39,9 +39,9 @@ ImageFilterPluginInterface* NucleiDetectionFilterPlugin::clone() const {
 NucleiDetectionFilterPlugin::NucleiDetectionFilterPlugin(const NucleiDetectionFilterPlugin& other) :
   ImageFilterPluginInterface()
 {
-  NucleiDetectionFilter<double>* otherFilter = dynamic_cast<NucleiDetectionFilter<double>* >(other._filter);
+  const NucleiDetectionFilter<double>* otherFilter = dynamic_cast<const NucleiDetectionFilter<double>* >(other._filter.get());
   if (otherFilter) {
-    _filter = otherFilter;
+    _filter.reset(new NucleiDetectionFilter<double>(*otherFilter));
     initializeSettingsPanel();
     updateSettingsPanelFromFilter();
   }
@@ -65,7 +65,7 @@ bool NucleiDetectionFilterPlugin::initialize(const ImageSource* img) {
 }
 
 void NucleiDetectionFilterPlugin::filter(const Patch<double> &input, QVariant &output) {
-  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter);
+  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter.get());
   if (filter) {
     _mutex.lock();
     if (_settingsPanel) {
@@ -158,7 +158,7 @@ void NucleiDetectionFilterPlugin::initializeSettingsPanel() {
 }
 
 void NucleiDetectionFilterPlugin::revertStainToDefault() {
-  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter);
+  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter.get());
   if (filter) {
     filter->getColorDeconvolutionFilter()->revertToDefaultStain();
     updateSettingsPanelFromFilter();
@@ -166,7 +166,7 @@ void NucleiDetectionFilterPlugin::revertStainToDefault() {
 }
 
 void NucleiDetectionFilterPlugin::updateFilterFromSettingsPanel() {
-  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter);
+  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter.get());
   if (_settingsPanel && filter) {
     filter->cancel();
     _mutex.lock();
@@ -219,7 +219,7 @@ void NucleiDetectionFilterPlugin::updateFilterFromSettingsPanel() {
 }
 
 void NucleiDetectionFilterPlugin::updateSettingsPanelFromFilter() {
-  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter);
+  NucleiDetectionFilter<double>* filter = dynamic_cast<NucleiDetectionFilter<double>* >(_filter.get());
   if (_settingsPanel && filter) {
     _mutex.lock();
     QDoubleSpinBox* stain1R = _settingsPanel->findChild<QDoubleSpinBox*>("Stain1RSpinBox");

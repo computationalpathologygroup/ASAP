@@ -4,6 +4,10 @@ PROJECT(DIAGPathology)
 SET(CMAKE_MODULE_PATH ${DIAGPathology_SOURCE_DIR}/cmakemodules)
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
+IF(NOT WIN32)
+SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib:$ORIGIN/")
+ENDIF(NOT WIN32)
+
 # Use boost for cross-platform use of threading, file system and date_time handling
 FIND_PACKAGE(Boost REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
 SET(Boost_DEFINITIONS "-DBOOST_ALL_DYN_LINK")

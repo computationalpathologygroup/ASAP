@@ -88,7 +88,7 @@ void AnnotationToMask::convert(const std::shared_ptr<AnnotationList>& annotation
                   if (nameOrder.empty()) {
                     buffer[y * 512 + x] = in_poly * label > buffer[y * 512 + x] ? in_poly * label : buffer[y * 512 + x];
                   }
-                  else {
+                  else if (in_poly) {
                     buffer[y * 512 + x] = in_poly * label;
                   }
                 }

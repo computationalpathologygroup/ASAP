@@ -15,7 +15,6 @@ FilterWorkstationExtensionPlugin::FilterWorkstationExtensionPlugin() :
   WorkstationExtensionPluginInterface(),
   _dockWidget(NULL),
   _filterThread(NULL),
-  _img(NULL),
   _filterResult(NULL),
   _autoUpdate(false)
 {
@@ -65,7 +64,7 @@ FilterWorkstationExtensionPlugin::~FilterWorkstationExtensionPlugin() {
 
 bool FilterWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _viewer = viewer;
-  connect(_viewer, SIGNAL(fieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF&, MultiResolutionImage*, const unsigned int)));
+  connect(_viewer, SIGNAL(fieldOfViewChanged(const QRectF&, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF&, const unsigned int)));
   return true;
 }
 
@@ -82,12 +81,14 @@ void FilterWorkstationExtensionPlugin::onFilterResultClearRequested() {
 }
 
 void FilterWorkstationExtensionPlugin::onFilterResultUpdateRequested() {
-  if (_img && _filterThread) {
-    float sceneScale = this->_viewer->getSceneScale();
-    float maxDownsample = 1. / sceneScale;
-    QRectF FOV = this->_viewer->mapToScene(this->_viewer->rect()).boundingRect();
-    QRectF FOVImage = QRectF(FOV.left() / sceneScale, FOV.top() / sceneScale, FOV.width() / sceneScale, FOV.height() / sceneScale);
-    _filterThread->updateFilterResult(FOVImage, _img, _img->getBestLevelForDownSample(maxDownsample / this->_viewer->transform().m11()), -1);
+  if (_filterThread) {
+    if (std::shared_ptr<MultiResolutionImage> local_img = _img.lock()) {
+      float sceneScale = this->_viewer->getSceneScale();
+      float maxDownsample = 1. / sceneScale;
+      QRectF FOV = this->_viewer->mapToScene(this->_viewer->rect()).boundingRect();
+      QRectF FOVImage = QRectF(FOV.left() / sceneScale, FOV.top() / sceneScale, FOV.width() / sceneScale, FOV.height() / sceneScale);
+      _filterThread->updateFilterResult(FOVImage, _img, local_img->getBestLevelForDownSample(maxDownsample / this->_viewer->transform().m11()), -1);
+    }
   }
 }
 
@@ -129,7 +130,7 @@ QDockWidget* FilterWorkstationExtensionPlugin::getDockWidget() {
   return _dockWidget;
 }
 
-void FilterWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage* img, std::string fileName) {
+void FilterWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName) {
   _img = img;
   if (_dockWidget) {
     _dockWidget->setEnabled(true);
@@ -138,7 +139,7 @@ void FilterWorkstationExtensionPlugin::onNewImageLoaded(MultiResolutionImage* im
   }
 }
 
-void FilterWorkstationExtensionPlugin::onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level) {
+void FilterWorkstationExtensionPlugin::onFieldOfViewChanged(const QRectF& FOV, std::weak_ptr<MultiResolutionImage> img, const unsigned int level) {
   onFilterResultClearRequested();
   if (_filterThread && _autoUpdate) {
     onFilterResultUpdateRequested();
@@ -146,7 +147,7 @@ void FilterWorkstationExtensionPlugin::onFieldOfViewChanged(const QRectF& FOV, M
 }
 
 void FilterWorkstationExtensionPlugin::onImageClosed() {
-  _img = NULL;
+  _img.reset();
   if (_filterResult) {
     onFilterResultClearRequested();
   }

@@ -25,7 +25,7 @@ class EXPORT_PATHOLOGYANNOTATIONPLUGIN AnnotationWorkstationExtensionPlugin : pu
 
 public :
     bool initialize(PathologyViewer* viewer);
-    std::vector<ToolPluginInterface*> getTools();
+    std::vector<std::shared_ptr<ToolPluginInterface> > getTools();
     AnnotationWorkstationExtensionPlugin();
     ~AnnotationWorkstationExtensionPlugin();
     void startAnnotation(float x, float y, const std::string& type);
@@ -42,7 +42,7 @@ public :
     void clearSelection();
 
 public slots:
-    void onNewImageLoaded(MultiResolutionImage* img, std::string fileName);
+    void onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName);
     void onImageClosed();
     void addAnnotationGroup();
     void onClearButtonPressed();
@@ -56,8 +56,8 @@ private slots:
     void resizeOnExpand();
 
 private :
-    std::vector<ToolPluginInterface*> _annotationTools;
-    AnnotationService* _annotationService;
+    std::vector<std::shared_ptr<ToolPluginInterface> > _annotationTools;
+    std::unique_ptr<AnnotationService> _annotationService;
     QtAnnotation* _generatedAnnotation;
     QtAnnotation* _activeAnnotation;
     QSet<QtAnnotation*> _selectedAnnotations;
@@ -66,7 +66,7 @@ private :
     QDockWidget* _dockWidget;
     QTreeWidget* _treeWidget;
     QEvent* _oldEvent;
-    MultiResolutionImage* _img;
+    std::weak_ptr<MultiResolutionImage> _img;
 
     void clearTreeWidget();
     void clearAnnotationList();

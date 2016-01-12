@@ -27,7 +27,7 @@ public:
     PathologyViewer(QWidget *parent = 0);
     ~PathologyViewer();
 
-    void initialize(MultiResolutionImage *img);
+    void initialize(std::shared_ptr<MultiResolutionImage> img);
     void close();
 
     float getZoomSensitivity() const;
@@ -44,7 +44,7 @@ public:
     void zoom(float numSteps);
    
     bool hasTool(const std::string& toolName) const;
-    void addTool(ToolPluginInterface* tool);
+    void addTool(std::shared_ptr<ToolPluginInterface> tool);
     void setActiveTool(const std::string& toolName);
     float getSceneScale() { return _sceneScale; }
 
@@ -53,15 +53,15 @@ public:
     void setAutoUpdate(bool autoUpdate);
 
 signals :
-    void fieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
+    void fieldOfViewChanged(const QRectF& FOV, const unsigned int level);
     void updateBBox(const QRectF& FOV);
     void channelChanged(int channelNr);
 
 public slots :
     void moveTo(const QPointF& pos);
     void changeActiveTool();
-    void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
-    void onForegroundImageChanged(MultiResolutionImage* for_img, float scale);
+    void onFieldOfViewChanged(const QRectF& FOV, const unsigned int level);
+    void onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale);
 
 private :
     
@@ -84,10 +84,11 @@ private :
     // Interface to the multi-resolution image. Please note that PathologyViewer
     // should never modify _img (it is modified in the RenderThread due to calls
     // to readRegion), otherwise race conditions could occur.
-    MultiResolutionImage *_img;
+    std::shared_ptr<MultiResolutionImage> _img;
+    std::weak_ptr<MultiResolutionImage> _for_img;
 
     // Minimap
-    MiniMap *_map; 
+    MiniMap* _map;
 
     // ScaleBar
     ScaleBar* _scaleBar;
@@ -96,7 +97,7 @@ private :
     QSettings* _settings;
 
     // Tools
-    ToolPluginInterface* _activeTool;
+    std::shared_ptr<ToolPluginInterface> _activeTool;
 
     // Members to track panning and zooming
     float _zoomSensitivity;
@@ -112,7 +113,7 @@ private :
     unsigned long long _cacheSize;
     WSITileGraphicsItemCache* _cache;
 
-    std::map<std::string, ToolPluginInterface*> _tools;
+    std::map<std::string, std::shared_ptr<ToolPluginInterface> > _tools;
 
 private slots :
     void showContextMenu(const QPoint& pos);
