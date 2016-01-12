@@ -124,6 +124,12 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
     cosy[2] = cosy[2] / leng;
     cosz[2] = cosz[2] / leng;
 
+		for (int i=0; i<3; i++){
+			if (cosx[i] == 0.0) cosx[i] = 0.001;
+			if (cosy[i] == 0.0) cosy[i] = 0.001;
+			if (cosz[i] == 0.0) cosz[i] = 0.001;
+		}
+
     /* matrix inversion */
     double A = cosy[1] - cosx[1] * cosy[0] / cosx[0];
     double V = cosz[1] - cosx[1] * cosz[0] / cosx[0];

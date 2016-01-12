@@ -10,7 +10,7 @@ AnnotationList::~AnnotationList() {
   removeAllGroups();
 }
 
-bool AnnotationList::addGroup(AnnotationGroup* group) {
+bool AnnotationList::addGroup(const std::shared_ptr<AnnotationGroup>& group) {
   if (group) {
     if (!this->getGroup(group->getName())) {
       _groups.push_back(group);
@@ -20,7 +20,7 @@ bool AnnotationList::addGroup(AnnotationGroup* group) {
   return false;
 }
 
-bool AnnotationList::addAnnotation(Annotation* annotation) {
+bool AnnotationList::addAnnotation(const std::shared_ptr<Annotation>& annotation) {
   if (annotation) {
     if (!this->getAnnotation(annotation->getName())) {
       _annotations.push_back(annotation);
@@ -30,7 +30,7 @@ bool AnnotationList::addAnnotation(Annotation* annotation) {
   return false;
 }
 
-AnnotationGroup* AnnotationList::getGroup(const int& index) {
+std::shared_ptr<AnnotationGroup> AnnotationList::getGroup(const int& index) {
   if (index < 0) {
     return *(_groups.end() - abs(index));
   }
@@ -39,8 +39,8 @@ AnnotationGroup* AnnotationList::getGroup(const int& index) {
   }
 }
 
-AnnotationGroup* AnnotationList::getGroup(std::string name) {
-  for (std::vector<AnnotationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
+std::shared_ptr<AnnotationGroup> AnnotationList::getGroup(std::string name) {
+  for (std::vector<std::shared_ptr<AnnotationGroup> >::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
     if ((*it) && (*it)->getName() == name) {
       return (*it);
     }
@@ -48,7 +48,7 @@ AnnotationGroup* AnnotationList::getGroup(std::string name) {
   return NULL;
 }
 
-Annotation* AnnotationList::getAnnotation(const int& index) {
+std::shared_ptr<Annotation> AnnotationList::getAnnotation(const int& index) {
   if (index < 0) {
     return *(_annotations.end() - abs(index));
   }
@@ -57,8 +57,8 @@ Annotation* AnnotationList::getAnnotation(const int& index) {
   }
 }
 
-Annotation* AnnotationList::getAnnotation(std::string name) {
-  for (std::vector<Annotation*>::const_iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
+std::shared_ptr<Annotation> AnnotationList::getAnnotation(std::string name) {
+  for (std::vector<std::shared_ptr<Annotation> >::const_iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
     if ((*it) && (*it)->getName() == name) {
       return (*it);
     }
@@ -66,39 +66,38 @@ Annotation* AnnotationList::getAnnotation(std::string name) {
   return NULL;
 }
 
-std::vector<Annotation*> AnnotationList::getAnnotations() const {
+std::vector<std::shared_ptr<Annotation> > AnnotationList::getAnnotations() const {
   return _annotations;
 }
 
-std::vector<AnnotationGroup*> AnnotationList::getGroups() const {
+std::vector<std::shared_ptr<AnnotationGroup> > AnnotationList::getGroups() const {
   return _groups;
 }
 
-void AnnotationList::setAnnotations(std::vector<Annotation*> annotations) {
+void AnnotationList::setAnnotations(const std::vector<std::shared_ptr<Annotation> >& annotations) {
   this->removeAllAnnotations();
   _annotations = annotations;
 }
 
-void AnnotationList::setGroups(std::vector<AnnotationGroup*> groups) {
+void AnnotationList::setGroups(const std::vector<std::shared_ptr<AnnotationGroup> >& groups) {
   this->removeAllGroups();
   _groups = groups;
 }
 
 void AnnotationList::removeGroup(const int& index) {
   if (index < 0) {
-    delete *(_groups.end() - abs(index));
+    (_groups.end() - abs(index))->reset();
     _groups.erase(_groups.end() - abs(index));
   }
   else {
-    delete *(_groups.begin() + index);
+    (_groups.begin() + index)->reset();
     _groups.erase(_groups.begin() + index);
   }
 }
 
 void AnnotationList::removeGroup(std::string name) {
-  for (std::vector<AnnotationGroup*>::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+  for (std::vector<std::shared_ptr<AnnotationGroup> >::iterator it = _groups.begin(); it != _groups.end(); ++it) {
     if ((*it) && (*it)->getName() == name) {
-      delete (*it);
       _groups.erase(it);
       break;
     }
@@ -107,19 +106,18 @@ void AnnotationList::removeGroup(std::string name) {
 
 void AnnotationList::removeAnnotation(const int& index) {
   if (index < 0) {
-    delete *(_annotations.end() - abs(index));
+    (_annotations.end() - abs(index))->reset();
     _annotations.erase(_annotations.end() - abs(index));
   }
   else {
-    delete *(_annotations.begin() + index);
+    (_annotations.begin() + index)->reset();
     _annotations.erase(_annotations.begin() + index);
   }
 }
 
 void AnnotationList::removeAnnotation(std::string name) {
-  for (std::vector<Annotation*>::iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
+  for (std::vector<std::shared_ptr<Annotation> >::iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
     if ((*it) && (*it)->getName() == name) {
-      delete (*it);
       _annotations.erase(it);
       break;
     }
@@ -127,15 +125,9 @@ void AnnotationList::removeAnnotation(std::string name) {
 }
 
 void AnnotationList::removeAllAnnotations() {
-  for (std::vector<Annotation*>::const_iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
-    delete (*it);
-  }
   _annotations.clear();
 }
 
 void AnnotationList::removeAllGroups() {
-  for (std::vector<AnnotationGroup*>::const_iterator it = _groups.begin(); it != _groups.end(); ++it) {
-    delete (*it);
-  }
   _groups.clear();
 }

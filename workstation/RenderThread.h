@@ -25,11 +25,12 @@ class RenderThread : public QObject
   Q_OBJECT
     
 public:
-  RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* for_img = NULL, unsigned int nrThreads = 2, QObject *parent = 0);
+  RenderThread(QObject *parent, unsigned int nrThreads = 2);
   ~RenderThread();
 
   void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level);
-  void setForegroundImage(MultiResolutionImage* for_img, float scale = 1.);
+  void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
+  void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
   
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
@@ -53,8 +54,8 @@ private :
   bool _abort;
   QMutex _jobListMutex;
   QWaitCondition _condition;
-  MultiResolutionImage *_bck_img;
-  MultiResolutionImage *_for_img;
+  std::weak_ptr<MultiResolutionImage> _bck_img;
+  std::weak_ptr<MultiResolutionImage> _for_img;
   std::list<RenderJob> _jobList;
   std::vector<RenderWorker*> _workers;
   int _channel;

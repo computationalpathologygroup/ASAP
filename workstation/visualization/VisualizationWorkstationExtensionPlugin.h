@@ -1,6 +1,7 @@
 #ifndef VISUALIZATIONWORKSTATIONEXTENSIONPLUGIN_H
 #define VISUALIZATIONWORKSTATIONEXTENSIONPLUGIN_H
 
+#include <memory>
 #include "../interfaces/interfaces.h"
 #include "config/pathology_config.h"
 
@@ -20,14 +21,14 @@ private :
   void addSegmentationsToViewer();
   void removeSegmentationsFromViewer();
 
-  MultiResolutionImage* _foreground;
+  std::shared_ptr<MultiResolutionImage> _foreground;
   QDockWidget* _dockWidget;
   QCheckBox* _likelihoodCheckBox;
   QCheckBox* _segmentationCheckBox;
   float _opacity;
   float _foregroundScale;
-  XmlRepository* _annotations;
-  AnnotationList* _lst;
+  std::shared_ptr<XmlRepository> _xmlRepo;
+  std::shared_ptr<AnnotationList> _lst;
   QList<QGraphicsPolygonItem*> _polygons;
 
 public :
@@ -37,14 +38,14 @@ public :
     QDockWidget* getDockWidget();    
 
 public slots:
-    void onNewImageLoaded(MultiResolutionImage* img, std::string fileName);
+    void onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName);
     void onImageClosed();
     void onEnableLikelihoodToggled(bool toggled);
     void onOpacityChanged(double opacity);
     void onEnableSegmentationToggled(bool toggled);
 
 signals: 
-    void changeForegroundImage(MultiResolutionImage*, float scale);
+    void changeForegroundImage(std::weak_ptr<MultiResolutionImage>, float scale);
 };
 
 #endif

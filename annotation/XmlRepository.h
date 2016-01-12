@@ -13,13 +13,13 @@ namespace pugi {
 
 class EXPORT_PATHOLOGYANNOTATION XmlRepository : public Repository {
 public:
-  XmlRepository(AnnotationList* list);
+  XmlRepository(const std::shared_ptr<AnnotationList>& list);
   virtual bool save() const;
   virtual bool load();
 
 private :
-  void saveAnnotation(const Annotation* annotation, pugi::xml_node* node) const;
-  void saveGroup(const AnnotationGroup* group, pugi::xml_node* node)  const;
+  void saveAnnotation(const std::shared_ptr<Annotation>&, pugi::xml_node* node) const;
+  void saveGroup(const std::shared_ptr<AnnotationGroup>& group, pugi::xml_node* node)  const;
 };
 
 #endif

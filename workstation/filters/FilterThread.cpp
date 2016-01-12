@@ -29,7 +29,6 @@ FilterThread::FilterThread(QObject *parent) :
   _FOV(QRectF()),
   _level(0),
   _channel(0),
-  _img(NULL),
   _filterPlugin(NULL)
 {
 }
@@ -54,7 +53,7 @@ void FilterThread::updateFilterResult() {
   _condition.wakeOne();
 }
 
-void FilterThread::updateFilterResult(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level, int channel)
+void FilterThread::updateFilterResult(const QRectF& FOV, std::weak_ptr<MultiResolutionImage> img, const unsigned int level, int channel)
 {
   stopFilter();
 
@@ -98,7 +97,7 @@ void FilterThread::run()
     _mutex.lock();
     QRectF FOV = _FOV;
     int level = _level;
-    MultiResolutionImage* img = _img;
+    std::shared_ptr<MultiResolutionImage> img = _img.lock();
     int channel = _channel;
 
     if (img) {
@@ -110,13 +109,11 @@ void FilterThread::run()
         float downsample = img->getLevelDownsample(level);
         unsigned int width = FOV.width() / downsample;
         unsigned int height = FOV.height() / downsample;
-        Patch<double>* input = img->getPatch<double>(FOV.left(), FOV.top(), width, height, level);
+        Patch<double> input = img->getPatch<double>(FOV.left(), FOV.top(), width, height, level);
         QVariant variant;
         if (!_restart) {
-          _filterPlugin->filter(*input, variant);
+          _filterPlugin->filter(input, variant);
         }
-        delete input;
-        input = NULL;
 
         if (variant.isValid() && !variant.isNull()) {
           Patch<double>* output = variant.value<Patch<double>*>();

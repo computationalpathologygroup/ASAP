@@ -13,11 +13,10 @@
 #include <QElapsedTimer>
 
 
-WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int itemLevel, unsigned int lastRenderLevel, const MultiResolutionImage* const img, TileManager* manager) :
+WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int itemLevel, unsigned int lastRenderLevel, const std::vector<float>& imgDownsamples, TileManager* manager) :
   QGraphicsItem(),
   _item(NULL),
   _manager(NULL),
-  _img(NULL),
   _tileX(tileX),
   _tileY(tileY),
   _tileSize(tileSize),
@@ -31,10 +30,23 @@ WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsi
   if (manager) {
     _manager = manager;
   }
-  if (img) {
-    _img = img;
+  _physicalSize = _tileSize / (imgDownsamples[_lastRenderLevel] / imgDownsamples[_itemLevel]);
+  float lastRenderLevelDownsample = imgDownsamples[_lastRenderLevel];
+  float itemLevelLOD = lastRenderLevelDownsample / imgDownsamples[_itemLevel];
+  if (_itemLevel == _lastRenderLevel) {
+    _lowerLOD = 0.;
   }
-  _physicalSize = _tileSize / (_img->getLevelDownsample(_lastRenderLevel) / _img->getLevelDownsample(_itemLevel));
+  else {
+    float prevLevelLOD = lastRenderLevelDownsample / imgDownsamples[_itemLevel + 1];
+    _lowerLOD = (prevLevelLOD + itemLevelLOD) / 2.;
+  }
+  if (_itemLevel == 0) {
+    _upperLOD = std::numeric_limits<float>::max();
+  }
+  else {
+    float nextLevelLOD = lastRenderLevelDownsample / imgDownsamples[_itemLevel - 1];
+    _upperLOD = (nextLevelLOD + itemLevelLOD) / 2.;
+  }
   this->setFlag(QGraphicsItem::ItemUsesExtendedStyleOption);
   _boundingRect = QRectF(-_physicalSize / 2., -_physicalSize / 2., _physicalSize, _physicalSize);
 }
@@ -57,11 +69,16 @@ QRectF WSITileGraphicsItem::boundingRect() const{
 void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                                 QWidget *widget){
   float lod = option->levelOfDetailFromTransform(painter->worldTransform());
-  float maxDownsample = _img->getLevelDownsample(_lastRenderLevel);
-  unsigned int currentLevel = _img->getBestLevelForDownSample(maxDownsample / lod) > _lastRenderLevel ? _lastRenderLevel : _img->getBestLevelForDownSample(maxDownsample / lod);
-  if (currentLevel <= _itemLevel) {
+  if (lod > _lowerLOD) {
     if (_item) {
-      if (!_manager->isCovered(_itemLevel, _tileX, _tileY) || currentLevel == _itemLevel) {
+      bool draw = false;
+      if (lod <= _upperLOD) {
+        draw = true;
+      }
+      else if (!_manager->isCovered(_itemLevel, _tileX, _tileY)) {
+        draw = true;
+      }
+      if (draw) {
         QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
         painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
         /*

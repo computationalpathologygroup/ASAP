@@ -9,7 +9,6 @@ Annotation::Annotation() :
   _type(Annotation::NONE),
   _coordinates(),
   _name(""),
-  _group(NULL),
   _color("#F4FA58")
 {
 }
@@ -110,12 +109,13 @@ std::string Annotation::getName() const
 	return _name;
 };
 
-void Annotation::setGroup(AnnotationGroup* group) {
+void Annotation::setGroup(const std::shared_ptr<AnnotationGroup>& group) {
   _group = group;
 }
 
-AnnotationGroup* Annotation::getGroup() const {
-  return _group;
+std::shared_ptr<AnnotationGroup> Annotation::getGroup() const {
+  std::shared_ptr<AnnotationGroup> grp = _group.lock();
+  return grp;
 }
 
 std::vector<Point> Annotation::getImageBoundingBox() const {

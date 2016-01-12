@@ -4,7 +4,7 @@
 
 using namespace std;
 
-QtAnnotation::QtAnnotation(Annotation* annotation, float scale) :
+QtAnnotation::QtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale) :
 QGraphicsItem(),
 QObject(),
 _annotation(annotation),
@@ -27,8 +27,8 @@ QtAnnotation::~QtAnnotation() {
 QColor QtAnnotation::getDrawingColor() {
   QColor drawingColor("#F4FA58");
   if (_annotation) {
-    if (_annotation->getGroup()) {
-      AnnotationGroup* grp = _annotation->getGroup();
+    std::shared_ptr<AnnotationGroup> grp = _annotation->getGroup();
+    if (grp) {
       while (grp->getGroup()) {
         grp = grp->getGroup();
       }
@@ -103,7 +103,7 @@ void QtAnnotation::onCoordinatesChanged() {
   return;
 }
 
-Annotation* QtAnnotation::getAnnotation() const {
+std::shared_ptr<Annotation> QtAnnotation::getAnnotation() const {
   return _annotation;
 }
 

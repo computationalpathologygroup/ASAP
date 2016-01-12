@@ -4,14 +4,14 @@
 #include "config/pathology_config.h"
 #include <mutex>
 #include <string>
+#include <memory>
 
 class ProgressMonitor;
 
 class EXPORT_BASICFILTERS FilterBase {
 
-  std::mutex _monitorMutex;
   std::mutex _cancelMutex;
-  ProgressMonitor* _monitor;
+  std::weak_ptr<ProgressMonitor> _monitor;
   bool _cancel;
   bool _running;
 
@@ -24,8 +24,8 @@ public:
 
   virtual std::string name() const;
 
-  const ProgressMonitor* const progressMonitor() const;
-  void setProgressMonitor(ProgressMonitor* monitor);
+  std::weak_ptr<ProgressMonitor> progressMonitor() const;
+  void setProgressMonitor(std::shared_ptr<ProgressMonitor> monitor);
   void updateProgress(float progress);
 
   void cancel();

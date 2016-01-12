@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 #include "config/pathology_config.h"
 #include "core/Point.h"
@@ -14,14 +15,14 @@ class ProgressMonitor;
 class EXPORT_PATHOLOGYANNOTATION AnnotationToMask {
 
 public :
-  void convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel = std::map<std::string, int>(), const std::vector<std::string> nameOrder = std::vector<std::string>()) const;
+  void convert(const std::shared_ptr<AnnotationList>& annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel = std::map<std::string, int>(), const std::vector<std::string> nameOrder = std::vector<std::string>()) const;
   void setProgressMonitor(ProgressMonitor* monitor);
 
 private:
 
   inline int isLeft(Point P0, Point P1, Point P2) const
   {
-    return ((P1.getX() - P0.getX()) * (P2.getY() - P0.getY())
+    return static_cast<int>((P1.getX() - P0.getX()) * (P2.getY() - P0.getY())
       - (P2.getX() - P0.getX()) * (P1.getY() - P0.getY()));
   }
 

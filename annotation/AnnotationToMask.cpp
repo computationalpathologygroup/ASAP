@@ -10,15 +10,15 @@ void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
   _monitor = monitor;
 }
 
-void AnnotationToMask::convert(const AnnotationList* const annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel, const std::vector<std::string> nameOrder) const {
+void AnnotationToMask::convert(const std::shared_ptr<AnnotationList>& annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel, const std::vector<std::string> nameOrder) const {
   bool hasGroups = !annotationList->getGroups().empty();
-  std::vector<Annotation*> annotations = annotationList->getAnnotations();
+  std::vector<std::shared_ptr<Annotation> > annotations = annotationList->getAnnotations();
   if (!nameOrder.empty() && !nameToLabel.empty()) {
-    std::vector<Annotation*> unorderedAnnotations = annotations;
+    std::vector<std::shared_ptr<Annotation> > unorderedAnnotations = annotations;
     annotations.clear();
     for (unsigned int i = 0; i < nameOrder.size(); ++i) {
       std::string currentName = nameOrder[i];
-      for (std::vector<Annotation*>::iterator it = unorderedAnnotations.begin(); it != unorderedAnnotations.end(); ++it) {
+      for (std::vector<std::shared_ptr<Annotation> >::iterator it = unorderedAnnotations.begin(); it != unorderedAnnotations.end(); ++it) {
         bool matchesName = false;
         if (hasGroups) {
           if ((*it)->getGroup()) {
@@ -54,7 +54,7 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
 		for (unsigned long long ty = 0; ty < dimensions[1]; ty += 512) {
 			for (unsigned long long tx = 0; tx < dimensions[0]; tx += 512) {
 				std::fill(buffer, buffer + 512 * 512, 0);
-        for (std::vector<Annotation*>::const_iterator annotation = annotations.begin(); annotation != annotations.end(); ++annotation) {
+        for (std::vector<std::shared_ptr<Annotation> >::const_iterator annotation = annotations.begin(); annotation != annotations.end(); ++annotation) {
           if (!nameToLabel.empty() && !(*annotation)->getGroup() && hasGroups) {
             continue;
           }
@@ -84,11 +84,11 @@ void AnnotationToMask::convert(const AnnotationList* const annotationList, const
             if (ty + y > bbox[0].getY() && ty + y < bbox[1].getY()) {
               for (unsigned int x = 0; x < 512; ++x) {
                 if (tx + x > bbox[0].getX() && tx + x < bbox[1].getX()) {                  
-                  int in_poly = wn_PnPoly(Point(tx + x, ty + y), coords) != 0 ? 1 : 0;
+                  int in_poly = wn_PnPoly(Point(static_cast<float>(tx + x), static_cast<float>(ty + y)), coords) != 0 ? 1 : 0;
                   if (nameOrder.empty()) {
                     buffer[y * 512 + x] = in_poly * label > buffer[y * 512 + x] ? in_poly * label : buffer[y * 512 + x];
                   }
-                  else {
+                  else if (in_poly) {
                     buffer[y * 512 + x] = in_poly * label;
                   }
                 }

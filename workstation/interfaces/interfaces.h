@@ -6,6 +6,7 @@
 #include <QIcon>
 #include <QWidget>
 #include <QMutex>
+#include <QAction>
 
 #include <memory>
 #include <vector>
@@ -13,13 +14,12 @@
 
 #include "core/Patch.h"
 #include "imgproc/generic/FilterBase.h"
+#include "workstation/PathologyViewer.h"
 
 class QToolBar;
 class QDockWidget;
 class PathologyViewer;
-class QAction;
 class QMenu;
-class PathologyViewer;
 class ProgressMonitor;
 class MultiResolutionImage;
 
@@ -28,17 +28,13 @@ class ImageFilterPluginInterface : public QObject
 
 public:
     ImageFilterPluginInterface() :
-      _settingsPanel(),
-      _filter(NULL)
+      _settingsPanel()
     {}
 
     virtual ~ImageFilterPluginInterface() {
       _mutex.lock();
       if (_settingsPanel) {
         delete _settingsPanel;
-      }
-      if (_filter) {
-        delete _filter;
       }
       _mutex.unlock();
     }
@@ -58,7 +54,7 @@ public:
       }
     };
 
-    void setProgressMonitor(ProgressMonitor* monitor) {
+    void setProgressMonitor(std::shared_ptr<ProgressMonitor> monitor) {
       if (_filter) {
         _filter->setProgressMonitor(monitor);
       }
@@ -73,7 +69,7 @@ signals:
 
 protected:
     QPointer<QWidget> _settingsPanel;
-    FilterBase* _filter;
+    std::unique_ptr<FilterBase> _filter;
     QMutex _mutex;
 };
 
@@ -98,8 +94,8 @@ public :
   virtual QAction* getToolButton() = 0;
 
 protected :
-  PathologyViewer* _viewer;
-  QAction* _button;
+  QPointer<PathologyViewer> _viewer;
+  QPointer<QAction> _button;
 };
 
 class WorkstationExtensionPluginInterface : public QObject {
@@ -109,10 +105,10 @@ public :
   virtual QToolBar* getToolBar() { return NULL;}
   virtual QMenu* getMenu() { return NULL; }
   virtual QDockWidget* getDockWidget() { return NULL; }
-  virtual std::vector<ToolPluginInterface*> getTools() { return std::vector<ToolPluginInterface*>(); }
+  virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
 
 protected:
-  PathologyViewer* _viewer;
+  QPointer<PathologyViewer> _viewer;
 
 public slots:
   virtual void onNewImageLoaded(MultiResolutionImage* img, std::string fileName) {};

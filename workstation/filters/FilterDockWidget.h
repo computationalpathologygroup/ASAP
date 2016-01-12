@@ -28,7 +28,7 @@ private :
   QPushButton *_clearFilter;
   QCheckBox *_autoUpdateCheckBox;
   QProgressBar* _progressBar;
-  QtProgressMonitor* _monitor;
+  std::shared_ptr<QtProgressMonitor> _monitor;
 
   bool _autoUpdate;
 
@@ -43,7 +43,7 @@ private slots :
   void onFilterParametersChanged();
 
 public slots :
-  void onNewImageLoaded(MultiResolutionImage* img);
+  void onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img);
   void onImageClosed();
 
 signals:

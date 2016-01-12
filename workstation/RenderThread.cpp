@@ -9,17 +9,15 @@
 
 using namespace pathology;
 
-RenderThread::RenderThread(MultiResolutionImage* bck_img, MultiResolutionImage* for_img, unsigned int nrThreads, QObject *parent) :
+RenderThread::RenderThread(QObject *parent, unsigned int nrThreads) :
   QObject(parent),
-  _bck_img(bck_img),
-  _for_img(for_img),
   _abort(false),
   _channel(0),
   _threadsWaiting(0),
   _foregroundImageScale(1.)
 {
   for (int i = 0; i < nrThreads; ++i) {
-    RenderWorker* worker = new RenderWorker(this, _bck_img, _for_img);
+    RenderWorker* worker = new RenderWorker(this);
     worker->start(QThread::HighPriority);
     _workers.push_back(worker);
   }
@@ -77,11 +75,19 @@ void RenderThread::addJob(const unsigned int tileSize, const long long imgPosX, 
     _condition.wakeOne();
 }
 
-void RenderThread::setForegroundImage(MultiResolutionImage* for_img, float scale) {
+void RenderThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
   QMutexLocker locker(&_jobListMutex);
   _for_img = for_img;
   for (unsigned int i = 0; i < _workers.size(); ++i) {
     _workers[i]->setForegroundImage(for_img, scale);
+  }
+}
+
+void RenderThread::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img) {
+  QMutexLocker locker(&_jobListMutex);
+  _bck_img = bck_img;
+  for (unsigned int i = 0; i < _workers.size(); ++i) {
+    _workers[i]->setBackgroundImage(_bck_img);
   }
 }
 

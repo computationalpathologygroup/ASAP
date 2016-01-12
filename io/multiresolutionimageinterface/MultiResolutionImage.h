@@ -1,10 +1,10 @@
 #ifndef _MultiResolutionImage
 #define _MultiResolutionImage
 #include <string>
+#include <memory>
 #include "config/pathology_config.h"
 #include "TileCache.h"
 #include "boost/thread.hpp"
-#include "boost/shared_ptr.hpp"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
@@ -46,7 +46,7 @@ public :
   //! Obtains data as a patch, which is a basic image class containing all relevant information for further processing,
   //! like data and colortype
   template <typename T> 
-  Patch<T>* getPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
+  Patch<T> getPatch(const long long& startX, const long long& startY, const unsigned long long& width,
     const unsigned long long& height, const unsigned int& level) 
   {
     std::vector<unsigned long long> dims(3,0);
@@ -60,8 +60,8 @@ public :
     for (unsigned int i = 0; i < _spacing.size(); ++i) {
       patchSpacing[i] = _spacing[i] * levelDownsample;
     }
-    Patch<T>* patch = new Patch<T>(dims, this->getColorType(), data, true);
-    patch->setSpacing(patchSpacing);
+    Patch<T> patch = Patch<T>(dims, this->getColorType(), data, true);
+    patch.setSpacing(patchSpacing);
     return patch;
   }
 
@@ -102,7 +102,7 @@ protected :
   //! To make MultiResolutionImage thread-safe
   boost::shared_mutex _openCloseMutex;
   boost::mutex _cacheMutex;
-  boost::shared_ptr<void> _cache;
+  std::shared_ptr<void> _cache;
 
   // Aditional properties of a multi-resolution image
   std::vector<std::vector<unsigned long long> > _levelDimensions;

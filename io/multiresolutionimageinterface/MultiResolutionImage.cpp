@@ -202,16 +202,16 @@ const unsigned long long MultiResolutionImage::getCacheSize() {
   _cacheMutex.lock();
   if (_cache && _isValid) {
     if (_dataType == UInt32) {
-      cacheSize = (boost::static_pointer_cast<TileCache<unsigned int> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->maxCacheSize();
     }
     else if (_dataType == UInt16) {
-      cacheSize = (boost::static_pointer_cast<TileCache<unsigned short> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<unsigned short> >(_cache))->maxCacheSize();
     }
     else if (_dataType == UChar) {
-      cacheSize = (boost::static_pointer_cast<TileCache<unsigned char> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<unsigned char> >(_cache))->maxCacheSize();
     }
     else if (_dataType == Float) {
-      cacheSize = (boost::static_pointer_cast<TileCache<float> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<float> >(_cache))->maxCacheSize();
     }
   _cacheMutex.unlock();
   }
@@ -222,16 +222,16 @@ void MultiResolutionImage::setCacheSize(const unsigned long long cacheSize) {
   _cacheMutex.lock();
   if (_cache && _isValid) {
     if (_dataType == UInt32) {
-      (boost::static_pointer_cast<TileCache<unsigned int> >(_cache))->setMaxCacheSize(cacheSize);
+      (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->setMaxCacheSize(cacheSize);
     }
     else if (_dataType == UInt16) {
-      (boost::static_pointer_cast<TileCache<unsigned short> >(_cache))->setMaxCacheSize(cacheSize);
+      (std::static_pointer_cast<TileCache<unsigned short> >(_cache))->setMaxCacheSize(cacheSize);
     }
     else if (_dataType == UChar) {
-      (boost::static_pointer_cast<TileCache<unsigned char> >(_cache))->setMaxCacheSize(cacheSize);
+      (std::static_pointer_cast<TileCache<unsigned char> >(_cache))->setMaxCacheSize(cacheSize);
     }
     else if (_dataType == Float) {
-      (boost::static_pointer_cast<TileCache<float> >(_cache))->setMaxCacheSize(cacheSize);
+      (std::static_pointer_cast<TileCache<float> >(_cache))->setMaxCacheSize(cacheSize);
     }
   _cacheMutex.unlock();
   }

@@ -20,7 +20,7 @@ private :
   QGraphicsItem* _filterResult;
   FilterThread* _filterThread;
   bool _autoUpdate;
-  MultiResolutionImage* _img;
+  std::weak_ptr<MultiResolutionImage> _img;
 
 public :
     bool initialize(PathologyViewer* viewer);
@@ -29,11 +29,11 @@ public :
     QDockWidget* getDockWidget();
 
 public slots:
-    void onNewImageLoaded(MultiResolutionImage* img, std::string fileName);
+    void onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName);
     void onImageClosed();
     void updateFilteredImage(QGraphicsItem* result, QRectF size);
     void onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface> filter);
-    void onFieldOfViewChanged(const QRectF& FOV, MultiResolutionImage* img, const unsigned int level);
+    void onFieldOfViewChanged(const QRectF& FOV, std::weak_ptr<MultiResolutionImage> img, const unsigned int level);
 
 private slots:
     void onFilterResultClearRequested();
