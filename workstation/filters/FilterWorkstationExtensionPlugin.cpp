@@ -64,7 +64,7 @@ FilterWorkstationExtensionPlugin::~FilterWorkstationExtensionPlugin() {
 
 bool FilterWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _viewer = viewer;
-  connect(_viewer, SIGNAL(fieldOfViewChanged(const QRectF&, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF&, const unsigned int)));
+  connect(_viewer, SIGNAL(fieldOfViewChanged(const QRectF&, std::weak_ptr<MultiResolutionImage>, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF&, std::weak_ptr<MultiResolutionImage>, const unsigned int)));
   return true;
 }
 

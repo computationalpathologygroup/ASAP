@@ -16,6 +16,8 @@ public:
 
 private:
   float _rectSize;
+  float _currentLOD;
   QColor _rectColor;
+  QColor _rectSelectedColor;
 };
 #endif

@@ -26,12 +26,18 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
     // Process all voxels of the valid region of the output page.
     for (unsigned int y = 0; y < dims[0]; ++y) {
       for (unsigned int x = 0; x < dims[1]; ++x) {
-        if (input.getColorType() == pathology::ColorType::ARGB) {
-          ++inPtr;
-        }
         std::vector<double> rgb(3);
-        for (unsigned int c = 0; c < 3; ++c, ++inPtr) {
-          rgb[c] = *inPtr;
+        if (input.getColorType() == pathology::ColorType::ARGB) {
+          inPtr += 2;
+          for (unsigned int c = 0; c < 3; ++c, --inPtr) {
+            rgb[c] = *inPtr;
+          }
+          inPtr += 5;
+        }
+        else {
+          for (unsigned int c = 0; c < 3; ++c, ++inPtr) {
+            rgb[c] = *inPtr;
+          }
         }
         if (rgb[0] != 0 && rgb[1] != 0 && rgb[2] != 0) {
           double Rlog = -log(rgb[0] / 255.0);
