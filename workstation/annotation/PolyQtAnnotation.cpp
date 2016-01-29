@@ -6,8 +6,8 @@
 #include <QStyleOptionGraphicsItem>
 #include <iostream>
 
-PolyQtAnnotation::PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale) : 
-  QtAnnotation(annotation, scale),
+PolyQtAnnotation::PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale) : 
+  QtAnnotation(annotation, parent, scale),
   _lineThickness(3),
   _lineAnnotationSelectedThickness(4.5),
   _rectColor(QColor("blue")),

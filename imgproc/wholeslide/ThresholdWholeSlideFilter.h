@@ -19,6 +19,7 @@ private:
   float _lowerThreshold;
   float _upperThreshold;
   int _component;
+  bool _keepOrgValues;
 
 public:
   ThresholdWholeSlideFilter();
@@ -40,6 +41,9 @@ public:
 
   void setComponent(const int& component);
   int getComponent() const;
+
+  void setKeepOriginalValues(const bool& keep);
+  bool getKeepOriginalValues() const;
 
 };
 

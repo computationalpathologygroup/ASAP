@@ -19,6 +19,7 @@ class NucleiDetectionFilter : public FilterBase {
   float _alpha;
   float _beta;
   unsigned int _nrOfDetectedNuclei;
+  bool _monochromeInput;
 
   ColorDeconvolutionFilter<double>* _colorDeconvolutionFilter;
 
@@ -94,12 +95,17 @@ class NucleiDetectionFilter : public FilterBase {
   bool checkInputImageRequirements(const Patch<inType>& input) const 
   {
     bool validInput = true;
-    validInput &= (input.getDimensions().size() == 3);
-    validInput &= (input.getColorType() == pathology::ColorType::RGB || input.getColorType() == pathology::ColorType::ARGB);
+    validInput &= ((input.getDimensions().size() == 3 && (input.getColorType() == pathology::ColorType::RGB || input.getColorType() == pathology::ColorType::ARGB || input.getColorType() == pathology::ColorType::Monochrome)));
     return validInput;
   }
 
   bool calculate(const Patch<inType>& input, std::vector<Point>& output) {
+    if (input.getDimensions().size() == 3 && input.getColorType() == pathology::ColorType::Monochrome) {
+      _monochromeInput = true;
+    }
+    else {
+      _monochromeInput = false;
+    }
     updateProgress(5);
     Patch<double> outp;    
     std::vector<double> spacing = input.getSpacing();
@@ -110,7 +116,12 @@ class NucleiDetectionFilter : public FilterBase {
     else if (spacing.size() == 1) {
       spacing.push_back(1.);
     }
-    _colorDeconvolutionFilter->filter(input, outp);
+    if (!_monochromeInput) {
+      _colorDeconvolutionFilter->filter(input, outp);
+    }
+    else {
+      outp = input;
+    }
     if (shouldCancel()) {
       updateProgress(100);
       return false;
@@ -170,7 +181,8 @@ public :
     _minRadius(1.5),
     _maxRadius(5),
     _stepRadius(1),
-    _nrOfDetectedNuclei(0)
+    _nrOfDetectedNuclei(0),
+    _monochromeInput(false)
   {
     _colorDeconvolutionFilter = new ColorDeconvolutionFilter<double>();
   }
@@ -259,7 +271,7 @@ public :
       return false;
     }
   }
-
+  /*
   bool filter(unsigned int width, unsigned int height, unsigned int channels, pathology::ColorType ctype, inType *data, QVariant& output) {
     std::vector<unsigned long long> dims;
     dims.push_back(width);
@@ -268,4 +280,5 @@ public :
     Patch<inType> input(dims, ctype, data, false);
     return filter(input, output);
   }
+  */
 };

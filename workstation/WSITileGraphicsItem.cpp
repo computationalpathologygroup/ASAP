@@ -37,15 +37,15 @@ WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsi
     _lowerLOD = 0.;
   }
   else {
-    float prevLevelLOD = lastRenderLevelDownsample / imgDownsamples[_itemLevel + 1];
-    _lowerLOD = (prevLevelLOD + itemLevelLOD) / 2.;
+    float avgDownsample = (imgDownsamples[_itemLevel + 1] + imgDownsamples[_itemLevel]) / 2.;
+    _lowerLOD = lastRenderLevelDownsample / avgDownsample;
   }
   if (_itemLevel == 0) {
     _upperLOD = std::numeric_limits<float>::max();
   }
   else {
-    float nextLevelLOD = lastRenderLevelDownsample / imgDownsamples[_itemLevel - 1];
-    _upperLOD = (nextLevelLOD + itemLevelLOD) / 2.;
+    float avgDownsample = (imgDownsamples[_itemLevel - 1] + imgDownsamples[_itemLevel]) / 2.;
+    _upperLOD = lastRenderLevelDownsample / avgDownsample;
   }
   this->setFlag(QGraphicsItem::ItemUsesExtendedStyleOption);
   _boundingRect = QRectF(-_physicalSize / 2., -_physicalSize / 2., _physicalSize, _physicalSize);

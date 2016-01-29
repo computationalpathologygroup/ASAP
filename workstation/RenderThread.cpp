@@ -12,9 +12,7 @@ using namespace pathology;
 RenderThread::RenderThread(QObject *parent, unsigned int nrThreads) :
   QObject(parent),
   _abort(false),
-  _channel(0),
-  _threadsWaiting(0),
-  _foregroundImageScale(1.)
+  _threadsWaiting(0)
 {
   for (int i = 0; i < nrThreads; ++i) {
     RenderWorker* worker = new RenderWorker(this);
@@ -42,22 +40,40 @@ void RenderThread::shutdown() {
 
 void RenderThread::setForegroundOpacity(const float& opacity) {
   _jobListMutex.lock();
-  _opacity = opacity;
   for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setForegroundOpacity(_opacity);
+    _workers[i]->setForegroundOpacity(opacity);
   }
   _jobListMutex.unlock();
 }
 
-float RenderThread::getForegroundOpacity() const {
-  return _opacity;
+void RenderThread::onBackgroundChannelChanged(int channel) {
+  _jobListMutex.lock();
+  for (unsigned int i = 0; i < _workers.size(); ++i) {
+    _workers[i]->setBackgroundChannel(channel);
+  }
+  _jobListMutex.unlock();
 }
 
-void RenderThread::onChannelChanged(int channel) {
+void RenderThread::onForegroundChannelChanged(int channel) {
   _jobListMutex.lock();
-  _channel = channel;
   for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setChannel(_channel);
+    _workers[i]->setForegroundChannel(channel);
+  }
+  _jobListMutex.unlock();
+}
+
+void RenderThread::onWindowAndLevelChanged(float window, float level) {
+  _jobListMutex.lock();
+  for (unsigned int i = 0; i < _workers.size(); ++i) {
+    _workers[i]->setWindowAndLevel(window, level);
+  }
+  _jobListMutex.unlock();
+}
+
+void RenderThread::onLUTChanged(std::string LUTname) {
+  _jobListMutex.lock();
+  for (unsigned int i = 0; i < _workers.size(); ++i) {
+    _workers[i]->setLUT(LUTname);
   }
   _jobListMutex.unlock();
 }

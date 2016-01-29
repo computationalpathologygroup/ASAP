@@ -10,11 +10,12 @@
 class Annotation;
 class Point;
 
-class EXPORT_PATHOLOGYANNOTATIONPLUGIN QtAnnotation : public QGraphicsItem, public QObject
+class EXPORT_PATHOLOGYANNOTATIONPLUGIN QtAnnotation : public QObject, public QGraphicsItem
 {
-
+  Q_OBJECT
+  Q_INTERFACES(QGraphicsItem)
 public:
-  QtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale = 1.);
+  QtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale = 1.);
   virtual ~QtAnnotation();
   void addCoordinate(const float& x, const float& y);
   void addCoordinate(const Point& xy);
@@ -50,4 +51,7 @@ protected:
   virtual void onCoordinatesChanged();
 
 };
+
+QDataStream &operator<<(QDataStream &out, QtAnnotation* const &rhs);
+QDataStream &operator>>(QDataStream &in, QtAnnotation* &rhs);
 #endif

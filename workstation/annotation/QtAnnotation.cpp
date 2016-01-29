@@ -4,9 +4,9 @@
 
 using namespace std;
 
-QtAnnotation::QtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale) :
+QtAnnotation::QtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale) :
 QGraphicsItem(),
-QObject(),
+QObject(parent),
 _annotation(annotation),
 _scale(scale),
 _editable(true),
@@ -129,4 +129,14 @@ void QtAnnotation::setEditable(const bool editable) {
 
 bool QtAnnotation::getEditable() const {
   return _editable;
+}
+
+QDataStream &operator<<(QDataStream &out, QtAnnotation* const &rhs) {
+  out.writeRawData(reinterpret_cast<const char*>(&rhs), sizeof(rhs));
+  return out;
+}
+
+QDataStream &operator>>(QDataStream &in, QtAnnotation* &rhs) {
+  in.readRawData(reinterpret_cast<char*>(&rhs), sizeof(rhs));
+  return in;
 }

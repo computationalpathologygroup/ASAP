@@ -45,7 +45,10 @@ public:
 
   public slots:
 
-  void onChannelChanged(int channel);
+  void onBackgroundChannelChanged(int channel);
+  void onForegroundChannelChanged(int channel);
+  void onWindowAndLevelChanged(float window, float level);
+  void onLUTChanged(std::string LUTname);
 
 protected :
   void run();
@@ -58,9 +61,6 @@ private :
   std::weak_ptr<MultiResolutionImage> _for_img;
   std::list<RenderJob> _jobList;
   std::vector<RenderWorker*> _workers;
-  int _channel;
-  float _opacity;
-  float _foregroundImageScale;
   unsigned int _threadsWaiting;
 };
   

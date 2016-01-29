@@ -9,7 +9,7 @@ class EXPORT_PATHOLOGYANNOTATIONPLUGIN PolyQtAnnotation : public QtAnnotation
 {
   Q_OBJECT
 public:
-  PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation, float scale = 1.0);
+  PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject *parent, float scale = 1.0);
   QRectF boundingRect() const;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,

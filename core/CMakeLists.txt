@@ -14,7 +14,7 @@ ${Boost_INCLUDE_DIRS}
 
 LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
 
-SET(core_src filetools.cpp stringconversion.cpp ImageSource.cpp Patch.hpp Box.cpp   Point.cpp ProgressMonitor.cpp CmdLineProgressMonitor.cpp)
+SET(core_src filetools.cpp stringconversion.cpp PathologyEnums.cpp ImageSource.cpp Patch.hpp Box.cpp Point.cpp ProgressMonitor.cpp CmdLineProgressMonitor.cpp)
 SET(core_headers filetools.h stringconversion.h PathologyEnums.h ImageSource.h Patch.h Box.h Point.h ProgressMonitor.h CmdLineProgressMonitor.h)
 
 ADD_LIBRARY(core SHARED ${core_src} ${core_headers})

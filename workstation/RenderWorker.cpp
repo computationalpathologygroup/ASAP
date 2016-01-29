@@ -11,9 +11,13 @@ using namespace pathology;
 RenderWorker::RenderWorker(RenderThread* thread) :
   QThread(thread),
   _abort(false),
-  _channel(0),
+  _backgroundChannel(0),
+  _foregroundChannel(0),
+  _window(1.),
+  _level(0.5),
   _opacity(1.0),
-  _foregroundImageScale(1.)
+  _foregroundImageScale(1.),
+  _LUTname("Normal")
 {
 }
 
@@ -26,9 +30,28 @@ void RenderWorker::abort() {
   _abort = true;
 }
 
-void RenderWorker::setChannel(int channel) {
+void RenderWorker::setBackgroundChannel(int channel) {
   mutex.lock();
-  _channel = channel;
+  _backgroundChannel = channel;
+  mutex.unlock();
+}
+
+void RenderWorker::setForegroundChannel(int channel) {
+  mutex.lock();
+  _foregroundChannel = channel;
+  mutex.unlock();
+}
+
+void RenderWorker::setWindowAndLevel(float window, float level) {
+  mutex.lock();
+  _window = window;
+  _level = level;
+  mutex.unlock();
+}
+
+void RenderWorker::setLUT(const std::string& LUTname) {
+  mutex.lock();
+  _LUTname = LUTname;
   mutex.unlock();
 }
 
@@ -63,113 +86,93 @@ void RenderWorker::run()
       return;
     }
     mutex.lock();
+
     std::shared_ptr<MultiResolutionImage> local_bck_img = _bck_img.lock();
     float levelDownsample = local_bck_img->getLevelDownsample(currentJob._level);
     QPixmap _foreground;
     if (std::shared_ptr<MultiResolutionImage> local_for_img = _for_img.lock()) {
-      int levelDifference = local_bck_img->getBestLevelForDownSample(_foregroundImageScale);
-      int fgImageLevel = currentJob._level - levelDifference;
-      float fgImageScale = 1;
-      if (fgImageLevel < 0) {
-        fgImageScale = pow(2,-1*fgImageLevel);
-        fgImageLevel = 0;
+      if (local_for_img->getDataType() == pathology::DataType::UChar) {
+        _foreground = renderForegroundImage<unsigned char>(local_for_img, currentJob, local_for_img->getColorType());
       }
-      if (fgImageLevel > local_for_img->getNumberOfLevels()) {
-        int fgMaxLevelDifference = local_for_img->getNumberOfLevels() - fgImageLevel + 1;
-        fgImageLevel = local_for_img->getNumberOfLevels() - 1;
-        fgImageScale = 1. / pow(2, fgMaxLevelDifference);
+      else if (local_for_img->getDataType() == pathology::DataType::UInt32) {
+        _foreground = renderForegroundImage<unsigned int>(local_for_img, currentJob, local_for_img->getColorType());
       }
-      float fgImageLevelDownsample = local_for_img->getLevelDownsample(fgImageLevel);
-      if (local_for_img->getColorType() == pathology::ColorType::Monochrome) {
-        if (local_for_img->getDataType() == pathology::DataType::UChar) {
-          // Label map
-          unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize];
-          local_for_img->getRawRegion(currentJob._imgPosX * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._imgPosY * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, fgImageLevel, imgBuf);
-          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, 0, 1, 0, 255, 0);
-          if (_foregroundImageScale != 1) {
-            renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
-          }
-          _foreground = QPixmap::fromImage(renderedImage);
-        }
-        else if (local_for_img->getDataType() == pathology::DataType::UInt32) {
-          // Label map
-          unsigned int* imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize];
-          local_for_img->getRawRegion(currentJob._imgPosX * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._imgPosY * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, fgImageLevel, imgBuf);
-          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, 0, 1, 0, 255, 0);
-          if (_foregroundImageScale != 1) {
-            renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
-          }
-          _foreground = QPixmap::fromImage(renderedImage);
-        }
-        else if (local_for_img->getDataType() == pathology::DataType::Float) {
-          //Likelihood map
-          float* imgBuf = new float[currentJob._tileSize*currentJob._tileSize];
-          local_for_img->getRawRegion(currentJob._imgPosX * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._imgPosY * fgImageLevelDownsample * currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, fgImageLevel, imgBuf);
-          float minValue = std::numeric_limits<double>::min() == local_for_img->getMinValue() ? 0 : local_for_img->getMinValue();
-          float maxValue = std::numeric_limits<double>::max() == local_for_img->getMaxValue() ? 1. : local_for_img->getMaxValue();
-          QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / fgImageScale, currentJob._tileSize / fgImageScale, 0, 1, minValue, maxValue, 1);
-          if (_foregroundImageScale != 1) {
-            renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
-          }
-          _foreground = QPixmap::fromImage(renderedImage);
-        }
+      else if (local_for_img->getDataType() == pathology::DataType::Float) {
+        _foreground = renderForegroundImage<float>(local_for_img, currentJob, local_for_img->getColorType());
       }
     }
+
     if (local_bck_img) {
-      int samplesPerPixel = local_bck_img->getSamplesPerPixel();
-      QImage renderedImg;
       QPixmap temp;
-      if (local_bck_img->getColorType() == pathology::ColorType::RGB) {
-        unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-        local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-        renderedImg = QImage(imgBuf, (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 3, QImage::Format_RGB888);
-        temp = QPixmap::fromImage(renderedImg.convertToFormat(QImage::Format_ARGB32_Premultiplied));
-        delete[] imgBuf;
+      pathology::ColorType cType = local_bck_img->getColorType();
+      if (local_bck_img->getDataType() == pathology::DataType::UChar) {
+        temp = renderBackgroundImage<unsigned char>(local_bck_img, currentJob, cType);
       }
-      else if (local_bck_img->getColorType() == pathology::ColorType::ARGB) {
-        unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-        local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-        renderedImg = QImage(imgBuf, (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 4, QImage::Format_ARGB32);
-        temp = QPixmap::fromImage(renderedImg);
-        delete[] imgBuf;
+      else if (local_bck_img->getDataType() == pathology::DataType::Float) {
+        temp = renderBackgroundImage<float>(local_bck_img, currentJob, cType);
       }
-      else if (local_bck_img->getColorType() == pathology::ColorType::Monochrome || local_bck_img->getColorType() == pathology::ColorType::Indexed) {
-        if (local_bck_img->getDataType() == pathology::DataType::UChar) {
-          unsigned char* imgBuf = new unsigned char[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-          local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _channel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue());
-          temp = QPixmap::fromImage(renderedImg);
-          delete[] imgBuf;
-        }
-        else if (local_bck_img->getDataType() == pathology::DataType::Float) {
-          float *imgBuf = new float[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-          local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _channel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue());
-          temp = QPixmap::fromImage(renderedImg);
-          delete[] imgBuf;
-        }
-        else if (local_bck_img->getDataType() == pathology::DataType::UInt16) {
-          unsigned short *imgBuf = new unsigned short[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-          local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _channel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue());
-          temp = QPixmap::fromImage(renderedImg);
-          delete[] imgBuf;
-        }
-        else if (local_bck_img->getDataType() == pathology::DataType::UInt32) {
-          unsigned int *imgBuf = new unsigned int[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-          local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
-          renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _channel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue());
-          temp = QPixmap::fromImage(renderedImg);
-          delete[] imgBuf;
-        }
+      else if (local_bck_img->getDataType() == pathology::DataType::UInt16) {
+        temp = renderBackgroundImage<unsigned short>(local_bck_img, currentJob, cType);
+      }
+      else if (local_bck_img->getDataType() == pathology::DataType::UInt32) {
+        temp = renderBackgroundImage<unsigned int>(local_bck_img, currentJob, cType);
       }
       if (!_foreground.isNull()) {
         QPainter painter(&temp);
         painter.setOpacity(_opacity);
         painter.drawPixmap(0, 0, _foreground);
       }
-      emit tileLoaded(new QPixmap(temp), currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize*currentJob._tileSize*samplesPerPixel, currentJob._level);
+      emit tileLoaded(new QPixmap(temp), currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize*currentJob._tileSize*local_bck_img->getSamplesPerPixel(), currentJob._level);
       mutex.unlock();
     }
   }
+}
+
+template<typename T>
+QPixmap RenderWorker::renderBackgroundImage(std::shared_ptr<MultiResolutionImage> local_bck_img, const RenderJob& currentJob, pathology::ColorType colorType) {
+  float levelDownsample = local_bck_img->getLevelDownsample(currentJob._level);
+  unsigned int samplesPerPixel = local_bck_img->getSamplesPerPixel();
+  T *imgBuf = new T[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
+  local_bck_img->getRawRegion(currentJob._imgPosX * levelDownsample * currentJob._tileSize, currentJob._imgPosY * levelDownsample * currentJob._tileSize, currentJob._tileSize, currentJob._tileSize, currentJob._level, imgBuf);
+  QImage renderedImg;
+  if (colorType == pathology::ColorType::RGB) {
+    renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 3, QImage::Format_RGB888);
+  }
+  else if (colorType == pathology::ColorType::ARGB) {
+    renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 4, QImage::Format_ARGB32);
+  }
+  else {
+    renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _backgroundChannel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue(), "Normal");
+  }
+  QPixmap renderedPixmap = QPixmap::fromImage(renderedImg);
+  delete[] imgBuf;
+  return renderedPixmap;
+}
+
+template<typename T>
+QPixmap RenderWorker::renderForegroundImage(std::shared_ptr<MultiResolutionImage> local_for_img, const RenderJob& currentJob, pathology::ColorType colorType) {
+
+  std::shared_ptr<MultiResolutionImage> loc_bck_img = _bck_img.lock();
+  int levelDifference = loc_bck_img->getBestLevelForDownSample(_foregroundImageScale);
+  int fgImageLevel = currentJob._level - levelDifference;
+
+  // If we request a level which is outside the range of the foreground image (e.g. level 8 when it only has 7 levels), get level 7 and scale up.
+  float foregroundExtraScaling = 1.;
+  if (fgImageLevel > local_for_img->getNumberOfLevels()) {
+    fgImageLevel = local_for_img->getNumberOfLevels() - 1;
+    foregroundExtraScaling = local_for_img->getLevelDimensions(fgImageLevel)[0] / static_cast<float>(loc_bck_img->getLevelDimensions(currentJob._level)[0]);
+  }
+
+  unsigned int samplesPerPixel = local_for_img->getSamplesPerPixel();
+  float fgLevelDownsample = local_for_img->getLevelDownsample(fgImageLevel);
+  T *imgBuf = new T[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
+  local_for_img->getRawRegion(currentJob._imgPosX * fgLevelDownsample * currentJob._tileSize, currentJob._imgPosY * fgLevelDownsample * currentJob._tileSize, currentJob._tileSize / foregroundExtraScaling, currentJob._tileSize / foregroundExtraScaling, fgImageLevel, imgBuf);
+  QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / foregroundExtraScaling, currentJob._tileSize / foregroundExtraScaling, _foregroundChannel, samplesPerPixel, _level - _window / 2, _level + _window / 2, _LUTname);
+
+  if (_foregroundImageScale != 1) {
+    renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
+  }
+  QPixmap renderedPixmap = QPixmap::fromImage(renderedImage);
+  delete[] imgBuf;
+  return renderedPixmap;
 }

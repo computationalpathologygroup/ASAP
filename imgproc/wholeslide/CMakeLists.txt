@@ -21,10 +21,12 @@ SET(WHOLESLIDEFILTERS_SRCS
   ThresholdWholeSlideFilter.cpp
   ArithmeticWholeSlideFilter.h
   ArithmeticWholeSlideFilter.cpp
+  NucleiDetectionWholeSlideFilter.h
+  NucleiDetectionWholeSlideFilter.cpp
 )
 
 ADD_LIBRARY(wholeslidefilters SHARED ${WHOLESLIDEFILTERS_SRCS})
-TARGET_LINK_LIBRARIES(wholeslidefilters multiresolutionimageinterface core)
+TARGET_LINK_LIBRARIES(wholeslidefilters ${OpenCV_LIBS} annotation NucleiSegmentation basicfilters multiresolutionimageinterface core)
 
 SET_TARGET_PROPERTIES(wholeslidefilters PROPERTIES DEBUG_POSTFIX _d)
 IF(WIN32)  

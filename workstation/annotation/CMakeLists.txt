@@ -15,9 +15,12 @@ SET(ANNOTATION_PLUGIN_HEADERS
   AnnotationWorkstationExtensionPlugin.h
   DotAnnotationTool.h
   PolyAnnotationTool.h
+  PointSetAnnotationTool.h
   SplineAnnotationTool.h
   QtAnnotation.h
+  QtAnnotationGroup.h
   PolyQtAnnotation.h
+  PointSetQtAnnotation.h
   DotQtAnnotation.h
 )
 
@@ -25,9 +28,12 @@ SET(ANNOTATION_PLUGIN_SOURCE
   AnnotationWorkstationExtensionPlugin.cpp
   DotAnnotationTool.cpp
   PolyAnnotationTool.cpp
+  PointSetAnnotationTool.cpp
   SplineAnnotationTool.cpp
   QtAnnotation.cpp
+  QtAnnotationGroup.cpp
   PolyQtAnnotation.cpp
+  PointSetQtAnnotation.cpp
   DotQtAnnotation.cpp
 )
 

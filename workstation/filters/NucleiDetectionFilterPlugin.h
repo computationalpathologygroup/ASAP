@@ -29,6 +29,7 @@ private :
 
     void updateSettingsPanelFromFilter();
     void initializeSettingsPanel();
+    bool _monochromeInput;
     
 private slots :
     void updateFilterFromSettingsPanel();

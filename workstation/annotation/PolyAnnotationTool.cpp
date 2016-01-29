@@ -89,6 +89,15 @@ void PolyAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
   }
 }
 
+void PolyAnnotationTool::setActive(bool active) {
+  if (!active) {
+    if (_generating) {
+      this->cancelAnnotation();
+    }
+  }
+  _active = active;
+}
+
 void PolyAnnotationTool::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key::Key_Escape) {
     cancelAnnotation();

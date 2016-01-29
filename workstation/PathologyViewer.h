@@ -38,6 +38,10 @@ public:
     float getForegroundOpacity() const;
     void  setForegroundOpacity(const float& opacity);
 
+    void setForegroundWindowAndLevel(const float& window, const float& level);
+    void setForegroundLUT(const std::string& LUTname);
+    void setForegroundChannel(unsigned int channel);
+
     void togglePan(bool pan, const QPoint& startPos = QPoint());
     void pan(const QPoint& panTo);
     bool isPanning();
@@ -55,7 +59,7 @@ public:
 signals :
     void fieldOfViewChanged(const QRectF& FOV, const unsigned int level);
     void updateBBox(const QRectF& FOV);
-    void channelChanged(int channelNr);
+    void backgroundChannelChanged(int channelNr);
 
 public slots :
     void moveTo(const QPointF& pos);
@@ -106,7 +110,16 @@ private :
     bool _pan;
     QPoint _prevPan;
 
+    // Members related to rendering
     RenderThread* _renderthread;
+    int _backgroundChannel;
+    int _foregroundChannel;
+    float _opacity;
+    float _window;
+    float _level;
+    std::string _LUTname;
+    float _foregroundImageScale;
+
     PrefetchThread* _prefetchthread;
 
     TileManager* _manager;

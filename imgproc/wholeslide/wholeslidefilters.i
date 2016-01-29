@@ -25,6 +25,7 @@
 #define SWIG_FILE_WITH_INIT
 #include "DistanceTransformWholeSlideFilter.h"
 #include "ConnectedComponentsWholeSlideFilter.h"
+#include "NucleiDetectionWholeSlideFilter.h"
 #include "LabelStatisticsWholeSlideFilter.h"
 #include "ThresholdWholeSlideFilter.h"
 #include "ArithmeticWholeSlideFilter.h"
@@ -55,3 +56,4 @@ namespace std {
 %include "LabelStatisticsWholeSlideFilter.h"
 %include "ThresholdWholeSlideFilter.h"
 %include "ArithmeticWholeSlideFilter.h"
+%include "NucleiDetectionWholeSlideFilter.h"

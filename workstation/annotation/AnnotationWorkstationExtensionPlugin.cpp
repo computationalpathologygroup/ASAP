@@ -1,16 +1,19 @@
 #include "AnnotationWorkstationExtensionPlugin.h"
 #include "DotAnnotationTool.h"
 #include "PolyAnnotationTool.h"
+#include "PointSetAnnotationTool.h"
 #include "SplineAnnotationTool.h"
 #include "AnnotationService.h"
 #include "AnnotationList.h"
 #include "AnnotationGroup.h"
 #include "QtAnnotation.h"
+#include "QtAnnotationGroup.h"
 #include "Annotation.h"
 #include "ImageScopeRepository.h"
 #include "AnnotationToMask.h"
 #include "DotQtAnnotation.h"
 #include "PolyQtAnnotation.h"
+#include "PointSetQtAnnotation.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "../PathologyViewer.h"
 #include <QtUiTools>
@@ -69,6 +72,8 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     connect(_treeWidget, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(resizeOnExpand()));
   }
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
+  qRegisterMetaTypeStreamOperators<QtAnnotation*>("QtAnnotation*");
+  qRegisterMetaTypeStreamOperators<QtAnnotationGroup*>("QtAnnotationGroup*");
 }
 
 AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
@@ -84,6 +89,12 @@ void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
       }
       else {
         std::dynamic_pointer_cast<PolyAnnotationTool>(_annotationTools[1])->cancelAnnotation();
+      }
+    }
+    else {
+      PointSetQtAnnotation* tmp2 = dynamic_cast<PointSetQtAnnotation*>(_generatedAnnotation);
+      if (tmp2) {
+        std::dynamic_pointer_cast<PointSetAnnotationTool>(_annotationTools[3])->cancelAnnotation();
       }
     }
   }
@@ -116,23 +127,25 @@ void AnnotationWorkstationExtensionPlugin::clearAnnotationList() {
 }
 
 void AnnotationWorkstationExtensionPlugin::clearQtAnnotations() {
-  for (QMap<QString, QtAnnotation*>::iterator it = _qtAnnotations.begin(); it != _qtAnnotations.end(); ++it) {
-    _viewer->scene()->removeItem(it.value());
-    (it.value())->deleteLater();
+  for (QList<QtAnnotation*>::iterator it = _qtAnnotations.begin(); it != _qtAnnotations.end(); ++it) {
+    _viewer->scene()->removeItem(*it);
+    (*it)->deleteLater();
   }
   _qtAnnotations.clear();
-  _qtAnnotationGroups.clear();
   _activeAnnotation = NULL;
   _generatedAnnotation = NULL;
 }
 
 void AnnotationWorkstationExtensionPlugin::onItemNameChanged(QTreeWidgetItem* item, int column) {
   if (item && column == 1) {
-    if (item->data(1, Qt::UserRole).value<QString>().contains(QString::fromStdString("_annotation"))) {
-      _qtAnnotations[item->data(1, Qt::UserRole).value<QString>()]->getAnnotation()->setName(item->text(1).toStdString());
+    if (QtAnnotation* annot = item->data(1, Qt::UserRole).value<QtAnnotation*>()) {
+       annot->getAnnotation()->setName(item->text(1).toStdString());
     }
-    else if (item->data(1, Qt::UserRole).value<QString>().contains(QString::fromStdString("_group"))) {
-      _qtAnnotationGroups[item->data(1, Qt::UserRole).value<QString>()]->setName(item->text(1).toStdString());
+    else {
+      QtAnnotationGroup* grp = item->data(1, Qt::UserRole).value<QtAnnotationGroup*>();
+      if (grp) {
+        grp->getAnnotationGroup()->setName(item->text(1).toStdString());
+      }
     }
   }
 }
@@ -151,11 +164,14 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetItemDoubleClicked(QTreeWi
       QIcon color(iconPM);
       item->setIcon(0, color);
       item->setData(0, Qt::UserRole, newColor);
-      if (item->data(1, Qt::UserRole).value<QString>().contains(QString::fromStdString("_annotation"))) {
-        _qtAnnotations[item->data(1, Qt::UserRole).value<QString>()]->getAnnotation()->setColor(newColor.name().toStdString());
+      if (QtAnnotation* annot = item->data(1, Qt::UserRole).value<QtAnnotation*>()) {
+        annot->getAnnotation()->setColor(newColor.name().toStdString());
       }
-      else if (item->data(1, Qt::UserRole).value<QString>().contains(QString::fromStdString("_group"))) {
-        _qtAnnotationGroups[item->data(1, Qt::UserRole).value<QString>()]->setColor(newColor.name().toStdString());
+      else {
+        QtAnnotationGroup* grp = item->data(1, Qt::UserRole).value<QtAnnotationGroup* >();
+        if (grp) {
+            grp->getAnnotationGroup()->setColor(newColor.name().toStdString());
+        }
       }
     }
   }
@@ -173,21 +189,19 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetSelectedItemsChanged() {
   // Then update from list view
   QList<QTreeWidgetItem*> selItems = _treeWidget->selectedItems();
   for (QList<QTreeWidgetItem*>::iterator itm = selItems.begin(); itm != selItems.end(); ++itm) {
-    if ((*itm)->data(1, Qt::UserRole).value<QString>().endsWith("_annotation")) {
-      QtAnnotation* annotation = _qtAnnotations[(*itm)->data(1, Qt::UserRole).value<QString>()];
-      annotation->setSelected(true);
-      _selectedAnnotations.insert(annotation);
-      _activeAnnotation = annotation;
+    if (QtAnnotation* annot = (*itm)->data(1, Qt::UserRole).value<QtAnnotation*>()) {
+      annot->setSelected(true);
+      _selectedAnnotations.insert(annot);
+      _activeAnnotation = annot;
     }
     else {
       if ((*itm)->childCount() > 0) {
         QTreeWidgetItemIterator subItm((*itm)->child(0));
         while (*subItm && (*subItm)->parent() != (*itm)->parent()) {
-          if ((*subItm)->data(1, Qt::UserRole).value<QString>().endsWith("_annotation")) {
-            QtAnnotation* annotation = _qtAnnotations[(*subItm)->data(1, Qt::UserRole).value<QString>()];
-            annotation->setSelected(true);
-            _selectedAnnotations.insert(annotation);
-            _activeAnnotation = annotation;
+          if (QtAnnotation* annot = (*itm)->data(1, Qt::UserRole).value<QtAnnotation*>()) {
+            annot->setSelected(true);
+            _selectedAnnotations.insert(annot);
+            _activeAnnotation = annot;
           }
           ++subItm;
         }
@@ -225,18 +239,17 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       }
     }
     // Add loaded groups to treewidget
-    std::map<std::string, std::shared_ptr<AnnotationGroup> > childGroups;
+    QList<QtAnnotationGroup* > childGroups;
     std::map<std::shared_ptr<AnnotationGroup>, QTreeWidgetItem*> annotToWidget;
     std::vector<std::shared_ptr<AnnotationGroup> > grps = _annotationService->getList()->getGroups();
     for (std::vector<std::shared_ptr<AnnotationGroup> >::const_iterator it = grps.begin(); it != grps.end(); ++it) {
+      QtAnnotationGroup *grp = new QtAnnotationGroup(*it, this);
       if ((*it)->getGroup() == NULL) {
-        std::string key = "Annotation Group " + QString::number(_annotationGroupIndex).toStdString() + "_group";
-        _annotationGroupIndex += 1;
-        _qtAnnotationGroups[QString::fromStdString(key)] = (*it);
+        _qtAnnotationGroups.append(grp);
         QTreeWidgetItem* newAnnotationGroup = new QTreeWidgetItem(_treeWidget);
         newAnnotationGroup->setText(1, QString::fromStdString((*it)->getName()));
         newAnnotationGroup->setText(2, "Group");
-        newAnnotationGroup->setData(1, Qt::UserRole, QString::fromStdString(key));
+        newAnnotationGroup->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotationGroup*>(grp));
         newAnnotationGroup->setFlags(newAnnotationGroup->flags() | Qt::ItemIsEditable);
         int cHeight = _treeWidget->visualItemRect(newAnnotationGroup).height();
         QPixmap iconPM(cHeight, cHeight);
@@ -244,30 +257,28 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         QIcon color(iconPM);
         newAnnotationGroup->setIcon(0, color);
         newAnnotationGroup->setData(0, Qt::UserRole, QColor((*it)->getColor().c_str()));
-        annotToWidget[(*it)] = newAnnotationGroup;
+        annotToWidget[grp->getAnnotationGroup()] = newAnnotationGroup;
       }
       else {
-        childGroups[(*it)->getName()] = (*it);
+        childGroups.append(grp);
       }
     }
     while (!childGroups.empty()) {
-      for (std::map<std::string, std::shared_ptr<AnnotationGroup> >::iterator it = childGroups.begin(); it != childGroups.end();) {
-        if (annotToWidget.find((*it).second->getGroup()) != annotToWidget.end()) {
-          std::string key = "Annotation Group " + QString::number(_annotationGroupIndex).toStdString() + "_group";
-          _annotationGroupIndex += 1;
-          _qtAnnotationGroups[QString::fromStdString(key)] = (*it).second;
-          QTreeWidgetItem* newAnnotationGroup = new QTreeWidgetItem(annotToWidget[(*it).second->getGroup()]);
-          newAnnotationGroup->setText(1, QString::fromStdString((*it).second->getName()));
+      for (QList<QtAnnotationGroup*>::iterator it = childGroups.begin(); it != childGroups.end();) {
+        if (annotToWidget.find((*it)->getAnnotationGroup()->getGroup()) != annotToWidget.end()) {
+          _qtAnnotationGroups.append((*it));
+          QTreeWidgetItem* newAnnotationGroup = new QTreeWidgetItem(annotToWidget[(*it)->getAnnotationGroup()->getGroup()]);
+          newAnnotationGroup->setText(1, QString::fromStdString((*it)->getAnnotationGroup()->getName()));
           newAnnotationGroup->setText(2, "Group");
-          newAnnotationGroup->setData(1, Qt::UserRole, QString::fromStdString(key));
+          newAnnotationGroup->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotationGroup*>((*it)));
           newAnnotationGroup->setFlags(newAnnotationGroup->flags() | Qt::ItemIsEditable);
           int cHeight = _treeWidget->visualItemRect(newAnnotationGroup).height();
           QPixmap iconPM(cHeight, cHeight);
-          iconPM.fill(QColor((*it).second->getColor().c_str()));
+          iconPM.fill(QColor((*it)->getAnnotationGroup()->getColor().c_str()));
           QIcon color(iconPM);
           newAnnotationGroup->setIcon(0, color);
-          newAnnotationGroup->setData(0, Qt::UserRole, QColor((*it).second->getColor().c_str()));
-          annotToWidget[(*it).second] = newAnnotationGroup;
+          newAnnotationGroup->setData(0, Qt::UserRole, QColor((*it)->getAnnotationGroup()->getColor().c_str()));
+          annotToWidget[(*it)->getAnnotationGroup()] = newAnnotationGroup;
           it = childGroups.erase(it);
         }
         else{
@@ -286,19 +297,22 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       // Add QtAnnotation
       QtAnnotation* annot = NULL;
       if ((*it)->getType() == Annotation::Type::DOT) {
-        annot = new DotQtAnnotation((*it), _viewer->getSceneScale());
+        annot = new DotQtAnnotation((*it), this, _viewer->getSceneScale());
       }
       else if ((*it)->getType() == Annotation::Type::POLYGON) {
-        annot = new PolyQtAnnotation((*it), _viewer->getSceneScale());
+        annot = new PolyQtAnnotation((*it), this, _viewer->getSceneScale());
         dynamic_cast<PolyQtAnnotation*>(annot)->setInterpolationType("linear");
       }
       else if ((*it)->getType() == Annotation::Type::SPLINE) {
-        annot = new PolyQtAnnotation((*it), _viewer->getSceneScale());
+        annot = new PolyQtAnnotation((*it), this, _viewer->getSceneScale());
         dynamic_cast<PolyQtAnnotation*>(annot)->setInterpolationType("spline");
+      }
+      else if ((*it)->getType() == Annotation::Type::POINTSET) {
+        annot = new PointSetQtAnnotation((*it), this, _viewer->getSceneScale());
       }
       if (annot) {
         annot->finish();
-        _qtAnnotations[QString::fromStdString(key)] = annot;
+        _qtAnnotations.append(annot);
         _viewer->scene()->addItem(annot);
         annot->setZValue(20.);
       }
@@ -309,7 +323,7 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       newAnnotation->setText(2, QString::fromStdString((*it)->getTypeAsString()));
       newAnnotation->setFlags(newAnnotation->flags() & ~Qt::ItemIsDropEnabled);
       newAnnotation->setFlags(newAnnotation->flags() | Qt::ItemIsEditable);
-      newAnnotation->setData(1, Qt::UserRole, QString::fromStdString(key));
+      newAnnotation->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotation*>(annot));
       int cHeight = _treeWidget->visualItemRect(newAnnotation).height();
       if (_treeWidget->topLevelItemCount() > 0) {
         cHeight = _treeWidget->visualItemRect(_treeWidget->topLevelItem(0)).height();
@@ -422,23 +436,28 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
       }
       QTreeWidgetItemIterator it(_treeWidget);
       while (*it) {
-        QString UID = (*it)->data(1, Qt::UserRole).value<QString>();
+        QtAnnotation* annot = (*it)->data(1, Qt::UserRole).value<QtAnnotation*>();
         if (!(*it)->parent()) {
-          if (UID.endsWith("_group")) {
-            _qtAnnotationGroups[UID]->setGroup(NULL);
+          if (annot) {            
+            annot->getAnnotation()->setGroup(NULL);
           }
           else {
-            _qtAnnotations[UID]->getAnnotation()->setGroup(NULL);
+            QtAnnotationGroup* grp = (*it)->data(1, Qt::UserRole).value<QtAnnotationGroup*>();
+            if (grp) {
+              grp->getAnnotationGroup()->setGroup(NULL);
+            }
           }
         }
         else {
-          QString parentUID = (*it)->parent()->data(1, Qt::UserRole).value<QString>();
-          QString UID = (*it)->data(1, Qt::UserRole).value<QString>();
-          if (UID.endsWith("_group")) {
-            _qtAnnotationGroups[UID]->setGroup(_qtAnnotationGroups[parentUID]);
+          QtAnnotation* annot = (*it)->data(1, Qt::UserRole).value<QtAnnotation*>();
+          if (annot) {
+            annot->getAnnotation()->setGroup((*it)->parent()->data(1, Qt::UserRole).value<QtAnnotationGroup*>()->getAnnotationGroup());
           }
           else {
-            _qtAnnotations[UID]->getAnnotation()->setGroup(_qtAnnotationGroups[parentUID]);
+            QtAnnotationGroup* grp = (*it)->data(1, Qt::UserRole).value<QtAnnotationGroup*>();
+            if (grp) {
+              grp->getAnnotationGroup()->setGroup((*it)->parent()->data(1, Qt::UserRole).value<QtAnnotationGroup*>()->getAnnotationGroup());
+            }
           }
         }
         ++it;
@@ -455,11 +474,11 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
       // Handle selected items iteratively to make sure we do not accidentely remove the parent before the child
       while (!selItems.empty()) {
         QTreeWidgetItem* itm = selItems[0];
-        if (itm->data(1, Qt::UserRole).value<QString>().endsWith("_group")) {
-          deleteAnnotationGroup(_qtAnnotationGroups[itm->data(1, Qt::UserRole).value<QString>()]);
+        if (QtAnnotationGroup* grp = itm->data(1, Qt::UserRole).value<QtAnnotationGroup*>()) {
+          deleteAnnotationGroup(grp);
         }
         else {
-          deleteAnnotation(_qtAnnotations[itm->data(1, Qt::UserRole).value<QString>()]);
+          deleteAnnotation(itm->data(1, Qt::UserRole).value<QtAnnotation*>());
         }
         selItems = _treeWidget->selectedItems();
       }
@@ -472,15 +491,16 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
 void AnnotationWorkstationExtensionPlugin::addAnnotationGroup() {
   if (_treeWidget && _annotationService) {
     std::shared_ptr<AnnotationGroup> grp = std::make_shared<AnnotationGroup>();
+    QtAnnotationGroup* annotGroup = new QtAnnotationGroup(grp, this);
     grp->setName("Annotation Group " + QString::number(_annotationGroupIndex).toStdString());
     _annotationGroupIndex += 1;
     QString grpUID = QString::fromStdString(grp->getName() + "_group");
     _annotationService->getList()->addGroup(grp);
-    _qtAnnotationGroups[grpUID] = grp;
+    _qtAnnotationGroups.append(annotGroup);
     QTreeWidgetItem* newAnnotationGroup = new QTreeWidgetItem(_treeWidget);
     newAnnotationGroup->setText(1, QString::fromStdString(grp->getName()));
     newAnnotationGroup->setText(2, "Group");
-    newAnnotationGroup->setData(1, Qt::UserRole, grpUID);
+    newAnnotationGroup->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotationGroup* >(annotGroup));
     newAnnotationGroup->setFlags(newAnnotationGroup->flags() | Qt::ItemIsEditable);
     int cHeight = _treeWidget->visualItemRect(newAnnotationGroup).height();
     QPixmap iconPM(cHeight, cHeight);
@@ -526,6 +546,8 @@ bool AnnotationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _annotationTools.push_back(tool);
   tool.reset(new SplineAnnotationTool(this, viewer));
   _annotationTools.push_back(tool);
+  tool.reset(new PointSetAnnotationTool(this, viewer));
+  _annotationTools.push_back(tool);
   _annotationService.reset(new AnnotationService());
   return true;
 }
@@ -542,19 +564,24 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
   annot->addCoordinate(x / _viewer->getSceneScale(), y / _viewer->getSceneScale());
   if (type == "dotannotation") {
     annot->setType(Annotation::Type::DOT);
-    _generatedAnnotation = new DotQtAnnotation(annot, _viewer->getSceneScale());
+    _generatedAnnotation = new DotQtAnnotation(annot, this, _viewer->getSceneScale());
   }
   else if (type == "polyannotation") {
     annot->setType(Annotation::Type::POLYGON);
-    PolyQtAnnotation* temp = new PolyQtAnnotation(annot, _viewer->getSceneScale());
+    PolyQtAnnotation* temp = new PolyQtAnnotation(annot, this, _viewer->getSceneScale());
     temp->setInterpolationType("linear");
     _generatedAnnotation = temp;
   }
   else if (type == "splineannotation") {
     annot->setType(Annotation::Type::SPLINE);
-    PolyQtAnnotation* temp = new PolyQtAnnotation(annot, _viewer->getSceneScale());
+    PolyQtAnnotation* temp = new PolyQtAnnotation(annot, this, _viewer->getSceneScale());
     temp->setInterpolationType("spline");
     _generatedAnnotation = temp;    
+  }
+  else if (type == "pointsetannotation") {
+    annot->setType(Annotation::Type::POINTSET);
+    PointSetQtAnnotation* temp = new PointSetQtAnnotation(annot, this, _viewer->getSceneScale());
+    _generatedAnnotation = temp;
   }
   else {
     return;
@@ -573,14 +600,14 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
       _generatedAnnotation->getAnnotation()->setName("Annotation " + QString::number(_annotationIndex).toStdString());
       _annotationIndex += 1;
       QString annotUID = QString::fromStdString(_generatedAnnotation->getAnnotation()->getName() + "_annotation");
-      _qtAnnotations[annotUID] = _generatedAnnotation;
+      _qtAnnotations.append(_generatedAnnotation);
       _annotationService->getList()->addAnnotation(_generatedAnnotation->getAnnotation());
       QTreeWidgetItem* newAnnotation = new QTreeWidgetItem(_treeWidget);
       newAnnotation->setText(1, QString::fromStdString(_generatedAnnotation->getAnnotation()->getName()));
       newAnnotation->setText(2, QString::fromStdString(_generatedAnnotation->getAnnotation()->getTypeAsString()));
       newAnnotation->setFlags(newAnnotation->flags() & ~Qt::ItemIsDropEnabled);
       newAnnotation->setFlags(newAnnotation->flags() | Qt::ItemIsEditable);
-      newAnnotation->setData(1, Qt::UserRole, annotUID);
+      newAnnotation->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotation*>(_generatedAnnotation));
       newAnnotation->setSelected(true);
       int cHeight = _treeWidget->visualItemRect(newAnnotation).height();
       QPixmap iconPM(cHeight, cHeight);
@@ -606,16 +633,17 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
     if (_treeWidget) {
       QTreeWidgetItemIterator it(_treeWidget);
       while (*it) {
-        if ((*it)->text(1) == QString::fromStdString(annotation->getAnnotation()->getName()) && (*it)->data(1, Qt::UserRole).value<QString>().endsWith("_annotation")) {
-          QString annotUID = (*it)->data(1, Qt::UserRole).value<QString>();
-          _qtAnnotations.remove(annotUID);
+        if (annotation == (*it)->data(1, Qt::UserRole).value<QtAnnotation*>()) {
           if (_viewer) {
             _viewer->scene()->removeItem(annotation);
           }
           if (_annotationService) {
-            _annotationService->getList()->removeAnnotation(annotation->getAnnotation()->getName());
+            std::vector<std::shared_ptr<Annotation> > annots = _annotationService->getList()->getAnnotations();
+            int annotInd = std::find(annots.begin(), annots.end(), annotation->getAnnotation()) - annots.begin();
+            _annotationService->getList()->removeAnnotation(annotInd);
           }
           annotation->deleteLater();
+          _qtAnnotations.removeOne(annotation);
           _selectedAnnotations.remove(annotation);
           (*it)->setSelected(false);
           delete (*it);
@@ -627,27 +655,31 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
   }
 }
 
-void AnnotationWorkstationExtensionPlugin::deleteAnnotationGroup(std::shared_ptr<AnnotationGroup> group) {
+void AnnotationWorkstationExtensionPlugin::deleteAnnotationGroup(QtAnnotationGroup* group) {
   if (_treeWidget) {
     QTreeWidgetItemIterator it(_treeWidget);
     while (*it) {
-      if ((*it)->text(1) == QString::fromStdString(group->getName()) && (*it)->data(1, Qt::UserRole).value<QString>().endsWith("_group")) {
+      if (group == (*it)->data(1, Qt::UserRole).value<QtAnnotationGroup* >()) {
         if ((*it)->childCount() > 0) {
           for (int i = (*it)->childCount() - 1; i >= 0; --i) {
             QTreeWidgetItem* itm = (*it)->child(i);
-            if (itm->data(1, Qt::UserRole).value<QString>().endsWith("_group")) {
-              deleteAnnotationGroup(_qtAnnotationGroups[itm->data(1, Qt::UserRole).value<QString>()]);
+            if (QtAnnotation* annot = itm->data(1, Qt::UserRole).value<QtAnnotation*>()) {
+              deleteAnnotation(annot);
             }
             else {
-              deleteAnnotation(_qtAnnotations[itm->data(1, Qt::UserRole).value<QString>()]);
+              QtAnnotationGroup* grp = itm->data(1, Qt::UserRole).value<QtAnnotationGroup* >();
+              if (grp) {              
+                deleteAnnotationGroup(grp);
+              }
             }
           }
         }
-        QString groupUID = (*it)->data(1, Qt::UserRole).value<QString>();
         if (_annotationService) {
-          _annotationService->getList()->removeGroup(_qtAnnotationGroups[groupUID]->getName());
+          std::vector<std::shared_ptr<AnnotationGroup> > groups = _annotationService->getList()->getGroups();
+          int groupInd = std::find(groups.begin(), groups.end(), group->getAnnotationGroup()) - groups.begin(); 
+          _annotationService->getList()->removeGroup(groupInd);
         }
-        _qtAnnotationGroups.remove(groupUID);
+        _qtAnnotationGroups.removeOne(group);
         (*it)->setSelected(false);
         delete (*it);
         break;

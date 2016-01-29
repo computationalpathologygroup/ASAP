@@ -33,7 +33,7 @@ public slots:
     void onImageClosed();
     void updateFilteredImage(QGraphicsItem* result, QRectF size);
     void onChangeCurrentFilter(std::shared_ptr<ImageFilterPluginInterface> filter);
-    void onFieldOfViewChanged(const QRectF& FOV, std::weak_ptr<MultiResolutionImage> img, const unsigned int level);
+    void onFieldOfViewChanged(const QRectF& FOV, const unsigned int level);
 
 private slots:
     void onFilterResultClearRequested();

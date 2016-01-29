@@ -15,10 +15,14 @@ public :
   void mouseMoveEvent(QMouseEvent *event);
   void mousePressEvent(QMouseEvent *event);
   void mouseReleaseEvent(QMouseEvent *event);
+  void keyPressEvent(QKeyEvent *event);
+
   QAction* getToolButton();
 
 private :
   AnnotationWorkstationExtensionPlugin* _annotationPlugin;
+  bool _startSelectionMove;
+  QPointF _moveStart;
 };
 
 #endif

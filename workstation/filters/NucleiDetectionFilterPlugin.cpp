@@ -26,7 +26,8 @@
 Q_DECLARE_METATYPE(std::vector<Point>)
 
 NucleiDetectionFilterPlugin::NucleiDetectionFilterPlugin() : 
-  ImageFilterPluginInterface()
+  ImageFilterPluginInterface(),
+  _monochromeInput(false)
 {
   _filter.reset(new NucleiDetectionFilter<double>());
 }
@@ -56,7 +57,13 @@ QIcon NucleiDetectionFilterPlugin::icon() const {
 }
 
 bool NucleiDetectionFilterPlugin::initialize(const ImageSource* img) {
-  if (img->getColorType() == pathology::ColorType::RGB || img->getColorType() == pathology::ColorType::ARGB) {
+  if (img->getColorType() == pathology::ColorType::RGB || img->getColorType() == pathology::ColorType::ARGB || img->getColorType() == pathology::ColorType::Monochrome) {
+    if (img->getColorType() == pathology::ColorType::Monochrome) {
+      _monochromeInput = true;
+    }
+    else {
+      _monochromeInput = false;
+    }
     return true;
   }
   else {
@@ -154,6 +161,13 @@ void NucleiDetectionFilterPlugin::initializeSettingsPanel() {
   connect(beta, SIGNAL(valueChanged(double)), this, SLOT(updateFilterFromSettingsPanel()));
   connect(hMaximaThreshold, SIGNAL(valueChanged(double)), this, SLOT(updateFilterFromSettingsPanel()));
   connect(revertStainButton, SIGNAL(clicked()), this, SLOT(revertStainToDefault()));
+  QGroupBox* colorDeconvBox = _settingsPanel->findChild<QGroupBox*>("ColorDeconvolutionBox");
+  if (_monochromeInput) {
+    colorDeconvBox->setEnabled(false);
+  }
+  else {
+    colorDeconvBox->setEnabled(true);
+  }
   _mutex.unlock();
 }
 

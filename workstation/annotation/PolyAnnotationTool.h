@@ -20,6 +20,7 @@ public :
   void mouseDoubleClickEvent(QMouseEvent *event);
   void keyPressEvent(QKeyEvent *event);
   virtual QAction* getToolButton();
+  void setActive(bool active);
 
 public slots:
   void cancelAnnotation();

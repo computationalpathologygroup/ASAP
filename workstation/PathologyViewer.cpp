@@ -157,6 +157,7 @@ void PathologyViewer::scalingTime(qreal x)
   QPointF delta_viewport_pos = _zoomToViewPos - QPointF(width() / 2.0, height() / 2.0);
   QPointF viewport_center = mapFromScene(_zoomToScenePos) - delta_viewport_pos;
   centerOn(mapToScene(viewport_center.toPoint()));
+  float tm11 = this->transform().m11();
   emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
   emit updateBBox(FOV);
 }
@@ -196,7 +197,11 @@ bool PathologyViewer::hasTool(const std::string& toolName) const {
 
 void PathologyViewer::setActiveTool(const std::string& toolName) {
   if (_tools.find(toolName) != _tools.end()) {
+    if (_activeTool) {
+      _activeTool->setActive(false);
+    }
     _activeTool = _tools[toolName];
+    _activeTool->setActive(true);
   }
 }
 
@@ -204,8 +209,12 @@ void PathologyViewer::changeActiveTool() {
   if (sender()) {
     QAction* button = qobject_cast< QAction*>(sender());
     std::shared_ptr<ToolPluginInterface> newActiveTool = _tools[button->objectName().toStdString()];
+    if (_activeTool && newActiveTool && _activeTool != newActiveTool) {
+      _activeTool->setActive(false);
+    }
     if (newActiveTool) {
       _activeTool = newActiveTool;
+      _activeTool->setActive(true);
     }
     else {
       _activeTool = NULL;
@@ -242,7 +251,7 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
   }
   initializeImage(scene(), tileSize, lastLevel);
   initializeGUIComponents(lastLevel);
-  QObject::connect(this, SIGNAL(channelChanged(int)), _renderthread, SLOT(onChannelChanged(int)));
+  QObject::connect(this, SIGNAL(backgroundChannelChanged(int)), _renderthread, SLOT(onBackgroundChannelChanged(int)));
   QObject::connect(_cache, SIGNAL(itemEvicted(WSITileGraphicsItem*)), _manager, SLOT(onTileRemoved(WSITileGraphicsItem*)));
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, const unsigned int)));
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
@@ -258,20 +267,46 @@ void PathologyViewer::onForegroundImageChanged(std::weak_ptr<MultiResolutionImag
   }
 }
 
-void PathologyViewer::setForegroundOpacity(const float& opacity) {
+void PathologyViewer::setForegroundLUT(const std::string& LUTname) {
   if (_renderthread) {
-    _renderthread->setForegroundOpacity(opacity);
-    _manager->refresh();
+    _renderthread->onLUTChanged(LUTname);
+    if (_for_img.lock()) {
+      _manager->refresh();
+    }
   }
 }
 
-float PathologyViewer::getForegroundOpacity() const {
+void PathologyViewer::setForegroundWindowAndLevel(const float& window, const float& level) {
   if (_renderthread) {
-    return _renderthread->getForegroundOpacity();
+    _renderthread->onWindowAndLevelChanged(window, level);
+    if (_for_img.lock()) {
+      _manager->refresh();
+    }
   }
-  else {
-    return 1;
+}
+
+void PathologyViewer::setForegroundChannel(unsigned int channel) {
+  if (_renderthread) {
+    _renderthread->onForegroundChannelChanged(channel);
+    if (_for_img.lock()) {
+      _manager->refresh();
+    }
   }
+}
+
+
+void PathologyViewer::setForegroundOpacity(const float& opacity) {
+  if (_renderthread) {
+    _renderthread->setForegroundOpacity(opacity);
+    if (_for_img.lock()) {
+      _manager->refresh();
+    }
+  }
+}
+
+
+float PathologyViewer::getForegroundOpacity() const {
+  return _opacity;
 }
 
 void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize, unsigned int lastLevel) {  
@@ -393,7 +428,7 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
       {
         for (int i = 0; i < _img->getSamplesPerPixel(); ++i) {
           if (selectedItem->text() == QString("Channel ") + QString::number(i + 1)) {
-            emit channelChanged(i);
+            emit backgroundChannelChanged(i);
             _manager->refresh();
           }
         }

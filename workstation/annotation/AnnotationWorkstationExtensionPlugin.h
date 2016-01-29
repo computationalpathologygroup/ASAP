@@ -9,7 +9,7 @@
 
 class AnnotationService;
 class QtAnnotation;
-class AnnotationGroup;
+class QtAnnotationGroup;
 class QDockWidget;
 class QTreeWidget;
 class QTreeWidgetItem;
@@ -38,7 +38,7 @@ public :
     void removeAnnotationFromSelection(QtAnnotation* annotation);
     bool eventFilter(QObject* watched, QEvent* event);
     void deleteAnnotation(QtAnnotation* annotation);
-    void deleteAnnotationGroup(std::shared_ptr<AnnotationGroup> group);
+    void deleteAnnotationGroup(QtAnnotationGroup* group);
     void clearSelection();
 
 public slots:
@@ -61,8 +61,8 @@ private :
     QtAnnotation* _generatedAnnotation;
     QtAnnotation* _activeAnnotation;
     QSet<QtAnnotation*> _selectedAnnotations;
-    QMap<QString, QtAnnotation*> _qtAnnotations;
-    QMap<QString, std::shared_ptr<AnnotationGroup> > _qtAnnotationGroups;
+    QList<QtAnnotation*> _qtAnnotations;
+    QList<QtAnnotationGroup*> _qtAnnotationGroups;
     QDockWidget* _dockWidget;
     QTreeWidget* _treeWidget;
     QEvent* _oldEvent;
@@ -74,7 +74,6 @@ private :
 
     static unsigned int _annotationIndex;
     static unsigned int _annotationGroupIndex;
-    QSettings* _settings;
 };
 
 #endif

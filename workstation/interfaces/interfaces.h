@@ -16,6 +16,7 @@
 #include "imgproc/generic/FilterBase.h"
 #include "workstation/PathologyViewer.h"
 
+class QSettings;
 class QToolBar;
 class QDockWidget;
 class PathologyViewer;
@@ -74,18 +75,22 @@ protected:
 };
 
 class ToolPluginInterface : public QObject {
-public :
-  ToolPluginInterface() : _button(NULL), _viewer(NULL)
+public:
+  ToolPluginInterface() : _button(NULL), _viewer(NULL), _active(false)
   {
   }
 
-  virtual ~ToolPluginInterface() { 
+  virtual ~ToolPluginInterface() {
     _viewer = NULL;
     _button = NULL;
   }
 
   virtual std::string name() = 0;
   void setViewer(PathologyViewer* viewer) { _viewer = viewer; }
+  bool active() { return _active; }
+  virtual void setActive(bool active) {
+    _active = active;
+  }
   virtual void mouseMoveEvent(QMouseEvent *event) { event->ignore(); };
   virtual void mousePressEvent(QMouseEvent *event) { event->ignore(); };
   virtual void mouseReleaseEvent(QMouseEvent *event) { event->ignore(); };
@@ -96,10 +101,12 @@ public :
 protected :
   QPointer<PathologyViewer> _viewer;
   QPointer<QAction> _button;
+  bool _active;
 };
 
 class WorkstationExtensionPluginInterface : public QObject {
 public :
+  WorkstationExtensionPluginInterface() : _settings(NULL) {}
   virtual ~WorkstationExtensionPluginInterface() {}
   virtual bool initialize(PathologyViewer* viewer) = 0;
   virtual QToolBar* getToolBar() { return NULL;}
@@ -109,6 +116,7 @@ public :
 
 protected:
   QPointer<PathologyViewer> _viewer;
+  QSettings* _settings;
 
 public slots:
   virtual void onNewImageLoaded(MultiResolutionImage* img, std::string fileName) {};

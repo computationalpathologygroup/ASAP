@@ -126,7 +126,7 @@ void FilterThread::run()
 
             QImage renderedImg;
             if (output->getColorType() == pathology::ColorType::Monochrome || output->getColorType() == pathology::ColorType::Indexed) {
-              renderedImg = convertMonochromeToRGB(typedOutput, dims[0], dims[1], 0, dims[2], output->getMinValue(), output->getMaxValue());
+              renderedImg = convertMonochromeToRGB(typedOutput, dims[0], dims[1], 0, dims[2], output->getMinValue(), output->getMaxValue(), "Normal");
             }
             else {
               std::copy(typedOutput, typedOutput + dims[0] * dims[1] * dims[2], imgBuf);
