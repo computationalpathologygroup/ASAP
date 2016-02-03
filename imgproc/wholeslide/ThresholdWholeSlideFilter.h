@@ -42,9 +42,6 @@ public:
   void setComponent(const int& component);
   int getComponent() const;
 
-  void setKeepOriginalValues(const bool& keep);
-  bool getKeepOriginalValues() const;
-
 };
 
 #endif
