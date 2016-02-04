@@ -6,6 +6,7 @@
 #include "ConnectedComponentsWholeSlideFilter.h"
 #include "core/filetools.h"
 #include "core/CmdLineProgressMonitor.h"
+#include "config/pathology_config.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
         .positional(positionalOptions).run(),
         vm);
       if (!vm.count("input")) {
-        cout << "WSIConnectedComponents v1.0" << endl;
+        cout << "WSIConnectedComponents v" << ASAP_VERSION_STRING << endl;
         cout << "Usage: WSIConnectedComponents.exe input output [options]" << endl;
       }
       if (vm.count("help")) {

@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES(
   ../../
   ${MultiResImageConverter_SOURCE_DIR}/../../io/multiresolutionimageinterface
   ${Boost_INCLUDE_DIRS}
+  ${DIAGPathology_BINARY_DIR}
 )
 ADD_DEFINITIONS(${Boost_DEFINITIONS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIR})

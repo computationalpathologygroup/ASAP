@@ -21,6 +21,7 @@ public:
   void setIgnoreAlpha(const bool ignoreAlpha);
 
   std::string getOpenSlideProperty(const std::string& propertyName);
+  std::string getOpenSlideErrorState();
 
   void setCacheSize(const unsigned long long cacheSize);
 
@@ -35,6 +36,7 @@ protected :
 private:
 
   bool _ignoreAlpha;
+  std::string _errorState;
 
 };
 

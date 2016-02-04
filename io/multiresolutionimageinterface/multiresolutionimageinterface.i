@@ -26,6 +26,7 @@
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImageWriter.h"
 #include "MultiResolutionImage.h"
+#include "config/pathology_config.h"
 #include "../../core/Point.h"
 #include "../../core/ProgressMonitor.h"
 #include "../../core/CmdLineProgressMonitor.h"
@@ -86,6 +87,9 @@ import_array();
 #endif
 
 %ignore swap(ImageSource& first, ImageSource& second);
+
+%immutable ASAP_VERSION_STRING;
+%include "../../config/pathology_config.h"
 
 %include "../../core/Point.h"
 %include "../../core/PathologyEnums.h"

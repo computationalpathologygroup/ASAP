@@ -26,6 +26,13 @@ void OpenSlideImage::setCacheSize(const unsigned long long cacheSize) {
 #endif
 }
 
+std::string OpenSlideImage::getOpenSlideErrorState() {
+  if (_errorState.empty()) {
+    return "No file opened.";
+  }
+  return _errorState;
+}
+
 void OpenSlideImage::setIgnoreAlpha(const bool ignoreAlpha) {
   if (ignoreAlpha) {
     _samplesPerPixel = 3;
@@ -42,45 +49,57 @@ bool OpenSlideImage::initialize(const std::string& imagePath) {
   boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
   cleanup();
 
-  if (openslide_can_open(imagePath.c_str())) {
+  if (openslide_detect_vendor(imagePath.c_str())) {
     _slide = openslide_open(imagePath.c_str());
-    _numberOfLevels = openslide_get_level_count(_slide);     
-    _dataType = UChar;
-    if (_ignoreAlpha) {
-      _samplesPerPixel = 3;
-      _colorType = RGB;
+    if (const char* error = openslide_get_error(_slide)) {
+      _errorState = error;
     }
     else {
-      _samplesPerPixel = 4;
-      _colorType = ARGB;
+      _errorState = "";
     }
-    for (int i = 0; i < _numberOfLevels; ++i) {
-      int64_t x,y;
-      openslide_get_level_dimensions(_slide,i,&x,&y);
-      std::vector<unsigned long long> tmp;
-      tmp.push_back(x);
-      tmp.push_back(y);
-      _levelDimensions.push_back(tmp);
+    if (_errorState.empty()) {
+      _numberOfLevels = openslide_get_level_count(_slide);
+      _dataType = UChar;
+      if (_ignoreAlpha) {
+        _samplesPerPixel = 3;
+        _colorType = RGB;
+      }
+      else {
+        _samplesPerPixel = 4;
+        _colorType = ARGB;
+      }
+      for (int i = 0; i < _numberOfLevels; ++i) {
+        int64_t x, y;
+        openslide_get_level_dimensions(_slide, i, &x, &y);
+        std::vector<unsigned long long> tmp;
+        tmp.push_back(x);
+        tmp.push_back(y);
+        _levelDimensions.push_back(tmp);
+      }
+      std::stringstream ssm;
+      if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X)) {
+        ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X);
+        float tmp;
+        ssm >> tmp;
+        _spacing.push_back(tmp);
+        ssm.clear();
+      }
+      if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y)) {
+        ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y);
+        float tmp;
+        ssm >> tmp;
+        _spacing.push_back(tmp);
+        ssm.clear();
+      }
+      _fileType = openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_VENDOR);
+      _isValid = true;
+      createCache<unsigned int>();
     }
-    std::stringstream ssm;
-    if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X)) {
-      ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X);
-      float tmp;
-      ssm >> tmp;
-      _spacing.push_back(tmp);
-      ssm.clear();
+    else {
+      _isValid = false;
     }
-    if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y)) {
-      ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_Y);
-      float tmp;
-      ssm >> tmp;
-      _spacing.push_back(tmp);
-      ssm.clear();
-    }
-    _fileType = openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_VENDOR);
-    _isValid = true;
-    createCache<unsigned int>();
-  } else {
+  } 
+  else {
     _isValid = false;
   }
   return _isValid;

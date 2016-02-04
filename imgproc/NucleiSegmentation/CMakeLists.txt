@@ -4,6 +4,7 @@ find_package(OpenCV REQUIRED)
 INCLUDE_DIRECTORIES(
   ${DIAGPathology_SOURCE_DIR}  
   ${OpenCV_INCLUDE_DIRS}
+  ${DIAGPathology_BINARY_DIR}
 )
 
 IF(WIN32)

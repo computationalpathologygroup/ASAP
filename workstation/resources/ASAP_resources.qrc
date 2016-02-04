@@ -1,7 +1,11 @@
 <RCC>
   <qresource prefix="ASAP_icons">
+  <file alias="aboutlogo.png">aboutlogo.png</file>
   <file alias="application.png">application.png</file>
   <file alias="open.png">open.png</file>
   <file alias="close.png">close.png</file>
+  </qresource>
+  <qresource prefix="ASAP_ui">
+    <file>aboutdialog.ui</file>
   </qresource>
 </RCC>

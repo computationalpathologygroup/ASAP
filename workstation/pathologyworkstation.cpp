@@ -26,6 +26,7 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QtUiTools>
 
 #include "pathologyworkstation.h"
 #include "PathologyViewer.h"
@@ -52,6 +53,7 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
   retranslateUi();
   connect(actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_actionOpen_triggered()));
   connect(actionClose, SIGNAL(triggered(bool)), this, SLOT(on_actionClose_triggered()));
+  connect(actionAbout, SIGNAL(triggered(bool)), this, SLOT(on_actionAbout_triggered()));
 
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   this->loadPlugins();
@@ -190,6 +192,36 @@ PathologyWorkstation::~PathologyWorkstation()
   writeSettings();
 }
 
+void PathologyWorkstation::on_actionAbout_triggered() {
+  QUiLoader loader;
+  QFile file(":/ASAP_ui/aboutdialog.ui");
+  file.open(QFile::ReadOnly);
+  QDialog* content = qobject_cast<QDialog*>(loader.load(&file, this));
+  if (content) {
+    QLabel* generalInfoLabel = content->findChild<QLabel*>("generalInfoLabel");
+    QString generalInfoText = generalInfoLabel->text();
+    generalInfoText.replace("@VERSION_STRING@", ASAP_VERSION_STRING);
+    generalInfoLabel->setText(generalInfoText);
+    QTreeWidget* pluginList = content->findChild<QTreeWidget*>("loadedPluginsOverviewTreeWidget");
+    QList<QTreeWidgetItem*> root_items = pluginList->findItems("Tool", Qt::MatchExactly);
+    if (!root_items.empty()) {
+      QTreeWidgetItem* root_item = root_items[0];
+      for (std::vector<std::string>::const_iterator it = _toolPluginFileNames.begin(); it != _toolPluginFileNames.end(); ++it) {
+        root_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(*it))));
+      }
+    }
+    root_items = pluginList->findItems("Workstation Extension", Qt::MatchExactly);
+    if (!root_items.empty()) {
+      QTreeWidgetItem* root_item = root_items[0];
+      for (std::vector<std::string>::const_iterator it = _extensionPluginFileNames.begin(); it != _extensionPluginFileNames.end(); ++it) {
+        root_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(*it))));
+      }
+    }    
+    content->exec();
+  }
+  file.close();
+}
+
 void PathologyWorkstation::on_actionClose_triggered()
 {
     emit imageClosed();
@@ -274,6 +306,8 @@ void PathologyWorkstation::setupUi()
   actionClose->setObjectName(QStringLiteral("actionClose"));
   actionOpen->setIcon(QIcon(QPixmap(":/ASAP_icons/open.png")));
   actionClose->setIcon(QIcon(QPixmap(":/ASAP_icons/close.png")));
+  actionAbout = new QAction(this);
+  actionAbout->setObjectName(QStringLiteral("actionAbout"));
   menuBar = new QMenuBar(this);
   menuBar->setObjectName(QStringLiteral("menuBar"));
   menuBar->setGeometry(QRect(0, 0, 1037, 21));
@@ -281,6 +315,8 @@ void PathologyWorkstation::setupUi()
   menuFile->setObjectName(QStringLiteral("menuFile"));
   menuView = new QMenu(menuBar);
   menuView->setObjectName(QStringLiteral("menuView"));
+  menuHelp = new QMenu(menuBar);
+  menuHelp->setObjectName(QStringLiteral("menuHelp"));
   this->setMenuBar(menuBar);
   mainToolBar = new QToolBar(this);
   mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -295,8 +331,10 @@ void PathologyWorkstation::setupUi()
 
   menuBar->addAction(menuFile->menuAction());
   menuBar->addAction(menuView->menuAction());
+  menuBar->addAction(menuHelp->menuAction());
   menuFile->addAction(actionOpen);
   menuFile->addAction(actionClose);
+  menuHelp->addAction(actionAbout);
   centralWidget = new QWidget(this);
   centralWidget->setObjectName(QStringLiteral("centralWidget"));
   sizePolicy.setHeightForWidth(centralWidget->sizePolicy().hasHeightForWidth());
@@ -319,10 +357,12 @@ void PathologyWorkstation::retranslateUi()
   this->setWindowTitle(QApplication::translate("PathologyWorkstation", "ASAP", 0));
   actionOpen->setText(QApplication::translate("PathologyWorkstation", "Open", 0));
   actionOpen->setIconText(QApplication::translate("PathologyWorkstation", "Open", 0));
+  actionAbout->setText(QApplication::translate("PathologyWorkstation", "About...", 0));
   actionOpen->setShortcut(QApplication::translate("PathologyWorkstation", "Ctrl+O", 0));
   actionClose->setText(QApplication::translate("PathologyWorkstation", "Close", 0));
   actionClose->setShortcut(QApplication::translate("PathologyWorkstation", "Ctrl+C", 0));
   actionClose->setIconText(QApplication::translate("PathologyWorkstation", "Close", 0));
   menuFile->setTitle(QApplication::translate("PathologyWorkstation", "File", 0));
   menuView->setTitle(QApplication::translate("PathologyWorkstation", "View", 0));
+  menuHelp->setTitle(QApplication::translate("PathologyWorkstation", "Help", 0));
 } 

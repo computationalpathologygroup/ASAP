@@ -23,6 +23,7 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
+#include "config/pathology_config.h"
 #include "DistanceTransformWholeSlideFilter.h"
 #include "ConnectedComponentsWholeSlideFilter.h"
 #include "NucleiDetectionWholeSlideFilter.h"
@@ -50,6 +51,9 @@ namespace std {
 #define EXPORT_WHOLESLIDEFILTERS
 #define EXPORT_CORE
 #endif
+
+%immutable ASAP_VERSION_STRING;
+%include "config/pathology_config.h"
 
 %include "DistanceTransformWholeSlideFilter.h"
 %include "ConnectedComponentsWholeSlideFilter.h"

@@ -46,6 +46,7 @@ signals:
 private slots:
   void on_actionClose_triggered();
   void on_actionOpen_triggered();
+  void on_actionAbout_triggered();
 
 private:
   static const char* sharedLibraryExtensions;
@@ -61,6 +62,7 @@ private:
   // GUI object
   QAction *actionOpen;
   QAction *actionClose;
+  QAction *actionAbout;
   QActionGroup *_toolActions;
   QWidget *centralWidget;
   QHBoxLayout *horizontalLayout_2;
@@ -68,6 +70,7 @@ private:
   QMenuBar *menuBar;
   QMenu *menuFile;
   QMenu *menuView;
+  QMenu *menuHelp;
   QToolBar *mainToolBar;
   QStatusBar *statusBar;
 

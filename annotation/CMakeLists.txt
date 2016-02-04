@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES(
   ../io/multiresolutionimageinterface
   ${Boost_INCLUDE_DIRS}
   ${PugiXML_INCLUDE_DIR}
+  ${DIAGPathology_BINARY_DIR}
 )
 LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
 ADD_DEFINITIONS(${Boost_DEFINITIONS})

@@ -4,11 +4,13 @@
 #include "TestData.h"
 #include <iostream>
 #include <fstream>
+#include "config/pathology_config.h"
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
+  std::cout << "TestRunner v" << ASAP_VERSION_STRING << endl;
   if (argc < 2)
   {
 	std::cout << "No data directory given, aborting" << endl;
