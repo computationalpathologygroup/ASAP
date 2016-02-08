@@ -81,9 +81,15 @@ void AnnotationToMask::convert(const std::shared_ptr<AnnotationList>& annotation
             }
           }
           for (unsigned int y = 0; y < 512; ++y) {
+            if (ty + y >= dimensions[1]) {
+              break;
+            }
             if (ty + y > bbox[0].getY() && ty + y < bbox[1].getY()) {
               for (unsigned int x = 0; x < 512; ++x) {
                 if (tx + x > bbox[0].getX() && tx + x < bbox[1].getX()) {                  
+                  if (tx + x >= dimensions[0]) {
+                    break;
+                  }
                   int in_poly = wn_PnPoly(Point(static_cast<float>(tx + x), static_cast<float>(ty + y)), coords) != 0 ? 1 : 0;
                   if (nameOrder.empty()) {
                     buffer[y * 512 + x] = in_poly * label > buffer[y * 512 + x] ? in_poly * label : buffer[y * 512 + x];

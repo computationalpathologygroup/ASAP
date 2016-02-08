@@ -16,6 +16,8 @@ class QTreeWidgetItem;
 class QObject;
 class QEvent;
 class QSettings;
+class QFrame;
+class QLabel;
 
 class EXPORT_PATHOLOGYANNOTATIONPLUGIN AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
@@ -54,6 +56,8 @@ public slots:
 
 private slots:
     void resizeOnExpand();
+    void updateAnnotationToolTip(QtAnnotation* annotation);
+    void updateGeneratingAnnotationLabel(QtAnnotation* annotation);
 
 private :
     std::vector<std::shared_ptr<ToolPluginInterface> > _annotationTools;
@@ -62,11 +66,16 @@ private :
     QtAnnotation* _activeAnnotation;
     QSet<QtAnnotation*> _selectedAnnotations;
     QList<QtAnnotation*> _qtAnnotations;
+    QMap<QtAnnotation*, QTreeWidgetItem*> _annotToItem;
     QList<QtAnnotationGroup*> _qtAnnotationGroups;
     QDockWidget* _dockWidget;
     QTreeWidget* _treeWidget;
+    QLabel* _currentAnnotationHeaderLabel;
+    QLabel* _currentAnnotationLabel;
+    QFrame* _currentAnnotationLine;
     QEvent* _oldEvent;
     std::weak_ptr<MultiResolutionImage> _img;
+    float _currentPixelArea;
 
     void clearTreeWidget();
     void clearAnnotationList();

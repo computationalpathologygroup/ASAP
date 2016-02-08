@@ -42,36 +42,11 @@ void PointSetQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsIt
         painter->restore();
       }
       else {
-        painter->drawPoint(this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale));
+        QPointF loc = this->mapFromScene(coords[i].getX()*_scale, coords[i].getY()*_scale);
+        painter->drawPoint(loc);
       }
     }
   }  
-}
-
-void PointSetQtAnnotation::moveCoordinateBy(unsigned int index, const Point& moveBy) {
-  std::vector<Point> coords = this->getAnnotation()->getCoordinates();
-  if (index < coords.size()) {
-    prepareGeometryChange();
-    coords[index].setX(coords[index].getX() + moveBy.getX() / _scale);
-    coords[index].setY(coords[index].getY() + moveBy.getY() / _scale);
-    this->getAnnotation()->setCoordinates(coords);
-    if (index == 0) {
-      this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
-    }
-  }
-  onCoordinatesChanged();
-}
-
-void PointSetQtAnnotation::moveCoordinatesBy(const Point& moveBy) {
-  std::vector<Point> coords = this->getAnnotation()->getCoordinates();
-  prepareGeometryChange();
-  for (std::vector<Point>::iterator it = coords.begin(); it != coords.end(); ++it) {
-    it->setX(it->getX() + moveBy.getX()/_scale);
-    it->setY(it->getY() + moveBy.getY()/_scale);
-  }
-  this->getAnnotation()->setCoordinates(coords);
-  this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
-  onCoordinatesChanged();
 }
 
 bool PointSetQtAnnotation::collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode) const {

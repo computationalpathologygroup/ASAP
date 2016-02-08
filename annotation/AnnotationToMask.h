@@ -22,8 +22,8 @@ private:
 
   inline int isLeft(Point P0, Point P1, Point P2) const
   {
-    return static_cast<int>((P1.getX() - P0.getX()) * (P2.getY() - P0.getY())
-      - (P2.getX() - P0.getX()) * (P1.getY() - P0.getY()));
+    return static_cast<int>((P1.getX() - P0.getX()) * (P0.getY() - P2.getY())
+      - (P2.getX() - P0.getX()) * (P0.getY() - P1.getY()));
   }
 
   int cn_PnPoly(const Point& P, const std::vector<Point>& V) const;

@@ -54,6 +54,9 @@ public:
 
   void simplify(unsigned int nrPoints);
 
+  float getArea() const;
+  unsigned int getNumberOfPoints() const;
+
 private:
   Type _type;
 	std::vector<Point> _coordinates;

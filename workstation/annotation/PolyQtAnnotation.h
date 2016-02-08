@@ -16,8 +16,6 @@ public:
     QWidget *widget);
 
   void finish();
-  void moveCoordinateBy(unsigned int index, const Point& moveBy);
-  void moveCoordinatesBy(const Point& moveBy);
   void setInterpolationType(const std::string& interpolationType);
   std::string getInterpolationType();
   QPainterPath getCurrentPath(const std::vector<Point>& coords) const;

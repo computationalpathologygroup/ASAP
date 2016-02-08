@@ -33,6 +33,25 @@ void Annotation::setTypeFromString(const std::string& type) {
   }
 }
 
+float Annotation::getArea() const {
+  if (!_coordinates.empty()) {
+    double  area = 0.;
+    int j = _coordinates.size() - 1;
+    for (int i = 0; i < _coordinates.size(); i++) {
+      area += (_coordinates[j].getX() + _coordinates[i].getX())*(_coordinates[j].getY() - _coordinates[i].getY());
+      j = i;
+    }
+    return area*.5;
+  }
+  else{
+    return 0.0;
+  }
+}
+
+unsigned int Annotation::getNumberOfPoints() const {
+  return _coordinates.size();
+}
+
 void Annotation::addCoordinate(const float& x, const float& y)
 {
 	_coordinates.push_back(Point(x, y));

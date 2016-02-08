@@ -10,7 +10,8 @@ QObject(parent),
 _annotation(annotation),
 _scale(scale),
 _editable(true),
-_activeSeedPoint(-1)
+_activeSeedPoint(-1),
+_finished(false)
 {
   // We consider the first point to act as the 'center' of the annotation
   if (_annotation) {
@@ -22,6 +23,10 @@ _activeSeedPoint(-1)
 
 QtAnnotation::~QtAnnotation() {
   _annotation = NULL;
+}
+
+void QtAnnotation::finish() {
+  _finished = true;
 }
 
 QColor QtAnnotation::getDrawingColor() {
@@ -47,6 +52,7 @@ void QtAnnotation::addCoordinate(const float& x, const float& y) {
     _annotation->addCoordinate(x, y);
   }
   onCoordinatesChanged();
+  emit coordinatesChanged(this);
 }
 
 void QtAnnotation::addCoordinate(const Point& xy) {
@@ -55,6 +61,7 @@ void QtAnnotation::addCoordinate(const Point& xy) {
     _annotation->addCoordinate(xy);
   }
   onCoordinatesChanged();
+  emit coordinatesChanged(this);
 }
 
 void QtAnnotation::insertCoordinate(const int& index, const float& x, const float& y) {
@@ -63,6 +70,7 @@ void QtAnnotation::insertCoordinate(const int& index, const float& x, const floa
     _annotation->insertCoordinate(index, x, y);
   }
   onCoordinatesChanged();
+  emit coordinatesChanged(this);
 }
 
 void QtAnnotation::insertCoordinate(const int& index, const Point& xy){
@@ -71,6 +79,7 @@ void QtAnnotation::insertCoordinate(const int& index, const Point& xy){
     _annotation->insertCoordinate(index, xy);
   }
   onCoordinatesChanged();
+  emit coordinatesChanged(this);
 }
 
 void QtAnnotation::removeCoordinate(const int& index) {
@@ -84,6 +93,7 @@ void QtAnnotation::removeCoordinate(const int& index) {
     }
   }
   onCoordinatesChanged();
+  emit coordinatesChanged(this);
 }
 
 void QtAnnotation::setCoordinates(const std::vector<Point>& coordinates) {
@@ -97,6 +107,34 @@ void QtAnnotation::setCoordinates(const std::vector<Point>& coordinates) {
     }
   }
   onCoordinatesChanged();
+  emit coordinatesChanged(this);
+}
+
+void QtAnnotation::moveCoordinateBy(unsigned int index, const Point& moveBy) {
+  std::vector<Point> coords = this->getAnnotation()->getCoordinates();
+  if (index < coords.size()) {
+    prepareGeometryChange();
+    coords[index].setX(coords[index].getX() + moveBy.getX() / _scale);
+    coords[index].setY(coords[index].getY() + moveBy.getY() / _scale);
+    this->getAnnotation()->setCoordinates(coords);
+    if (index == 0) {
+      this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
+    }
+  }
+  onCoordinatesChanged();
+  emit coordinatesChanged(this);
+}
+
+void QtAnnotation::moveCoordinatesBy(const Point& moveBy) {
+  std::vector<Point> coords = this->getAnnotation()->getCoordinates();
+  for (std::vector<Point>::iterator it = coords.begin(); it != coords.end(); ++it) {
+    it->setX(it->getX() + moveBy.getX() / _scale);
+    it->setY(it->getY() + moveBy.getY() / _scale);
+  }
+  this->getAnnotation()->setCoordinates(coords);
+  this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
+  onCoordinatesChanged();
+  emit coordinatesChanged(this);
 }
 
 void QtAnnotation::onCoordinatesChanged() {

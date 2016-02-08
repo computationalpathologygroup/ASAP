@@ -89,9 +89,9 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
       _lastLevel = level;
       _lastFOV = FOVTile;
       for (int x = topLeftTile.x(); x <= bottomRightTile.x(); ++x) {
-        if (x >= 0 && x < nrTiles.x()) {
+        if (x >= 0 && x <= nrTiles.x()) {
           for (int y = topLeftTile.y(); y <= bottomRightTile.y(); ++y) {
-            if (y >= 0 && y < nrTiles.y()) {
+            if (y >= 0 && y <= nrTiles.y()) {
               if (providesCoverage(level, x, y) < 1) {
                 setCoverage(level, x, y, 1);
                 _renderThread->addJob(_tileSize, x, y, level);

@@ -25,8 +25,10 @@
 #include <QApplication>
 #include <QColorDialog>
 #include <QSettings>
+#include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QFrame>
 #include <QFormLayout>
 #include <QSpinBox>
 #include "core/filetools.h"
@@ -47,7 +49,11 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
   _activeAnnotation(NULL),
   _dockWidget(NULL),
   _treeWidget(NULL),
-  _oldEvent(NULL)
+  _oldEvent(NULL),
+  _currentAnnotationLine(NULL),
+  _currentAnnotationLabel(NULL),
+  _currentAnnotationHeaderLabel(NULL),
+  _currentPixelArea(1.)
 {
   QUiLoader loader;
   QFile file(":/AnnotationWorkstationExtensionPlugin_ui/AnnotationDockWidget.ui");
@@ -57,11 +63,18 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     _dockWidget->setEnabled(false);
     _treeWidget = _dockWidget->findChild<QTreeWidget*>("AnnotationTreeWidget");
     _treeWidget->viewport()->installEventFilter(this);
+    _treeWidget->setMouseTracking(true);
     _treeWidget->installEventFilter(this);
     QPushButton* groupButton = _dockWidget->findChild<QPushButton*>("addGroupButton");
     QPushButton* clearButton = _dockWidget->findChild<QPushButton*>("clearButton");
     QPushButton* saveButton = _dockWidget->findChild<QPushButton*>("saveButton");
     QPushButton* loadButton = _dockWidget->findChild<QPushButton*>("loadButton");
+    _currentAnnotationLine = _dockWidget->findChild<QFrame*>("currentAnnotationLine");
+    _currentAnnotationLabel = _dockWidget->findChild<QLabel*>("currentAnnotationLabel");
+    _currentAnnotationHeaderLabel = _dockWidget->findChild<QLabel*>("currentAnnotationHeaderLabel");
+    _currentAnnotationLine->setVisible(false);
+    _currentAnnotationLabel->setVisible(false);
+    _currentAnnotationHeaderLabel->setVisible(false);
     connect(groupButton, SIGNAL(clicked()), this, SLOT(addAnnotationGroup()));
     connect(clearButton, SIGNAL(clicked()), this, SLOT(onClearButtonPressed()));
     connect(saveButton, SIGNAL(clicked()), this, SLOT(onSaveButtonPressed()));
@@ -115,6 +128,7 @@ void AnnotationWorkstationExtensionPlugin::resizeOnExpand() {
 
 void AnnotationWorkstationExtensionPlugin::clearTreeWidget() {
   if (_treeWidget) {
+    _annotToItem.clear();
     _treeWidget->clear();
   }
 }
@@ -146,6 +160,21 @@ void AnnotationWorkstationExtensionPlugin::onItemNameChanged(QTreeWidgetItem* it
       if (grp) {
         grp->getAnnotationGroup()->setName(item->text(1).toStdString());
       }
+    }
+  }
+}
+
+void AnnotationWorkstationExtensionPlugin::updateAnnotationToolTip(QtAnnotation* annotation) {
+  if (annotation) {
+    QMap<QtAnnotation*, QTreeWidgetItem*>::iterator it = _annotToItem.find(annotation);
+    if (it != _annotToItem.end()) {
+      unsigned int nrPoints = annotation->getAnnotation()->getNumberOfPoints();
+      float area = annotation->getAnnotation()->getArea();
+      QString areaUnit(" pixels.");
+      if (_currentPixelArea != 1.) {
+        areaUnit = QString(" um<sup>2</sup></html>");
+      }
+      it.value()->setToolTip(1, QString("<html>Total number of control points: ") + QString::number(nrPoints) + QString("<br/>") + QString("Total area: ") + QString::number(area * _currentPixelArea, 'g', 4) + areaUnit);
     }
   }
 }
@@ -315,25 +344,28 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         _qtAnnotations.append(annot);
         _viewer->scene()->addItem(annot);
         annot->setZValue(20.);
-      }
 
-      _annotationIndex += 1;
-      QTreeWidgetItem* newAnnotation = new QTreeWidgetItem(prnt);
-      newAnnotation->setText(1, QString::fromStdString((*it)->getName()));
-      newAnnotation->setText(2, QString::fromStdString((*it)->getTypeAsString()));
-      newAnnotation->setFlags(newAnnotation->flags() & ~Qt::ItemIsDropEnabled);
-      newAnnotation->setFlags(newAnnotation->flags() | Qt::ItemIsEditable);
-      newAnnotation->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotation*>(annot));
-      int cHeight = _treeWidget->visualItemRect(newAnnotation).height();
-      if (_treeWidget->topLevelItemCount() > 0) {
-        cHeight = _treeWidget->visualItemRect(_treeWidget->topLevelItem(0)).height();
-      }
-      QPixmap iconPM(cHeight, cHeight);
-      iconPM.fill(QColor((*it)->getColor().c_str()));
-      QIcon color(iconPM);
-      newAnnotation->setIcon(0, color);
-      newAnnotation->setData(0, Qt::UserRole, QColor((*it)->getColor().c_str()));
 
+        _annotationIndex += 1;
+        QTreeWidgetItem* newAnnotation = new QTreeWidgetItem(prnt);
+        newAnnotation->setText(1, QString::fromStdString((*it)->getName()));
+        newAnnotation->setText(2, QString::fromStdString((*it)->getTypeAsString()));
+        newAnnotation->setFlags(newAnnotation->flags() & ~Qt::ItemIsDropEnabled);
+        newAnnotation->setFlags(newAnnotation->flags() | Qt::ItemIsEditable);
+        newAnnotation->setData(1, Qt::UserRole, QVariant::fromValue<QtAnnotation*>(annot));
+        int cHeight = _treeWidget->visualItemRect(newAnnotation).height();
+        if (_treeWidget->topLevelItemCount() > 0) {
+          cHeight = _treeWidget->visualItemRect(_treeWidget->topLevelItem(0)).height();
+        }
+        QPixmap iconPM(cHeight, cHeight);
+        iconPM.fill(QColor((*it)->getColor().c_str()));
+        QIcon color(iconPM);
+        newAnnotation->setIcon(0, color);
+        newAnnotation->setData(0, Qt::UserRole, QColor((*it)->getColor().c_str()));
+        _annotToItem[annot] = newAnnotation;
+        updateAnnotationToolTip(annot);
+        connect(annot, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateAnnotationToolTip(QtAnnotation*)));
+      }
     }
     _treeWidget->resizeColumnToContents(0);
     _treeWidget->resizeColumnToContents(1);
@@ -529,6 +561,15 @@ void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiR
     }
   }
   _img = img;
+  if (std::shared_ptr<MultiResolutionImage> local_img = _img.lock()) {
+    std::vector<double> spacing = local_img->getSpacing();
+    if (spacing.size() > 1) {
+      _currentPixelArea = spacing[0] * spacing[1];
+    }
+    else {
+      _currentPixelArea = 1.;
+    }
+  }
 }
 
 void AnnotationWorkstationExtensionPlugin::onImageClosed() {
@@ -590,12 +631,36 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
     _treeWidget->clearSelection();
     _viewer->scene()->addItem(_generatedAnnotation);
     _generatedAnnotation->setZValue(20.);
+    updateGeneratingAnnotationLabel(_generatedAnnotation);
+    connect(_generatedAnnotation, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateGeneratingAnnotationLabel(QtAnnotation*)));
+  }
+}
+
+void AnnotationWorkstationExtensionPlugin::updateGeneratingAnnotationLabel(QtAnnotation* annotation) {
+  if (annotation) {
+    _currentAnnotationLine->setVisible(true);
+    _currentAnnotationLabel->setVisible(true);
+    _currentAnnotationHeaderLabel->setVisible(true);
+    unsigned int nrPoints = annotation->getAnnotation()->getNumberOfPoints();
+    float area = annotation->getAnnotation()->getArea();
+    QString areaUnit(" pixels.");
+    if (_currentPixelArea != 1.) {
+      areaUnit = QString(" um<sup>2</sup>");
+    }
+    _currentAnnotationLabel->setText(QString("Total number of control points: ") + QString::number(nrPoints) + QString("<br/>") + QString("Total area: ") + QString::number(area * _currentPixelArea, 'g', 4) + areaUnit);
+  }
+  else {
+    _currentAnnotationLine->setVisible(false);
+    _currentAnnotationLabel->setVisible(false);
+    _currentAnnotationHeaderLabel->setVisible(false);
   }
 }
 
 void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
   if (_generatedAnnotation) {
     _generatedAnnotation->finish();
+    updateGeneratingAnnotationLabel(NULL);
+    disconnect(_generatedAnnotation, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateGeneratingAnnotationLabel(QtAnnotation*)));
     if (!cancel) {
       _generatedAnnotation->getAnnotation()->setName("Annotation " + QString::number(_annotationIndex).toStdString());
       _annotationIndex += 1;
@@ -618,6 +683,9 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
       _treeWidget->resizeColumnToContents(0);      
       _treeWidget->resizeColumnToContents(1);
       _activeAnnotation = _generatedAnnotation;
+      _annotToItem[_activeAnnotation] = newAnnotation;
+      updateAnnotationToolTip(_activeAnnotation);
+      connect(_activeAnnotation, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateAnnotationToolTip(QtAnnotation*)));
       _generatedAnnotation = NULL;
     }
     else {
@@ -643,6 +711,7 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
             _annotationService->getList()->removeAnnotation(annotInd);
           }
           annotation->deleteLater();
+          _annotToItem.remove(annotation);
           _qtAnnotations.removeOne(annotation);
           _selectedAnnotations.remove(annotation);
           (*it)->setSelected(false);

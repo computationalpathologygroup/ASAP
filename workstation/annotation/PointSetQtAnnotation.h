@@ -15,9 +15,6 @@ public:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     QWidget *widget);
 
-  void moveCoordinateBy(unsigned int index, const Point& moveBy);
-  void moveCoordinatesBy(const Point& moveBy);
-
   bool contains(const QPointF & point) const;
   bool collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
   int getLastClickedPointIndex() const;

@@ -23,7 +23,9 @@ public:
   void insertCoordinate(const int& index, const Point& xy);
   void removeCoordinate(const int& index);
   void setCoordinates(const std::vector<Point>& coordinates);
-  virtual void moveCoordinatesBy(const Point& moveBy) {};
+  void moveCoordinateBy(unsigned int index, const Point& moveBy);
+  void moveCoordinatesBy(const Point& moveBy);
+
 	std::shared_ptr<Annotation> getAnnotation() const;
   
   virtual QRectF boundingRect() const = 0;
@@ -31,7 +33,7 @@ public:
   virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     QWidget *widget) = 0;
 
-  virtual void finish() {};
+  virtual void finish();
 
   void setActiveSeedPoint(const unsigned int seedPointIndex);
   void clearActiveSeedPoint();
@@ -42,11 +44,15 @@ public:
 
   QColor getDrawingColor();
 
+signals:
+  void coordinatesChanged(QtAnnotation* annotation);
+
 protected:
 	std::shared_ptr<Annotation> _annotation;
   float _scale;
   int _activeSeedPoint;
   bool _editable;
+  bool _finished;
 
   virtual void onCoordinatesChanged();
 
