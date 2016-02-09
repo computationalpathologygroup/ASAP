@@ -6,6 +6,12 @@
 #include <QDoubleSpinBox>
 #include <QGraphicsPolygonItem>
 #include <QPolygonF>
+#include <QPushButton>
+#include <QFrame>
+#include <QGroupBox>
+#include <QComboBox>
+#include <QPushButton>
+#include <QFileDialog>
 #include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "core/filetools.h"

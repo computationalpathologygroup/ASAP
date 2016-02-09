@@ -2,6 +2,7 @@
 #include "WSITileGraphicsItem.h"
 
 WSITileGraphicsItemCache::~WSITileGraphicsItemCache() {
+  clear();
 }
 
 void WSITileGraphicsItemCache::evict() {

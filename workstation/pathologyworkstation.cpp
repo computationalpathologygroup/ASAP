@@ -27,6 +27,7 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QtUiTools>
+#include <QTreeWidget>
 
 #include "pathologyworkstation.h"
 #include "PathologyViewer.h"

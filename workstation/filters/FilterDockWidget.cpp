@@ -51,10 +51,6 @@ FilterDockWidget::FilterDockWidget(QWidget *parent, Qt::WindowFlags flags) :
 
 FilterDockWidget::~FilterDockWidget() {
   stopProgressTracking();
-  if (_monitor) {
-    _monitor->deleteLater();
-    _monitor = NULL;
-  }
 }
 
 void FilterDockWidget::onAutoUpdateToggled(bool autoUpdate) {

@@ -54,7 +54,7 @@ template<typename T>
 Patch<T>::~Patch()
 {
   if (_buffer && _ownData) {
-    delete _buffer;
+    delete[] _buffer;
     _buffer = NULL;
   }
 }

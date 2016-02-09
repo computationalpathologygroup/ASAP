@@ -211,7 +211,9 @@ void TileManager::clear() {
   while (_renderThread->getWaitingThreads() != _renderThread->getWorkers().size()) {
   }
   QCoreApplication::processEvents();
-  _cache->clear();
+  if (_cache) {
+    _cache->clear();
+  }
   QList<QGraphicsItem *> itms = _scene->items();
   for (QList<QGraphicsItem *>::iterator it = itms.begin(); it != itms.end(); ++it) {
     WSITileGraphicsItem* itm = dynamic_cast<WSITileGraphicsItem*>((*it));

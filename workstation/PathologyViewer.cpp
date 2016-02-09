@@ -60,8 +60,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
           this, SLOT(showContextMenu(const QPoint&)));
-  _cache = new WSITileGraphicsItemCache();
-  _cache->setMaxCacheSize(_cacheSize);
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
   _settings->beginGroup("ASAP");
   if (this->window()) {
@@ -98,7 +96,7 @@ unsigned long long PathologyViewer::getCacheSize() {
 
 void PathologyViewer::setCacheSize(unsigned long long& maxCacheSize) {
   if (_cache) {
-    return _cache->setMaxCacheSize(maxCacheSize);
+    _cache->setMaxCacheSize(maxCacheSize);
   }
 }
 
@@ -241,6 +239,8 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
       break;
     }
   }
+  _cache = new WSITileGraphicsItemCache();
+  _cache->setMaxCacheSize(_cacheSize);
   _renderthread = new RenderThread(this);
   _renderthread->setBackgroundImage(img);
   _manager = new TileManager(_img, tileSize, lastLevel, _renderthread, _cache, scene());
@@ -462,12 +462,16 @@ void PathologyViewer::close() {
     _prefetchthread = NULL;
   }
   scene()->clear();
-  _cache->clear();
   if (_manager) {
     _manager->clear();
     delete _manager;
     _manager = NULL;
   }
+  if (_cache) {
+    _cache->clear();
+    delete _cache;
+    _cache = NULL;
+  }  
   _img = NULL;
   if (_renderthread) {
     _renderthread->shutdown();
