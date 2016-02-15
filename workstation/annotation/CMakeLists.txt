@@ -14,6 +14,7 @@ set(CMAKE_AUTOMOC ON)
 
 SET(ANNOTATION_PLUGIN_HEADERS
   AnnotationWorkstationExtensionPlugin.h
+  AnnotationTool.h
   DotAnnotationTool.h
   PolyAnnotationTool.h
   PointSetAnnotationTool.h
@@ -26,6 +27,7 @@ SET(ANNOTATION_PLUGIN_HEADERS
 )
 
 SET(ANNOTATION_PLUGIN_SOURCE
+  AnnotationTool.cpp
   AnnotationWorkstationExtensionPlugin.cpp
   DotAnnotationTool.cpp
   PolyAnnotationTool.cpp

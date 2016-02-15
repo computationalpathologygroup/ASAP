@@ -112,6 +112,7 @@ public :
   virtual QToolBar* getToolBar() { return NULL;}
   virtual QMenu* getMenu() { return NULL; }
   virtual QDockWidget* getDockWidget() { return NULL; }
+  virtual bool canClose() { return true; }
   virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
 
 protected:

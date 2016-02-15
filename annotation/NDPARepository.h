@@ -12,9 +12,9 @@ public:
   std::string NDPISourceFile() const;
 
   virtual bool save() const;
-  virtual bool load();
 
 private:
+  virtual bool loadFromRepo();
   std::string _ndpiSourceFile;
 
 };

@@ -23,7 +23,7 @@ void DotQtAnnotation::moveCoordinateBy(const Point& moveBy) {
   coords[0].setY(coords[0].getY() + moveBy.getY() / _scale);
   this->getAnnotation()->setCoordinates(coords);
   this->setPos(QPointF(coords[0].getX()*_scale, coords[0].getY()*_scale));
-  onCoordinatesChanged();
+  onAnnotationChanged();
 }
 
 QRectF DotQtAnnotation::boundingRect() const {

@@ -30,7 +30,7 @@ std::string NDPARepository::NDPISourceFile() const {
   return _ndpiSourceFile;
 }
 
-bool NDPARepository::load()
+bool NDPARepository::loadFromRepo()
 {
   if (!_list || _source.empty()) {
     return false;

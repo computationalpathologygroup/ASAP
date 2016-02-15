@@ -42,6 +42,7 @@ public :
     void deleteAnnotation(QtAnnotation* annotation);
     void deleteAnnotationGroup(QtAnnotationGroup* group);
     void clearSelection();
+    bool canClose();
 
 public slots:
     void onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName);
@@ -49,7 +50,7 @@ public slots:
     void addAnnotationGroup();
     void onClearButtonPressed();
     void onLoadButtonPressed(const std::string& filePath = std::string());
-    void onSaveButtonPressed();
+    bool onSaveButtonPressed();
     void onItemNameChanged(QTreeWidgetItem* item, int column);
     void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
     void onTreeWidgetSelectedItemsChanged();
@@ -77,6 +78,8 @@ private :
     std::weak_ptr<MultiResolutionImage> _img;
     float _currentPixelArea;
 
+    bool shouldClear();
+    void clear();
     void clearTreeWidget();
     void clearAnnotationList();
     void clearQtAnnotations();

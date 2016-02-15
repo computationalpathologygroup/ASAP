@@ -53,6 +53,8 @@ private:
   std::shared_ptr<MultiResolutionImage> _img;
   unsigned long long _cacheMaxByteSize;
   QSettings* _settings;
+
+  void closeEvent(QCloseEvent *event);
   
   // Plugins
   QDir _pluginsDir;

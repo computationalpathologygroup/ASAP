@@ -31,7 +31,7 @@ bool ImageScopeRepository::save() const
   return false;
 }
 
-bool ImageScopeRepository::load()
+bool ImageScopeRepository::loadFromRepo()
 {
   if (!_list || _source.empty()) {
     return false;

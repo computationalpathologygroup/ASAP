@@ -17,8 +17,6 @@ PolyQtAnnotation::PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation
   _currentLoD(1.0),
   _selectionSensitivity(100.0),
   _lastClickedLinePoint(QPointF()),
-  _lastClickedFirstCoordinateIndex(-1),
-  _lastClickedSecondCoordinateIndex(-1),
   _fill(false)
 {
 
@@ -35,7 +33,7 @@ QRectF PolyQtAnnotation::boundingRect() const {
   return bRect;
 }
 
-void PolyQtAnnotation::onCoordinatesChanged() {
+void PolyQtAnnotation::onAnnotationChanged() {
   _currentPath = getCurrentPath(_annotation->getCoordinates());
   if (_type == "spline") {
     _polys = _currentPath.toFillPolygon();
@@ -179,10 +177,9 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 }
 
 void PolyQtAnnotation::finish() {
-  QtAnnotation::finish();
   prepareGeometryChange();
   _closed = true;
-  onCoordinatesChanged();
+  QtAnnotation::finish();
 }
 
 bool PolyQtAnnotation::collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode) const {
@@ -285,8 +282,4 @@ bool PolyQtAnnotation::contains(const QPointF & point) const {
 
 QPointF PolyQtAnnotation::getLastClickedLinePoint() {
   return _lastClickedLinePoint;
-}
-
-std::pair<int, int> PolyQtAnnotation::getLastClickedCoordinateIndices() {
-  return std::pair<int, int>(_lastClickedFirstCoordinateIndex, _lastClickedSecondCoordinateIndex);
 }

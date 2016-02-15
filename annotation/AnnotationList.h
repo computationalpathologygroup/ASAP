@@ -14,6 +14,8 @@ public:
   AnnotationList();
   ~AnnotationList();
 
+  bool isModified();
+  void resetModifiedStatus();
   bool addGroup(const std::shared_ptr<AnnotationGroup>& group);
   bool addAnnotation(const std::shared_ptr<Annotation>& annotation);
   std::shared_ptr<AnnotationGroup> getGroup(const int& index);

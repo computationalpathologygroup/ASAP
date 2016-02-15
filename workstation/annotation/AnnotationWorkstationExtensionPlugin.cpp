@@ -90,10 +90,16 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
 }
 
 AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
-  onClearButtonPressed();
+  clear();
 }
 
 void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
+  if (shouldClear()) {
+    clear();
+  }
+}
+
+void AnnotationWorkstationExtensionPlugin::clear() {
   if (_generatedAnnotation) {
     PolyQtAnnotation* tmp = dynamic_cast<PolyQtAnnotation*>(_generatedAnnotation);
     if (tmp) {
@@ -175,6 +181,28 @@ void AnnotationWorkstationExtensionPlugin::updateAnnotationToolTip(QtAnnotation*
         areaUnit = QString(" um<sup>2</sup></html>");
       }
       it.value()->setToolTip(1, QString("<html>Total number of control points: ") + QString::number(nrPoints) + QString("<br/>") + QString("Total area: ") + QString::number(area * _currentPixelArea, 'g', 4) + areaUnit);
+      QTreeWidgetItem* parentItem = it.value()->parent();
+      while (parentItem) {
+        if (QtAnnotationGroup* grp = parentItem->data(1, Qt::UserRole).value<QtAnnotationGroup*>()) {
+          unsigned int nrPoints = grp->getAnnotationGroup()->getNumberOfPoints();
+          float area = grp->getAnnotationGroup()->getArea();
+          QString areaUnit(" pixels.");
+          if (_currentPixelArea != 1.) {
+            areaUnit = QString(" um<sup>2</sup></html>");
+          }
+          parentItem->setToolTip(1, QString("<html>Total number of control points: ") + QString::number(nrPoints) + QString("<br/>") + QString("Total area: ") + QString::number(area * _currentPixelArea, 'g', 4) + areaUnit);
+        }
+        else if (QtAnnotation* annot = parentItem->data(1, Qt::UserRole).value<QtAnnotation*>()) {
+          unsigned int nrPoints = annot->getAnnotation()->getNumberOfPoints();
+          float area = annot->getAnnotation()->getArea();
+          QString areaUnit(" pixels.");
+          if (_currentPixelArea != 1.) {
+            areaUnit = QString(" um<sup>2</sup></html>");
+          }
+          parentItem->setToolTip(1, QString("<html>Total number of control points: ") + QString::number(nrPoints) + QString("<br/>") + QString("Total area: ") + QString::number(area * _currentPixelArea, 'g', 4) + areaUnit);
+        }
+        parentItem = parentItem->parent();
+      }
     }
   }
 }
@@ -239,6 +267,38 @@ void AnnotationWorkstationExtensionPlugin::onTreeWidgetSelectedItemsChanged() {
   }
 }
 
+bool AnnotationWorkstationExtensionPlugin::canClose() {
+  return shouldClear();
+}
+
+bool AnnotationWorkstationExtensionPlugin::shouldClear() {
+  bool shouldClear = false;
+  if (_annotationService->getList()->isModified()) {
+    QMessageBox msgBox;
+    msgBox.setText("The annotations have been modified.");
+    msgBox.setInformativeText("Do you want to save your changes?");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    int ret = msgBox.exec();
+    switch (ret) {
+      case QMessageBox::Save:      
+        shouldClear = onSaveButtonPressed();
+        break;
+      case QMessageBox::Discard:
+        shouldClear = true;
+        break;
+      case QMessageBox::Cancel:
+        shouldClear = false;
+      default:
+        shouldClear = false;
+    }
+  }
+  else {
+    shouldClear = true;
+  }
+  return shouldClear;
+}
+
 void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string& filePath) {
   QString fileName;
   if (filePath.empty()) {
@@ -248,7 +308,10 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
     fileName = QString::fromStdString(filePath);
   }
   if (!fileName.isEmpty()) {
-    onClearButtonPressed();
+    if (!shouldClear()) {
+      return;
+    }
+    clear();
     if (!_annotationService->loadRepositoryFromFile(fileName.toStdString())) {
       int ret = QMessageBox::warning(NULL, tr("ASAP"),
         tr("The annotations could not be loaded."),
@@ -364,7 +427,7 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         newAnnotation->setData(0, Qt::UserRole, QColor((*it)->getColor().c_str()));
         _annotToItem[annot] = newAnnotation;
         updateAnnotationToolTip(annot);
-        connect(annot, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateAnnotationToolTip(QtAnnotation*)));
+        connect(annot, SIGNAL(annotationChanged(QtAnnotation*)), this, SLOT(updateAnnotationToolTip(QtAnnotation*)));
       }
     }
     _treeWidget->resizeColumnToContents(0);
@@ -372,7 +435,7 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
   }
 }
 
-void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
+bool AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
   QDir defaultName = _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString();
   QString basename = QFileInfo(_settings->value("currentFile", QString()).toString()).completeBaseName();
   if (basename.isEmpty()) {
@@ -443,7 +506,11 @@ void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
         QApplication::processEvents();
         maskConverter.convert(_annotationService->getList(), fileName.toStdString(), local_img->getDimensions(), local_img->getSpacing(), nameToLab);
         delete nameToLabel;
+        return true;
       }
+    }
+    else {
+      return false;
     }
   }
   else if (!fileName.isEmpty()) {
@@ -451,8 +518,14 @@ void AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
       int ret = QMessageBox::warning(NULL, tr("ASAP"),
         tr("The annotations could not be saved."),
         QMessageBox::Ok);
+      return false;
+    }
+    else {
+      _annotationService->getList()->resetModifiedStatus();
+      return true;
     }
   }
+  return false;
 }
 
 bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent* event) {
@@ -573,10 +646,10 @@ void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiR
 }
 
 void AnnotationWorkstationExtensionPlugin::onImageClosed() {
+  clear();
   if (_dockWidget) {
     _dockWidget->setEnabled(false);
   }
-  onClearButtonPressed();
 }
 
 bool AnnotationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
@@ -632,7 +705,7 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
     _viewer->scene()->addItem(_generatedAnnotation);
     _generatedAnnotation->setZValue(20.);
     updateGeneratingAnnotationLabel(_generatedAnnotation);
-    connect(_generatedAnnotation, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateGeneratingAnnotationLabel(QtAnnotation*)));
+    connect(_generatedAnnotation, SIGNAL(annotationChanged(QtAnnotation*)), this, SLOT(updateGeneratingAnnotationLabel(QtAnnotation*)));
   }
 }
 
@@ -660,7 +733,7 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
   if (_generatedAnnotation) {
     _generatedAnnotation->finish();
     updateGeneratingAnnotationLabel(NULL);
-    disconnect(_generatedAnnotation, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateGeneratingAnnotationLabel(QtAnnotation*)));
+    disconnect(_generatedAnnotation, SIGNAL(annotationChanged(QtAnnotation*)), this, SLOT(updateGeneratingAnnotationLabel(QtAnnotation*)));
     if (!cancel) {
       _generatedAnnotation->getAnnotation()->setName("Annotation " + QString::number(_annotationIndex).toStdString());
       _annotationIndex += 1;
@@ -685,7 +758,7 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
       _activeAnnotation = _generatedAnnotation;
       _annotToItem[_activeAnnotation] = newAnnotation;
       updateAnnotationToolTip(_activeAnnotation);
-      connect(_activeAnnotation, SIGNAL(coordinatesChanged(QtAnnotation*)), this, SLOT(updateAnnotationToolTip(QtAnnotation*)));
+      connect(_activeAnnotation, SIGNAL(annotationChanged(QtAnnotation*)), this, SLOT(updateAnnotationToolTip(QtAnnotation*)));
       _generatedAnnotation = NULL;
     }
     else {

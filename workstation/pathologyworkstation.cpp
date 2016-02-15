@@ -187,6 +187,10 @@ void PathologyWorkstation::loadPlugins() {
   }
 }
 
+void PathologyWorkstation::closeEvent(QCloseEvent *event) {
+  event->accept();
+}
+
 PathologyWorkstation::~PathologyWorkstation()
 {
   on_actionClose_triggered();
@@ -225,6 +229,11 @@ void PathologyWorkstation::on_actionAbout_triggered() {
 
 void PathologyWorkstation::on_actionClose_triggered()
 {
+    for (std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> >::iterator it = _extensions.begin(); it != _extensions.end(); ++it) {
+      if (!(*it)->canClose()) {
+        return;
+      }
+    }
     emit imageClosed();
     _settings->setValue("currentFile", QString());
     this->setWindowTitle("ASAP");

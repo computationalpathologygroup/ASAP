@@ -35,6 +35,9 @@ public:
 
   virtual void finish();
 
+  int getLastClickedPointIndex() const;
+  std::pair<int, int> getLastClickedCoordinateIndices() const;
+
   void setActiveSeedPoint(const unsigned int seedPointIndex);
   void clearActiveSeedPoint();
   int getActiveSeedPoint();
@@ -45,7 +48,7 @@ public:
   QColor getDrawingColor();
 
 signals:
-  void coordinatesChanged(QtAnnotation* annotation);
+  void annotationChanged(QtAnnotation* annotation);
 
 protected:
 	std::shared_ptr<Annotation> _annotation;
@@ -54,7 +57,10 @@ protected:
   bool _editable;
   bool _finished;
 
-  virtual void onCoordinatesChanged();
+  mutable int _lastClickedFirstCoordinateIndex;
+  mutable int _lastClickedSecondCoordinateIndex;
+
+  virtual void onAnnotationChanged();
 
 };
 

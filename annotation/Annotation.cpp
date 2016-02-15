@@ -7,18 +7,8 @@ const char* Annotation::_typeStrings[5] = { "None", "Dot", "Polygon", "Spline", 
 
 Annotation::Annotation() :
   _type(Annotation::NONE),
-  _coordinates(),
-  _name(""),
-  _color("#F4FA58")
+  _coordinates()
 {
-}
-
-std::string Annotation::getColor() const {
-  return _color;
-}
-
-void Annotation::setColor(const std::string& color) {
-  _color = color;
 }
 
 std::string Annotation::getTypeAsString() const {
@@ -31,6 +21,7 @@ void Annotation::setTypeFromString(const std::string& type) {
       _type = (Annotation::Type)i;
     }
   }
+  _modified = true;
 }
 
 float Annotation::getArea() const {
@@ -41,7 +32,7 @@ float Annotation::getArea() const {
       area += (_coordinates[j].getX() + _coordinates[i].getX())*(_coordinates[j].getY() - _coordinates[i].getY());
       j = i;
     }
-    return area*.5;
+    return abs(area*.5);
   }
   else{
     return 0.0;
@@ -55,11 +46,13 @@ unsigned int Annotation::getNumberOfPoints() const {
 void Annotation::addCoordinate(const float& x, const float& y)
 {
 	_coordinates.push_back(Point(x, y));
+  _modified = true;
 }
 
 void Annotation::addCoordinate(const Point& xy)
 {
   _coordinates.push_back(xy);
+  _modified = true;
 }
 
 void Annotation::insertCoordinate(const int& index, const Point& xy) {
@@ -69,10 +62,12 @@ void Annotation::insertCoordinate(const int& index, const Point& xy) {
   else {
     _coordinates.insert(_coordinates.begin() + index, xy);
   }
+  _modified = true;
 }
 
 void Annotation::insertCoordinate(const int& index, const float& x, const float& y) {
   this->insertCoordinate(index, Point(x, y));
+  _modified = true;
 }
 
 void Annotation::removeCoordinate(const int& index) {
@@ -82,6 +77,7 @@ void Annotation::removeCoordinate(const int& index) {
   else {
     _coordinates.erase(_coordinates.begin() + index);
   }
+  _modified = true;
 }
 
 Point Annotation::getCoordinate(const int& index) const
@@ -102,39 +98,23 @@ std::vector<Point> Annotation::getCoordinates() const
 void Annotation::setCoordinates(const std::vector<Point>& coordinates)
 {
   _coordinates = coordinates;
+  _modified = true;
 }
 
 void Annotation::clearCoordinates() {
   _coordinates.clear();
+  _modified = true;
 }
 
 void Annotation::setType(const Annotation::Type& type)
 {
 	_type = type;
+  _modified = true;
 }
 
 Annotation::Type Annotation::getType() const
 {
 	return _type;
-}
-
-void Annotation::setName(const std::string& name)
-{
-	_name = name;
-}
-
-std::string Annotation::getName() const
-{
-	return _name;
-};
-
-void Annotation::setGroup(const std::shared_ptr<AnnotationGroup>& group) {
-  _group = group;
-}
-
-std::shared_ptr<AnnotationGroup> Annotation::getGroup() const {
-  std::shared_ptr<AnnotationGroup> grp = _group.lock();
-  return grp;
 }
 
 std::vector<Point> Annotation::getImageBoundingBox() const {
@@ -185,6 +165,7 @@ void Annotation::simplify(unsigned int nrPoints) {
     float y = *it;
     _coordinates.push_back(Point(x,y));
   }
+  _modified = true;
 }
 
 Point Annotation::getCenter() {

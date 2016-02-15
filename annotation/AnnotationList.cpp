@@ -10,6 +10,29 @@ AnnotationList::~AnnotationList() {
   removeAllGroups();
 }
 
+bool AnnotationList::isModified() {
+  for (std::vector<std::shared_ptr<Annotation> >::iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
+    if ((*it)->isModified()) {
+      return true;
+    }
+  }
+  for (std::vector<std::shared_ptr<AnnotationGroup> >::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+    if ((*it)->isModified()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void AnnotationList::resetModifiedStatus() {
+  for (std::vector<std::shared_ptr<Annotation> >::iterator it = _annotations.begin(); it != _annotations.end(); ++it) {
+    (*it)->resetModifiedStatus();
+  }
+  for (std::vector<std::shared_ptr<AnnotationGroup> >::iterator it = _groups.begin(); it != _groups.end(); ++it) {
+    (*it)->resetModifiedStatus();
+  }
+}
+
 bool AnnotationList::addGroup(const std::shared_ptr<AnnotationGroup>& group) {
   if (group) {
     if (!this->getGroup(group->getName())) {

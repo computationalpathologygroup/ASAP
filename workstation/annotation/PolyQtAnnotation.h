@@ -22,7 +22,6 @@ public:
   bool contains(const QPointF & point) const;
   bool collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
   QPointF getLastClickedLinePoint();
-  std::pair<int, int> getLastClickedCoordinateIndices();
 
 private:
   QColor _rectColor;
@@ -37,12 +36,9 @@ private:
   float _currentLoD;
   bool _fill;
   mutable QPointF _lastClickedLinePoint;
-  mutable int _lastClickedFirstCoordinateIndex;
-  mutable int _lastClickedSecondCoordinateIndex;
-
   std::vector<QPointF> catmullRomToBezier(const QPointF& p0, const QPointF& p1, const QPointF& p2, const QPointF& p3) const;
 
-  void onCoordinatesChanged();
+  void onAnnotationChanged();
 
 };
 #endif

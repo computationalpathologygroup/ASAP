@@ -95,7 +95,7 @@ void XmlRepository::saveGroup(const std::shared_ptr<AnnotationGroup>& group, pug
   }
 }
 
-bool XmlRepository::load()
+bool XmlRepository::loadFromRepo()
 {
   if (!_list) {
     return false;

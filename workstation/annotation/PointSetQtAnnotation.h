@@ -17,7 +17,6 @@ public:
 
   bool contains(const QPointF & point) const;
   bool collidesWithPath(const QPainterPath & path, Qt::ItemSelectionMode mode = Qt::IntersectsItemShape) const;
-  int getLastClickedPointIndex() const;
 
 private:
   QColor _rectColor;
@@ -25,7 +24,6 @@ private:
   float _selectionSensitivity;
   float _currentLoD;
   float _rectSize;
-  mutable int _lastClickedPointIndex;
   QRectF _bRect;
 
   void onCoordinatesChanged();

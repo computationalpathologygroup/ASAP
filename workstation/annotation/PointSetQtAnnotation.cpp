@@ -12,8 +12,7 @@ PointSetQtAnnotation::PointSetQtAnnotation(const std::shared_ptr<Annotation>& an
   _rectSelectedColor(QColor("red")),
   _currentLoD(1.0),
   _selectionSensitivity(100.0),
-  _rectSize(3.),
-  _lastClickedPointIndex(-1)
+  _rectSize(3.)
 {
   onCoordinatesChanged();
 }
@@ -53,10 +52,6 @@ bool PointSetQtAnnotation::collidesWithPath(const QPainterPath & path, Qt::ItemS
   return contains(path.currentPosition());
 }
 
-int PointSetQtAnnotation::getLastClickedPointIndex() const {
-  return _lastClickedPointIndex;
-}
-
 bool PointSetQtAnnotation::contains(const QPointF & point) const {
   if (shape().controlPointRect().contains(point)) {
     QPointF imgPoint = this->mapToScene(point) / _scale;
@@ -66,7 +61,7 @@ bool PointSetQtAnnotation::contains(const QPointF & point) const {
     double imgY = imgPoint.y();
     std::vector<Point> coords = _annotation->getCoordinates();
     double minDist = std::numeric_limits<double>::max();
-    _lastClickedPointIndex = -1;
+    _lastClickedFirstCoordinateIndex = -1;
 
     // Quickly check if a seed point was hit
     for (unsigned int i = 0; i < coords.size(); ++i) {
@@ -74,11 +69,11 @@ bool PointSetQtAnnotation::contains(const QPointF & point) const {
       double coord1X = pt1.getX(); double coord1Y = pt1.getY();
       double distSquared = pow(imgX - coord1X, 2) + pow(imgY - coord1Y, 2);
       if (distSquared < curSelectionSensitivitySquared && distSquared < minDist) {
-        _lastClickedPointIndex = i;
+        _lastClickedFirstCoordinateIndex = i;
         minDist = distSquared;
       }
     }
-    if (_lastClickedPointIndex >= 0) {
+    if (_lastClickedFirstCoordinateIndex >= 0) {
       return true;
     }
   }

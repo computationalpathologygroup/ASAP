@@ -7,26 +7,33 @@
 #include <memory>
 #include "core/stringconversion.h"
 #include "config/pathology_config.h"
+#include "AnnotationBase.h"
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationGroup {
+class EXPORT_PATHOLOGYANNOTATION AnnotationGroup : public AnnotationBase {
 public:
 
   AnnotationGroup();
   ~AnnotationGroup();
 
-	void setName(const std::string& name);
-	std::string getName() const;
+  std::vector<Point> getImageBoundingBox() const;
+  std::vector<Point> getLocalBoundingBox();
+  Point getCenter();
+
+  float getArea() const;
+  unsigned int getNumberOfPoints() const;
 
   void clearAttributes();
 
   template<typename T>
   void setAttribute(const std::string& key, const T& value) {
     _attributes[key] = core::tostring<T>(value);
+    _modified = true;
   }
 
   template<typename T>
   void setAttribute(const std::string& key, const std::vector<T>& value) {
     _attributes[key] = core::tostring<T>(value, ";");
+    _modified = true;
   }
 
   template<typename T>
@@ -42,17 +49,11 @@ public:
   std::map<std::string, std::string> getAttributes() const;
 
   void setAttributes(std::map<std::string, std::string> attributes);
-
-  void setGroup(const std::shared_ptr<AnnotationGroup>& parent);
-  std::shared_ptr<AnnotationGroup> getGroup() const;
-
-  std::string getColor() const;
-  void setColor(const std::string& color);
+  void addMember(std::shared_ptr<AnnotationBase> member);
+  void removeMember(std::shared_ptr<AnnotationBase> member);
 
 private:
-  std::weak_ptr<AnnotationGroup> _parent;
-  std::string _name;
   std::map<std::string, std::string> _attributes;
-  std::string _color;
+  std::vector<std::weak_ptr<AnnotationBase> > _groupMembers;
 };
 #endif

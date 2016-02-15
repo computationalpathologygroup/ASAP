@@ -16,6 +16,7 @@ set(CMAKE_AUTOMOC ON)
 
 SET(ANNOTATION_HEADERS
   Annotation.h
+  AnnotationBase.h
   AnnotationToMask.h
   AnnotationGroup.h
   AnnotationList.h
@@ -28,6 +29,7 @@ SET(ANNOTATION_HEADERS
 
 SET(ANNOTATION_SOURCE
   Annotation.cpp
+  AnnotationBase.cpp
   AnnotationGroup.cpp
   AnnotationToMask.cpp
   AnnotationList.cpp

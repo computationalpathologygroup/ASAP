@@ -13,6 +13,8 @@
 #include <QHBoxLayout>
 #include <QSettings>
 #include <QGuiApplication>
+#include <QMainWindow>
+#include <QStatusBar>
 
 #include "MiniMap.h"
 #include "ScaleBar.h"
@@ -560,6 +562,8 @@ void PathologyViewer::mouseReleaseEvent(QMouseEvent *event)
 
 void PathologyViewer::mouseMoveEvent(QMouseEvent *event)
 {
+  QPointF imgLoc = this->mapToScene(event->pos()) / this->_sceneScale;
+  qobject_cast<QMainWindow*>(this->parentWidget()->parentWidget())->statusBar()->showMessage(QString("Current position in image coordinates: (") + QString::number(imgLoc.x()) + QString(", ") + QString::number(imgLoc.y()) + QString(")"), 1000);
   if (this->_pan) {
     pan(event->pos());
     event->accept();
