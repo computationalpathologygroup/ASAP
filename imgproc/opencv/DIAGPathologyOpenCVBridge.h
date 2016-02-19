@@ -45,7 +45,7 @@ cv::Mat patchToMat(const Patch<T>& patch, bool copyData = false) {
       std::copy(patch.getPointer(), patch.getPointer() + patch.getBufferSize(), (T*)output.data);
     }
     else {
-      T* data = const_cast<double*>(patch.getPointer());
+      T* data = const_cast<T*>(patch.getPointer());
       output = cv::Mat_<T>(dims[1], dims[0]*dims[2], data);
       output = output.reshape(dims[2]);
     }

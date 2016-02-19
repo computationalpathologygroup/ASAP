@@ -29,7 +29,8 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _opacity(1.0),
   _window(1.0),
   _level(0.5),
-  _foregroundChannel(0)
+  _foregroundChannel(0),
+  _renderingEnabled(false)
 {
   _lst = std::make_shared<AnnotationList>();
   _xmlRepo = std::make_shared<XmlRepository>(_lst);
@@ -137,11 +138,23 @@ void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::
       std::vector<unsigned long long> dimsFG = _foreground->getDimensions();
       if (_backgroundDimensions[0] / dimsFG[0] == _backgroundDimensions[1] / dimsFG[1]) {
         _foregroundScale = _backgroundDimensions[0] / dimsFG[0];
-        if (_likelihoodCheckBox && _likelihoodCheckBox->isChecked()) {
-          emit changeForegroundImage(_foreground, _foregroundScale);
-        }
-        else {
-          emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+        if (_likelihoodCheckBox) {
+          if (_renderingEnabled) {
+            if (_likelihoodCheckBox->isChecked()) {
+              emit changeForegroundImage(_foreground, _foregroundScale);
+            }
+            else {
+              _likelihoodCheckBox->setChecked(true);
+            }
+          }
+          else {
+            if (_likelihoodCheckBox->isChecked()) {
+              _likelihoodCheckBox->setChecked(false);
+            }
+            else {
+              emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+            }
+          }
         }
       }
       QGroupBox* segmentationGroupBox = _dockWidget->findChild<QGroupBox*>("SegmentationGroupBox");
@@ -154,41 +167,97 @@ void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::
 
 void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(std::shared_ptr<MultiResolutionImage> img) {
   if (_dockWidget) {
-    _opacity = 0.5;
+    double maxValue = img->getMaxValue(_foregroundChannel);
+    double minValue = img->getMinValue(_foregroundChannel);
+    if (_settings) {
+      _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
+      pathology::DataType dtype = img->getDataType();
+      if (dtype == pathology::Float) {
+        _settings->beginGroup("VisualizationSettingsForFloatType");
+      }
+      else if (dtype == pathology::UChar) {
+        _settings->beginGroup("VisualizationSettingsForUCharType");
+      }
+      else if (dtype == pathology::UInt16) {
+        _settings->beginGroup("VisualizationSettingsForUInt16Type");
+      }
+      else if (dtype == pathology::UInt32) {
+        _settings->beginGroup("VisualizationSettingsForUInt32Type");
+      }
+      _opacity = _settings->value("opacity", 0.5).toFloat();
+      _foregroundChannel = _settings->value("foregroundchannel", 0).toUInt();
+      if (_foregroundChannel >= img->getSamplesPerPixel()) {
+        _foregroundChannel = 0;
+      }
+      _window = _settings->value("window", maxValue - minValue).toDouble();
+      _level = _settings->value("level", (maxValue + minValue) / 2).toDouble();
+      if (dtype == pathology::Float) {
+        _currentLUT = _settings->value("lut", "Traffic Light").toString();
+      }
+      else {
+        _currentLUT = _settings->value("lut", "Label").toString();
+      }
+      _renderingEnabled = _settings->value("visible", false).toBool();
+      _settings->endGroup();
+      _settings->endGroup();
+    }
+    else {
+      _opacity = 0.5;
+      _foregroundChannel = 0;
+      _window = maxValue - minValue;
+      _level = (maxValue + minValue) / 2;
+      if (img->getDataType() == pathology::UChar || img->getDataType() == pathology::UInt32 || img->getDataType() == pathology::UInt16) {
+        _currentLUT = "Label";
+      }
+      else {
+        _currentLUT = "Traffic Light";
+      }
+    }
     QDoubleSpinBox* spinBox = _dockWidget->findChild<QDoubleSpinBox*>("OpacitySpinBox");
     spinBox->setValue(_opacity);
     _viewer->setForegroundOpacity(_opacity);
-    _foregroundChannel = 0;
     QSpinBox* channelSpinBox = _dockWidget->findChild<QSpinBox*>("ChannelSpinBox");
-    channelSpinBox->setValue(_foregroundChannel);
     channelSpinBox->setMaximum(_foreground->getSamplesPerPixel() - 1);
+    channelSpinBox->setValue(_foregroundChannel);
     _viewer->setForegroundChannel(_foregroundChannel);
 
-    double maxValue = img->getMaxValue(_foregroundChannel);
-    double minValue = img->getMinValue(_foregroundChannel);
-    _window = maxValue - minValue;
     QDoubleSpinBox* windowSpinBox = _dockWidget->findChild<QDoubleSpinBox*>("WindowSpinBox");
     windowSpinBox->setValue(_window);
-    _level = (maxValue + minValue) / 2;
     QDoubleSpinBox* levelSpinBox = _dockWidget->findChild<QDoubleSpinBox*>("LevelSpinBox");
     levelSpinBox->setValue(_level);
     _viewer->setForegroundWindowAndLevel(_window, _level);
-
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
-    if (img->getDataType() == pathology::UChar || img->getDataType() == pathology::UInt32 || img->getDataType() == pathology::UInt16) {
-      LUTBox->setCurrentText("Label");
-      _currentLUT = "Label";
-      _viewer->setForegroundLUT("Label");
-    }
-    else {
-      LUTBox->setCurrentText("Traffic Light");
-      _currentLUT = "Traffic Light";
-      _viewer->setForegroundLUT("Traffic Light");
-    }
+    LUTBox->setCurrentText(_currentLUT);
+    _viewer->setForegroundLUT(_currentLUT.toStdString());
   }
 }
 
 void VisualizationWorkstationExtensionPlugin::onImageClosed() {
+  // Store current visualization settings based on ImageType (later replace this with Result specific settings)
+  if (_settings && _foreground) {
+    _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
+    pathology::DataType dtype = _foreground->getDataType();
+    if (dtype == pathology::Float) {
+      _settings->beginGroup("VisualizationSettingsForFloatType");
+    }
+    else if (dtype == pathology::UChar) {
+      _settings->beginGroup("VisualizationSettingsForUCharType");
+    }
+    else if (dtype == pathology::UInt16) {
+      _settings->beginGroup("VisualizationSettingsForUInt16Type");
+    }
+    else if (dtype == pathology::UInt32) {
+      _settings->beginGroup("VisualizationSettingsForUInt32Type");
+    }
+    _settings->setValue("opacity", _opacity);
+    _settings->setValue("foregroundchannel", _foregroundChannel);
+    _settings->setValue("window", _window);
+    _settings->setValue("level", _level);
+    _settings->setValue("lut", _currentLUT);
+    _settings->setValue("visible", _renderingEnabled);
+    _settings->endGroup();
+    _settings->endGroup();
+  }
   if (!_polygons.empty()) {
     removeSegmentationsFromViewer();
   }
@@ -209,9 +278,11 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
 void VisualizationWorkstationExtensionPlugin::onEnableLikelihoodToggled(bool toggled) {
   if (!toggled) {
     emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+    _renderingEnabled = false;
   }
   else {
     emit changeForegroundImage(_foreground, _foregroundScale);
+    _renderingEnabled = true;
   }
 }
 

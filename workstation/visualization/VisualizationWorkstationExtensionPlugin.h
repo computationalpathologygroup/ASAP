@@ -29,6 +29,7 @@ private :
   float _window;
   float _level;
   float _foregroundChannel;
+  bool  _renderingEnabled;
   float _foregroundScale;
   QString _currentLUT;
   std::shared_ptr<XmlRepository> _xmlRepo;

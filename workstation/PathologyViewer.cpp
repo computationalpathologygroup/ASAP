@@ -56,7 +56,7 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   //setViewport(new QGLWidget());
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
   setInteractive(false);
-  this->setScene(new QGraphicsScene);
+  this->setScene(new QGraphicsScene); //Memleak!
   this->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
   this->scene()->setBackgroundBrush(QBrush(QColor(252, 252, 252)));
   this->setContextMenuPolicy(Qt::CustomContextMenu);
