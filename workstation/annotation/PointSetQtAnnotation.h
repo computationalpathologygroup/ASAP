@@ -26,7 +26,7 @@ private:
   float _rectSize;
   QRectF _bRect;
 
-  void onCoordinatesChanged();
+  void onAnnotationChanged();
 
 };
 #endif

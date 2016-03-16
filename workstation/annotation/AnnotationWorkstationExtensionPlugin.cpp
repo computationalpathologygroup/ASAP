@@ -589,6 +589,11 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
       }
       connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
     }
+    else if (kpEvent->key() == Qt::Key::Key_Z) {
+      if (std::shared_ptr<AnnotationTool> tool = std::dynamic_pointer_cast<AnnotationTool>(_viewer->getActiveTool())) {
+        tool->keyPressEvent(kpEvent);
+      }
+    }
   }
   return QObject::eventFilter(watched, event);
 }
@@ -848,7 +853,7 @@ void AnnotationWorkstationExtensionPlugin::clearSelection() {
 void AnnotationWorkstationExtensionPlugin::addAnnotationToSelection(QtAnnotation* annotation) {
   QTreeWidgetItemIterator it(_treeWidget);
   while (*it) {
-    if ((*it)->text(1) == QString::fromStdString(annotation->getAnnotation()->getName())) {
+    if ((*it)->data(1, Qt::UserRole).value<QtAnnotation*>() == annotation) {
       (*it)->setSelected(true);
       break;
     }
@@ -859,7 +864,7 @@ void AnnotationWorkstationExtensionPlugin::addAnnotationToSelection(QtAnnotation
 void AnnotationWorkstationExtensionPlugin::removeAnnotationFromSelection(QtAnnotation* annotation) {
   QTreeWidgetItemIterator it(_treeWidget);
   while (*it) {
-    if ((*it)->text(1) == QString::fromStdString(annotation->getAnnotation()->getName())) {
+    if ((*it)->data(1, Qt::UserRole).value<QtAnnotation*>() == annotation)  {
       (*it)->setSelected(true);
       break;
     }

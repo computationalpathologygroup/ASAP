@@ -205,6 +205,10 @@ void PathologyViewer::setActiveTool(const std::string& toolName) {
   }
 }
 
+std::shared_ptr<ToolPluginInterface> PathologyViewer::getActiveTool() {
+  return _activeTool;
+}
+
 void PathologyViewer::changeActiveTool() {
   if (sender()) {
     QAction* button = qobject_cast< QAction*>(sender());
@@ -519,6 +523,14 @@ void PathologyViewer::pan(const QPoint& panTo) {
   _prevPan = panTo;
   hBar->setValue(hBar->value() + (isRightToLeft() ? delta.x() : -delta.x()));
   vBar->setValue(vBar->value() - delta.y());
+  float maxDownsample = 1. / this->_sceneScale;
+  QRectF FOV = this->mapToScene(this->rect()).boundingRect();
+  QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
+  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
+  emit updateBBox(FOV);
+}
+
+void PathologyViewer::updateCurrentFieldOfView() {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);

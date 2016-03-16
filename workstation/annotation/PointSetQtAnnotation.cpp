@@ -14,7 +14,7 @@ PointSetQtAnnotation::PointSetQtAnnotation(const std::shared_ptr<Annotation>& an
   _selectionSensitivity(100.0),
   _rectSize(3.)
 {
-  onCoordinatesChanged();
+  onAnnotationChanged();
 }
 
 QRectF PointSetQtAnnotation::boundingRect() const {  
@@ -80,7 +80,7 @@ bool PointSetQtAnnotation::contains(const QPointF & point) const {
   return false;
 }
 
-void PointSetQtAnnotation::onCoordinatesChanged() {
+void PointSetQtAnnotation::onAnnotationChanged() {
   if (_annotation) {
     std::vector<Point> localBBox = _annotation->getImageBoundingBox();
     QPointF tl = this->mapFromScene(QPointF(localBBox[0].getX() * _scale, localBBox[0].getY() * _scale));

@@ -50,11 +50,14 @@ public:
     bool hasTool(const std::string& toolName) const;
     void addTool(std::shared_ptr<ToolPluginInterface> tool);
     void setActiveTool(const std::string& toolName);
+    std::shared_ptr<ToolPluginInterface> getActiveTool();
     float getSceneScale() { return _sceneScale; }
 
     unsigned long long getCacheSize();
     void setCacheSize(unsigned long long& maxCacheSize);
     void setAutoUpdate(bool autoUpdate);
+
+    void updateCurrentFieldOfView();
 
 signals :
     void fieldOfViewChanged(const QRectF& FOV, const unsigned int level);

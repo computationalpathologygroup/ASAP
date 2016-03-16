@@ -229,13 +229,13 @@ bool PolyQtAnnotation::contains(const QPointF & point) const {
       double coord1X = pt1.getX(); double coord1Y = pt1.getY();
       double coord2X = pt2.getX(); double coord2Y = pt2.getY();
       QRectF hitbox(imgX - curSelectionSensitivity / 2., imgY - curSelectionSensitivity / 2., curSelectionSensitivity * 2., curSelectionSensitivity * 2.);
-      QRectF lineBox(QPointF(std::min(coord1X, coord2X), std::max(coord1Y, coord2Y)), QPointF(std::max(coord1X, coord2X), std::min(coord1Y, coord2Y)));       
+      QRectF lineBox(QPointF(std::min(coord1X, coord2X) - curSelectionSensitivity / 2., std::max(coord1Y, coord2Y) + curSelectionSensitivity / 2.), QPointF(std::max(coord1X, coord2X) + curSelectionSensitivity / 2., std::min(coord1Y, coord2Y) - curSelectionSensitivity / 2.));
       if (hitbox.intersects(lineBox)) {
         if (_type == "spline") {
           for (unsigned int j = 0; j < polyInImgCoords.size(); ++j) {
             QPointF polyPt1 = polyInImgCoords[polyIndex];
             QPointF polyPt2 = polyIndex == polyInImgCoords.size() - 1 ? polyInImgCoords[0] : polyInImgCoords[polyIndex + 1];
-            if (QPoint(polyPt1.x(), polyPt1.y()) == QPoint(coord2X, coord2Y)) {
+            if (QPoint(polyPt1.x(), polyPt1.y()) == QPoint(coord2X, coord2Y) && j != 0) {
               break;
             }
             double polyCoord1X = polyPt1.x(); double polyCoord1Y = polyPt1.y();

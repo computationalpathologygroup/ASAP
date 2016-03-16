@@ -137,6 +137,7 @@ void AnnotationTool::zoomToAnnotation(qreal val) {
 
 void AnnotationTool::zoomToAnnotationFinished() {
   sender()->~QObject();
+  _viewer->updateCurrentFieldOfView();
 }
 
 void AnnotationTool::cancelAnnotation() {
