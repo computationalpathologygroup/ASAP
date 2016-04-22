@@ -160,14 +160,18 @@ QPixmap RenderWorker::renderForegroundImage(std::shared_ptr<MultiResolutionImage
   float foregroundExtraScaling = 1.;
   if (fgImageLevel > local_for_img->getNumberOfLevels()) {
     fgImageLevel = local_for_img->getNumberOfLevels() - 1;
-    foregroundExtraScaling = local_for_img->getLevelDimensions(fgImageLevel)[0] / static_cast<float>(loc_bck_img->getLevelDimensions(currentJob._level)[0]);
   }
+  else if (fgImageLevel < 0) {
+    fgImageLevel = 0;
+  }
+  foregroundExtraScaling = local_for_img->getLevelDimensions(fgImageLevel)[0] / static_cast<float>(loc_bck_img->getLevelDimensions(currentJob._level)[0]);
 
+  int correctedTileSize = currentJob._tileSize * foregroundExtraScaling;
   unsigned int samplesPerPixel = local_for_img->getSamplesPerPixel();
   float fgLevelDownsample = local_for_img->getLevelDownsample(fgImageLevel);
-  T *imgBuf = new T[currentJob._tileSize*currentJob._tileSize*samplesPerPixel];
-  local_for_img->getRawRegion(currentJob._imgPosX * fgLevelDownsample * currentJob._tileSize, currentJob._imgPosY * fgLevelDownsample * currentJob._tileSize, currentJob._tileSize / foregroundExtraScaling, currentJob._tileSize / foregroundExtraScaling, fgImageLevel, imgBuf);
-  QImage renderedImage = convertMonochromeToRGB(imgBuf, currentJob._tileSize / foregroundExtraScaling, currentJob._tileSize / foregroundExtraScaling, _foregroundChannel, samplesPerPixel, _level - _window / 2, _level + _window / 2, _LUTname);
+  T *imgBuf = new T[correctedTileSize*correctedTileSize*samplesPerPixel];
+  local_for_img->getRawRegion(currentJob._imgPosX * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, currentJob._imgPosY * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, correctedTileSize, correctedTileSize, fgImageLevel, imgBuf);
+  QImage renderedImage = convertMonochromeToRGB(imgBuf, correctedTileSize, correctedTileSize, _foregroundChannel, samplesPerPixel, _level - _window / 2, _level + _window / 2, _LUTname);
 
   if (_foregroundImageScale != 1) {
     renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);
