@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 class MultiResolutionImage;
 class ProgressMonitor;
@@ -12,7 +13,7 @@ class ProgressMonitor;
 class EXPORT_WHOLESLIDEFILTERS ThresholdWholeSlideFilter {
 
 private:
-  MultiResolutionImage* _input;
+  std::weak_ptr<MultiResolutionImage> _input;
   ProgressMonitor* _monitor;
   unsigned int _processedLevel;
   std::string _outPath;
@@ -25,7 +26,7 @@ public:
   ThresholdWholeSlideFilter();
   virtual ~ThresholdWholeSlideFilter();
 
-  void setInput(MultiResolutionImage* const input);
+  void setInput(const std::shared_ptr<MultiResolutionImage>& input);
   void setProcessedLevel(const unsigned int processedLevel);
   unsigned int getProcessedLevel();
   void setProgressMonitor(ProgressMonitor* progressMonitor);

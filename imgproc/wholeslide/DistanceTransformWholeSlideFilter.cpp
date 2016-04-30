@@ -7,7 +7,6 @@
 #include <set>
 
 DistanceTransformWholeSlideFilter::DistanceTransformWholeSlideFilter() :
-_input(NULL),
 _monitor(NULL),
 _processedLevel(0),
 _outPath("")
@@ -16,10 +15,9 @@ _outPath("")
 }
 
 DistanceTransformWholeSlideFilter::~DistanceTransformWholeSlideFilter() {
-  _input = NULL;
 }
 
-void DistanceTransformWholeSlideFilter::setInput(MultiResolutionImage* const input) {
+void DistanceTransformWholeSlideFilter::setInput(const std::shared_ptr<MultiResolutionImage>& input) {
   _input = input;
 }
 
@@ -44,8 +42,9 @@ ProgressMonitor* DistanceTransformWholeSlideFilter::getProgressMonitor() {
 }
 
 bool DistanceTransformWholeSlideFilter::process() const {
-  std::vector<unsigned long long> dims = this->_input->getLevelDimensions(this->_processedLevel);
-  double downsample = this->_input->getLevelDownsample(this->_processedLevel);
+  std::shared_ptr<MultiResolutionImage> img = _input.lock();
+  std::vector<unsigned long long> dims = img->getLevelDimensions(this->_processedLevel);
+  double downsample = img->getLevelDownsample(this->_processedLevel);
 
   MultiResolutionImageWriter writer;
   writer.setColorType(pathology::ColorType::Monochrome);
@@ -53,7 +52,7 @@ bool DistanceTransformWholeSlideFilter::process() const {
   writer.setDataType(pathology::DataType::UInt32);
   writer.setInterpolation(pathology::Interpolation::NearestNeighbor);
   writer.setTileSize(512);
-  std::vector<double> spacing = _input->getSpacing();
+  std::vector<double> spacing = img->getSpacing();
   if (!spacing.empty()) {
     spacing[0] *= downsample;
     spacing[1] *= downsample;
@@ -83,7 +82,7 @@ bool DistanceTransformWholeSlideFilter::process() const {
   for (unsigned long long t_y = 0; t_y < dims[1]; t_y += 512) {
     std::fill(buffer_t_x, buffer_t_x + 512, maxDist);
     for (unsigned long long t_x = 0; t_x < dims[0]; t_x += 512) {
-      this->_input->getRawRegion<unsigned char>(static_cast<unsigned long long>(t_x*downsample), static_cast<unsigned long long>(t_y*downsample), 512, 512, this->_processedLevel, tile);
+      img->getRawRegion<unsigned char>(static_cast<unsigned long long>(t_x*downsample), static_cast<unsigned long long>(t_y*downsample), 512, 512, this->_processedLevel, tile);
       std::fill(out_tile, out_tile + 512 * 512, (dims[0] + dims[1] / 2) + 1);
       int startX = 0;
       int startY = 0;

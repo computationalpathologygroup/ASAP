@@ -9,7 +9,6 @@
 #include <iostream>
 
 LabelStatisticsWholeSlideFilter::LabelStatisticsWholeSlideFilter() :
-_input(NULL),
 _monitor(NULL),
 _processedLevel(0),
 _outPath("")
@@ -18,10 +17,9 @@ _outPath("")
 }
 
 LabelStatisticsWholeSlideFilter::~LabelStatisticsWholeSlideFilter() {
-  _input = NULL;
 }
 
-void LabelStatisticsWholeSlideFilter::setInput(MultiResolutionImage* const input) {
+void LabelStatisticsWholeSlideFilter::setInput(const std::shared_ptr<MultiResolutionImage>& input) {
   _input = input;
 }
 
@@ -51,8 +49,9 @@ std::vector<std::vector<float> > LabelStatisticsWholeSlideFilter::getLabelStatis
 
 bool LabelStatisticsWholeSlideFilter::process() {
   _labelStats.clear();
-  std::vector<unsigned long long> dims = this->_input->getLevelDimensions(this->_processedLevel);
-  double downsample = this->_input->getLevelDownsample(this->_processedLevel);
+  std::shared_ptr<MultiResolutionImage> img = _input.lock();
+  std::vector<unsigned long long> dims = img->getLevelDimensions(this->_processedLevel);
+  double downsample = img->getLevelDownsample(this->_processedLevel);
 
   std::ofstream csvfile;
   if (!_outPath.empty()) {
@@ -66,7 +65,7 @@ bool LabelStatisticsWholeSlideFilter::process() {
   unsigned int* tile = new unsigned int[512 * 512];
   for (unsigned long long t_y = 0; t_y < dims[1]; t_y += 512) {
     for (unsigned long long t_x = 0; t_x < dims[0]; t_x += 512) {
-      this->_input->getRawRegion<unsigned int>(static_cast<unsigned long long>(t_x*downsample), static_cast<unsigned long long>(t_y*downsample), 512, 512, this->_processedLevel, tile);
+      img->getRawRegion<unsigned int>(static_cast<unsigned long long>(t_x*downsample), static_cast<unsigned long long>(t_y*downsample), 512, 512, this->_processedLevel, tile);
       for (unsigned int y = 0; y < 512; ++y) {
         for (unsigned int x = 0; x < 512; ++x) {
           unsigned int curVal = tile[y * 512 + x];

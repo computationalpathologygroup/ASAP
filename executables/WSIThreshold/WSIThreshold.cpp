@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
       std::cerr << "Use -h or --help for usage information" << std::endl;
       return 1;
     }
-    MultiResolutionImageReader reader; 
-    MultiResolutionImage* input = reader.open(inputPth);
+    MultiResolutionImageReader reader;
+    std::shared_ptr<MultiResolutionImage> input = std::shared_ptr<MultiResolutionImage>(reader.open(inputPth));
     CmdLineProgressMonitor monitor;
     if (input) {
       ThresholdWholeSlideFilter fltr;
@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
       if (!fltr.process()) {
         std::cerr << "ERROR: Processing failed" << std::endl;
       }
-      delete input;
     }
     else {
       std::cerr << "ERROR: Invalid input image" << std::endl;
