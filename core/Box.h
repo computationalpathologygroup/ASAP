@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "config/pathology_config.h"
+#include "core_export.h"
 
-class EXPORT_CORE Box {
+class CORE_EXPORT Box {
 private :	  
   std::vector<unsigned long long> _start;
   std::vector<unsigned long long> _size;

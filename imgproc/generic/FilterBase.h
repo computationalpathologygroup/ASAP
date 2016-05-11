@@ -1,14 +1,14 @@
 #ifndef _FilterBase
 #define _FilterBase
 
-#include "config/pathology_config.h"
+#include "basicfilters_export.h"
 #include <mutex>
 #include <string>
 #include <memory>
 
 class ProgressMonitor;
 
-class EXPORT_BASICFILTERS FilterBase {
+class BASICFILTERS_EXPORT FilterBase {
 
   std::mutex _cancelMutex;
   std::weak_ptr<ProgressMonitor> _monitor;

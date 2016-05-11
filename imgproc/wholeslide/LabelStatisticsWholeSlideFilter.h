@@ -1,7 +1,7 @@
 #ifndef _LabelStatisticsWholeSlideFilter
 #define _LabelStatisticsWholeSlideFilter
 
-#include "config/pathology_config.h"
+#include "wholeslidefilters_export.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -10,7 +10,7 @@
 class MultiResolutionImage;
 class ProgressMonitor;
 
-class EXPORT_WHOLESLIDEFILTERS LabelStatisticsWholeSlideFilter {
+class WHOLESLIDEFILTERS_EXPORT LabelStatisticsWholeSlideFilter {
 
 private:
   std::weak_ptr<MultiResolutionImage> _input;

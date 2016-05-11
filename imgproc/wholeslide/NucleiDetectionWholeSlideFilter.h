@@ -1,7 +1,7 @@
 #ifndef _NUCLEIDETECTIONWHOLESLIDEFILTER
 #define _NUCLEIDETECTIONWHOLESLIDEFILTER
 
-#include "config/pathology_config.h"
+#include "wholeslidefilters_export.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -9,7 +9,7 @@
 class MultiResolutionImage;
 class ProgressMonitor;
 
-class EXPORT_WHOLESLIDEFILTERS NucleiDetectionWholeSlideFilter {
+class WHOLESLIDEFILTERS_EXPORT NucleiDetectionWholeSlideFilter {
 
 private:
   std::weak_ptr<MultiResolutionImage> _input;

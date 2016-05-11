@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "core/ImageSource.h"
-#include "config/pathology_config.h"
 
 template<typename T>
 class Patch : public ImageSource {

@@ -1,12 +1,12 @@
 //---------------------------------------------------------------------------
 #ifndef _MultiResolutionImageReader
 #define _MultiResolutionImageReader
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 #include <string>
 
 class MultiResolutionImage;
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImageReader {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImageReader {
 
 public:
   MultiResolutionImageReader();

@@ -7,11 +7,11 @@
 #include <memory>
 #include "AnnotationBase.h"
 #include "core/Point.h"
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 
 class AnnotationGroup;
 
-class EXPORT_PATHOLOGYANNOTATION Annotation : public AnnotationBase {
+class ANNOTATION_EXPORT Annotation : public AnnotationBase {
 public:
 
   enum Type {

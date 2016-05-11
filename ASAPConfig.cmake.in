@@ -1,0 +1,15 @@
+# - Config file for the ASAP package
+# It defines the following variables
+#  ASAP_INCLUDE_DIRS - include directories for ASAP
+#  ASAP_LIBRARIES    - libraries to link against
+ 
+# Compute paths
+get_filename_component(ASAP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(ASAP_INCLUDE_DIRS "${ASAP_CMAKE_DIR}/@REL_INCLUDE_DIR@")
+set(ASAP_BINARY_DIRS "${ASAP_CMAKE_DIR}/@REL_BINARY_DIR@")
+set(ASAP_LIBRARY_DIRS "${ASAP_CMAKE_DIR}/@REL_LIBRARY_DIR@")
+ 
+# Our library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET ASAP AND NOT DIAGPathology_BINARY_DIR)
+  include("${ASAP_CMAKE_DIR}/asap-targets.cmake")
+endif()

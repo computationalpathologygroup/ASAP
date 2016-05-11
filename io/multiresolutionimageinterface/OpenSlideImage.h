@@ -2,12 +2,12 @@
 #define _OpenSlideImage
 
 #include "MultiResolutionImage.h"
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 
 struct _openslide;
 typedef struct _openslide openslide_t;
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE OpenSlideImage : public MultiResolutionImage {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT OpenSlideImage : public MultiResolutionImage {
 
 public:
 

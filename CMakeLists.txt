@@ -4,10 +4,13 @@ PROJECT(DIAGPathology)
 SET(CURRENT_MAJOR_VERSION 1)
 SET(CURRENT_MINOR_VERSION 5)
 SET(CURRENT_PATCH_VERSION 1)
+set(ASAP_VERSION ${CURRENT_MAJOR_VERSION}.${CURRENT_MINOR_VERSION}.${CURRENT_PATCH_VERSION})
+
+include (GenerateExportHeader)
 
 CONFIGURE_FILE (
-  "${PROJECT_SOURCE_DIR}/config/pathology_config.h.in"
-  "${PROJECT_BINARY_DIR}/config/pathology_config.h"
+  "${PROJECT_SOURCE_DIR}/config/ASAPMacros.h.in"
+  "${PROJECT_BINARY_DIR}/config/ASAPMacros.h"
   )
 
 SET(CMAKE_MODULE_PATH ${DIAGPathology_SOURCE_DIR}/cmakemodules)
@@ -68,6 +71,7 @@ ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(io)
 ADD_SUBDIRECTORY(annotation)
 
+
 IF(BUILD_DIAG_PATHOLOGY_EXECUTABLES)
   ADD_SUBDIRECTORY(executables)
 ENDIF()
@@ -85,6 +89,30 @@ IF(BUILD_DIAG_PATHOLOGY_WORKSTATION)
 ENDIF()
 
 ADD_SUBDIRECTORY(buildtools)
+
+set(INSTALL_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/cmake)
+set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+set(INSTALL_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(INSTALL_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+
+# Create the FooBarConfig.cmake and FooBarConfigVersion files
+file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+file(RELATIVE_PATH REL_BINARY_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_BINARY_DIR}")
+file(RELATIVE_PATH REL_LIBRARY_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_LIBRARY_DIR}")
+
+configure_file(ASAPConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/ASAPConfig.cmake" @ONLY)
+configure_file(ASAPConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/ASAPConfigVersion.cmake" @ONLY)
+ 
+# Install the FooBarConfig.cmake and FooBarConfigVersion.cmake
+install(FILES
+  "${PROJECT_BINARY_DIR}/ASAPConfig.cmake"
+  "${PROJECT_BINARY_DIR}/ASAPConfigVersion.cmake"
+  DESTINATION cmake)
+ 
+# Install the export set for use with the install-tree
+install(EXPORT asap-targets DESTINATION cmake)
 
 IF(PACKAGE_ON_INSTALL)
 set(CPACK_PACKAGE_NAME "ASAP")

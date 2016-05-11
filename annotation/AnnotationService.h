@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 
 class AnnotationList;
 class Repository;
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationService {
+class ANNOTATION_EXPORT AnnotationService {
 public:
 	AnnotationService();
 	~AnnotationService();

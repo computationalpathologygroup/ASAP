@@ -257,7 +257,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       rate = getJPEGQuality() / 100.;
     }
     JPEG2000Codec cod;
-    cod.encode((char*)data, size, _tileSize, depth, nrComponents, rate);
+    cod.encode((char*)data, size, _tileSize, depth, nrComponents, rate, (getColorType() == pathology::ARGB || getColorType() == pathology::RGB));
     TIFFWriteRawTile(_tiff, pos, data, size);
   }
   else {
@@ -648,7 +648,7 @@ template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* l
 	  for (unsigned int i = 0; i < TIFFNumberOfTiles(levelTiff); ++i) {
       TIFFReadEncodedTile(levelTiff, i, raster, npixels * sizeof(T));
 		  unsigned int size = npixels * sizeof(T);
-		  cod.encode((char*)raster, size, _tileSize, depth, nrComponents, rate);
+      cod.encode((char*)raster, size, _tileSize, depth, nrComponents, rate, (getColorType() == pathology::ARGB || getColorType() == pathology::RGB));
 		  TIFFWriteRawTile(_tiff, i, raster, size);
 	  }
   } else {

@@ -1,10 +1,10 @@
 #ifndef ANNOTATIONNDPASERVICE_H
 #define ANNOTATIONNDPASERVICE_H
 
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 #include "Repository.h"
 
-class EXPORT_PATHOLOGYANNOTATION NDPARepository : public Repository {
+class ANNOTATION_EXPORT NDPARepository : public Repository {
 public:
   NDPARepository(const std::shared_ptr<AnnotationList>& list);
 

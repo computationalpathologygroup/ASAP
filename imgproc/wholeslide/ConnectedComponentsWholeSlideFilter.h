@@ -1,7 +1,7 @@
 #ifndef _ConnectedComponentsWholeSlideFilter
 #define _ConnectedComponentsWholeSlideFilter
 
-#include "config/pathology_config.h"
+#include "wholeslidefilters_export.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -9,7 +9,7 @@
 class MultiResolutionImage;
 class ProgressMonitor;
 
-class EXPORT_WHOLESLIDEFILTERS ConnectedComponentsWholeSlideFilter {
+class WHOLESLIDEFILTERS_EXPORT ConnectedComponentsWholeSlideFilter {
 
 private:
   std::weak_ptr<MultiResolutionImage> _input;

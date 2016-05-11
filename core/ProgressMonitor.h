@@ -2,9 +2,9 @@
 #define PROGRESSMONITOR_H
 
 #include <string>
-#include "config/pathology_config.h"
+#include "core_export.h"
 
-class EXPORT_CORE ProgressMonitor {
+class CORE_EXPORT ProgressMonitor {
 
 protected:
   std::string _status;

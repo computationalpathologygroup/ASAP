@@ -26,7 +26,8 @@
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImageWriter.h"
 #include "MultiResolutionImage.h"
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
+#include "../../config/ASAPMacros.h"
 #include "../../core/Point.h"
 #include "../../core/ProgressMonitor.h"
 #include "../../core/CmdLineProgressMonitor.h"
@@ -81,15 +82,15 @@ import_array();
 %}
 
 #ifdef SWIG
-#define EXPORT_MULTIRESOLUTIONIMAGEINTERFACE
-#define EXPORT_CORE
-#define EXPORT_PATHOLOGYANNOTATION
+#define MULTIRESOLUTIONIMAGEINTERFACE_EXPORT
+#define CORE_EXPORT
+#define ANNOTATION_EXPORT
 #endif
 
 %ignore swap(ImageSource& first, ImageSource& second);
 
 %immutable ASAP_VERSION_STRING;
-%include "../../config/pathology_config.h"
+%include "../../config/ASAPMacros.h"
 
 %include "../../core/Point.h"
 %include "../../core/PathologyEnums.h"

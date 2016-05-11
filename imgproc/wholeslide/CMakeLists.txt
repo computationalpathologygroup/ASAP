@@ -6,9 +6,14 @@ INCLUDE_DIRECTORIES(
   ${Boost_INCLUDE_DIRS}
   ${WHOLESLIDEFILTERS_SOURCE_DIR}
   ${DIAGPathology_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CORE_BINARY_DIR}
+  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
+  ${BASICFILTERS_BINARY_DIR}
+  ${NUCLEISEGMENTATION_BINARY_DIR}
+  ${ANNOTATION_BINARY_DIR}
 )
 ADD_DEFINITIONS(${Boost_DEFINITIONS})
-ADD_DEFINITIONS(-DBUILD_WHOLESLIDEFILTERS)
 LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
 
 SET(WHOLESLIDEFILTERS_SRCS 
@@ -28,6 +33,7 @@ SET(WHOLESLIDEFILTERS_SRCS
 
 ADD_LIBRARY(wholeslidefilters SHARED ${WHOLESLIDEFILTERS_SRCS})
 TARGET_LINK_LIBRARIES(wholeslidefilters ${OpenCV_LIBS} annotation NucleiSegmentation basicfilters multiresolutionimageinterface core)
+generate_export_header(wholeslidefilters)
 
 SET_TARGET_PROPERTIES(wholeslidefilters PROPERTIES DEBUG_POSTFIX _d)
 IF(WIN32)  
@@ -35,8 +41,10 @@ IF(WIN32)
 ENDIF(WIN32)
 
 INSTALL(FILES ConnectedComponentsWholeSlideFilter.h DistanceTransformWholeSlideFilter.h LabelStatisticsWholeSlideFilter.h ThresholdWholeSlideFilter.h ArithmeticWholeSlideFilter.h DESTINATION include/wholeslidefilters)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/wholeslidefilters_export.h DESTINATION include/wholeslidefilters)
 
 INSTALL(TARGETS wholeslidefilters
+  EXPORT asap-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
@@ -82,6 +90,7 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	  INSTALL(FILES ${PROJECT_BINARY_DIR}/wholeslidefilters.py DESTINATION bin)
 
       INSTALL(TARGETS ${SWIG_MODULE_wholeslidefilters_REAL_NAME}
+	  	EXPORT asap-targets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION bin
         ARCHIVE DESTINATION lib

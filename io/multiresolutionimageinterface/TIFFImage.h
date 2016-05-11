@@ -2,14 +2,14 @@
 #define _TIFFImage
 
 #include "MultiResolutionImage.h"
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 
 struct tiff;
 typedef struct tiff TIFF;
 
 class JPEG2000Codec;
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE TIFFImage : public MultiResolutionImage {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT TIFFImage : public MultiResolutionImage {
 
 public:
 

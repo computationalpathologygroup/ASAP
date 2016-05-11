@@ -1,7 +1,7 @@
 #ifndef _DistanceTransformWholeSlideFilter
 #define _DistanceTransformWholeSlideFilter
 
-#include "config/pathology_config.h"
+#include "wholeslidefilters_export.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -9,7 +9,7 @@
 class MultiResolutionImage;
 class ProgressMonitor;
 
-class EXPORT_WHOLESLIDEFILTERS DistanceTransformWholeSlideFilter {
+class WHOLESLIDEFILTERS_EXPORT DistanceTransformWholeSlideFilter {
 
 private:
   std::weak_ptr<MultiResolutionImage> _input;

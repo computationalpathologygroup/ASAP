@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 #ifndef _MultiResolutionImageWriter
 #define _MultiResolutionImageWriter
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 #include "core/PathologyEnums.h"
 #include <string>
 #include <vector>
@@ -20,7 +20,7 @@ class ProgressMonitor;
 //! which writes an entire MultiResolutionImage to disk using the image properties (color, data)
 //! and the specified codec.
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImageWriter {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImageWriter {
 protected:
 
   //! Reference to the file to be written

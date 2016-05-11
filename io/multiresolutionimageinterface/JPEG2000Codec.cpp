@@ -45,7 +45,7 @@ void JPEG2000Codec::decode(char* buf, const unsigned int& inSize, const unsigned
     jas_image_destroy(image);
 }
 
-void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& tileSize, const unsigned int& depth, const unsigned int& nrComponents, float& rate) const
+void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& tileSize, const unsigned int& depth, const unsigned int& nrComponents, float& rate, bool colorImage) const
 {
     jas_image_cmptparm_t* component_info = new jas_image_cmptparm_t[4];
     for( int i = 0; i < nrComponents; i++ )
@@ -59,27 +59,26 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
         component_info[i].prec = depth;
         component_info[i].sgnd = 0;
     }
-    jas_image_t *img = jas_image_create(nrComponents, component_info, (nrComponents == 1 || nrComponents == 2) ? JAS_CLRSPC_SGRAY : JAS_CLRSPC_SRGB);
-    if(nrComponents == 1) {
-      jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
-    }
-    else if(nrComponents == 2) {
-      jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
-      jas_image_setcmpttype(img, 1, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
-    }
-    else if (nrComponents == 3)
+    jas_image_t *img = jas_image_create(nrComponents, component_info, (colorImage) ? JAS_CLRSPC_SGRAY : JAS_CLRSPC_SRGB);
+    if (nrComponents == 3 && colorImage)
     {
       jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_R));
       jas_image_setcmpttype(img, 1, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_G));
       jas_image_setcmpttype(img, 2, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_B));
     }
-    else
+    else if(nrComponents == 4 && colorImage)
     {
       jas_image_setcmpttype(img, 0, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_R));
       jas_image_setcmpttype(img, 1, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_G));
       jas_image_setcmpttype(img, 2, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_RGB_B));
       jas_image_setcmpttype(img, 3, JAS_IMAGE_CT_COLOR(JAS_IMAGE_CT_OPACITY));
     }
+    else {
+      for (unsigned int i = 0; i < nrComponents; ++i) {
+        jas_image_setcmpttype(img, i, JAS_IMAGE_CT_COLOR(JAS_CLRSPC_CHANIND_GRAY_Y));
+      }
+    }
+
     jas_matrix_t *row = jas_matrix_create( 1, tileSize );
     for( int y = 0; y < tileSize; ++y)
     {

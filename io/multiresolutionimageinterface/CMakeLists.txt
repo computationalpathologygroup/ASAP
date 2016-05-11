@@ -2,7 +2,6 @@ PROJECT(MULTIRESOLUTIONIMAGEINTERFACE)
 
 INCLUDE_DIRECTORIES(
   ${MULTIRESOLUTIONIMAGEINTERFACE_SOURCE_DIR} 
-  ../core
   ../../
   ../
   ${Boost_INCLUDE_DIRS}
@@ -12,6 +11,8 @@ INCLUDE_DIRECTORIES(
   ${OPENSLIDE_INCLUDE_DIR}
   ${PugiXML_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CORE_BINARY_DIR}
 )
 ADD_DEFINITIONS(${Boost_DEFINITIONS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
@@ -20,10 +21,6 @@ if(WIN32 AND NOT MINGW)
   add_definitions(-DJAS_WIN_MSVC_BUILD)
   add_definitions(-DNOMINMAX)
 endif(WIN32 AND NOT MINGW)
-
-IF(WIN32)
-  ADD_DEFINITIONS(-DBUILD_MULTIRESOLUTIONIMAGEINTERFACE)
-ENDIF(WIN32)
 
 SET(MULTIRESOLUTIONIMAGEINTERFACE_HS
     JPEG2000Codec.h 
@@ -52,6 +49,7 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
 )
 
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
+generate_export_header(multiresolutionimageinterface)
 TARGET_LINK_LIBRARIES(multiresolutionimageinterface ${DCMTKJPEG_LIBRARY} libtiff ${OPENSLIDE_LIBRARY} core libjasper ${Boost_LIBRARIES} libjpeg zlib pugixml)
 
 SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
@@ -86,6 +84,7 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-builtin")
 	  include_directories(${PYTHON_INCLUDE_DIR})
+	  include_directories(${DIAGPathology_BINARY_DIR}/annotation)
 	  include_directories(${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)
 	  IF(PYTHON_CONFIG_INCLUDE_DIR)
 		include_directories(${PYTHON_CONFIG_INCLUDE_DIR})
@@ -101,6 +100,7 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  INSTALL(FILES ${PROJECT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
 
       INSTALL(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+	  	EXPORT asap-targets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION bin
         ARCHIVE DESTINATION lib
@@ -109,8 +109,10 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 ENDIF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 
 INSTALL(FILES ${MULTIRESOLUTIONIMAGEINTERFACE_HS} DESTINATION include/multiresolutionimageinterface)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface_export.h DESTINATION include/multiresolutionimageinterface)
 
 INSTALL(TARGETS multiresolutionimageinterface
+  EXPORT asap-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

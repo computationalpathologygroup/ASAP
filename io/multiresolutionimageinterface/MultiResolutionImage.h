@@ -2,14 +2,14 @@
 #define _MultiResolutionImage
 #include <string>
 #include <memory>
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 #include "TileCache.h"
 #include "boost/thread.hpp"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImage : public ImageSource {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage : public ImageSource {
 
 public :
   MultiResolutionImage();
@@ -126,16 +126,16 @@ protected :
   }
 };
 
-template <> void EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+template <> void MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
   const unsigned long long& height, const unsigned int& level, unsigned char*& data);
 
-template <> void EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+template <> void MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
   const unsigned long long& height, const unsigned int& level, unsigned short*& data);
 
-template <> void EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+template <> void MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
   const unsigned long long& height, const unsigned int& level, unsigned int*& data);
 
-template <> void EXPORT_MULTIRESOLUTIONIMAGEINTERFACE MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
+template <> void MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width,
   const unsigned long long& height, const unsigned int& level, float*& data);
 
 #endif

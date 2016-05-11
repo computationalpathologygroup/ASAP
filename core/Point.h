@@ -1,8 +1,8 @@
 #ifndef WSCOORDINATE_H
 #define WSCOORDINATE_H
-#include "config/pathology_config.h"
+#include "core_export.h"
 
-class EXPORT_CORE Point {
+class CORE_EXPORT Point {
 public:
   Point();
   Point(const float& x, const float& y);

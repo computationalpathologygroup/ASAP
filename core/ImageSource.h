@@ -2,10 +2,10 @@
 #define _ImageSource
 #include <string>
 #include <vector>
-#include "config/pathology_config.h"
+#include "core_export.h"
 #include "core/PathologyEnums.h"
 
-class EXPORT_CORE ImageSource {
+class CORE_EXPORT ImageSource {
 
 public :
   ImageSource();

@@ -1,11 +1,11 @@
 #ifndef CMDLINEPROGRESSMONITOR_H
 #define CMDLINEPROGRESSMONITOR_H
 
-#include "config/pathology_config.h"
+#include "core_export.h"
 #include "ProgressMonitor.h"
 #include <boost/progress.hpp>
 
-class EXPORT_CORE CmdLineProgressMonitor : public ProgressMonitor {
+class CORE_EXPORT CmdLineProgressMonitor : public ProgressMonitor {
 
 protected:
   boost::progress_display* disp;

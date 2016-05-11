@@ -1,7 +1,7 @@
 #ifndef __DIAGCVR_FILETOOLS_H__
 #define __DIAGCVR_FILETOOLS_H__
 
-#include <config/pathology_config.h>
+#include "core_export.h"
 #include <string>
 #include <vector>
 
@@ -12,38 +12,38 @@ namespace core
 
 /////////////////////
 // Returns true iff file exists (it is not checked if the file can be opened)
-  bool EXPORT_CORE fileExists(const std::string &name);
+  bool CORE_EXPORT fileExists(const std::string &name);
 
 /////////////////////
 // Returns true iff the directory exists
-  bool EXPORT_CORE dirExists(const std::string &name);
+  bool CORE_EXPORT dirExists(const std::string &name);
 
 //////////////////////
 // Returns the size of the file in bytes.
 // If the file does not exist or an error occurs, -1 is returned.
 // Note: long int is just an int for the Borland compiler, so maximum file size is 2GB
-  long int EXPORT_CORE fileSize(const std::string &name);
+  long int CORE_EXPORT fileSize(const std::string &name);
 
 /////////////////////////
 // Deletes the file, returns true iff the file existed and was successfully
 // deleted.
-  bool EXPORT_CORE deleteFile(const std::string &name);
+  bool CORE_EXPORT deleteFile(const std::string &name);
 
 /////////////////////////
 // Deletes the directory, returns true iff the directory existed, is empty,
 // and was successfully deleted.
-  bool EXPORT_CORE deleteDir(const std::string &name, bool deleteNonEmpty = false);
+  bool CORE_EXPORT deleteDir(const std::string &name, bool deleteNonEmpty = false);
 
 /////////////////////////
 // Returns true iff the directory exists and is empty.
-  bool EXPORT_CORE emptyDir(const std::string &name);
+  bool CORE_EXPORT emptyDir(const std::string &name);
 
 /////////////////////////
 // Copies the file, returns true if the source file exists and is not empty, and
 // the target file does not exist and the copy is successful.
 // If the target directory does exist, it is created.
 // Flag overwrite to overwrite an existing target file
-  bool EXPORT_CORE copyFile(
+  bool CORE_EXPORT copyFile(
     const std::string &source,
     const std::string &target,
     bool overwrite = false,
@@ -59,7 +59,7 @@ namespace core
 // If recurse is true, all subdirectories of path are processed as well. Source
 // directory stucture is preserved.
 // Flag overwrite to overwrite existing files in the target directory.
-  bool EXPORT_CORE copyDirectory(
+  bool CORE_EXPORT copyDirectory(
     const std::string &source,
     const std::string &target,
     const std::string &name = "",
@@ -72,7 +72,7 @@ namespace core
 /////////////////////////
 // Renames the file, returns true iff the file existed and was successfully
 // renamed. The target directory must exist, the target file should not exist.
-  bool EXPORT_CORE renameFile(const std::string &source, const std::string &target);
+  bool CORE_EXPORT renameFile(const std::string &source, const std::string &target);
 
 ///////////////////////
 // Returns the path of the passed file name. Examples:
@@ -82,26 +82,26 @@ namespace core
 // File \test.txt has path: \<br>
 // File c:\temp\test.txt has path: c:\temp<br>
 // File c:/temp/test.txt has path: c:\temp<br>
-  std::string EXPORT_CORE extractFilePath(const std::string &name);
+  std::string CORE_EXPORT extractFilePath(const std::string &name);
 
 ///////////////////////
 // Returns the level above the current directory structure level
 // If a root directory is given it is returned unchanged
 // If a file name is attached to the directory given then the filePath
 // to the file is returned
-  std::string EXPORT_CORE upOneLevel(const std::string &name);
+  std::string CORE_EXPORT upOneLevel(const std::string &name);
 
 ///////////////////////
 // Returns the level above the current directory structure level
 // If a root directory is given it is returned unchanged
 // If a file name is attached to the directory given then the filePath
 // to the file is returned
-  std::string EXPORT_CORE upMultipleLevels(const std::string& name, unsigned int nrOfLevels);
+  std::string CORE_EXPORT upMultipleLevels(const std::string& name, unsigned int nrOfLevels);
 
 ///////////////////////
 // Returns the undecorated name of the passed (full) file name.
 // If the input is empty or ends with \ or / or : an empty string is returned.
-  std::string EXPORT_CORE extractFileName(const std::string &name);
+  std::string CORE_EXPORT extractFileName(const std::string &name);
 
 ///////////////////////
 // Returns the undecorated file name, as provided by extractFileName, but
@@ -110,28 +110,28 @@ namespace core
 // File c:\test.txt returns test<br>
 // File c:test.txt.bak returns test.txt<br>
 // File \test returns test<br>
-  std::string EXPORT_CORE extractBaseName(const std::string &name);
+  std::string CORE_EXPORT extractBaseName(const std::string &name);
 
 ///////////////////////
 // Returns the lowest level directory name
 // Only works if "name" is a directory (not a file)
 // Dir c:\level1\level2\level3 returns level3<br>
-  std::string EXPORT_CORE extractLowestDirName(const std::string &name);
+  std::string CORE_EXPORT extractLowestDirName(const std::string &name);
 
 ///////////////////////
 // Returns the extension, if any, without the .
-  std::string EXPORT_CORE extractFileExtension(const std::string &name);
+  std::string CORE_EXPORT extractFileExtension(const std::string &name);
 
 ////////////////////////
 // Creates the directory, and all higher directories if necessary.
 // Returns true iff the directory exists on exit.
-  bool EXPORT_CORE createDirectory(const std::string &dir);
+  bool CORE_EXPORT createDirectory(const std::string &dir);
 
 //////////////////////////
 // Returns in v all files in path that match the pattern name, which may contain
 // wildcards. If name is empty, all files are returned. If recurse is true, all
 // subdirectories of path are processed as well.
-  void EXPORT_CORE getFiles(
+  void CORE_EXPORT getFiles(
     const std::string &path,
     const std::string &name,
     std::vector<std::string> &v,
@@ -141,14 +141,14 @@ namespace core
 //////////////////////////
 // Returns in v all subdirectories of path.
 // If recurse is true, all subdirectories of path are processed as well.
-  void EXPORT_CORE getSubdirectories(
+  void CORE_EXPORT getSubdirectories(
     const std::string &path,
     std::vector<std::string> &v,
     bool recurse = false
   );
 
 #ifndef LINUX
-  void EXPORT_CORE getSubdirectoriesWindows(
+  void CORE_EXPORT getSubdirectoriesWindows(
     const std::string &thepath,
     std::vector<std::string> &v,
     bool recurse);
@@ -158,7 +158,7 @@ namespace core
 // Creates the directory, including any subdirectory is needed.
 // path can be a filename or a path name (extractdirectoryName is called first).
 // Returns true if the dierctory exists on exit, false otherwise.
-  bool EXPORT_CORE createDirectory(const std::string &path);
+  bool CORE_EXPORT createDirectory(const std::string &path);
 
 //////////////////////////
 // Returns the name of the root directory in the specified path, or
@@ -169,7 +169,7 @@ namespace core
 // Path //Hiawatha/bin returns //Hiawatha<br>
 // Path \\Hiawatha\bin returns //Hiawatha<br>
 // Path //Hiawatha/ returns //Hiawatha<br>
-  std::string EXPORT_CORE rootName(const std::string &spath);
+  std::string CORE_EXPORT rootName(const std::string &spath);
 
 //////////////////////////
   /* Returns the path to pathToAlter starting from fixedPath
@@ -177,7 +177,7 @@ namespace core
      pathToAlter = c:\\mypath\otherpath\\test1\\a.txt, fixedPath = c:\\mypath\\diffpath\\
                            returns ..\\otherpath\\test1\\a.txt
   */
-  std::string EXPORT_CORE getPathRelativeToLocation(const std::string &pathToAlter, const std::string &fixedPath);
+  std::string CORE_EXPORT getPathRelativeToLocation(const std::string &pathToAlter, const std::string &fixedPath);
 
 //////////////////////////
 // Returns true if the given path is a path to the root and false otherwise.
@@ -190,11 +190,11 @@ namespace core
 // Path \\Hiawatha should return true<br> but returns false (bug in boost)(works in 1.35)
 // Path //Hiawatha/ returns true<br>
 // Path //Hiawatha/dir returns false<br>
-  bool EXPORT_CORE isRoot(const std::string &spath);
+  bool CORE_EXPORT isRoot(const std::string &spath);
 
 ///////////////////////
 // Returns true if the given path is a UNC path. This means it starts with \\.
-  bool EXPORT_CORE isUNCPath(const std::string &spath);
+  bool CORE_EXPORT isUNCPath(const std::string &spath);
 
 //////////////////////////
 // Returns true if the given path is a path to a directory and
@@ -204,9 +204,9 @@ namespace core
 
 // hello
 // !!!@
-  bool EXPORT_CORE isOnlyDirectory(const std::string &spath);
+  bool CORE_EXPORT isOnlyDirectory(const std::string &spath);
 
-  bool EXPORT_CORE isOnlyDirectoryTmpKeelin(const std::string &spath);
+  bool CORE_EXPORT isOnlyDirectoryTmpKeelin(const std::string &spath);
 
 //////////////////////////
 // Returns the path to the current directory as maintained by the operating
@@ -217,7 +217,7 @@ namespace core
 // If your program depends on the current directory, it is good to save the return
 // value of currentDirPath() immediately upon entering main(), and use this
 // variable from there on.
-  std::string EXPORT_CORE currentDirPath();
+  std::string CORE_EXPORT currentDirPath();
 
 //////////////////////////
 // Creates a complete path from base and path. (A complete path is a path containing
@@ -229,61 +229,61 @@ namespace core
 // completePath( "./", "D:\\dir0\\dir1" ) returns D:\dir0\dir1<br>
 // completePath( "\\", "D:\\dir0\\dir1" ) returns D:\<br>
 // completePath( "\\dir2", "D:\\dir0\\dir1" ) returns D:\dir2<br>
-  std::string EXPORT_CORE completePath(const std::string &spath, const std::string &base);
+  std::string CORE_EXPORT completePath(const std::string &spath, const std::string &base);
 
 /////////////////////////////
 // Changes the extension of name. newextension should be the new extension, without the .
 // Examples:
 // changeExtension("c:\\test.txt","bak") changes input to c:\\test.bak
-  void EXPORT_CORE changeExtension(std::string &name, const std::string &newextension);
+  void CORE_EXPORT changeExtension(std::string &name, const std::string &newextension);
 
 /////////////////////////////
 // Changes the basename. newbasename should be the new basename, without the .
 // Examples:
 // changeBaseName("c:\\test.txt","aap") changes input to c:\\aap.txt
-  void EXPORT_CORE changeBaseName(std::string &name, const std::string &newbasename);
+  void CORE_EXPORT changeBaseName(std::string &name, const std::string &newbasename);
 
 /////////////////////////////
 // Changes the path. newpath should be the new path, and may or may not end with
 // \\ or /
 // Examples:
 // changePath("c:\\test.txt","c:\temp") changes input to c:\temp\test.txt
-  void EXPORT_CORE changePath(std::string &name, const std::string &newpath);
+  void CORE_EXPORT changePath(std::string &name, const std::string &newpath);
 
 ////////////////////////////
 // Reads the contents of a text file into s. Returns true iff file exists and
 // was successfully read.
-  bool EXPORT_CORE readFile(const std::string &filename, std::string &s);
+  bool CORE_EXPORT readFile(const std::string &filename, std::string &s);
 
 ////////////////////////////
 // Reads the contents of a text file into a vector of strings (one per line).
 // Returns true iff file exists and was successfully read.
-  bool EXPORT_CORE readFile(const std::string &filename, std::vector<std::string> &vs);
+  bool CORE_EXPORT readFile(const std::string &filename, std::vector<std::string> &vs);
 
-  bool EXPORT_CORE readFileTail(const std::string &filename, std::vector<std::string> &vs, int nBytesToRead = 2048);
+  bool CORE_EXPORT readFileTail(const std::string &filename, std::vector<std::string> &vs, int nBytesToRead = 2048);
 
 ////////////////////////////
 // Reads the contents of a text file into a vector of vector of strings.
 // The outer vector contains lines, the inner vector contains the elements of
 // that line, split with the split character.
 // Returns true iff file exists and was successfully read.
-  bool EXPORT_CORE readFile(
+  bool CORE_EXPORT readFile(
     const std::string &filename,
     std::vector<std::vector<std::string> > &vvs,
     const std::string& split_at = " ");
 
 ////////////////////////////
 // Writes s to a file. Returns true iff writing was successful.
-  bool EXPORT_CORE writeFile(const std::string &filename, const std::string &s);
+  bool CORE_EXPORT writeFile(const std::string &filename, const std::string &s);
 
 ////////////////////////////
 // Writes vs to a file, one string per line. Returns true iff writing was successful.
-  bool EXPORT_CORE writeFile(const std::string &filename, const std::vector<std::string> &vs);
+  bool CORE_EXPORT writeFile(const std::string &filename, const std::vector<std::string> &vs);
 
 ////////////////////////////
 // Writes vvs to a file, one set of strings per line, each spearated by split.
 // Returns true iff writing was successful.
-  bool EXPORT_CORE writeFile(
+  bool CORE_EXPORT writeFile(
     const std::string &filename,
     const std::vector<std::vector<std::string> > &vvs,
     const std::string &split = " "
@@ -292,24 +292,24 @@ namespace core
 ////////////////////////////
 // Returns true if the two paths resolve to the same file or directory. (Useful
 // for example when one of the paths is a network path and the other a local path).
-  bool EXPORT_CORE equivalentPaths(const std::string path1,  const std::string path2);
+  bool CORE_EXPORT equivalentPaths(const std::string path1,  const std::string path2);
 
 //////////////////////////////
 // 'Cleans' a filename, that is, double separators (two backslashes) are replaced
 // with one, except for the first part of the path where it means that it is
 // a different machine.
-  void EXPORT_CORE cleanFileName(std::string &file);
+  void CORE_EXPORT cleanFileName(std::string &file);
 
 //////////////////////////////
 // 'Cleans' a directory name, similar to cleanFileName except that the final
 // character is always a backslash
-  void EXPORT_CORE cleanDirName(std::string &dir);
+  void CORE_EXPORT cleanDirName(std::string &dir);
 
 /////////////////////////////
 // Returns the last date and time that the file was written to. This is the
 // only type of datetime access provided by Boost Filesystem. If the file
 // does not exist the function returns with all output set to -1.
-  void EXPORT_CORE fileDateTime(
+  void CORE_EXPORT fileDateTime(
     const std::string &file,
     int &year,
     int &month,
@@ -323,19 +323,19 @@ namespace core
 // Returns the last date and time that the file was written to in string
 // format YYYYMMDDHHMMSS. Calls other fileDateTime function. Returns empty
 // string on error.
-  void EXPORT_CORE fileDateTime(
+  void CORE_EXPORT fileDateTime(
     const std::string &file, std::string &s);
 
 /////////////////////////////
 // Returns the current date and time in string format YYYYMMDDHHMMSS.
-  void EXPORT_CORE getDateTime(std::string &s);
+  void CORE_EXPORT getDateTime(std::string &s);
 
 /////////////////////
 // Windows only.
 // Returns the name of a temp file ready to be used (the file is also created)
 // The first three letters of the prefix string are prefixed to the temp file
 // name.
-  void EXPORT_CORE getTempFile(
+  void CORE_EXPORT getTempFile(
     std::string &filename, // returned and a file with this name is created
     const std::string &prefix = std::string("pre")
   );
@@ -343,7 +343,7 @@ namespace core
 /////////////////////
 // Windows only.
 // Returns a temporary directory on the host
-  void EXPORT_CORE getTempDir(std::string &dirname);
+  void CORE_EXPORT getTempDir(std::string &dirname);
 
 ////////////////////
 // Windows only.
@@ -351,7 +351,7 @@ namespace core
 // Optionally the parent dir can be specified, otherwise geTempDir is used.
 // May get stuck in an endless loop if it cannot create a directory in the
 // parent directory.
-  void EXPORT_CORE getEmptyTempDir(
+  void CORE_EXPORT getEmptyTempDir(
     std::string &dirname, // empty dir, created and returned
     const std::string &parent = std::string()
   );
@@ -361,15 +361,15 @@ namespace core
 // Returns a vector with string objects each representing an available windows
 // drive. This function can be used to determine which drives are
 // (un)available on a windows computer.
-  std::vector<std::string> EXPORT_CORE getWindowsDriveLetters();
+  std::vector<std::string> CORE_EXPORT getWindowsDriveLetters();
 
-  std::string EXPORT_CORE stripTrailingSlash(std::string str);
+  std::string CORE_EXPORT stripTrailingSlash(std::string str);
 
-  std::string EXPORT_CORE getDirSeparator();
+  std::string CORE_EXPORT getDirSeparator();
 
-  bool EXPORT_CORE isComplete(const std::string &spath);
+  bool CORE_EXPORT isComplete(const std::string &spath);
 
-  std::string EXPORT_CORE uniformSlashes(const std::string &path);
+  std::string CORE_EXPORT uniformSlashes(const std::string &path);
 
 }
 

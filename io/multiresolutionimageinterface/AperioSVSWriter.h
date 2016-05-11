@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 #ifndef _AperioSVSWriter
 #define _AperioSVSWriter
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 #include "core/PathologyEnums.h"
 #include "MultiResolutionImageWriter.h"
 #include <string>
@@ -16,7 +16,7 @@
 //! which writes an entire MultiResolutionImage to disk using the image properties (color, data)
 //! and the specified codec.
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE AperioSVSWriter : public MultiResolutionImageWriter {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT AperioSVSWriter : public MultiResolutionImageWriter {
 private:
   template <typename T> void writeThumbnail();
 

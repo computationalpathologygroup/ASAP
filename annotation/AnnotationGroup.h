@@ -6,10 +6,10 @@
 #include <map>
 #include <memory>
 #include "core/stringconversion.h"
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 #include "AnnotationBase.h"
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationGroup : public AnnotationBase {
+class ANNOTATION_EXPORT AnnotationGroup : public AnnotationBase {
 public:
 
   AnnotationGroup();

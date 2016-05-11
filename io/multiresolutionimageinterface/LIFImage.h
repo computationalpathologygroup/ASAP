@@ -3,11 +3,11 @@
 
 #include <vector>
 #include "MultiResolutionImage.h"
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 #include "pugixml.hpp"
 #include "core/PathologyEnums.h"
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE LIFImage : public MultiResolutionImage {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT LIFImage : public MultiResolutionImage {
 
 public:
   LIFImage();

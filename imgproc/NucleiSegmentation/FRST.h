@@ -10,14 +10,14 @@
  *
  */
 
-#include "config/pathology_config.h"
+#include "nucleisegmentation_export.h"
 #include <vector>
 
 namespace cv {
   class Mat;
 }
 
-class EXPORT_NUCLEISEGMENTATION FRST {
+class NUCLEISEGMENTATION_EXPORT FRST {
 
 public:
   FRST();

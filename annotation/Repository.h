@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 
 class AnnotationList;
 
-class EXPORT_PATHOLOGYANNOTATION Repository
+class ANNOTATION_EXPORT Repository
 {
 public:
   Repository(const std::shared_ptr<AnnotationList>& list);

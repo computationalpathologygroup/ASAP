@@ -23,13 +23,14 @@ ADD_LIBRARY(opencvfilters SHARED ${OPENCVFILTERS_SRCS})
 TARGET_LINK_LIBRARIES(opencvfilters ${OpenCV_LIBS} core)
 
 IF(WIN32)  
-  SET_TARGET_PROPERTIES(opencvfilters PROPERTIES FOLDER pathology/diag/imgproc)    
+  SET_TARGET_PROPERTIES(opencvfilters PROPERTIES FOLDER pathology/diag/imgproc)
 ENDIF(WIN32)
 
 
 INSTALL(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/opencvfilters)
 
 INSTALL(TARGETS opencvfilters
+  EXPORT asap-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

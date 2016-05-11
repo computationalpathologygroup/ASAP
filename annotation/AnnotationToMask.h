@@ -6,13 +6,13 @@
 #include <map>
 #include <memory>
 
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 #include "core/Point.h"
 
 class AnnotationList;
 class ProgressMonitor;
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationToMask {
+class ANNOTATION_EXPORT AnnotationToMask {
 
 public :
   void convert(const std::shared_ptr<AnnotationList>& annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel = std::map<std::string, int>(), const std::vector<std::string> nameOrder = std::vector<std::string>()) const;

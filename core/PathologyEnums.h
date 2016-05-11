@@ -3,7 +3,7 @@
 
 #include <string>
 #include <map>
-#include "config/pathology_config.h"
+#include "core_export.h"
 
 namespace pathology {
 
@@ -12,7 +12,7 @@ namespace pathology {
     bool wrapAround;
   };
 
-  extern EXPORT_CORE const std::map<std::string, LUT> ColorLookupTables;
+  extern CORE_EXPORT const std::map<std::string, LUT> ColorLookupTables;
 
   enum ColorType {
     InvalidColorType,

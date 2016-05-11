@@ -1,7 +1,7 @@
 #ifndef __DIAG_STRINGCONVERSION_H__
 #define __DIAG_STRINGCONVERSION_H__
 
-#include "config/pathology_config.h"
+#include "core_export.h"
 #include <string>
 #include <sstream>
 #include <typeinfo>
@@ -51,7 +51,7 @@ namespace core {
 
 /////////////////////
 // Splits s into pieces, separated with split.
-  void EXPORT_CORE split(
+  void CORE_EXPORT split(
     const std::string &s,
     std::vector<std::string> &vs,
     const std::string &split);
@@ -179,24 +179,24 @@ namespace core {
     return s;
   }
 
-  void EXPORT_CORE lower(std::string &s);
+  void CORE_EXPORT lower(std::string &s);
 
-  void EXPORT_CORE upper(std::string &s);
+  void CORE_EXPORT upper(std::string &s);
 
-  void EXPORT_CORE trim(std::string &s);
+  void CORE_EXPORT trim(std::string &s);
 
 ////////////////////
 // Replace all occurrences of olds with news in s. Returns true iff
 // any replacements have been made.
-  bool EXPORT_CORE replaceAll(
+  bool CORE_EXPORT replaceAll(
     std::string &s,
     const std::string &olds,
     const std::string &news
   );
 
   //escape 
-  void EXPORT_CORE escape(std::string &str, char toEscape);
-	void EXPORT_CORE unescape(std::string &str, char toUnEscape);
+  void CORE_EXPORT escape(std::string &str, char toEscape);
+	void CORE_EXPORT unescape(std::string &str, char toUnEscape);
 
 }
 #endif

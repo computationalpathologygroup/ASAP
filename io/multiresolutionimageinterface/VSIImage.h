@@ -3,9 +3,9 @@
 
 #include <vector>
 #include "MultiResolutionImage.h"
-#include "config/pathology_config.h"
+#include "multiresolutionimageinterface_export.h"
 
-class EXPORT_MULTIRESOLUTIONIMAGEINTERFACE VSIImage : public MultiResolutionImage {
+class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT VSIImage : public MultiResolutionImage {
 
 public:
   VSIImage();

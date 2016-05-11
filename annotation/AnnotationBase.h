@@ -6,11 +6,11 @@
 #include <map>
 #include <memory>
 #include "core/Point.h"
-#include "config/pathology_config.h"
+#include "annotation_export.h"
 
 class AnnotationGroup;
 
-class EXPORT_PATHOLOGYANNOTATION AnnotationBase : public std::enable_shared_from_this<AnnotationBase> {
+class ANNOTATION_EXPORT AnnotationBase : public std::enable_shared_from_this<AnnotationBase> {
 public:
 
   AnnotationBase();
