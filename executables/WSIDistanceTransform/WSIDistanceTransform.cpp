@@ -6,7 +6,7 @@
 #include "DistanceTransformWholeSlideFilter.h"
 #include "core/filetools.h"
 #include "core/CmdLineProgressMonitor.h"
-#include "config/pathology_config.h"
+#include "config/ASAPMacros.h"
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;

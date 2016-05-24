@@ -5,11 +5,22 @@
  
 # Compute paths
 get_filename_component(ASAP_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(ASAP_INCLUDE_DIRS "${ASAP_CMAKE_DIR}/@REL_INCLUDE_DIR@")
-set(ASAP_BINARY_DIRS "${ASAP_CMAKE_DIR}/@REL_BINARY_DIR@")
-set(ASAP_LIBRARY_DIRS "${ASAP_CMAKE_DIR}/@REL_LIBRARY_DIR@")
+set(ASAP_INCLUDE_DIR "${ASAP_CMAKE_DIR}/@REL_INCLUDE_DIR@")
+
+set(ASAP_INCLUDE_DIRS
+${ASAP_INCLUDE_DIR}
+${ASAP_INCLUDE_DIR}/core
+${ASAP_INCLUDE_DIR}/multiresolutionimageinterface
+${ASAP_INCLUDE_DIR}/annotation
+${ASAP_INCLUDE_DIR}/ASAP
+${ASAP_INCLUDE_DIR}/imgproc
+${ASAP_INCLUDE_DIR}/ASAP/plugins/workstationextension
+)
+
+set(ASAP_BINARY_DIR "${ASAP_CMAKE_DIR}/@REL_BINARY_DIR@")
+set(ASAP_LIBRARY_DIR "${ASAP_CMAKE_DIR}/@REL_LIBRARY_DIR@")
  
 # Our library dependencies (contains definitions for IMPORTED targets)
-if(NOT TARGET ASAP AND NOT DIAGPathology_BINARY_DIR)
+if(NOT TARGET ASAP)
   include("${ASAP_CMAKE_DIR}/asap-targets.cmake")
 endif()

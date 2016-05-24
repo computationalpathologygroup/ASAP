@@ -40,8 +40,8 @@ IF(WIN32)
   SET_TARGET_PROPERTIES(wholeslidefilters PROPERTIES FOLDER pathology/diag/imgproc)    
 ENDIF(WIN32)
 
-INSTALL(FILES ConnectedComponentsWholeSlideFilter.h DistanceTransformWholeSlideFilter.h LabelStatisticsWholeSlideFilter.h ThresholdWholeSlideFilter.h ArithmeticWholeSlideFilter.h DESTINATION include/wholeslidefilters)
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/wholeslidefilters_export.h DESTINATION include/wholeslidefilters)
+INSTALL(FILES ConnectedComponentsWholeSlideFilter.h DistanceTransformWholeSlideFilter.h LabelStatisticsWholeSlideFilter.h ThresholdWholeSlideFilter.h ArithmeticWholeSlideFilter.h DESTINATION include/imgproc/wholeslidefilters)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/wholeslidefilters_export.h DESTINATION include/imgproc/wholeslidefilters)
 
 INSTALL(TARGETS wholeslidefilters
   EXPORT asap-targets

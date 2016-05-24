@@ -1,7 +1,6 @@
 #include "UnitTest++.h"
 #include "FRST.h"
 #include "TestData.h"
-#include "config/pathology_config.h"
 #ifdef WIN32
 #include <windows.h>
 #include <tchar.h>

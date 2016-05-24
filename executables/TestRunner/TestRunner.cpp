@@ -4,7 +4,7 @@
 #include "TestData.h"
 #include <iostream>
 #include <fstream>
-#include "config/pathology_config.h"
+#include "config/ASAPMacros.h"
 
 using namespace std;
 

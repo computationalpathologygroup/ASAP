@@ -10,6 +10,7 @@
 #include "core/filetools.h"
 #include "core/PathologyEnums.h"
 #include "core/CmdLineProgressMonitor.h"
+#include "config/ASAPMacros.h"
 #include <sstream>
 
 #include <boost/program_options.hpp>

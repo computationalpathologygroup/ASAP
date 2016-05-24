@@ -20,17 +20,21 @@ SET(OPENCVFILTERS_SRCS
 )
 
 ADD_LIBRARY(opencvfilters SHARED ${OPENCVFILTERS_SRCS})
-TARGET_LINK_LIBRARIES(opencvfilters ${OpenCV_LIBS} core)
+TARGET_LINK_LIBRARIES(opencvfilters core)
+IF(OpenCV_VERSION EQUAL "3.1.0")
+TARGET_LINK_LIBRARIES(opencvfilters optimized ${OpenCV_LIB_DIR_OPT}/opencv_world310.lib debug ${OpenCV_LIB_DIR_DBG}/opencv_world310d.lib)
+ELSE()
+TARGET_LINK_LIBRARIES(opencvfilters ${OpenCV_LIBS})
+ENDIF()
 
 IF(WIN32)  
   SET_TARGET_PROPERTIES(opencvfilters PROPERTIES FOLDER pathology/diag/imgproc)
 ENDIF(WIN32)
 
 
-INSTALL(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/opencvfilters)
+INSTALL(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/imgproc/opencvfilters)
 
 INSTALL(TARGETS opencvfilters
-  EXPORT asap-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

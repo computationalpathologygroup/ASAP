@@ -6,7 +6,6 @@
 #include "core/filetools.h"
 #include "core/PathologyEnums.h"
 #include "TestData.h"
-#include "config/pathology_config.h"
 
 using namespace UnitTest;
 using namespace std;
