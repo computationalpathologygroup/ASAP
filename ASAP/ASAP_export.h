@@ -7,6 +7,7 @@
 #  define ASAP_NO_EXPORT
 #else
 #  ifndef ASAP_EXPORT
+#  ifdef _WIN32
 #    ifdef ASAP_EXPORTS
         /* We are building this library */
 #      define ASAP_EXPORT __declspec(dllexport)
@@ -14,6 +15,9 @@
         /* We are using this library */
 #      define ASAP_EXPORT __declspec(dllimport)
 #    endif
+#  else
+#    define ASAP_EXPORT
+# endif
 #  endif
 
 #  ifndef ASAP_NO_EXPORT
