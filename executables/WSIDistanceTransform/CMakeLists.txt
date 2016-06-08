@@ -1,6 +1,14 @@
 PROJECT(WSIDistanceTransform)
 
-INCLUDE_DIRECTORIES(
+SET(WSIDistanceTransform_src
+  WSIDistanceTransform.cpp
+)
+
+ADD_EXECUTABLE(WSIDistanceTransform ${WSIDistanceTransform_src})
+SET_TARGET_PROPERTIES(WSIDistanceTransform PROPERTIES DEBUG_POSTFIX _d)
+TARGET_LINK_LIBRARIES(WSIDistanceTransform wholeslidefilters multiresolutionimageinterface core Boost::disable_autolinking Boost::program_options)
+TARGET_INCLUDE_DIRECTORIES(
+  WSIDistanceTransform PRIVATE
   .
   ../../
   ${WSIDistanceTransform_SOURCE_DIR}/../../io/multiresolutionimageinterface
@@ -11,17 +19,8 @@ INCLUDE_DIRECTORIES(
   ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
   ${WHOLESLIDEFILTERS_BINARY_DIR}
 )
-ADD_DEFINITIONS(${Boost_DEFINITIONS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
+TARGET_COMPILE_DEFINITIONS(WSIDistanceTransform PRIVATE -DBOOST_ALL_DYN_LINK)
 
-SET(WSIDistanceTransform_src
-  WSIDistanceTransform.cpp
-)
-
-ADD_EXECUTABLE(WSIDistanceTransform ${WSIDistanceTransform_src})
-
-SET_TARGET_PROPERTIES(WSIDistanceTransform PROPERTIES DEBUG_POSTFIX _d)
-TARGET_LINK_LIBRARIES(WSIDistanceTransform wholeslidefilters multiresolutionimageinterface)
 
 INSTALL(
   TARGETS WSIDistanceTransform 

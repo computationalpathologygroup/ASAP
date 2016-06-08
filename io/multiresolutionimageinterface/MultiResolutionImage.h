@@ -4,10 +4,14 @@
 #include <memory>
 #include "multiresolutionimageinterface_export.h"
 #include "TileCache.h"
-#include "boost/thread.hpp"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
+
+namespace boost {
+  class mutex;
+  class shared_mutex;
+}
 
 class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage : public ImageSource {
 
@@ -100,8 +104,8 @@ public :
 protected :
 
   //! To make MultiResolutionImage thread-safe
-  boost::shared_mutex _openCloseMutex;
-  boost::mutex _cacheMutex;
+  std::unique_ptr<boost::shared_mutex> _openCloseMutex;
+  std::unique_ptr<boost::mutex> _cacheMutex;
   std::shared_ptr<void> _cache;
 
   // Aditional properties of a multi-resolution image

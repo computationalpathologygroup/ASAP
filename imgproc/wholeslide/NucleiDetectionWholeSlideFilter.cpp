@@ -6,6 +6,7 @@
 #include "annotation/AnnotationList.h"
 #include "annotation/XmlRepository.h"
 #include <memory>
+#include <iostream>
 
 NucleiDetectionWholeSlideFilter::NucleiDetectionWholeSlideFilter() :
 _monitor(NULL),

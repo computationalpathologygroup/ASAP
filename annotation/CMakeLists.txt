@@ -1,21 +1,4 @@
 PROJECT(ANNOTATION)
-INCLUDE_DIRECTORIES(
-  .
-  ../
-  ../io/multiresolutionimageinterface
-  ${Boost_INCLUDE_DIRS}
-  ${PugiXML_INCLUDE_DIR}
-  ${DIAGPathology_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CORE_BINARY_DIR}
-  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
-)
-LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
-ADD_DEFINITIONS(${Boost_DEFINITIONS})
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-
 SET(ANNOTATION_HEADERS
   Annotation.h
   AnnotationBase.h
@@ -44,7 +27,20 @@ SET(ANNOTATION_SOURCE
 
 add_library(annotation SHARED ${ANNOTATION_SOURCE} ${ANNOTATION_HEADERS})
 generate_export_header(annotation)
-TARGET_LINK_LIBRARIES(annotation pugixml core multiresolutionimageinterface)
+TARGET_INCLUDE_DIRECTORIES(
+annotation
+PRIVATE
+  .
+  ../
+  ../io/multiresolutionimageinterface
+  ${Boost_INCLUDE_DIRS}
+  ${PugiXML_INCLUDE_DIR}
+  ${DIAGPathology_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CORE_BINARY_DIR}
+  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
+)
+TARGET_LINK_LIBRARIES(annotation PRIVATE pugixml core multiresolutionimageinterface)
 SET_TARGET_PROPERTIES(annotation PROPERTIES DEBUG_POSTFIX _d)
 
 INSTALL(TARGETS annotation

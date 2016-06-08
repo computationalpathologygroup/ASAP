@@ -5,6 +5,7 @@
 #include "core/PathologyEnums.h"
 #include "core/filetools.h"
 #include <set>
+#include <iostream>
 
 DistanceTransformWholeSlideFilter::DistanceTransformWholeSlideFilter() :
 _monitor(NULL),

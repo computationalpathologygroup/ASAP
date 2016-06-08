@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImage.h"

@@ -3,6 +3,7 @@
 #include "MultiResolutionImageWriter.h"
 #include "core/PathologyEnums.h"
 #include <set>
+#include <iostream>
 
 ConnectedComponentsWholeSlideFilter::DisjointSet::DisjointSet()
 {

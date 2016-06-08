@@ -1,21 +1,5 @@
 PROJECT(WHOLESLIDEFILTERS)
 
-INCLUDE_DIRECTORIES(
-  ${MULTIRESOLUTIONIMAGEINTERFACE_SOURCE_DIR}
-  ../../
-  ${Boost_INCLUDE_DIRS}
-  ${WHOLESLIDEFILTERS_SOURCE_DIR}
-  ${DIAGPathology_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CORE_BINARY_DIR}
-  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
-  ${BASICFILTERS_BINARY_DIR}
-  ${NUCLEISEGMENTATION_BINARY_DIR}
-  ${ANNOTATION_BINARY_DIR}
-)
-ADD_DEFINITIONS(${Boost_DEFINITIONS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
-
 SET(WHOLESLIDEFILTERS_SRCS 
   ConnectedComponentsWholeSlideFilter.h
   ConnectedComponentsWholeSlideFilter.cpp
@@ -32,7 +16,21 @@ SET(WHOLESLIDEFILTERS_SRCS
 )
 
 ADD_LIBRARY(wholeslidefilters SHARED ${WHOLESLIDEFILTERS_SRCS})
-TARGET_LINK_LIBRARIES(wholeslidefilters ${OpenCV_LIBS} annotation NucleiSegmentation basicfilters multiresolutionimageinterface core)
+TARGET_LINK_LIBRARIES(wholeslidefilters PRIVATE ${OpenCV_LIBS} annotation NucleiSegmentation basicfilters multiresolutionimageinterface core)
+TARGET_INCLUDE_DIRECTORIES(
+  wholeslidefilters PRIVATE
+  ${MULTIRESOLUTIONIMAGEINTERFACE_SOURCE_DIR}
+  ../../
+  ${WHOLESLIDEFILTERS_SOURCE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${DIAGPathology_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CORE_BINARY_DIR}
+  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
+  ${BASICFILTERS_BINARY_DIR}
+  ${NUCLEISEGMENTATION_BINARY_DIR}
+  ${ANNOTATION_BINARY_DIR}
+)
 generate_export_header(wholeslidefilters)
 
 SET_TARGET_PROPERTIES(wholeslidefilters PROPERTIES DEBUG_POSTFIX _d)
@@ -75,14 +73,11 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	  
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES SWIG_FLAGS "-builtin")
-	  include_directories(${PYTHON_INCLUDE_DIR})
-	  IF(PYTHON_CONFIG_INCLUDE_DIR)
-		include_directories(${PYTHON_CONFIG_INCLUDE_DIR})
-	  ENDIF(PYTHON_CONFIG_INCLUDE_DIR)
-
+	  include_directories(. ${PYTHON_INCLUDE_DIR} ${DIAGPathology_BINARY_DIR})
 	  SWIG_ADD_MODULE(wholeslidefilters python wholeslidefilters.i)
 	  SWIG_LINK_LIBRARIES(wholeslidefilters wholeslidefilters core) 
 	  SWIG_LINK_LIBRARIES(wholeslidefilters ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+	  
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_wholeslidefilters_REAL_NAME} PROPERTIES FOLDER pathology/diag/imgproc)
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_wholeslidefilters_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  

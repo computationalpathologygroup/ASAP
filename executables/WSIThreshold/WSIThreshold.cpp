@@ -7,6 +7,7 @@
 #include "core/filetools.h"
 #include "core/CmdLineProgressMonitor.h"
 #include "config/ASAPMacros.h"
+#include <iostream>
 
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;

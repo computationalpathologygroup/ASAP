@@ -1,4 +1,5 @@
 #include "MultiResolutionImage.h"
+#include "boost/thread.hpp"
 
 using namespace pathology;
 
@@ -118,6 +119,8 @@ MultiResolutionImage::MultiResolutionImage() :
   _levelDimensions(),
   _numberOfLevels(0)
 {
+  _cacheMutex.reset(new boost::mutex());
+  _openCloseMutex.reset(new boost::shared_mutex());
 }
 
 const int MultiResolutionImage::getNumberOfLevels() const {
@@ -183,7 +186,7 @@ const int MultiResolutionImage::getBestLevelForDownSample(const double& downsamp
 }
 
 MultiResolutionImage::~MultiResolutionImage() {
-  boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
 }
 
@@ -199,7 +202,7 @@ void MultiResolutionImage::cleanup() {
 
 const unsigned long long MultiResolutionImage::getCacheSize() {
   unsigned long long cacheSize = 0;
-  _cacheMutex.lock();
+  _cacheMutex->lock();
   if (_cache && _isValid) {
     if (_dataType == UInt32) {
       cacheSize = (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->maxCacheSize();
@@ -213,13 +216,13 @@ const unsigned long long MultiResolutionImage::getCacheSize() {
     else if (_dataType == Float) {
       cacheSize = (std::static_pointer_cast<TileCache<float> >(_cache))->maxCacheSize();
     }
-  _cacheMutex.unlock();
+  _cacheMutex->unlock();
   }
   return cacheSize;
 }
 
 void MultiResolutionImage::setCacheSize(const unsigned long long cacheSize) {
-  _cacheMutex.lock();
+  _cacheMutex->lock();
   if (_cache && _isValid) {
     if (_dataType == UInt32) {
       (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->setMaxCacheSize(cacheSize);
@@ -233,6 +236,6 @@ void MultiResolutionImage::setCacheSize(const unsigned long long cacheSize) {
     else if (_dataType == Float) {
       (std::static_pointer_cast<TileCache<float> >(_cache))->setMaxCacheSize(cacheSize);
     }
-  _cacheMutex.unlock();
+  _cacheMutex->unlock();
   }
 }

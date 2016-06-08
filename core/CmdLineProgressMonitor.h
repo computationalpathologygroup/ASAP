@@ -3,7 +3,10 @@
 
 #include "core_export.h"
 #include "ProgressMonitor.h"
-#include <boost/progress.hpp>
+
+namespace boost {
+  class progress_display;
+}
 
 class CORE_EXPORT CmdLineProgressMonitor : public ProgressMonitor {
 

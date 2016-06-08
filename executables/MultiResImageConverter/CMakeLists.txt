@@ -1,39 +1,23 @@
 PROJECT(MultiResImageConverter)
 
-INCLUDE_DIRECTORIES(
-  .
-  ../../
-  ${MultiResImageConverter_SOURCE_DIR}/../../io/multiresolutionimageinterface
-  ${Boost_INCLUDE_DIRS}
-  ${DIAGPathology_BINARY_DIR}
-  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
-  ${CORE_BINARY_DIR}
-)
-ADD_DEFINITIONS(${Boost_DEFINITIONS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
-
-ADD_DEFINITIONS(${BOOST_DEFINITIONS})
-
 SET(MultiResImageConverter_src
   MultiResImageConverter.cpp
 )
 
-IF(WIN32)
-  INCLUDE_DIRECTORIES(
-    ${MultiResImageConverter_SOURCE_DIR}/../../3rd-party-tk/openslide/64bit/include/openslide
-  )
-  LINK_DIRECTORIES(${MultiResImageConverter_SOURCE_DIR}/../../3rd-party-tk/openslide/64bit/lib)
-ELSE()
-  INCLUDE_DIRECTORIES(
-    ${MultiResImageConverter_SOURCE_DIR}/../../3rd-party-tk/openslide/linux/include/openslide
-  )
-  LINK_DIRECTORIES(${MultiResImageConverter_SOURCE_DIR}/../../3rd-party-tk/openslide/linux/lib)
-ENDIF()
-
 ADD_EXECUTABLE(MultiResImageConverter ${MultiResImageConverter_src})
-
 SET_TARGET_PROPERTIES(MultiResImageConverter PROPERTIES DEBUG_POSTFIX _d)
-TARGET_LINK_LIBRARIES(MultiResImageConverter multiresolutionimageinterface ${Boost_LIBRARIES})
+TARGET_INCLUDE_DIRECTORIES(
+  MultiResImageConverter PRIVATE
+  .
+  ../../
+  ${Boost_INCLUDE_DIRS}
+  ${MultiResImageConverter_SOURCE_DIR}/../../io/multiresolutionimageinterface
+  ${DIAGPathology_BINARY_DIR}
+  ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
+  ${CORE_BINARY_DIR}
+)
+TARGET_COMPILE_DEFINITIONS(MultiResImageConverter PRIVATE -DBOOST_ALL_DYN_LINK)
+TARGET_LINK_LIBRARIES(MultiResImageConverter PRIVATE multiresolutionimageinterface core Boost::disable_autolinking Boost::program_options)
 
 INSTALL(
   TARGETS MultiResImageConverter

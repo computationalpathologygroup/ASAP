@@ -3,7 +3,6 @@ PROJECT(Tests)
   INCLUDE_DIRECTORIES(
     .
     ../../
-    ${Boost_INCLUDE_DIRS}
     ${UNITTEST_INCLUDE_DIR}
 	${DIAGPathology_BINARY_DIR}
     ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
@@ -11,9 +10,6 @@ PROJECT(Tests)
 	${BASICFILTERS_BINARY_DIR}
 	${NUCLEISEGMENTATION_BINARY_DIR}
   )
-  ADD_DEFINITIONS(${Boost_DEFINITIONS})
-  ADD_DEFINITIONS(-DNOMINMAX)
-  LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
 
   # Add test which are always performed
   FILE(GLOB unittest_io_src ${Tests_SOURCE_DIR}/../../io/*/unittest/*.cpp)
@@ -40,16 +36,10 @@ PROJECT(Tests)
     LIST(APPEND unittest_src ${unittest_imgproc_src})
   ENDIF()
 
-  IF(WIN32)
-    LINK_DIRECTORIES(${Tests_SOURCE_DIR}/../../3rd-party-tk/openslide/64bit/lib)
-  ELSE()
-    LINK_DIRECTORIES(${Tests_SOURCE_DIR}/../../3rd-party-tk/openslide/linux/lib)
-  ENDIF()
-
   ADD_EXECUTABLE(patholTestRunner ${unittest_src})
-  TARGET_LINK_LIBRARIES(patholTestRunner optimized ${UNITTEST_LIBRARY} debug ${UNITTEST_LIBRARY_DEBUG} multiresolutionimageinterface)
+  TARGET_LINK_LIBRARIES(patholTestRunner PRIVATE optimized ${UNITTEST_LIBRARY} debug ${UNITTEST_LIBRARY_DEBUG} multiresolutionimageinterface)
   IF(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING)
-    TARGET_LINK_LIBRARIES(patholTestRunner basicfilters NucleiSegmentation ${OpenCV_LIBS})
+    TARGET_LINK_LIBRARIES(patholTestRunner PRIVATE basicfilters NucleiSegmentation ${OpenCV_LIBS})
   ENDIF()
 
   # set target properties

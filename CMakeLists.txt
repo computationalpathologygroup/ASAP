@@ -22,7 +22,6 @@ ENDIF(NOT WIN32)
 
 # Use boost for cross-platform use of threading, file system and date_time handling
 FIND_PACKAGE(Boost REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
-SET(Boost_DEFINITIONS "-DBOOST_ALL_DYN_LINK")
 
 # Jasper for JPEG2000 codec
 FIND_PACKAGE(Jasper REQUIRED)

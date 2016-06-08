@@ -1,4 +1,5 @@
 #include "OpenSlideImage.h"
+#include <boost/thread.hpp>
 #include <openslide.h>
 #include <sstream>
 
@@ -8,7 +9,7 @@ OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _ignore
 }
 
 OpenSlideImage::~OpenSlideImage() {
-  boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
   MultiResolutionImage::cleanup();
 }
@@ -46,7 +47,7 @@ void OpenSlideImage::setIgnoreAlpha(const bool ignoreAlpha) {
 }
 
 bool OpenSlideImage::initialize(const std::string& imagePath) {
-  boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
 
   if (openslide_detect_vendor(imagePath.c_str())) {
@@ -121,7 +122,7 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
     return NULL;
   }
 
-  boost::shared_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
   unsigned int* temp = new unsigned int[width*height];
   std::fill(temp,temp+width*height,0);
   std::vector<unsigned long long> levelDims = this->getLevelDimensions(level);
@@ -168,19 +169,19 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
         deleteTile = true;
       }
       else {
-        _cacheMutex.lock();
+        _cacheMutex->lock();
         std::static_pointer_cast<TileCache<unsigned int> >(_cache)->get(k.str(), tile, cachedTileSize);
-        _cacheMutex.unlock();
+        _cacheMutex->unlock();
         if (!tile) {
           tile = new unsigned int[tileW*tileH];
           openslide_read_region(_slide, tile, ix*levelDownsample, iy*levelDownsample, level, tileW, tileH);
 
           // If tile did not fit in the cache, delete it at the end
-          _cacheMutex.lock();
+          _cacheMutex->lock();
           if (std::static_pointer_cast<TileCache<unsigned int> >(_cache)->set(k.str(), tile, tileW*tileH*sizeof(unsigned int))) {
             deleteTile = true;
           }
-          _cacheMutex.unlock();
+          _cacheMutex->unlock();
         }
       }
       if (!tile) {

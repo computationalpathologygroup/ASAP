@@ -2,6 +2,7 @@
 #include "tiffio.h"
 #include "JPEG2000Codec.h"
 #include "core/PathologyEnums.h"
+#include <boost/thread.hpp>
 
 using namespace pathology;
 
@@ -9,13 +10,13 @@ TIFFImage::TIFFImage() : MultiResolutionImage(), _tiff(NULL), _jp2000(NULL) {
 }
 
 TIFFImage::~TIFFImage() {
-  boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
   MultiResolutionImage::cleanup();
 }
 
 bool TIFFImage::initialize(const std::string& imagePath) {
-  boost::unique_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
   
   //Disable warning popups
@@ -254,7 +255,7 @@ void* TIFFImage::readDataFromImage(const long long& startX, const long long& sta
 template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long& startX, const long long& startY, const unsigned long long& width, 
                                                                                  const unsigned long long& height, const unsigned int& level, unsigned int nrSamples)
 {
-  boost::shared_lock<boost::shared_mutex> l(_openCloseMutex);
+  boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
   T* temp = new T[width*height*nrSamples];
   std::fill(temp,temp+width*height*nrSamples,0);
   unsigned int tileW=_tileSizesPerLevel[level][0], tileH=_tileSizesPerLevel[level][1], levelH=_levelDimensions[level][1], levelW=_levelDimensions[level][0];
@@ -280,13 +281,13 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
       bool deleteTile = false;
       unsigned int cachedTileSize = 0;
       T* tile = NULL;
-      _cacheMutex.lock();
+      _cacheMutex->lock();
       std::static_pointer_cast<TileCache<T> >(_cache)->get(k.str(), tile, cachedTileSize);
-      _cacheMutex.unlock();
+      _cacheMutex->unlock();
       if (!tile) {
         tile = new T[tileW*tileH*getSamplesPerPixel()];
         std::fill(tile, tile + tileW*tileH*getSamplesPerPixel(), static_cast<T>(0.0));
-        _cacheMutex.lock();
+        _cacheMutex->lock();
         TIFFSetDirectory(_tiff, level);
         unsigned int codec = 0;
         TIFFGetField(_tiff, TIFFTAG_COMPRESSION, &codec);
@@ -311,7 +312,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
         if (std::static_pointer_cast<TileCache<T> >(_cache)->set(k.str(), tile, tileW*tileH*getSamplesPerPixel()*sizeof(T))) {
           deleteTile = true;
         }
-        _cacheMutex.unlock();
+        _cacheMutex->unlock();
       }
 
       long long ixx = (ix-levelStartX);

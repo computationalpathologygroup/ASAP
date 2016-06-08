@@ -1,6 +1,15 @@
 PROJECT(WSIThreshold)
 
-INCLUDE_DIRECTORIES(
+SET(WSIThreshold_src
+  WSIThreshold.cpp
+)
+
+ADD_EXECUTABLE(WSIThreshold ${WSIThreshold_src})
+SET_TARGET_PROPERTIES(WSIThreshold PROPERTIES DEBUG_POSTFIX _d)
+TARGET_LINK_LIBRARIES(WSIThreshold wholeslidefilters multiresolutionimageinterface core Boost::disable_autolinking Boost::program_options)
+TARGET_INCLUDE_DIRECTORIES(
+  WSIThreshold  
+  PRIVATE
   .
   ../../
   ${WSIThreshold_SOURCE_DIR}/../../io/multiresolutionimageinterface
@@ -11,17 +20,7 @@ INCLUDE_DIRECTORIES(
   ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
   ${WHOLESLIDEFILTERS_BINARY_DIR}
 )
-ADD_DEFINITIONS(${Boost_DEFINITIONS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
-
-SET(WSIThreshold_src
-  WSIThreshold.cpp
-)
-
-ADD_EXECUTABLE(WSIThreshold ${WSIThreshold_src})
-
-SET_TARGET_PROPERTIES(WSIThreshold PROPERTIES DEBUG_POSTFIX _d)
-TARGET_LINK_LIBRARIES(WSIThreshold wholeslidefilters multiresolutionimageinterface)
+TARGET_COMPILE_DEFINITIONS(WSIThreshold PRIVATE -DBOOST_ALL_DYN_LINK)
 
 INSTALL(
   TARGETS WSIThreshold 

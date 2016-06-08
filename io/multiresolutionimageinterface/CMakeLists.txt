@@ -14,8 +14,6 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CORE_BINARY_DIR}
 )
-ADD_DEFINITIONS(${Boost_DEFINITIONS})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIR})
 
 if(WIN32 AND NOT MINGW)
   add_definitions(-DJAS_WIN_MSVC_BUILD)
@@ -50,8 +48,7 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
 
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
 generate_export_header(multiresolutionimageinterface)
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface ${DCMTKJPEG_LIBRARY} libtiff ${OPENSLIDE_LIBRARY} core libjasper ${Boost_LIBRARIES} libjpeg zlib pugixml)
-
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff ${OPENSLIDE_LIBRARY} core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
 SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
 
 IF(WIN32)  
@@ -83,16 +80,11 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-builtin")
-	  include_directories(${PYTHON_INCLUDE_DIR})
-	  include_directories(${DIAGPathology_BINARY_DIR}/annotation)
-	  include_directories(${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)
-	  IF(PYTHON_CONFIG_INCLUDE_DIR)
-		include_directories(${PYTHON_CONFIG_INCLUDE_DIR})
-	  ENDIF(PYTHON_CONFIG_INCLUDE_DIR)
 
 	  SWIG_ADD_MODULE(multiresolutionimageinterface python multiresolutionimageinterface.i)
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+	  target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER pathology/diag/io)
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  

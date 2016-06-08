@@ -1,4 +1,5 @@
 #include "CmdLineProgressMonitor.h"
+#include <boost/progress.hpp>
 
 CmdLineProgressMonitor::CmdLineProgressMonitor() : ProgressMonitor(), disp(NULL)
 {
