@@ -260,9 +260,6 @@ void PathologyWorkstation::openFile(const QString& fileName) {
     _img.reset(imgReader.open(fn));
     if (_img) {
       if (_img->valid()) {
-        if (std::shared_ptr<OpenSlideImage> openslide_img = dynamic_pointer_cast<OpenSlideImage>(_img)) {
-          openslide_img->setIgnoreAlpha(false);
-        }
         vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
         PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
         view->initialize(_img);

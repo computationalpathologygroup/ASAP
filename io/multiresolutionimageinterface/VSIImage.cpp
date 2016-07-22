@@ -44,7 +44,7 @@ void VSIImage::cleanup() {
   MultiResolutionImage::cleanup();
 }
 
-bool VSIImage::initialize(const std::string& imagePath) { 
+bool VSIImage::initializeType(const std::string& imagePath) {
 	cleanup();
 	if (!core::fileExists(imagePath)) {
 		return false;

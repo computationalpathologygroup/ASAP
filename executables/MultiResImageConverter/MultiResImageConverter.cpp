@@ -71,9 +71,6 @@ void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std
         CmdLineProgressMonitor* monitor = new CmdLineProgressMonitor();
         monitor->setStatus("Processing " + fileIn);
         writer->setProgressMonitor(monitor);
-        if (dynamic_cast<OpenSlideImage*>(img)) {
-          dynamic_cast<OpenSlideImage*>(img)->setIgnoreAlpha(true);
-        }
         writer->writeImageToFile(img, fileOut);
         delete monitor;
       }

@@ -13,7 +13,7 @@ public:
   LIFImage();
   ~LIFImage();
 
-  bool initialize(const std::string& imagePath);
+  bool initializeType(const std::string& imagePath);
   
 protected :
 

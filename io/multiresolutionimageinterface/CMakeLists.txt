@@ -26,11 +26,14 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_HS
     MultiResolutionImageWriter.h 
 	AperioSVSWriter.h
     VSIImage.h
+	VSIImageFactory.h
     TIFFImage.h
-    OpenSlideImage.h
+	TIFFImageFactory.h
     MultiResolutionImage.h
+	MultiResolutionImageFactory.h
     TileCache.h
     LIFImage.h
+	LIFImageFactory.h
 )
 
 SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS 
@@ -39,20 +42,40 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
     MultiResolutionImageWriter.cpp 
 	AperioSVSWriter.cpp
     VSIImage.cpp
+	VSIImageFactory.cpp
     TIFFImage.cpp
-    OpenSlideImage.cpp  
     MultiResolutionImage.cpp
+	MultiResolutionImageFactory.cpp
+    MultiResolutionImage.cpp
+	TIFFImageFactory.cpp
     TileCache.cpp
     LIFImage.cpp
+	LIFImageFactory.cpp
+)
+
+SET(EXTERNAL_OPENSLIDE_HS
+    OpenSlideImage.h
+	OpenSlideImageFactory.h
+)
+
+SET(EXTERNAL_OPENSLIDE_SRCS
+    OpenSlideImage.cpp
+	OpenSlideImageFactory.cpp
 )
 
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
 generate_export_header(multiresolutionimageinterface)
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff ${OPENSLIDE_LIBRARY} core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
 SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
+
+ADD_LIBRARY(openslidefileformat SHARED ${EXTERNAL_OPENSLIDE_SRCS} ${EXTERNAL_OPENSLIDE_HS})
+generate_export_header(openslidefileformat)
+TARGET_LINK_LIBRARIES(openslidefileformat PRIVATE ${OPENSLIDE_LIBRARY} multiresolutionimageinterface core Boost::disable_autolinking Boost::thread)
+SET_TARGET_PROPERTIES(openslidefileformat PROPERTIES DEBUG_POSTFIX _d)
 
 IF(WIN32)  
   SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES FOLDER pathology/diag/io)    
+  SET_TARGET_PROPERTIES(openslidefileformat PROPERTIES FOLDER pathology/diag/io)
 ENDIF(WIN32)
 
 OPTION(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON "Wrap multi-resolution image reading in Python" OFF)
@@ -103,9 +126,19 @@ ENDIF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 INSTALL(FILES ${MULTIRESOLUTIONIMAGEINTERFACE_HS} DESTINATION include/multiresolutionimageinterface)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface_export.h DESTINATION include/multiresolutionimageinterface)
 
+INSTALL(FILES ${EXTERNAL_OPENSLIDE_HS} DESTINATION include/multiresolutionimageinterface)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/openslidefileformat_export.h DESTINATION include/multiresolutionimageinterface)
+
 INSTALL(TARGETS multiresolutionimageinterface
   EXPORT asap-targets
   RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+INSTALL(TARGETS openslidefileformat
+  EXPORT asap-targets
+  RUNTIME DESTINATION bin/formats
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )

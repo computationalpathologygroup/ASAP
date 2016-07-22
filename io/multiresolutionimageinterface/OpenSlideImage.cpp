@@ -5,17 +5,13 @@
 
 using namespace pathology;
 
-OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _ignoreAlpha(true) {
+OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL) {
 }
 
 OpenSlideImage::~OpenSlideImage() {
   boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
   MultiResolutionImage::cleanup();
-}
-
-const bool OpenSlideImage::getIgnoreAlpha() const {
-  return _ignoreAlpha;
 }
 
 void OpenSlideImage::setCacheSize(const unsigned long long cacheSize) {
@@ -34,19 +30,7 @@ std::string OpenSlideImage::getOpenSlideErrorState() {
   return _errorState;
 }
 
-void OpenSlideImage::setIgnoreAlpha(const bool ignoreAlpha) {
-  if (ignoreAlpha) {
-    _samplesPerPixel = 3;
-    _colorType = RGB;
-  }
-  else {
-    _samplesPerPixel = 4;
-    _colorType = ARGB;
-  }
-  _ignoreAlpha = ignoreAlpha;
-}
-
-bool OpenSlideImage::initialize(const std::string& imagePath) {
+bool OpenSlideImage::initializeType(const std::string& imagePath) {
   boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
 
@@ -61,14 +45,8 @@ bool OpenSlideImage::initialize(const std::string& imagePath) {
     if (_errorState.empty()) {
       _numberOfLevels = openslide_get_level_count(_slide);
       _dataType = UChar;
-      if (_ignoreAlpha) {
-        _samplesPerPixel = 3;
-        _colorType = RGB;
-      }
-      else {
-        _samplesPerPixel = 4;
-        _colorType = ARGB;
-      }
+      _samplesPerPixel = 3;
+      _colorType = RGB;
       for (int i = 0; i < _numberOfLevels; ++i) {
         int64_t x, y;
         openslide_get_level_dimensions(_slide, i, &x, &y);
@@ -105,7 +83,7 @@ bool OpenSlideImage::initialize(const std::string& imagePath) {
   }
   return _isValid;
 }
-std::string OpenSlideImage::getOpenSlideProperty(const std::string& propertyName) {
+std::string OpenSlideImage::getProperty(const std::string& propertyName) {
   std::string propertyValue;
   if (_slide) {
     if (openslide_get_property_value(_slide, propertyName.c_str())) {
@@ -211,18 +189,15 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
       }
     }
   }
-  if (_ignoreAlpha) {
-    unsigned char* rgb = new unsigned char[width*height*3];
-    unsigned char* bgra = (unsigned char*)temp;
-    for (unsigned long long i = 0, j = 0; i < width*height*4; i+=4, j+=3) {
-      rgb[j] = bgra[i + 2];
-      rgb[j + 1] = bgra[i + 1];
-      rgb[j + 2] = bgra[i];
-    }
-    delete[] temp;
-    return rgb;
+  unsigned char* rgb = new unsigned char[width*height*3];
+  unsigned char* bgra = (unsigned char*)temp;
+  for (unsigned long long i = 0, j = 0; i < width*height*4; i+=4, j+=3) {
+    rgb[j] = bgra[i + 2];
+    rgb[j + 1] = bgra[i + 1];
+    rgb[j + 2] = bgra[i];
   }
-  return temp;
+  delete[] temp;
+  return rgb;
 }
 
 void OpenSlideImage::cleanup() {

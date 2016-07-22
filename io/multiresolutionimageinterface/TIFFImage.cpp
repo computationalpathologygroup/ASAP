@@ -15,7 +15,7 @@ TIFFImage::~TIFFImage() {
   MultiResolutionImage::cleanup();
 }
 
-bool TIFFImage::initialize(const std::string& imagePath) {
+bool TIFFImage::initializeType(const std::string& imagePath) {
   boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
   

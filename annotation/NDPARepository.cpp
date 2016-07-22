@@ -3,7 +3,7 @@
 #include "AnnotationGroup.h"
 #include "AnnotationList.h"
 #include "MultiResolutionImageReader.h"
-#include "OpenSlideImage.h"
+#include "MultiResolutionImage.h"
 #include "core/Point.h"
 #include "core/filetools.h"
 #include "core/stringconversion.h"
@@ -39,13 +39,13 @@ bool NDPARepository::loadFromRepo()
   _list->removeAllAnnotations();
   _list->removeAllGroups();
 
-  std::shared_ptr<OpenSlideImage> ndpi;
+  std::shared_ptr<MultiResolutionImage> ndpi;
   if (_ndpiSourceFile.empty()) {
     std::vector<std::string> ndpaParts;
     core::split(_source, ndpaParts, ".ndpa");
     if (core::fileExists(ndpaParts[0])) {
       MultiResolutionImageReader reader;
-      ndpi.reset(dynamic_cast<OpenSlideImage*>(reader.open(ndpaParts[0])));
+      ndpi.reset(reader.open(ndpaParts[0]));
       if (!ndpi) {
         return false;
       }
@@ -55,10 +55,10 @@ bool NDPARepository::loadFromRepo()
     }
   }
 
-  float offsetX = core::fromstring<float>(ndpi->getOpenSlideProperty("hamamatsu.XOffsetFromSlideCentre"));
-  float offsetY = core::fromstring<float>(ndpi->getOpenSlideProperty("hamamatsu.YOffsetFromSlideCentre"));
-  float mppX = core::fromstring<float>(ndpi->getOpenSlideProperty("openslide.mpp-x"));
-  float mppY = core::fromstring<float>(ndpi->getOpenSlideProperty("openslide.mpp-y"));
+  float offsetX = core::fromstring<float>(ndpi->getProperty("hamamatsu.XOffsetFromSlideCentre"));
+  float offsetY = core::fromstring<float>(ndpi->getProperty("hamamatsu.YOffsetFromSlideCentre"));
+  float mppX = core::fromstring<float>(ndpi->getProperty("openslide.mpp-x"));
+  float mppY = core::fromstring<float>(ndpi->getProperty("openslide.mpp-y"));
   std::vector<unsigned long long> dims = ndpi->getDimensions();
 
 	pugi::xml_document xml_doc;

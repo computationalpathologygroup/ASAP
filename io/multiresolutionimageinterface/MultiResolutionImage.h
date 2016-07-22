@@ -20,7 +20,13 @@ public :
   virtual ~MultiResolutionImage();
 
   //! Load the image, returns whether a valid image is obtained
-  virtual bool initialize(const std::string& imagePath) = 0;
+  bool initialize(const std::string& imagePath);
+
+  //! Actually initialization implementataiton
+  virtual bool initializeType(const std::string& imagePath) = 0;
+
+  //! Get a stored data property (e.g. objective magnification")
+  virtual std::string getProperty(const std::string& propertyName) { return std::string(); };
 
   //! Gets/Sets the maximum size of the cache
   virtual const unsigned long long getCacheSize();
@@ -46,7 +52,7 @@ public :
   
   //! Gets the maximum value for a channel. If no channel is specified, default to the first channel
   virtual double getMaxValue(int channel = -1) = 0;
-
+  
   //! Obtains data as a patch, which is a basic image class containing all relevant information for further processing,
   //! like data and colortype
   template <typename T> 
@@ -115,6 +121,7 @@ protected :
   // Properties of the loaded slide
   unsigned long long _cacheSize;
   std::string _fileType;
+  std::string _filePath;
 
   // Cleans up internals
   virtual void cleanup();

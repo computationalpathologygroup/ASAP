@@ -11,7 +11,7 @@ public:
   VSIImage();
   ~VSIImage();
 
-  bool initialize(const std::string& imagePath);
+  bool initializeType(const std::string& imagePath);
 
 protected :
 

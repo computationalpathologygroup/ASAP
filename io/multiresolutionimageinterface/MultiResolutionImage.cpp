@@ -117,7 +117,9 @@ MultiResolutionImage::MultiResolutionImage() :
   _cacheSize(0),
   _cache(),
   _levelDimensions(),
-  _numberOfLevels(0)
+  _numberOfLevels(0),
+  _filePath(),
+  _fileType()
 {
   _cacheMutex.reset(new boost::mutex());
   _openCloseMutex.reset(new boost::shared_mutex());
@@ -138,6 +140,11 @@ const std::vector<unsigned long long> MultiResolutionImage::getDimensions() cons
     return _levelDimensions[0];
   }
   return dims;
+}
+
+bool MultiResolutionImage::initialize(const std::string& imagePath) {
+  _filePath = imagePath;
+  return initializeType(imagePath);
 }
 
 const std::vector<unsigned long long> MultiResolutionImage::getLevelDimensions(const unsigned int& level) const {
@@ -198,6 +205,8 @@ void MultiResolutionImage::cleanup() {
   _colorType = InvalidColorType;
   _dataType = InvalidDataType;
   _isValid = false;
+  _fileType = "";
+  _filePath = "";
 }
 
 const unsigned long long MultiResolutionImage::getCacheSize() {

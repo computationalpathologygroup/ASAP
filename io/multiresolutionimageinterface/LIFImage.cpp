@@ -74,7 +74,7 @@ void LIFImage::cleanup() {
   MultiResolutionImage::cleanup();
 }
 
-bool LIFImage::initialize(const std::string& imagePath) {
+bool LIFImage::initializeType(const std::string& imagePath) {
 	cleanup();
 	if (!core::fileExists(imagePath)) {
 		return false;

@@ -15,7 +15,7 @@ public:
 
   TIFFImage();
   ~TIFFImage();  
-  bool initialize(const std::string& imagePath);
+  bool initializeType(const std::string& imagePath);
 
   double getMinValue(int channel = -1);
   double getMaxValue(int channel = -1);
