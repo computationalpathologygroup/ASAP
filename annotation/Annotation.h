@@ -44,7 +44,7 @@ public:
   std::vector<Point> getLocalBoundingBox();
   Point getCenter();
 
-  void simplify(unsigned int nrPoints);
+  void simplify(unsigned int nrPoints=0, float epsilon=1.0);
 
   float getArea() const;
   unsigned int getNumberOfPoints() const;

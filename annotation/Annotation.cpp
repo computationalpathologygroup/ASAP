@@ -148,7 +148,7 @@ std::vector<Point> Annotation::getImageBoundingBox() const {
   return bbox;
 }
 
-void Annotation::simplify(unsigned int nrPoints) {
+void Annotation::simplify(unsigned int nrPoints, float epsilon) {
   std::vector<float> inPoints;
   std::vector<float> outPoints;
   for (std::vector<Point>::iterator it = _coordinates.begin(); it != _coordinates.end(); ++it) {
@@ -157,7 +157,12 @@ void Annotation::simplify(unsigned int nrPoints) {
   }
   std::vector<float>::const_iterator begin = inPoints.begin();
   std::vector<float>::const_iterator end = inPoints.end();
-  psimpl::simplify_douglas_peucker_n<2>(begin, end, nrPoints, std::back_inserter(outPoints));
+  if (nrPoints > 0) {
+    psimpl::simplify_douglas_peucker_n<2>(begin, end, nrPoints, std::back_inserter(outPoints));
+  }
+  else {
+    psimpl::simplify_douglas_peucker<2>(begin, end, epsilon, std::back_inserter(outPoints));
+  }
   _coordinates.clear();
   for (std::vector<float>::iterator it = outPoints.begin(); it != outPoints.end(); ++it) {
     float x = *it;

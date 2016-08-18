@@ -65,6 +65,13 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
     return false;
   }
 
+  _numberOfLevels = TIFFNumberOfDirectories(_tiff);
+
+  if (_numberOfLevels < 2) {
+    cleanup();
+    return false;
+  }
+
   // Check the multi-resolution pyramid is stored nicely
   TIFFSetDirectory(_tiff,0);
   unsigned int width = 0;
@@ -95,8 +102,6 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
       }
     }
   }
-
-  _numberOfLevels = TIFFNumberOfDirectories(_tiff);
 
   if (dType == SAMPLEFORMAT_IEEEFP) {
     _dataType = Float;

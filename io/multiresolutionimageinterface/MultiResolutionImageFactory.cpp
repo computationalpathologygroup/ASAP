@@ -1,5 +1,6 @@
 #include "MultiResolutionImageFactory.h"
 #include "MultiResolutionImage.h"
+#include "VSIImage.h"
 #include "core/filetools.h"
 #include "core/stringconversion.h"
 
@@ -28,7 +29,7 @@ MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& 
     core::split(it->first, factoryExtensions, ";");
     if (std::find(factoryExtensions.begin(), factoryExtensions.end(), extension) != factoryExtensions.end()) {
       MultiResolutionImage* img = it->second->readImage(fileName);
-        if (img && img->getNumberOfLevels() > 1) {
+        if (img && (img->getNumberOfLevels() > 1 || dynamic_cast<VSIImage*>(img) != NULL)) {
           return img;
         } else {
           delete img;

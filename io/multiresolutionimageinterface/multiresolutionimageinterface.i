@@ -31,6 +31,7 @@
 #include "../../core/Point.h"
 #include "../../core/ProgressMonitor.h"
 #include "../../core/CmdLineProgressMonitor.h"
+#include "../../annotation/AnnotationBase.h"
 #include "../../annotation/Annotation.h"
 #include "../../annotation/AnnotationGroup.h"
 #include "../../annotation/AnnotationList.h"
@@ -54,6 +55,7 @@
 %shared_ptr(TIFFImage)
 %shared_ptr(LIFImage)
 %shared_ptr(Annotation)
+%shared_ptr(AnnotationBase)
 %shared_ptr(AnnotationGroup)
 %shared_ptr(AnnotationList)
 %shared_ptr(Repository)
@@ -96,7 +98,7 @@ import_array();
 %include "../../core/PathologyEnums.h"
 %include "../../core/ImageSource.h"
 %include "../../core/CmdLineProgressMonitor.h"
-
+%include "../../annotation/AnnotationBase.h"
 %include "../../annotation/Annotation.h"
 %include "../../annotation/AnnotationGroup.h"
 %include "../../annotation/AnnotationList.h"

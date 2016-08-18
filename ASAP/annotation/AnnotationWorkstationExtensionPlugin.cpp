@@ -321,13 +321,21 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
     std::shared_ptr<ImageScopeRepository> imscRepo = std::dynamic_pointer_cast<ImageScopeRepository>(_annotationService->getRepository());
     if (imscRepo) {
       bool ok = false;
+      bool ok2 = false;
       float newClosingDistance = QInputDialog::getDouble(_viewer, tr("Enter the annotation closing distance."), tr("Please provide the maximal distance for which annotations are automatically closed by ASAP if they remain open."), 30., 0, 1000, 1, &ok);
+      float simplifcationDistance = QInputDialog::getDouble(_viewer, tr("Enter the simplification distance."), tr("Please provide the minimal perpendicular distance for which points are automatically merged."), 100, 0, 1000, 2, &ok2);
       float closingDistance = imscRepo->getClosingDistance();
       if (ok && newClosingDistance != closingDistance) {
         _annotationService->getList()->removeAllAnnotations();
         _annotationService->getList()->removeAllGroups();
         imscRepo->setClosingDistance(newClosingDistance);
         imscRepo->load();
+      }
+      if (ok2 && simplifcationDistance > 0) {
+        std::vector<std::shared_ptr<Annotation> > annotations = _annotationService->getList()->getAnnotations();
+        for (std::vector<std::shared_ptr<Annotation> >::iterator it = annotations.begin(); it != annotations.end(); ++it) {
+          (*it)->simplify(0, simplifcationDistance);
+        }
       }
     }
     // Add loaded groups to treewidget
