@@ -296,6 +296,7 @@ unsigned long long PathologyWorkstation::getCacheSize() const {
   if (view) {
     return view->getCacheSize();
   }
+  return 0; // FIXME: throw error?
 }
 
 void PathologyWorkstation::setupUi()
