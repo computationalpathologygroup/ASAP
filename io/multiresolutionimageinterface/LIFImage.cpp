@@ -122,7 +122,7 @@ bool LIFImage::initialize(const std::string& imagePath) {
       }
     }
     if (index < nc*2) {
-      editedXml[index] = NULL;
+      editedXml[index] = '\0';
     }
     std::string xml(editedXml);
 
