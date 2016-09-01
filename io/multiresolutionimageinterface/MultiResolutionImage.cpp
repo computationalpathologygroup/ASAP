@@ -1,5 +1,6 @@
 #include "MultiResolutionImage.h"
 #include "boost/thread.hpp"
+#include <cmath>
 
 using namespace pathology;
 
@@ -175,7 +176,7 @@ const int MultiResolutionImage::getBestLevelForDownSample(const double& downsamp
       double previousDownSample = (double)_levelDimensions[0][0] / (double)_levelDimensions[i-1][0];
       if (downsample<currentDownSample) {
         
-        if (abs(currentDownSample - downsample) > abs(previousDownSample - downsample)) {
+        if (std::abs(currentDownSample - downsample) > std::abs(previousDownSample - downsample)) {
           return i - 1;
         }
         else {

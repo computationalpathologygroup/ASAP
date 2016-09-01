@@ -436,7 +436,7 @@ namespace core
     string fixedPath = _fixedPath;
 
 //if a relative path cannot be written
-    if (! (rootName(pathToAlter)).compare(rootName(fixedPath)) == 0 )
+    if ( (rootName(pathToAlter)).compare(rootName(fixedPath)) != 0 )
       return pathToAlter;
 //if the two paths are the same
     if ( pathToAlter.compare(fixedPath) == 0)
