@@ -19,7 +19,7 @@ void CmdLineProgressMonitor::setProgress(const unsigned int& progress) {
   } else if (progress == 0) {
     disp->restart(100);
   }
-  (*disp) += ((100 * static_cast<float>(progress) / static_cast<float>(_maxProgress)) - disp->count());
+  (*disp) += static_cast<unsigned long>(((100 * static_cast<float>(progress) / static_cast<float>(_maxProgress)) - disp->count()));
 }
 
 void CmdLineProgressMonitor::setStatus(const std::string& status) {

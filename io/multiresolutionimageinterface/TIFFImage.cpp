@@ -154,23 +154,23 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
   TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
   double* min_values;  
   if (TIFFGetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &min_values)) {
-    for (int i = 0; i < _samplesPerPixel; ++i) {
+    for (unsigned int i = 0; i < _samplesPerPixel; ++i) {
       _minValues.push_back(min_values[i]);
     }
   }
   else {
-    for (int i = 0; i < _samplesPerPixel; ++i) {
+    for (unsigned int i = 0; i < _samplesPerPixel; ++i) {
       _minValues.push_back(0.);
     }
   }
   double* max_values;
   if (TIFFGetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &max_values)) {
-    for (int i = 0; i < _samplesPerPixel; ++i) {
+    for (unsigned int i = 0; i < _samplesPerPixel; ++i) {
       _maxValues.push_back(max_values[i]);
     }
   }
   else {
-    for (int i = 0; i < _samplesPerPixel; ++i) {
+    for (unsigned int i = 0; i < _samplesPerPixel; ++i) {
       _maxValues.push_back(255.);
     }
   }
@@ -262,7 +262,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
 {
   boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
   T* temp = new T[width*height*nrSamples];
-  std::fill(temp,temp+width*height*nrSamples,0);
+  std::fill(temp,temp+width*height*nrSamples,static_cast<T>(0));
   unsigned int tileW=_tileSizesPerLevel[level][0], tileH=_tileSizesPerLevel[level][1], levelH=_levelDimensions[level][1], levelW=_levelDimensions[level][0];
 
   long long levelStartX = startX / getLevelDownsample(level);
@@ -325,7 +325,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
       long long lyh = levelStartY + height;
       long long lxw = levelStartX + width;
       long long ixw = ixx + tileW;
-      long long rowLength = ixw > width ? (tileW - (ixw - width))*nrSamples : tileW*nrSamples;
+      long long rowLength = ixw > static_cast<long long>(width) ? (tileW - (ixw - width))*nrSamples : tileW*nrSamples;
       long long tileDeltaX = 0;
       if (ixx < 0) {
         rowLength += ixx*nrSamples;
@@ -333,7 +333,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
         ixx = 0;        
       }
       for (unsigned int ty = 0; ty < tileH; ++ty) {
-        if ((iyy + ty >= 0) && (ixx >= 0) && (iyy + ty < height) && lxw > 0){
+        if ((iyy + ty >= 0) && (ixx >= 0) && (iyy + ty < static_cast<long long>(height)) && lxw > 0){
           long long idx = (ty+iyy)*width*nrSamples + ixx*nrSamples;
           long long tids = (ty*tileW)*nrSamples;
           std::copy(tile+tids+tileDeltaX, tile+tids+rowLength+tileDeltaX, temp + idx);

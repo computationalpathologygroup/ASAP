@@ -20,6 +20,16 @@ IF(NOT WIN32)
 SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib:$ORIGIN/")
 ENDIF(NOT WIN32)
 
+# Set compile definitions to ignore some warnings
+if (WIN32)
+    set(DEFAULT_COMPILE_DEFINITIONS ${DEFAULT_COMPILE_DEFINITIONS}
+        /D"_SCL_SECURE_NO_WARNINGS"  # Calling any one of the potentially unsafe methods in the Standard C++ Library
+        /D"_CRT_SECURE_NO_WARNINGS"  # Calling any one of the potentially unsafe methods in the CRT Library
+		/wd4251
+    )
+	add_definitions(${DEFAULT_COMPILE_DEFINITIONS})
+endif()
+
 # Use boost for cross-platform use of threading, file system and date_time handling
 FIND_PACKAGE(Boost REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
 
