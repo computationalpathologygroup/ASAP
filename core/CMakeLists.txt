@@ -9,6 +9,8 @@ target_link_libraries(core PRIVATE Boost::disable_autolinking Boost::filesystem 
 
 target_include_directories(core PRIVATE ${CORE_SOURCE_DIR} ${DIAGPathology_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
+target_compile_features(core PRIVATE cxx_generalized_initializers)
+
 SET_TARGET_PROPERTIES(core PROPERTIES DEBUG_POSTFIX _d)
 IF(WIN32)  
   SET_TARGET_PROPERTIES(core PROPERTIES FOLDER diag)    
