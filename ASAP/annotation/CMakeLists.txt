@@ -1,6 +1,6 @@
 PROJECT(AnnotationPlugin)
 INCLUDE_DIRECTORIES(
-  ${Annotation_SOURCE_DIR}
+  ${ANNOTATION_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${PugiXML_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
