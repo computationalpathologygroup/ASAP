@@ -10,7 +10,7 @@
 // Include DCMTK LIBJPEG for lossy and lossless JPEG compression
 extern "C" {
 #define boolean ijg_boolean
-#include "dcmjpeg/libijg8/jpeglib8.h"
+#include "dcmtk/dcmjpeg/libijg8/jpeglib8.h"
 #include "jpeg_mem_src.h"
 #undef boolean
 #undef const
@@ -24,7 +24,8 @@ using namespace std;
 VSIImage::VSIImage() : MultiResolutionImage(),
 	_vsiFileName(""), _etsFile(""), _tileOffsets(), _tileCoords(),
 	_tileSizeX(0), _tileSizeY(0), _nrTilesX(0),
-	_nrTilesY(0), _compressionType(0) {
+	_nrTilesY(0), _compressionType(0) 
+{
 }
 
 VSIImage::~VSIImage() {
