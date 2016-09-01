@@ -1,6 +1,7 @@
 #include "LIFImage.h"
 #include <fstream>
 #include <iostream>
+#include <cmath>
 #include "core/filetools.h"
 #include "core/stringconversion.h"
 #include "core/PathologyEnums.h"
@@ -121,7 +122,7 @@ bool LIFImage::initialize(const std::string& imagePath) {
       }
     }
     if (index < nc*2) {
-      editedXml[index] = NULL;
+      editedXml[index] = '\0';
     }
     std::string xml(editedXml);
 
@@ -553,7 +554,7 @@ void LIFImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
   _physicalSizeYs.push_back(physicalSizeY);
 
   if (_zSteps[imageNr] == 0.0 && physicalSizeZ != 0.0) {
-    _zSteps[imageNr] = abs(physicalSizeZ);
+    _zSteps[imageNr] = std::abs(physicalSizeZ);
   }
 
   if (extras > 1) {
