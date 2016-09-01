@@ -23,7 +23,8 @@ public :
   Patch();
   ~Patch();
   Patch(const Patch& rhs);
-  Patch& operator=(const Patch rhs);
+  Patch& operator=(const Patch &rhs);
+  Patch& operator=(Patch &&rhs);
   Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& ctype = pathology::Monochrome, T* data = NULL, bool ownData = true);
 
   // Arithmetic operators

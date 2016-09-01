@@ -157,7 +157,18 @@ void Patch<T>::swap(Patch<T>& first, Patch<T>& second) {
 }
 
 template<typename T>
-Patch<T>& Patch<T>::operator=(Patch<T> rhs) {
+Patch<T>& Patch<T>::operator=(const Patch<T> &rhs) {
+  ImageSource::operator=(rhs);
+  _dimensions = rhs._dimensions;
+  _buffer = rhs._buffer;
+  _bufferSize = rhs._bufferSize;
+  _ownData = rhs._ownData;
+  _strides = rhs._strides;
+  return *this;
+}
+
+template<typename T>
+Patch<T>& Patch<T>::operator=(Patch<T> &&rhs) {
   this->swap(*this, rhs);
   return *this;
 }
