@@ -6,6 +6,7 @@
 #include "core/filetools.h"
 #include <set>
 #include <iostream>
+#include <cmath>
 
 DistanceTransformWholeSlideFilter::DistanceTransformWholeSlideFilter() :
 _monitor(NULL),

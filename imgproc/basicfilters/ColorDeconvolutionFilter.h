@@ -1,6 +1,7 @@
 #ifndef _ColorDeconvolutionFilter
 #define _ColorDeconvolutionFilter
 
+#include <cmath>
 #include <map>
 #include <string>
 #include <vector>
@@ -40,9 +41,9 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
           }
         }
         if (rgb[0] != 0 && rgb[1] != 0 && rgb[2] != 0) {
-          double Rlog = -log(rgb[0] / 255.0);
-          double Glog = -log(rgb[1] / 255.0);
-          double Blog = -log(rgb[2] / 255.0);
+          double Rlog = -std::log(rgb[0] / 255.0);
+          double Glog = -std::log(rgb[1] / 255.0);
+          double Blog = -std::log(rgb[2] / 255.0);
           double val = 0.0;
           if ((Rlog + Glog + Blog) / 3. > _globalThreshold && Rlog > _rgbThresholds[0] && Glog > _rgbThresholds[1] && Blog > _rgbThresholds[2]) {
             double Rscaled = Rlog * _q[_outputStain * 3];
@@ -84,7 +85,7 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
     for (unsigned int i = 0; i<3; ++i){
       /* normalise vector length */
       cosx[i] = cosy[i] = cosz[i] = 0.0;
-      len[i] = sqrt(_modX[i] * _modX[i] + _modY[i] * _modY[i] + _modZ[i] * _modZ[i]);
+      len[i] = std::sqrt(_modX[i] * _modX[i] + _modY[i] * _modY[i] + _modZ[i] * _modZ[i]);
       if (len[i] != 0.0){
         cosx[i] = _modX[i] / len[i];
         cosy[i] = _modY[i] / len[i];
@@ -109,22 +110,22 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
           if ((cosx[0] * cosx[0] + cosx[1] * cosx[1])> 1)
             cosx[2] = 0.0;
           else
-            cosx[2] = sqrt(1.0 - (cosx[0] * cosx[0]) - (cosx[1] * cosx[1]));
+            cosx[2] = std::sqrt(1.0 - (cosx[0] * cosx[0]) - (cosx[1] * cosx[1]));
 
           if ((cosy[0] * cosy[0] + cosy[1] * cosy[1])> 1)
             cosy[2] = 0.0;
           else
-            cosy[2] = sqrt(1.0 - (cosy[0] * cosy[0]) - (cosy[1] * cosy[1]));
+            cosy[2] = std::sqrt(1.0 - (cosy[0] * cosy[0]) - (cosy[1] * cosy[1]));
 
           if ((cosz[0] * cosz[0] + cosz[1] * cosz[1])> 1)
             cosz[2] = 0.0;
           else
-            cosz[2] = sqrt(1.0 - (cosz[0] * cosz[0]) - (cosz[1] * cosz[1]));
+            cosz[2] = std::sqrt(1.0 - (cosz[0] * cosz[0]) - (cosz[1] * cosz[1]));
         }
       }
     }
 
-    double leng = sqrt(cosx[2] * cosx[2] + cosy[2] * cosy[2] + cosz[2] * cosz[2]);
+    double leng = std::sqrt(cosx[2] * cosx[2] + cosy[2] * cosy[2] + cosz[2] * cosz[2]);
 
     cosx[2] = cosx[2] / leng;
     cosy[2] = cosy[2] / leng;

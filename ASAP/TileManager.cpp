@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cmath>
 #include "TileManager.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "RenderThread.h"
