@@ -17,7 +17,7 @@ TARGET_INCLUDE_DIRECTORIES(
 )
 
 IF(OpenCV_VERSION EQUAL "3.1.0")
-TARGET_LINK_LIBRARIES(opencvfilters PRIVATE core optimized ${OpenCV_LIB_DIR_OPT}/opencv_world310.lib debug ${OpenCV_LIB_DIR_DBG}/opencv_world310d.lib)
+TARGET_LINK_LIBRARIES(opencvfilters PRIVATE core ${OpenCV_LIBS})
 ELSE()
 TARGET_LINK_LIBRARIES(opencvfilters PRIVATE core ${OpenCV_LIBS})
 ENDIF()

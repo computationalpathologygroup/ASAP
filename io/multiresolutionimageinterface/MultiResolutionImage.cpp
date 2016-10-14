@@ -120,10 +120,24 @@ MultiResolutionImage::MultiResolutionImage() :
   _levelDimensions(),
   _numberOfLevels(0),
   _filePath(),
-  _fileType()
+  _fileType(),
+  _numberOfZPlanes(1),
+  _currentZPlaneIndex(0)
 {
   _cacheMutex.reset(new boost::mutex());
   _openCloseMutex.reset(new boost::shared_mutex());
+}
+
+int MultiResolutionImage::getNumberOfZPlanes() const {
+  return _numberOfZPlanes;
+}
+void MultiResolutionImage::setCurrentZPlaneIndex(const unsigned int& zPlaneIndex) {
+  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  zPlaneIndex < _numberOfZPlanes ? _currentZPlaneIndex = zPlaneIndex : _currentZPlaneIndex = _numberOfZPlanes - 1;
+}
+
+unsigned int MultiResolutionImage::getCurrentZPlaneIndex() const {
+  return _currentZPlaneIndex;
 }
 
 const int MultiResolutionImage::getNumberOfLevels() const {
