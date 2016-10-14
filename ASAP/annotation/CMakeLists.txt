@@ -1,6 +1,6 @@
 PROJECT(AnnotationPlugin)
 INCLUDE_DIRECTORIES(
-  ${Annotation_SOURCE_DIR}
+  ${ANNOTATION_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${PugiXML_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
@@ -20,10 +20,12 @@ SET(ANNOTATION_PLUGIN_HEADERS
   AnnotationTool.h
   DotAnnotationTool.h
   PolyAnnotationTool.h
+  MeasurementAnnotationTool.h
   PointSetAnnotationTool.h
   SplineAnnotationTool.h
   QtAnnotation.h
   QtAnnotationGroup.h
+  MeasurementQtAnnotation.h
   PolyQtAnnotation.h
   PointSetQtAnnotation.h
   DotQtAnnotation.h
@@ -32,6 +34,7 @@ SET(ANNOTATION_PLUGIN_HEADERS
 SET(ANNOTATION_PLUGIN_SOURCE
   AnnotationTool.cpp
   AnnotationWorkstationExtensionPlugin.cpp
+  MeasurementAnnotationTool.cpp
   DotAnnotationTool.cpp
   PolyAnnotationTool.cpp
   PointSetAnnotationTool.cpp
@@ -39,6 +42,7 @@ SET(ANNOTATION_PLUGIN_SOURCE
   QtAnnotation.cpp
   QtAnnotationGroup.cpp
   PolyQtAnnotation.cpp
+  MeasurementQtAnnotation.cpp
   PointSetQtAnnotation.cpp
   DotQtAnnotation.cpp
 )

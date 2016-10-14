@@ -41,6 +41,7 @@ public :
     bool eventFilter(QObject* watched, QEvent* event);
     void deleteAnnotation(QtAnnotation* annotation);
     void deleteAnnotationGroup(QtAnnotationGroup* group);
+    std::weak_ptr<MultiResolutionImage> getCurrentImage();
     void clearSelection();
     bool canClose();
 

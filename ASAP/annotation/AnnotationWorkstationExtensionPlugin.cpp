@@ -13,6 +13,8 @@
 #include "AnnotationToMask.h"
 #include "DotQtAnnotation.h"
 #include "PolyQtAnnotation.h"
+#include "MeasurementQtAnnotation.h"
+#include "MeasurementAnnotationTool.h"
 #include "PointSetQtAnnotation.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include "../PathologyViewer.h"
@@ -101,20 +103,8 @@ void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
 
 void AnnotationWorkstationExtensionPlugin::clear() {
   if (_generatedAnnotation) {
-    PolyQtAnnotation* tmp = dynamic_cast<PolyQtAnnotation*>(_generatedAnnotation);
-    if (tmp) {
-      if (tmp->getInterpolationType() == "spline") {
-        std::dynamic_pointer_cast<SplineAnnotationTool>(_annotationTools[2])->cancelAnnotation();
-      }
-      else {
-        std::dynamic_pointer_cast<PolyAnnotationTool>(_annotationTools[1])->cancelAnnotation();
-      }
-    }
-    else {
-      PointSetQtAnnotation* tmp2 = dynamic_cast<PointSetQtAnnotation*>(_generatedAnnotation);
-      if (tmp2) {
-        std::dynamic_pointer_cast<PointSetAnnotationTool>(_annotationTools[3])->cancelAnnotation();
-      }
+    for (std::vector<std::shared_ptr<ToolPluginInterface> >::iterator it = _annotationTools.begin(); it != _annotationTools.end(); ++it) {
+      std::dynamic_pointer_cast<AnnotationTool>((*it))->cancelAnnotation();
     }
   }
   _treeWidget->clearSelection();
@@ -407,6 +397,9 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
         annot = new PolyQtAnnotation((*it), this, _viewer->getSceneScale());
         dynamic_cast<PolyQtAnnotation*>(annot)->setInterpolationType("spline");
       }
+      else if ((*it)->getType() == Annotation::Type::MEASUREMENT) {
+        annot = new MeasurementQtAnnotation((*it), this, _viewer->getSceneScale());
+      }
       else if ((*it)->getType() == Annotation::Type::POINTSET) {
         annot = new PointSetQtAnnotation((*it), this, _viewer->getSceneScale());
       }
@@ -636,6 +629,7 @@ QDockWidget* AnnotationWorkstationExtensionPlugin::getDockWidget() {
 }
 
 void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName) {
+  _img = img;
   if (_dockWidget) {
     _dockWidget->setEnabled(true);
   }
@@ -646,7 +640,6 @@ void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiR
       onLoadButtonPressed(annotationPath);
     }
   }
-  _img = img;
   if (std::shared_ptr<MultiResolutionImage> local_img = _img.lock()) {
     std::vector<double> spacing = local_img->getSpacing();
     if (spacing.size() > 1) {
@@ -656,6 +649,10 @@ void AnnotationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiR
       _currentPixelArea = 1.;
     }
   }
+}
+
+std::weak_ptr<MultiResolutionImage> AnnotationWorkstationExtensionPlugin::getCurrentImage() {
+  return _img;
 }
 
 void AnnotationWorkstationExtensionPlugin::onImageClosed() {
@@ -674,6 +671,8 @@ bool AnnotationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   tool.reset(new SplineAnnotationTool(this, viewer));
   _annotationTools.push_back(tool);
   tool.reset(new PointSetAnnotationTool(this, viewer));
+  _annotationTools.push_back(tool);
+  tool.reset(new MeasurementAnnotationTool(this, viewer));
   _annotationTools.push_back(tool);
   _annotationService.reset(new AnnotationService());
   return true;
@@ -708,6 +707,11 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
   else if (type == "pointsetannotation") {
     annot->setType(Annotation::Type::POINTSET);
     PointSetQtAnnotation* temp = new PointSetQtAnnotation(annot, this, _viewer->getSceneScale());
+    _generatedAnnotation = temp;
+  }
+  else if (type == "measurementannotation") {
+    annot->setType(Annotation::Type::MEASUREMENT);
+    MeasurementQtAnnotation* temp = new MeasurementQtAnnotation(annot, this, _viewer->getSceneScale());
     _generatedAnnotation = temp;
   }
   else {
