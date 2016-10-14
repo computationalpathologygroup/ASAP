@@ -2,6 +2,7 @@
 #include "AnnotationGroup.h"
 #include "psimpl.h"
 #include <limits>
+#include <cmath>
 
 const char* Annotation::_typeStrings[6] = { "None", "Dot", "Polygon", "Spline", "PointSet", "Measurement"};
 
@@ -32,7 +33,7 @@ float Annotation::getArea() const {
       area += (_coordinates[j].getX() + _coordinates[i].getX())*(_coordinates[j].getY() - _coordinates[i].getY());
       j = i;
     }
-    return abs(area*.5);
+    return std::abs(area*.5);
   }
   else{
     return 0.0;

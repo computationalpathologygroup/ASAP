@@ -25,6 +25,11 @@ public :
   //! Actually initialization implementataiton
   virtual bool initializeType(const std::string& imagePath) = 0;
 
+  //! Support for slides with multiple z-planes
+  int getNumberOfZPlanes() const;
+  void setCurrentZPlaneIndex(const unsigned int& zPlaneIndex);
+  unsigned int getCurrentZPlaneIndex() const;
+
   //! Get a stored data property (e.g. objective magnification")
   virtual std::string getProperty(const std::string& propertyName) { return std::string(); };
 
@@ -117,6 +122,8 @@ protected :
   // Aditional properties of a multi-resolution image
   std::vector<std::vector<unsigned long long> > _levelDimensions;
   unsigned int _numberOfLevels;
+  unsigned int _numberOfZPlanes;
+  unsigned int _currentZPlaneIndex;
 
   // Properties of the loaded slide
   unsigned long long _cacheSize;

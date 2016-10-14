@@ -88,7 +88,7 @@ namespace core
   long int fileSize(const std::string &name)
   {
     if (!fileExists(name)) return -1;
-	long int length = file_size(name);
+	long int length = static_cast<long int>(file_size(name));
 	/*
 	FILE *handle = fopen(name.c_str(), "rb");
 
@@ -436,7 +436,7 @@ namespace core
     string fixedPath = _fixedPath;
 
 //if a relative path cannot be written
-    if (! (rootName(pathToAlter)).compare(rootName(fixedPath)) == 0 )
+    if ( (rootName(pathToAlter)).compare(rootName(fixedPath)) != 0 )
       return pathToAlter;
 //if the two paths are the same
     if ( pathToAlter.compare(fixedPath) == 0)
@@ -943,7 +943,7 @@ namespace core
     s.clear();
     s.resize(n);
     //char *in = new char[n];
-    long bytes = fread(&(s[0]), sizeof(char), n, fpIO);
+    long bytes = static_cast<long>(fread(&(s[0]), sizeof(char), n, fpIO));
 	//delete in;
     fclose(fpIO);
     return (bytes == n);
@@ -994,7 +994,7 @@ namespace core
 	  while (c != EOF);
 	  */
 	  tail.resize(nBytesToRead);
-	  long bytes = fread(&(tail[0]), sizeof(char), nBytesToRead, pFile);
+	  long bytes = static_cast<long>(fread(&(tail[0]), sizeof(char), nBytesToRead, pFile));
 	
 	}
 	else //smaller than nBytesToRead

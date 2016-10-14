@@ -1,7 +1,7 @@
 #include "ProgressMonitor.h"
 #include <iostream>
 
-ProgressMonitor::ProgressMonitor() : _status(""), _progress(0.0), _maxProgress(100)
+ProgressMonitor::ProgressMonitor() : _status(""), _progress(0), _maxProgress(100)
 {
 
 }

@@ -129,7 +129,7 @@ int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& 
     }
     _min_vals = new double[cDepth];
     _max_vals = new double[cDepth];
-    for (int i = 0; i < cDepth; ++i) {
+    for (unsigned int i = 0; i < cDepth; ++i) {
       _min_vals[i] = std::numeric_limits<double>::max();
       _max_vals[i] = std::numeric_limits<double>::min();
     }
@@ -174,8 +174,8 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
   //Determine min/max of tile part
   if (_dType == pathology::UInt32) {
     unsigned int *temp = (unsigned int*)data;
-    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-      for (int j = 0; j < cDepth; ++j) {
+    for (unsigned int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (unsigned int j = 0; j < cDepth; ++j) {
         double val = temp[i + j];
         if (val > _max_vals[j]) {
           _max_vals[j] = val;
@@ -188,8 +188,8 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
   }
   else if (_dType == pathology::UInt16) {
     unsigned short *temp = (unsigned short*)data;
-    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-      for (int j = 0; j < cDepth; ++j) {
+    for (unsigned int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (unsigned int j = 0; j < cDepth; ++j) {
         double val = temp[i + j];
         if (val > _max_vals[j]) {
           _max_vals[j] = val;
@@ -202,8 +202,8 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
   }
   else if (_dType == pathology::Float) {
     float *temp = (float*)data;
-    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-      for (int j = 0; j < cDepth; ++j) {
+    for (unsigned int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (unsigned int j = 0; j < cDepth; ++j) {
         double val = temp[i + j];
         if (val > _max_vals[j]) {
           _max_vals[j] = val;
@@ -216,8 +216,8 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
   }
   else if (_dType == pathology::UChar) {
     unsigned char *temp = (unsigned char*)data;
-    for (int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
-      for (int j = 0; j < cDepth; ++j) {
+    for (unsigned int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
+      for (unsigned int j = 0; j < cDepth; ++j) {
         double val = temp[i + j];
         if (val > _max_vals[j]) {
           _max_vals[j] = val;

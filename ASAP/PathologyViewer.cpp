@@ -440,6 +440,21 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
         }
       }
     }
+    else if (_img->getNumberOfZPlanes() > 1) {
+      for (int i = 0; i < _img->getNumberOfZPlanes(); ++i) {
+        rightClickMenu.addAction(QString("Plane ") + QString::number(i + 1));
+      }
+      QAction* selectedItem = rightClickMenu.exec(globalPos);
+      if (selectedItem)
+      {
+        for (int i = 0; i < _img->getNumberOfZPlanes(); ++i) {
+          if (selectedItem->text() == QString("Plane ") + QString::number(i + 1)) {
+            _img->setCurrentZPlaneIndex(i);
+            _manager->refresh();
+          }
+        }
+      }
+    }
   }
 }
 

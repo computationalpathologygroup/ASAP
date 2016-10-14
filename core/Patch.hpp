@@ -89,7 +89,7 @@ double Patch<T>::getMaxValue(int channel) {
 template<typename T>
 const int Patch<T>::getSamplesPerPixel() const {
   if (!_dimensions.empty()) {
-    return _dimensions.back();
+    return static_cast<int>(_dimensions.back());
   }
   else {
     return 0;

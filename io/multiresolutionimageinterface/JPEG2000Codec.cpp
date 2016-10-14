@@ -32,7 +32,7 @@ void JPEG2000Codec::decode(char* buf, const unsigned int& inSize, const unsigned
       }
       for (int j = 0; j < components.size(); ++j) {
         jas_matrix_t* cmp = components[j];
-        for (int i = j; i < outSize; i += image->numcmpts_) {
+        for (unsigned int i = j; i < outSize; i += image->numcmpts_) {
           buf[i] = cmp->data_[i / image->numcmpts_];
         }
       }
@@ -48,7 +48,7 @@ void JPEG2000Codec::decode(char* buf, const unsigned int& inSize, const unsigned
 void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& tileSize, const unsigned int& depth, const unsigned int& nrComponents, float& rate, bool colorImage) const
 {
     jas_image_cmptparm_t* component_info = new jas_image_cmptparm_t[4];
-    for( int i = 0; i < nrComponents; i++ )
+    for(unsigned int i = 0; i < nrComponents; i++ )
     {
         component_info[i].tlx = 0;
         component_info[i].tly = 0;
@@ -80,12 +80,12 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
     }
 
     jas_matrix_t *row = jas_matrix_create( 1, tileSize );
-    for( int y = 0; y < tileSize; ++y)
+    for(unsigned int y = 0; y < tileSize; ++y)
     {
         unsigned char* tmp = (unsigned char*)data + tileSize*y*nrComponents;
-        for( int i = 0; i < nrComponents; i++ )
+        for (unsigned int i = 0; i < nrComponents; i++)
         {
-            for( int x = 0; x < tileSize; x++) {
+          for (unsigned int x = 0; x < tileSize; x++) {
                 jas_matrix_setv( row, x, tmp[x * nrComponents + i] );
             }
             jas_image_writecmpt( img, i, 0, y, tileSize, 1, row );

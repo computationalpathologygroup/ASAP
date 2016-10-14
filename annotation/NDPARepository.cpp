@@ -93,4 +93,5 @@ bool NDPARepository::loadFromRepo()
       }
     }
 	}
+  return true;
 }
