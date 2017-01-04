@@ -125,7 +125,7 @@ Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const patholo
   }
   if (!dimensions.empty()) {
     if ((_colorType == pathology::ARGB && dimensions.back() != 4) || (_colorType == pathology::RGB && dimensions.back() != 3) || (_colorType == pathology::Monochrome && dimensions.back() != 1)) {
-      _colorType == pathology::Indexed;
+      _colorType = pathology::Indexed;
     }
   }
   calculateStrides();
