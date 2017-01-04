@@ -3,7 +3,7 @@
 
 const TIFFImageFactory TIFFImageFactory::registerThis;
 
-TIFFImageFactory::TIFFImageFactory() : MultiResolutionImageFactory("tif;tiff") {
+TIFFImageFactory::TIFFImageFactory() : MultiResolutionImageFactory("aaa;tif;tiff") { //Small hack to make sure this is used first for TIFF files
 }
 
 MultiResolutionImage* TIFFImageFactory::readImage(const std::string& fileName) const {

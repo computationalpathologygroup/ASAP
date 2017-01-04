@@ -19,7 +19,7 @@ namespace po = boost::program_options;
 using namespace std;
 using namespace pathology;
 
-void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std::string compression = "LZW", double quality = 70., double spacingX = -1.0, double spacingY = -1.0) {
+void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std::string compression = "LZW", double quality = 70., double spacingX = -1.0, double spacingY = -1.0, unsigned int tileSize = 512) {
   MultiResolutionImageReader read;
   MultiResolutionImageWriter* writer;
   if (svs) {
@@ -32,7 +32,7 @@ void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std
     MultiResolutionImage* img = read.open(fileIn);
     if (img) {
       if (img->valid()) {
-        writer->setTileSize(512);
+        writer->setTileSize(tileSize);
         if (compression == string("LZW")) {
           writer->setCompression(LZW);
         } 
@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
 
     std::string inputPth, outputPth, codec;
     double rate, spacingX, spacingY;
+    unsigned int tileSize;
     po::options_description desc("Options");
     desc.add_options()
       ("help,h", "Displays this message")
@@ -100,6 +101,7 @@ int main(int argc, char *argv[]) {
       ("rate,r", po::value<double>(&rate)->default_value(70.), "Set compression rate for JPEG and JPEG2000Lossy")
       ("spacingX,x", po::value<double>(&spacingX)->default_value(-1.0), "Set the pixel spacing of the x-dimension")
       ("spacingY,y", po::value<double>(&spacingY)->default_value(-1.0), "Set the pixel spacing of the y-dimension")
+      ("tileSize,t", po::value<unsigned int>(&tileSize)->default_value(512), "Sets the tile size for the TIF")
       ;
   
     po::positional_options_description positionalOptions;
@@ -144,10 +146,10 @@ int main(int argc, char *argv[]) {
 
     if (core::fileExists(inputPth) && !core::dirExists(outputPth)) {
       if (!vm["spacingX"].defaulted() || !vm["spacingY"].defaulted()) {
-        convertImage(inputPth, outputPth, svs, codec, rate, spacingX, spacingY);
+        convertImage(inputPth, outputPth, svs, codec, rate, spacingX, spacingY, tileSize);
       }
       else {
-        convertImage(inputPth, outputPth, svs, codec, rate);
+        convertImage(inputPth, outputPth, svs, codec, rate, -1., -1., tileSize);
       }
     } 
     else if (core::dirExists(outputPth)) { //Could be wildcards and output dir 
@@ -165,10 +167,10 @@ int main(int argc, char *argv[]) {
           core::changeExtension(outPth, "tif");
         }
         if (!vm["spacingX"].defaulted() || !vm["spacingY"].defaulted()) {
-          convertImage(fls[i], outPth, svs, codec, rate, spacingX, spacingY);
+          convertImage(fls[i], outPth, svs, codec, rate, spacingX, spacingY, tileSize);
         }
         else {
-          convertImage(fls[i], outPth, svs, codec, rate);
+          convertImage(fls[i], outPth, svs, codec, rate, -1., -1., tileSize);
         }
       }
     }

@@ -67,7 +67,7 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
 
   _numberOfLevels = TIFFNumberOfDirectories(_tiff);
 
-  if (_numberOfLevels < 2) {
+  if (_numberOfLevels < 1) {
     cleanup();
     return false;
   }

@@ -29,10 +29,13 @@ MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& 
     core::split(it->first, factoryExtensions, ";");
     if (std::find(factoryExtensions.begin(), factoryExtensions.end(), extension) != factoryExtensions.end()) {
       MultiResolutionImage* img = it->second->readImage(fileName);
-        if (img && (img->getNumberOfLevels() > 1 || dynamic_cast<VSIImage*>(img) != NULL)) {
+      if (img) {
+        if ((img->getNumberOfLevels() > 1 || dynamic_cast<VSIImage*>(img) != NULL) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
           return img;
-        } else {
+        }
+        else {
           delete img;
+        }
       }
     }
   }

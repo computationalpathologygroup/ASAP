@@ -524,6 +524,7 @@ template <typename T> int MultiResolutionImageWriter::incorporatePyramid() {
     TIFFGetField(level, TIFFTAG_IMAGEWIDTH, &levelw);
     TIFFGetField(level, TIFFTAG_IMAGELENGTH, &levelh);
     setPyramidTags(_tiff, levelw, levelh);
+    TIFFSetField(_tiff, TIFFTAG_SUBFILETYPE, FILETYPE_REDUCEDIMAGE);
     TIFFGetField(level, TIFFTAG_SAMPLESPERPIXEL, &nrsamples);
     writePyramidLevel<T>(level, levelw, levelh, nrsamples);
 
@@ -537,7 +538,6 @@ template <typename T> int MultiResolutionImageWriter::incorporatePyramid() {
 template int MultiResolutionImageWriter::incorporatePyramid<unsigned int>();
 
 void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
-  TIFFSetField(levelTiff, TIFFTAG_SUBFILETYPE, 0);
   if (_cType == Monochrome || _cType == Indexed) {
     TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
   } else if (_cType == ARGB || _cType == RGB) {
