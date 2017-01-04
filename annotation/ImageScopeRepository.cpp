@@ -159,4 +159,5 @@ bool ImageScopeRepository::loadFromRepo()
     _list->addGroup(grp);
     group_nr += 1;
 	}
+  return true;
 }

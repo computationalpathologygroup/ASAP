@@ -77,8 +77,11 @@ Box Box::intersection(const Box& b) const {
   std::vector<unsigned long long> start(_start.size(),0), size(_start.size(),0);
   for (int i = 0; i < _start.size(); ++i) {
     start[i] = std::max(_start[i], b.getStart()[i]);
-    size[i] = std::min(_start[i] + _size[i], b.getStart()[i] + b.getSize()[i]) - start[i];
-    if (size[i] < 0) size[i] = 0;
+    unsigned long long end = std::min(_start[i] + _size[i], b.getStart()[i] + b.getSize()[i]);
+    if(end > start[i])
+      size[i] = end - start[i];
+    else
+      size[i] = 0;
   }
 
   return Box(start, size);
