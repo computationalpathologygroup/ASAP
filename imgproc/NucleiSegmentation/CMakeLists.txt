@@ -33,4 +33,4 @@ INSTALL(TARGETS NucleiSegmentation
 )
 
 INSTALL(FILES FRST.h DESTINATION include/imgproc/NucleiSegmentation)
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/NucleiSegmentation_export.h DESTINATION include/imgproc/NucleiSegmentation)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/nucleisegmentation_export.h DESTINATION include/imgproc/NucleiSegmentation)

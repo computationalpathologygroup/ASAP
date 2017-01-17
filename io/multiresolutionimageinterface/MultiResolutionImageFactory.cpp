@@ -65,13 +65,18 @@ void MultiResolutionImageFactory::registerExternalFileFormats() {
   pathStr = std::string(path);
 #else
   Dl_info dlInfo;
-  dladdr(&MultiResolutionImageFactory::registerExternalFileFormats, &dlInfo);
+  dladdr((void*)&MultiResolutionImageFactory::registerExternalFileFormats, &dlInfo);
   pathStr = std::string(dlInfo.dli_fname);
 #endif
   std::string rootDir = core::extractFilePath(pathStr);
-  std::string fileFormatPluginDir = core::completePath("formats", rootDir);
   std::vector<std::string> formatPlugins;
+#ifdef _WIN32
+  std::string fileFormatPluginDir = core::completePath("formats", rootDir);  
   core::getFiles(fileFormatPluginDir, "*.dll", formatPlugins);
+#else
+  std::string fileFormatPluginDir = core::completePath("bin/formats", core::upOneLevel(rootDir));  
+  core::getFiles(fileFormatPluginDir, "*.so", formatPlugins);
+#endif
   for (std::vector<std::string>::const_iterator it = formatPlugins.begin(); it != formatPlugins.end(); ++it) {
 #ifdef _WIN32
     SetDllDirectory(rootDir.c_str());
@@ -84,6 +89,14 @@ void MultiResolutionImageFactory::registerExternalFileFormats() {
     }
     else {
       DWORD test = GetLastError();
+    }
+#else
+    void *hndl = dlopen(core::completePath((*it), fileFormatPluginDir).c_str(), RTLD_NOW);
+    if(hndl != NULL){
+      FileFormatLoader loadfunction = (FileFormatLoader)dlsym(hndl, "filetypeLoad");
+      if (loadfunction) {
+        (*loadfunction)();
+      }
     }
 #endif
   }
