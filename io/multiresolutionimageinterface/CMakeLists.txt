@@ -139,6 +139,6 @@ INSTALL(TARGETS multiresolutionimageinterface
 INSTALL(TARGETS openslidefileformat
   EXPORT asap-targets
   RUNTIME DESTINATION bin/formats
-  LIBRARY DESTINATION lib
+  LIBRARY DESTINATION bin/formats
   ARCHIVE DESTINATION lib
 )

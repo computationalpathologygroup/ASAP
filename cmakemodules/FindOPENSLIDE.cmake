@@ -6,7 +6,7 @@
 #  OPENSLIDE_FOUND, If false, do not try to use OPENSLIDE.
 
 find_path(OPENSLIDE_INCLUDE_DIR openslide.h)
-find_library(OPENSLIDE_LIBRARY NAMES OPENSLIDE)
+find_library(OPENSLIDE_LIBRARY NAMES openslide)
 
 # handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if
 # all listed variables are TRUE

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include <math.h>
 #include "core/filetools.h"
 #include "core/Box.h"
@@ -300,7 +301,7 @@ void* VSIImage::readDataFromImage(const long long& startX, const long long& star
         for (int trow=0; trow<intersection.getSize()[1]; trow++) {
           int realRow = trow + intersection.getStart()[1] - tile.getStart()[1];
           int inputOffset = 3 * (realRow * width + intersectionX);
-          memcpy(data+outputOffset, tileBuf+inputOffset, rowLen);
+          std::memcpy(data+outputOffset, tileBuf+inputOffset, rowLen);
           outputOffset += outputRowLen;
         }
 
