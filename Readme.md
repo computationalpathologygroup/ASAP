@@ -20,7 +20,7 @@ Currently ASAP is only supported under 64-bit Windows and Linux machines. Compil
 
 #### Compilation
 
-To compile the code yourself, some prerequesites are required. First, we use CMake as our build system and Microsoft Visual Studio or GCC as the compiler. The software depends on numerous third-party libraries:
+To compile the code yourself, some prerequesites are required. First, we use CMake (version >= 3.5) as our build system and Microsoft Visual Studio or GCC as the compiler. The software depends on numerous third-party libraries:
 
 - Boost (http://www.boost.org/)
 - OpenCV (http://www.opencv.org/)
