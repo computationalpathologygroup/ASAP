@@ -35,20 +35,16 @@ void AnnotationList::resetModifiedStatus() {
 
 bool AnnotationList::addGroup(const std::shared_ptr<AnnotationGroup>& group) {
   if (group) {
-    if (!this->getGroup(group->getName())) {
-      _groups.push_back(group);
-      return true;
-    }
+    _groups.push_back(group);
+    return true;
   }
   return false;
 }
 
 bool AnnotationList::addAnnotation(const std::shared_ptr<Annotation>& annotation) {
   if (annotation) {
-    if (!this->getAnnotation(annotation->getName())) {
-      _annotations.push_back(annotation);
-      return true;
-    }
+    _annotations.push_back(annotation);
+    return true;
   }
   return false;
 }
