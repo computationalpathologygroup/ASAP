@@ -5,7 +5,7 @@
 
 using namespace pathology;
 
-OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL) {
+OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _bg_r(255), _bg_g(255), _bg_b(255) {
 }
 
 OpenSlideImage::~OpenSlideImage() {
@@ -71,6 +71,15 @@ bool OpenSlideImage::initializeType(const std::string& imagePath) {
         ssm.clear();
       }
       _fileType = openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_VENDOR);
+      
+      // Get background color if present
+      const char* bg_color_hex = openslide_get_property_value(_slide, "openslide.background-color");
+      if (bg_color_hex) {
+        unsigned int bg_color = std::stoi(bg_color_hex, 0, 16);
+        _bg_r = ((bg_color >> 16) & 0xff);
+        _bg_g = ((bg_color >> 8) & 0xff);
+        _bg_b = (bg_color & 0xff);
+      }
       _isValid = true;
       createCache<unsigned int>();
     }
@@ -102,7 +111,6 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
 
   boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
   unsigned int* temp = new unsigned int[width*height];
-  std::fill(temp,temp+width*height,0);
   std::vector<unsigned long long> levelDims = this->getLevelDimensions(level);
   unsigned long long levelW = levelDims[0];
   unsigned long long levelH = levelDims[1];
@@ -192,9 +200,21 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
   unsigned char* rgb = new unsigned char[width*height*3];
   unsigned char* bgra = (unsigned char*)temp;
   for (unsigned long long i = 0, j = 0; i < width*height*4; i+=4, j+=3) {
-    rgb[j] = bgra[i + 2];
-    rgb[j + 1] = bgra[i + 1];
-    rgb[j + 2] = bgra[i];
+    if (bgra[i + 3] == 255) {
+      rgb[j] = bgra[i + 2];
+      rgb[j + 1] = bgra[i + 1];
+      rgb[j + 2] = bgra[i];
+    }
+    else if (bgra[i + 3] == 0) {
+      rgb[j] = _bg_r;
+      rgb[j + 1] = _bg_g;
+      rgb[j + 2] = _bg_b;
+    }
+    else {
+      rgb[j] = (255. * bgra[i + 2]) / bgra[i + 3];
+      rgb[j + 1] = (255. * bgra[i + 1]) / bgra[i + 3];
+      rgb[j + 2] = (255. * bgra[i]) / bgra[i + 3];
+    }
   }
   delete[] temp;
   return rgb;

@@ -34,6 +34,10 @@ private:
 
   std::string _errorState;
 
+  unsigned char _bg_r;
+  unsigned char _bg_g;
+  unsigned char _bg_b;
+
 };
 
 #endif
