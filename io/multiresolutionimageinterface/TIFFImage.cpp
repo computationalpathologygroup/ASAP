@@ -25,6 +25,14 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
   TIFFSetErrorHandler(NULL);
 
   if (_tiff) {
+  const char * img_desc;
+  TIFFGetField(_tiff, TIFFTAG_IMAGEDESCRIPTION, &img_desc);
+  std::string img_desc_string(img_desc);
+  if (img_desc_string.find("xml") != std::string::npos || img_desc_string.find("XML") != std::string::npos) {
+    // Not one of our TIFFs
+    cleanup();
+    return false;
+  }
   unsigned int cType = 0, dType = 0, planarconfig=0, bitsPerSample = 0;
   TIFFGetField(_tiff, TIFFTAG_PHOTOMETRIC, &cType);
   

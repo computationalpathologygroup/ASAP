@@ -445,7 +445,7 @@ bool AnnotationWorkstationExtensionPlugin::onSaveButtonPressed() {
   else {
     basename += QString(".xml");
   }
-  QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), defaultName.filePath(basename), tr("XML file (*.xml);TIF file (*.tif)"));
+  QString fileName = QFileDialog::getSaveFileName(NULL, tr("Save annotations"), defaultName.filePath(basename), tr("XML file (*.xml);;TIF file (*.tif);;All files (*)"));
   if (fileName.endsWith(".tif")) {
     if (std::shared_ptr<MultiResolutionImage> local_img = _img.lock()) {
       std::vector<std::shared_ptr<AnnotationGroup> > grps = this->_annotationService->getList()->getGroups();
@@ -619,6 +619,7 @@ void AnnotationWorkstationExtensionPlugin::addAnnotationGroup() {
     QIcon color(iconPM);
     newAnnotationGroup->setIcon(0, color);
     newAnnotationGroup->setData(0, Qt::UserRole, QColor("#64FE2E"));
+    grp->setColor("#64FE2E");
     _treeWidget->resizeColumnToContents(0);
     _treeWidget->resizeColumnToContents(1);
   }
@@ -754,7 +755,6 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
     if (!cancel) {
       _generatedAnnotation->getAnnotation()->setName("Annotation " + QString::number(_annotationIndex).toStdString());
       _annotationIndex += 1;
-      QString annotUID = QString::fromStdString(_generatedAnnotation->getAnnotation()->getName() + "_annotation");
       _qtAnnotations.append(_generatedAnnotation);
       _annotationService->getList()->addAnnotation(_generatedAnnotation->getAnnotation());
       QTreeWidgetItem* newAnnotation = new QTreeWidgetItem(_treeWidget);
@@ -769,7 +769,8 @@ void AnnotationWorkstationExtensionPlugin::finishAnnotation(bool cancel) {
       iconPM.fill(QColor("yellow"));
       QIcon color(iconPM);
       newAnnotation->setIcon(0, color);
-      newAnnotation->setData(0, Qt::UserRole, QColor("yellow"));
+      newAnnotation->setData(0, Qt::UserRole, QColor("#F4FA58"));
+      _generatedAnnotation->getAnnotation()->setColor("#F4FA58");
       _treeWidget->resizeColumnToContents(0);      
       _treeWidget->resizeColumnToContents(1);
       _activeAnnotation = _generatedAnnotation;
