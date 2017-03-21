@@ -12,11 +12,7 @@ TARGET_INCLUDE_DIRECTORIES(
   ${DIAGPathology_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
-IF(OpenCV_VERSION EQUAL "3.1.0")
-TARGET_LINK_LIBRARIES(NucleiSegmentation PRIVATE optimized ${OpenCV_LIB_DIR_OPT}/opencv_world310.lib debug ${OpenCV_LIB_DIR_DBG}/opencv_world310d.lib)
-ELSE()
 TARGET_LINK_LIBRARIES(NucleiSegmentation PRIVATE ${OpenCV_LIBS})
-ENDIF()
 generate_export_header(NucleiSegmentation)
 
 SET_TARGET_PROPERTIES(NucleiSegmentation PROPERTIES DEBUG_POSTFIX _d)
