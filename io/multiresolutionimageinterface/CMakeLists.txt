@@ -1,12 +1,13 @@
 PROJECT(MULTIRESOLUTIONIMAGEINTERFACE)
 
+OPTION(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT "Builds support for Olympus VSI files; requires DCMTK ijg8.lib" OFF)
+
 INCLUDE_DIRECTORIES(
   ${MULTIRESOLUTIONIMAGEINTERFACE_SOURCE_DIR} 
   ../../
   ../
   ${Boost_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR}
-  ${DCMTKJPEG_INCLUDE_DIR}
   ${JASPER_INCLUDE_DIR}
   ${OPENSLIDE_INCLUDE_DIR}
   ${PugiXML_INCLUDE_DIR}
@@ -14,6 +15,12 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CORE_BINARY_DIR}
 )
+
+IF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
+INCLUDE_DIRECTORIES(
+  ${DCMTKJPEG_INCLUDE_DIR}
+)
+ENDIF()
 
 if(WIN32 AND NOT MINGW)
   add_definitions(-DJAS_WIN_MSVC_BUILD)
@@ -25,8 +32,6 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_HS
     MultiResolutionImageReader.h 
     MultiResolutionImageWriter.h 
 	AperioSVSWriter.h
-    VSIImage.h
-	VSIImageFactory.h
     TIFFImage.h
 	TIFFImageFactory.h
     MultiResolutionImage.h
@@ -41,8 +46,6 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
     MultiResolutionImageReader.cpp 
     MultiResolutionImageWriter.cpp 
 	AperioSVSWriter.cpp
-    VSIImage.cpp
-	VSIImageFactory.cpp
     TIFFImage.cpp
     MultiResolutionImage.cpp
 	MultiResolutionImageFactory.cpp
@@ -58,14 +61,32 @@ SET(EXTERNAL_OPENSLIDE_HS
 	OpenSlideImageFactory.h
 )
 
+SET(VSI_SOURCE_HS
+    VSIImage.h
+	VSIImageFactory.h
+)
+
 SET(EXTERNAL_OPENSLIDE_SRCS
     OpenSlideImage.cpp
 	OpenSlideImageFactory.cpp
 )
 
-ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
-generate_export_header(multiresolutionimageinterface)
+SET(VSI_SOURCE_SRCS
+    VSIImage.cpp
+	VSIImageFactory.cpp
+)
+
+IF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
+# Required for lossless JPEG compression used in VSIs
+FIND_PACKAGE(DCMTKJPEG REQUIRED)
+ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
 TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
+ELSE(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
+ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE libtiff core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
+ENDIF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
+
+generate_export_header(multiresolutionimageinterface)
 SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
 
 ADD_LIBRARY(openslidefileformat SHARED ${EXTERNAL_OPENSLIDE_SRCS} ${EXTERNAL_OPENSLIDE_HS})
@@ -103,6 +124,11 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-builtin")
+      IF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
+	      set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-py3")
+	  ELSEIF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
+	      set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-builtin")
+      ENDIF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
 
 	  SWIG_ADD_MODULE(multiresolutionimageinterface python multiresolutionimageinterface.i)
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface annotation core) 

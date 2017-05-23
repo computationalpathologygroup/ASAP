@@ -215,9 +215,8 @@ unsigned long long VSIImage::parseETSFile(std::ifstream& ets) {
 char* VSIImage::decodeTile(int no, int row, int col) const {	
   int size = _tileSizeX*_tileSizeY*3;
   char* buf = new char[size];
-	if (no==_tileCoords.size()) {
-		std::fill(buf, buf+(3*_tileSizeX*_tileSizeY), 0);
-	} else {
+  std::fill(buf, buf + size, 255);
+	if (no!=_tileCoords.size()) {
 		ifstream ets;
 		ets.open(_etsFile.c_str(), ios::in | ios::binary);
 		ets.seekg(_tileOffsets[no]);
@@ -263,7 +262,9 @@ void* VSIImage::readDataFromImage(const long long& startX, const long long& star
     if (level!=0) {
       return NULL;
     }
-    unsigned char* data = new unsigned char[width*height*_samplesPerPixel];
+    int dataSize = width*height*_samplesPerPixel;
+    unsigned char* data = new unsigned char[dataSize];
+    std::fill(data, data + dataSize, 255);
     int tileRows = _nrTilesY;
     int tileCols = _nrTilesX;
 

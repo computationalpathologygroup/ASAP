@@ -68,9 +68,6 @@ SET_PROPERTY(TARGET pugixml PROPERTY IMPORTED_LOCATION ${PugiXML_LIBRARY})
 # Required for additional format support
 FIND_PACKAGE(OPENSLIDE REQUIRED)
 
-# Required for lossless JPEG compression used in for example VSIs
-FIND_PACKAGE(DCMTKJPEG REQUIRED)
-
 # Build options for the pathology projects
 OPTION(BUILD_DIAG_PATHOLOGY_EXECUTABLES "Builds executables" OFF)
 OPTION(BUILD_DIAG_PATHOLOGY_WORKSTATION "Builds workstation" OFF)
