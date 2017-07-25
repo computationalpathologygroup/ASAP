@@ -14,6 +14,8 @@ private:
   bool _ownData;
   std::vector<unsigned long long> _dimensions;
   std::vector<unsigned long long> _strides;
+  std::vector<double> _wsiMinValues;
+  std::vector<double> _wsiMaxValues;
   void calculateStrides();
 
   void swap(Patch<T>& first, Patch<T>& second);
@@ -24,7 +26,7 @@ public :
   ~Patch();
   Patch(const Patch& rhs);
   Patch& operator=(const Patch rhs);
-  Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& ctype = pathology::Monochrome, T* data = NULL, bool ownData = true);
+  Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& ctype = pathology::Monochrome, T* data = NULL, bool ownData = true, std::vector<double> wsiMinValues = std::vector<double>(), std::vector<double> wsiMaxValues = std::vector<double>());
 
   // Arithmetic operators
   Patch<T> operator*(const T& val);
@@ -41,8 +43,13 @@ public :
 
   std::vector<unsigned long long> getStrides();
 
+  double getWSIMinValue(int channel = -1) const;
+  double getWSIMaxValue(int channel = -1) const;
+
   double getMinValue(int channel = -1);
   double getMaxValue(int channel = -1);
+  double getMinValue(int channel = -1) const;
+  double getMaxValue(int channel = -1) const;
 
   T getValue(const std::vector<unsigned long long>& index) const;
   void setValue(const std::vector<unsigned long long>& index, const T& value);

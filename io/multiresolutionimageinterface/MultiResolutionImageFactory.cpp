@@ -1,8 +1,11 @@
 #include "MultiResolutionImageFactory.h"
 #include "MultiResolutionImage.h"
-#include "VSIImage.h"
 #include "core/filetools.h"
 #include "core/stringconversion.h"
+
+#ifdef HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT
+#include "VSIImage.h"
+#endif
 
 #ifdef _WIN32
 #include <windows.h>
@@ -30,7 +33,12 @@ MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& 
     if (std::find(factoryExtensions.begin(), factoryExtensions.end(), extension) != factoryExtensions.end()) {
       MultiResolutionImage* img = it->second->readImage(fileName);
       if (img) {
+
+#ifdef HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT
         if ((img->getNumberOfLevels() > 1 || dynamic_cast<VSIImage*>(img) != NULL) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
+#else
+        if ((img->getNumberOfLevels() > 1) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
+#endif
           return img;
         }
         else {

@@ -75,7 +75,12 @@ public :
     for (unsigned int i = 0; i < _spacing.size(); ++i) {
       patchSpacing[i] = _spacing[i] * levelDownsample;
     }
-    Patch<T> patch = Patch<T>(dims, this->getColorType(), data, true);
+    std::vector<double> minValues, maxValues;
+    for (unsigned int i = 0; i < this->getSamplesPerPixel(); ++i) {
+      minValues.push_back(this->getMinValue(i));
+      maxValues.push_back(this->getMaxValue(i));
+    }
+    Patch<T> patch = Patch<T>(dims, this->getColorType(), data, true, minValues, maxValues);
     patch.setSpacing(patchSpacing);
     return patch;
   }

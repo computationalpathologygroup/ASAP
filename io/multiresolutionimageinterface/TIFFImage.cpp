@@ -272,8 +272,8 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
   std::fill(temp,temp+width*height*nrSamples,static_cast<T>(0));
   unsigned int tileW=_tileSizesPerLevel[level][0], tileH=_tileSizesPerLevel[level][1], levelH=_levelDimensions[level][1], levelW=_levelDimensions[level][0];
 
-  long long levelStartX = startX / getLevelDownsample(level);
-  long long levelStartY = startY / getLevelDownsample(level);
+  long long levelStartX = std::floor(startX / getLevelDownsample(level) + 0.5);
+  long long levelStartY = std::floor(startY / getLevelDownsample(level) + 0.5);
   long long startTileY = levelStartY-(levelStartY-((levelStartY/tileH)*tileH));
   long long startTileX = levelStartX-(levelStartX-((levelStartX/tileW)*tileW));
   long long finalX = levelStartX + width >= levelW ? levelW : levelStartX + width;
@@ -316,6 +316,23 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
           TIFFGetField(_tiff, TIFFTAG_PHOTOMETRIC, &ycbcr);
           if (ycbcr == PHOTOMETRIC_YCBCR) {
             TIFFReadRGBATile(_tiff, ix, iy, (uint32*)tile);
+            unsigned char* tmp_row = new unsigned char[tileW*nrSamples];
+            for (unsigned int rev_y = 0; rev_y < tileH / 2; ++rev_y) {
+              std::copy(tile + rev_y*tileW*nrSamples, tile + (rev_y + 1)*tileW*nrSamples, tmp_row);
+              std::copy(tile + (tileH*tileW*nrSamples) - (rev_y + 1)*tileW*nrSamples, tile + (tileH*tileW*nrSamples) - rev_y*tileW*nrSamples, tile + rev_y*tileW*nrSamples);
+              std::copy(tmp_row, tmp_row + tileW*nrSamples, tile + (tileH*tileW*nrSamples) - (rev_y + 1)*tileW*nrSamples);
+            }
+            delete[] tmp_row;
+            for (unsigned int pos = 0; pos < tileW*tileH*nrSamples; pos += 4) {
+              unsigned char r = tile[pos + 0];
+              unsigned char g = tile[pos + 1];
+              unsigned char b = tile[pos + 2];
+              unsigned char a = tile[pos + 3];
+              tile[pos + 0] = b;
+              tile[pos + 1] = g;
+              tile[pos + 2] = r;
+              tile[pos + 3] = a;
+            }
           }
           else {
             TIFFReadTile(_tiff, tile, ix, iy, 0, 0);

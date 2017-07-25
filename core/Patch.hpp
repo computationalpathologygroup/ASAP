@@ -60,6 +60,32 @@ Patch<T>::~Patch()
 }
 
 template<typename T>
+double Patch<T>::getWSIMinValue(int channel) const {
+  if (channel < 0) {
+    return *std::max_element(_wsiMinValues.begin(), _wsiMinValues.end());
+  }
+  else if (channel < _wsiMinValues.size()) {
+    return _wsiMinValues[channel];
+  }
+  else{
+    return std::numeric_limits<double>::max();
+  }
+}
+
+template<typename T>
+double Patch<T>::getWSIMaxValue(int channel) const  {
+  if (channel < 0) {
+    return *std::max_element(_wsiMaxValues.begin(), _wsiMaxValues.end());
+  }
+  else if (channel < _wsiMaxValues.size()) {
+    return _wsiMaxValues[channel];
+  }
+  else{
+    return std::numeric_limits<double>::min();
+  }
+}
+
+template<typename T>
 double Patch<T>::getMinValue(int channel) {
   double min = std::numeric_limits<double>::max();
   if (_buffer) {
@@ -74,6 +100,32 @@ double Patch<T>::getMinValue(int channel) {
 
 template<typename T>
 double Patch<T>::getMaxValue(int channel) {
+  double max = std::numeric_limits<double>::min();
+  if (_buffer) {
+    for (int i = 0; i < _bufferSize; ++i) {
+      if (_buffer[i] > max) {
+        max = _buffer[i];
+      }
+    }
+  }
+  return max;
+}
+
+template<typename T>
+double Patch<T>::getMinValue(int channel) const  {
+  double min = std::numeric_limits<double>::max();
+  if (_buffer) {
+    for (int i = 0; i < _bufferSize; ++i) {
+      if (_buffer[i] < min) {
+        min = _buffer[i];
+      }
+    }
+  }
+  return min;
+}
+
+template<typename T>
+double Patch<T>::getMaxValue(int channel) const {
   double max = std::numeric_limits<double>::min();
   if (_buffer) {
     for (int i = 0; i < _bufferSize; ++i) {
@@ -102,7 +154,7 @@ const unsigned long long Patch<T>::getBufferSize() const {
 }
 
 template<typename T>
-Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& colorType, T* data, bool ownData) :
+Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const pathology::ColorType& colorType, T* data, bool ownData, std::vector<double> wsiMinValues, std::vector<double> wsiMaxValues) :
    ImageSource(),
   _dimensions(dimensions),
   _buffer(data),
@@ -128,6 +180,8 @@ Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const patholo
       _colorType = pathology::Indexed;
     }
   }
+  this->_wsiMaxValues = wsiMaxValues;
+  this->_wsiMinValues = wsiMinValues;
   calculateStrides();
   _isValid = true;
 }
@@ -139,7 +193,9 @@ Patch<T>::Patch(const Patch<T>& rhs) :
   _dimensions(rhs._dimensions),
   _ownData(true),
   _strides(rhs._strides),
-  _buffer(NULL)
+  _buffer(NULL),
+  _wsiMinValues(rhs._wsiMinValues),
+  _wsiMaxValues(rhs._wsiMaxValues)
 {
   _buffer = new T[_bufferSize];
   std::copy(rhs._buffer, rhs._buffer + rhs._bufferSize, _buffer);
@@ -153,6 +209,8 @@ void Patch<T>::swap(Patch<T>& first, Patch<T>& second) {
   std::swap(first._buffer, second._buffer);
   std::swap(first._bufferSize, second._bufferSize);
   std::swap(first._ownData, second._ownData);
+  std::swap(first._wsiMinValues, second._wsiMinValues);
+  std::swap(first._wsiMaxValues, second._wsiMaxValues);
   std::swap(first._strides, second._strides);
 }
 
