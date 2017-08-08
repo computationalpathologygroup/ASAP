@@ -74,7 +74,7 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES SWIG_FLAGS "-builtin")
 	  include_directories(. ${PYTHON_INCLUDE_DIR} ${DIAGPathology_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-	  SWIG_ADD_MODULE(wholeslidefilters python wholeslidefilters.i)
+	  SWIG_ADD_LIBRARY(wholeslidefilters LANGUAGE python SOURCES wholeslidefilters.i)
 	  SWIG_LINK_LIBRARIES(wholeslidefilters wholeslidefilters core) 
 	  SWIG_LINK_LIBRARIES(wholeslidefilters ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
 	  

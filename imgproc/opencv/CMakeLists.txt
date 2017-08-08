@@ -1,7 +1,5 @@
 PROJECT(OPENCVFILTERS)
 
-FIND_PACKAGE(OpenCV REQUIRED)
-
 SET(OPENCVFILTERS_SRCS 
   DIAGPathologyOpenCVBridge.h
   NucleiDetectionFilter.h
@@ -16,11 +14,7 @@ TARGET_INCLUDE_DIRECTORIES(
   ${DIAGPathology_BINARY_DIR}
 )
 
-IF(OpenCV_VERSION EQUAL "3.1.0")
 TARGET_LINK_LIBRARIES(opencvfilters PRIVATE core ${OpenCV_LIBS})
-ELSE()
-TARGET_LINK_LIBRARIES(opencvfilters PRIVATE core ${OpenCV_LIBS})
-ENDIF()
 
 IF(WIN32)  
   SET_TARGET_PROPERTIES(opencvfilters PROPERTIES FOLDER pathology/diag/imgproc)

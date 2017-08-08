@@ -131,7 +131,7 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	      set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-builtin")
       ENDIF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
 
-	  SWIG_ADD_MODULE(multiresolutionimageinterface python multiresolutionimageinterface.i)
+	  SWIG_ADD_LIBRARY(multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
 	  target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)

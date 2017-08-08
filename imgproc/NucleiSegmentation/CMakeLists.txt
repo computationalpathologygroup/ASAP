@@ -1,6 +1,4 @@
 PROJECT(NUCLEISEGMENTATION)
-find_package(OpenCV REQUIRED)
-
 SET(NucleiSegmentation_SRCS FRST.h FRST.cpp)
 
 ADD_LIBRARY(NucleiSegmentation SHARED ${NucleiSegmentation_SRCS})

@@ -33,7 +33,7 @@ if (WIN32)
 endif()
 
 # Use boost for cross-platform use of threading, file system and date_time handling
-FIND_PACKAGE(Boost REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
+FIND_PACKAGE(Boost QUIET REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
 
 # Jasper for JPEG2000 codec
 FIND_PACKAGE(Jasper REQUIRED)
@@ -74,6 +74,11 @@ OPTION(BUILD_DIAG_PATHOLOGY_WORKSTATION "Builds workstation" OFF)
 OPTION(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING "Builds image processing routines" OFF)
 OPTION(BUILD_DIAG_PATHOLOGY_TESTS "Builds tests" OFF)
 OPTION(PACKAGE_ON_INSTALL "Copies dependent DLLs and packages install" OFF)
+
+IF(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING)
+  SET(OpenCV_STATIC OFF)
+  FIND_PACKAGE(OpenCV QUIET)
+ENDIF()
 
 ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(io)
