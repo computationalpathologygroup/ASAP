@@ -35,7 +35,7 @@ To compile the code yourself, some prerequesites are required. First, we use CMa
 - zlib (http://www.zlib.net/)
 - unittest++ (https://github.com/unittest-cpp/unittest-cpp)
 
-To help developers compile this software themselves we provide the necesarry binaries (Visual Studio 2013, 64-bit) for all third party libraries on Windows except Boost, OpenCV and Qt (due to size constraints). If you want to provide the packages yourself, there are no are no strict version requirements, except for libtiff (4.0.1 and higher), Boost (1.55 or higher), Qt (5.1 or higher) and OpenCV (3.1). On Linux all packages except OpenCV 3.1 can be installed through the package manager on Ubuntu-derived systems (tested on Ubuntu and Kubuntu 16.04 LTS). OpenCV 3.1 can easily be compile yourself.
+To help developers compile this software themselves we provide the necesarry binaries (Visual Studio 2013, 64-bit) for all third party libraries on Windows except Boost, OpenCV and Qt (due to size constraints). If you want to provide the packages yourself, there are no strict version requirements, except for libtiff (4.0.1 and higher), Boost (1.55 or higher), Qt (5.1 or higher) and OpenCV (3.1). On Linux all packages except OpenCV 3.1 can be installed through the package manager on Ubuntu-derived systems (tested on Ubuntu and Kubuntu 16.04 LTS). OpenCV 3.1 can easily be compile yourself.
 
 To compile the source code yourself, first make sure all third-party libraries are installed. If you download the Boost-binaries for Windows (http://sourceforge.net/projects/boost/files/boost-binaries/), you need to rename the folder containing the .lib and .dll files to lib (otherwise the CMake-modules provided by CMake will not be able to find the libraries).
 
