@@ -1,6 +1,7 @@
 #ifndef _ColorDeconvolutionFilter
 #define _ColorDeconvolutionFilter
 
+#include <cmath>
 #include <map>
 #include <string>
 #include <vector>
