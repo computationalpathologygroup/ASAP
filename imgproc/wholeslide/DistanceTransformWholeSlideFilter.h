@@ -1,10 +1,11 @@
 #ifndef _DistanceTransformWholeSlideFilter
 #define _DistanceTransformWholeSlideFilter
 
-#include "wholeslidefilters_export.h"
+#include <cmath>
 #include <string>
 #include <vector>
 #include <memory>
+#include "wholeslidefilters_export.h"
 
 class MultiResolutionImage;
 class ProgressMonitor;
