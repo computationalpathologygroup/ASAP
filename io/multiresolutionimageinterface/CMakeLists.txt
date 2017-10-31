@@ -134,7 +134,12 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  SWIG_ADD_LIBRARY(multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
-	  target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)
+          IF(APPLE)
+              target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR}/../../pkgs/numpy-1.13.1-py36_0/lib/python3.6/site-packages/numpy/core/include)
+          ELSEIF(APPLE)
+              target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)
+          ENDIF(APPLE)
+	  
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER pathology/diag/io)
 	  SET_TARGET_PROPERTIES(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  
