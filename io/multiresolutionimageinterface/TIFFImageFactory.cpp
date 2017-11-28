@@ -4,7 +4,7 @@
 
 const TIFFImageFactory TIFFImageFactory::registerThis;
 
-TIFFImageFactory::TIFFImageFactory() : MultiResolutionImageFactory("aaa;tif;tiff") { //Small hack to make sure this is used first for TIFF files
+TIFFImageFactory::TIFFImageFactory() : MultiResolutionImageFactory("TIFFImageFactory", "aaa;tif;tiff") { //Small hack to make sure this is used first for TIFF files
   TIFFSetWarningHandler(NULL);
   TIFFSetErrorHandler(NULL);
 }

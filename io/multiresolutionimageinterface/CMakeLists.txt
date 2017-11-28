@@ -80,11 +80,11 @@ IF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 # Required for lossless JPEG compression used in VSIs
 FIND_PACKAGE(DCMTKJPEG REQUIRED)
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff zlib core libjasper libjpeg pugixml Boost::disable_autolinking Boost::thread)
 TARGET_COMPILE_DEFINITIONS(multiresolutionimageinterface PRIVATE HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 ELSE(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE libtiff core libjasper libjpeg zlib pugixml Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE libtiff zlib core libjasper libjpeg pugixml Boost::disable_autolinking Boost::thread)
 ENDIF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 
 generate_export_header(multiresolutionimageinterface)

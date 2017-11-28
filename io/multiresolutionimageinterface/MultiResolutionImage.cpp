@@ -149,6 +149,10 @@ const int MultiResolutionImage::getNumberOfLevels() const {
   }
 }
 
+const std::string MultiResolutionImage::getFileType() const {
+  return _fileType;
+}
+
 const std::vector<unsigned long long> MultiResolutionImage::getDimensions() const {
   std::vector<unsigned long long> dims;
   if (_isValid) {

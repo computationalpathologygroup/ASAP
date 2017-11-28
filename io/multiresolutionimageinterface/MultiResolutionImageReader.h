@@ -13,7 +13,7 @@ public:
   ~MultiResolutionImageReader();
 
   //! Opens the slide file and keeps a reference to it
-  MultiResolutionImage* open(const std::string& fileName);
+  MultiResolutionImage* open(const std::string& fileName, const std::string factoryName = std::string("default"));
 
 };
 

@@ -20,14 +20,16 @@ MultiResolutionImageFactory::FactoryMap& MultiResolutionImageFactory::registry()
   return typeRegistry;
 }
 
-MultiResolutionImageFactory::MultiResolutionImageFactory(const std::string& supported_extensions) {
-  registry().insert(std::make_pair(supported_extensions, this));
+MultiResolutionImageFactory::MultiResolutionImageFactory(const std::string& factoryName, const std::string& supported_extensions) {
+  registry()["default"].insert(std::make_pair(supported_extensions, this));
+  registry()[factoryName].insert(std::make_pair(supported_extensions, this));
 }
 
-MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& fileName) {
-  MultiResolutionImageFactory::registerExternalFileFormats();
+MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& fileName, const std::string factoryName) {
+  MultiResolutionImageFactory::registerExternalFileFormats();  
   std::string extension = core::extractFileExtension(fileName);
-  for (std::map<std::string, MultiResolutionImageFactory*>::const_iterator it = registry().begin(); it != registry().end(); ++it) {
+  std::map<std::string, MultiResolutionImageFactory*> requestedRegistry = registry()[factoryName];
+  for (std::map<std::string, MultiResolutionImageFactory*>::const_iterator it = requestedRegistry.begin(); it != requestedRegistry.end(); ++it) {
     std::vector<std::string> factoryExtensions;
     core::split(it->first, factoryExtensions, ";");
     if (std::find(factoryExtensions.begin(), factoryExtensions.end(), extension) != factoryExtensions.end()) {

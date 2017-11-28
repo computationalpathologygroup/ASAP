@@ -57,6 +57,9 @@ public :
   
   //! Gets the maximum value for a channel. If no channel is specified, default to the first channel
   virtual double getMaxValue(int channel = -1) = 0;
+
+  //! Get the file type of the opened image
+  const std::string getFileType() const;
   
   //! Obtains data as a patch, which is a basic image class containing all relevant information for further processing,
   //! like data and colortype

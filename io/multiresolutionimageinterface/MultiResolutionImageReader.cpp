@@ -13,6 +13,6 @@ MultiResolutionImageReader::MultiResolutionImageReader()
 MultiResolutionImageReader::~MultiResolutionImageReader() {
 }
 
-MultiResolutionImage* MultiResolutionImageReader::open(const std::string& fileName) { 
-  return MultiResolutionImageFactory::openImage(fileName);
+MultiResolutionImage* MultiResolutionImageReader::open(const std::string& fileName, const std::string factoryName) { 
+  return MultiResolutionImageFactory::openImage(fileName, factoryName);
 }
