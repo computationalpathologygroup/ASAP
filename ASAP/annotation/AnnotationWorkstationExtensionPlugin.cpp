@@ -801,12 +801,15 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
             int annotInd = std::find(annots.begin(), annots.end(), annotation->getAnnotation()) - annots.begin();
             _annotationService->getList()->removeAnnotation(annotInd);
           }
-          annotation->deleteLater();
+
           _annotToItem.remove(annotation);
           _qtAnnotations.removeOne(annotation);
           _selectedAnnotations.remove(annotation);
+		  annotation->decoupleAnnotation();
+
           (*it)->setSelected(false);
           delete (*it);
+		  _viewer->scene()->removeItem(annotation);
           break;
         }
         ++it;

@@ -24,7 +24,10 @@ _lastClickedSecondCoordinateIndex(-1)
 }
 
 QtAnnotation::~QtAnnotation() {
-  _annotation = NULL;
+}
+
+void QtAnnotation::decoupleAnnotation(void) {
+	_annotation = nullptr;
 }
 
 std::shared_ptr<Annotation> QtAnnotation::getAnnotation() const {
