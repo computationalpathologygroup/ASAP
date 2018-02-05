@@ -1,7 +1,7 @@
 #include "OpenSlideImageFactory.h"
 #include "OpenSlideImage.h"
 
-OpenSlideImageFactory::OpenSlideImageFactory() : MultiResolutionImageFactory("OpenSlideImageFactory", "svs;tif;tiff;mrxs;vms;vmu;ndpi;scn;svslide;bif") {
+OpenSlideImageFactory::OpenSlideImageFactory() : MultiResolutionImageFactory("OpenSlide Formats", { "svs", "tif", "tiff", "mrxs", "vms", "vmu", "ndpi", "scn", "svslide", "bif" }, 1) {
 }
 
 MultiResolutionImage* OpenSlideImageFactory::readImage(const std::string& fileName) const {

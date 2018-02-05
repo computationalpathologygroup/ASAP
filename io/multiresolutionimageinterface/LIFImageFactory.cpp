@@ -3,7 +3,7 @@
 
 const LIFImageFactory LIFImageFactory::registerThis;
 
-LIFImageFactory::LIFImageFactory() : MultiResolutionImageFactory("LIFImageFactory", "lif") {
+LIFImageFactory::LIFImageFactory() : MultiResolutionImageFactory("Leica LIF", { "lif" }, 0) {
 }
 
 MultiResolutionImage* LIFImageFactory::readImage(const std::string& fileName) const {

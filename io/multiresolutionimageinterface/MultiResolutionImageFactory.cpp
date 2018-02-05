@@ -14,40 +14,89 @@
 #endif
 
 bool MultiResolutionImageFactory::_externalFormatsRegistered = false;
+std::set<std::string> MultiResolutionImageFactory::_allSupportedExtensions;
 
 MultiResolutionImageFactory::FactoryMap& MultiResolutionImageFactory::registry() {
   static FactoryMap typeRegistry;
   return typeRegistry;
 }
 
-MultiResolutionImageFactory::MultiResolutionImageFactory(const std::string& factoryName, const std::string& supported_extensions) {
-  registry()["default"].insert(std::make_pair(supported_extensions, this));
-  registry()[factoryName].insert(std::make_pair(supported_extensions, this));
+void MultiResolutionImageFactory::addSupportedExtensions(const std::set<std::string>& extensions)
+{
+  _allSupportedExtensions.insert(extensions.begin(), extensions.end());
+}
+
+MultiResolutionImageFactory::MultiResolutionImageFactory(const std::string& factoryName, const std::set<std::string>& supported_extensions, const unsigned int priority) :
+  _factoryName(factoryName),
+  _priority(priority)
+{
+  registry()[factoryName] = std::make_pair(supported_extensions, this);
+  addSupportedExtensions(supported_extensions);
+}
+
+std::vector<std::pair<std::string, std::set<std::string>>> MultiResolutionImageFactory::getLoadedFactoriesAndSupportedExtensions()
+{
+  MultiResolutionImageFactory::registerExternalFileFormats();
+  std::vector<std::pair<std::string, std::set<std::string>>> factoriesAndExtensions;
+  for (auto it = registry().begin(); it != registry().end(); ++it) {
+    factoriesAndExtensions.push_back(std::make_pair(it->first, it->second.first));
+  }
+  return factoriesAndExtensions;
+}
+
+std::set<std::string> MultiResolutionImageFactory::getAllSupportedExtensions()
+{
+  MultiResolutionImageFactory::registerExternalFileFormats();
+  return _allSupportedExtensions;
+}
+
+bool operator < (MultiResolutionImageFactory const& lhs, MultiResolutionImageFactory const& rhs)
+{
+  return lhs._priority < rhs._priority;
 }
 
 MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& fileName, const std::string factoryName) {
   MultiResolutionImageFactory::registerExternalFileFormats();  
-  std::string extension = core::extractFileExtension(fileName);
-  std::map<std::string, MultiResolutionImageFactory*> requestedRegistry = registry()[factoryName];
-  for (std::map<std::string, MultiResolutionImageFactory*>::const_iterator it = requestedRegistry.begin(); it != requestedRegistry.end(); ++it) {
-    std::vector<std::string> factoryExtensions;
-    core::split(it->first, factoryExtensions, ";");
-    if (std::find(factoryExtensions.begin(), factoryExtensions.end(), extension) != factoryExtensions.end()) {
-      MultiResolutionImage* img = it->second->readImage(fileName);
-      if (img) {
-
-#ifdef HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT
-        if ((img->getNumberOfLevels() > 1 || dynamic_cast<VSIImage*>(img) != NULL) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
-#else
-        if ((img->getNumberOfLevels() > 1) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
-#endif
-          return img;
-        }
-        else {
-          delete img;
-        }
+  if (factoryName == "default") {
+    std::vector<MultiResolutionImageFactory*> suitableFactoriesByPriority;
+    for (auto it = registry().begin(); it != registry().end(); ++it) {
+      std::string extension = core::extractFileExtension(fileName);
+      const std::set<std::string>& supportedExtensions = it->second.first;
+      if (std::find(supportedExtensions.begin(), supportedExtensions.end(), extension) != supportedExtensions.end()) {
+        suitableFactoriesByPriority.push_back(it->second.second);
       }
     }
+    std::sort(suitableFactoriesByPriority.begin(), suitableFactoriesByPriority.end());
+    for (auto it = suitableFactoriesByPriority.begin(); it != suitableFactoriesByPriority.end(); ++it) {
+      MultiResolutionImage* img = MultiResolutionImageFactory::openImageWithFactory(fileName, *it);
+      if (img) {
+        return img;
+      }
+    }
+  }
+  else {
+    auto requestedFactory = registry().find(factoryName);
+    if (requestedFactory != registry().end()) {
+      return MultiResolutionImageFactory::openImageWithFactory(fileName, requestedFactory->second.second);
+    }
+  }
+  return NULL;
+}
+
+MultiResolutionImage* MultiResolutionImageFactory::openImageWithFactory(const std::string& fileName, const MultiResolutionImageFactory* factory)
+{
+  MultiResolutionImage* img = factory->readImage(fileName);
+  if (img) {
+#ifdef HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT
+    if ((img->getNumberOfLevels() > 1 || dynamic_cast<VSIImage*>(img) != NULL) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
+#else
+    if ((img->getNumberOfLevels() > 1) || (img->getNumberOfLevels() == 1 && img->getLevelDimensions(0)[0] < 4096)) {
+#endif
+      return img;
+    }
+    else {
+      delete img;
+    }        
   }
   return NULL;
 }
@@ -112,3 +161,4 @@ void MultiResolutionImageFactory::registerExternalFileFormats() {
   }
   MultiResolutionImageFactory::_externalFormatsRegistered = true;
 }
+

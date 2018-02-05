@@ -36,6 +36,7 @@
 #include "config/ASAPMacros.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "io/multiresolutionimageinterface/MultiResolutionImageFactory.h"
 #include "io/multiresolutionimageinterface/OpenSlideImage.h"
 
 #ifdef WIN32
@@ -246,7 +247,7 @@ void PathologyWorkstation::on_actionClose_triggered()
     }
 }
 
-void PathologyWorkstation::openFile(const QString& fileName) {
+void PathologyWorkstation::openFile(const QString& fileName, const QString& factoryName) {
   statusBar->clearMessage();
   if (!fileName.isEmpty()) {
     if (_img) {
@@ -257,7 +258,7 @@ void PathologyWorkstation::openFile(const QString& fileName) {
     _settings->setValue("currentFile", QFileInfo(fileName).fileName());
     this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
     MultiResolutionImageReader imgReader;
-    _img.reset(imgReader.open(fn));
+    _img.reset(imgReader.open(fn, factoryName.toStdString()));
     if (_img) {
       if (_img->valid()) {
         vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
@@ -276,9 +277,29 @@ void PathologyWorkstation::openFile(const QString& fileName) {
 }
 
 void PathologyWorkstation::on_actionOpen_triggered()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Slide files (*.lif *.svs *.mrxs *.ndpi *.tif *.tiff);;All files (*)"));
-    openFile(fileName);
+{ 
+  QString filterList;
+  std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
+  QString defaultString = "All supported types (";
+  for (auto it = allExtensions.begin(); it != allExtensions.end(); ++it) {
+    defaultString += " *." + QString::fromStdString(*it);
+  }
+  defaultString += ")";
+  filterList += defaultString;
+
+  std::vector<std::pair<std::string, std::set<std::string>> > factoriesAndExtensions = MultiResolutionImageFactory::getLoadedFactoriesAndSupportedExtensions();
+  for (auto it = factoriesAndExtensions.begin(); it != factoriesAndExtensions.end(); ++it) {
+    QString extensionString = "(*." + QString::fromStdString(*(it->second.begin()));
+    for (auto extensionIt = std::next(it->second.begin(), 1); extensionIt != it->second.end(); ++extensionIt) {
+      extensionString += " *." + QString::fromStdString(*extensionIt);
+    }
+    extensionString += ")";
+    filterList += (";;" + QString::fromStdString(it->first) + " " + extensionString);
+  }
+  QString selectedFilter;
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), filterList, &selectedFilter);
+  QString selectedFactory = selectedFilter.split("(")[0].trimmed();
+  openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
 }
 
 void PathologyWorkstation::setCacheSize(const unsigned long long& cacheMaxByteSize) {

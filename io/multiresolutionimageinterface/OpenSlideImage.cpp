@@ -14,8 +14,8 @@ OpenSlideImage::~OpenSlideImage() {
   MultiResolutionImage::cleanup();
 }
 
+// We are using OpenSlides caching system instead of our own.
 void OpenSlideImage::setCacheSize(const unsigned long long cacheSize) {
-  MultiResolutionImage::setCacheSize(cacheSize);
 #ifdef CUSTOM_OPENSLIDE
   if (_slide) {
     openslide_set_cache_size(_slide, cacheSize);
@@ -81,7 +81,6 @@ bool OpenSlideImage::initializeType(const std::string& imagePath) {
         _bg_b = (bg_color & 0xff);
       }
       _isValid = true;
-      createCache<unsigned int>();
     }
     else {
       _isValid = false;
@@ -111,92 +110,8 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
 
   boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
   unsigned int* temp = new unsigned int[width*height];
-  std::vector<unsigned long long> levelDims = this->getLevelDimensions(level);
-  unsigned long long levelW = levelDims[0];
-  unsigned long long levelH = levelDims[1];
+  openslide_read_region(_slide, temp, startX, startY, level, width, height);
 
-  std::stringstream ssmH; 
-  ssmH << "openslide.level[";
-  ssmH << level;
-  ssmH << "].tile-height";
-
-  std::stringstream ssmW; 
-  ssmW << "openslide.level[";
-  ssmW << level;
-  ssmW << "].tile-width";
-
-  unsigned int tileW = openslide_get_property_value(_slide, ssmW.str().c_str()) ? atoi(openslide_get_property_value(_slide, ssmW.str().c_str())) : 512;
-  unsigned int tileH = openslide_get_property_value(_slide, ssmW.str().c_str()) ? atoi(openslide_get_property_value(_slide, ssmH.str().c_str())) : 512;
-  unsigned int levelDownsample = getLevelDownsample(level);
-
-  long long levelStartX = startX/levelDownsample;
-  long long levelStartY = startY/levelDownsample;
-  long long startTileY = levelStartY-(levelStartY-((levelStartY/tileH)*tileH));
-  long long startTileX = levelStartX-(levelStartX-((levelStartX/tileW)*tileW));
-  long long finalX = levelStartX + width >= levelW ? levelW : levelStartX + width;
-  long long finalY = levelStartY + height >= levelH ? levelH : levelStartY + height;
-
-  for (long long iy= startTileY; iy<finalY;iy += tileH) {
-    if (iy < 0) {
-      continue;
-    }
-    for (long long ix= startTileX; ix<finalX; ix+= tileW)  {
-      if (ix < 0) {
-        continue;
-      }
-      std::stringstream k;
-      k << ix*levelDownsample << "-" << iy*levelDownsample << "-" << level;
-      unsigned int* tile = NULL;
-      bool deleteTile = false;
-      unsigned int cachedTileSize = 0;
-      if (_cacheSize == 0) { // OpenSlide is thread-safe, so special case when we do not need caching;
-        tile = new unsigned int[tileW*tileH];
-        openslide_read_region(_slide, tile, ix*levelDownsample, iy*levelDownsample, level, tileW, tileH);
-        deleteTile = true;
-      }
-      else {
-        _cacheMutex->lock();
-        std::static_pointer_cast<TileCache<unsigned int> >(_cache)->get(k.str(), tile, cachedTileSize);
-        _cacheMutex->unlock();
-        if (!tile) {
-          tile = new unsigned int[tileW*tileH];
-          openslide_read_region(_slide, tile, ix*levelDownsample, iy*levelDownsample, level, tileW, tileH);
-
-          // If tile did not fit in the cache, delete it at the end
-          _cacheMutex->lock();
-          if (std::static_pointer_cast<TileCache<unsigned int> >(_cache)->set(k.str(), tile, tileW*tileH*sizeof(unsigned int))) {
-            deleteTile = true;
-          }
-          _cacheMutex->unlock();
-        }
-      }
-      if (!tile) {
-        break;
-      }
-      long long ixx = (ix-levelStartX);
-      long long iyy = (iy-levelStartY);
-      long long lyh = levelStartY + height;
-      long long lxw = levelStartX + width;
-      long long ixw = ixx + tileW;
-      long long rowLength = ixw > width ? tileW - (ixw - width) : tileW;
-      long long tileDeltaX = 0;
-      if (ixx < 0) {
-        rowLength += ixx;
-        tileDeltaX -= ixx;
-        ixx = 0;        
-      }
-      for (unsigned int ty = 0; ty < tileH; ++ty) {
-        if ((iyy + ty >= 0) && (ixx >= 0) && (iyy + ty < height) && lxw > 0){
-          long long idx = (ty+iyy)*width + ixx;
-          long long tids = (ty*tileW);
-          std::copy(tile+tids+tileDeltaX, tile+tids+rowLength+tileDeltaX, temp + idx);
-        } 
-      }
-      if (deleteTile) {
-        delete[] tile;
-      }
-    }
-  }
   unsigned char* rgb = new unsigned char[width*height*3];
   unsigned char* bgra = (unsigned char*)temp;
   for (unsigned long long i = 0, j = 0; i < width*height*4; i+=4, j+=3) {

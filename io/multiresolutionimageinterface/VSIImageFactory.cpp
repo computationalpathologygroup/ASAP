@@ -3,7 +3,7 @@
 
 const VSIImageFactory VSIImageFactory::registerThis;
 
-VSIImageFactory::VSIImageFactory() : MultiResolutionImageFactory("VSIImageFactory", "vsi") {
+VSIImageFactory::VSIImageFactory() : MultiResolutionImageFactory("Olympus VSI", { "vsi" }, 0) {
 }
 
 MultiResolutionImage* VSIImageFactory::readImage(const std::string& fileName) const {
