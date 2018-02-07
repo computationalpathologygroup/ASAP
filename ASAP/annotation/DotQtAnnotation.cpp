@@ -36,12 +36,7 @@ QRectF DotQtAnnotation::boundingRect() const {
 
 QPainterPath DotQtAnnotation::shape() const {
   QPainterPath path;
-  if (isSelected()) {
-    path.addEllipse(QPointF(), 1.5 * _rectSize / _currentLOD, 1.5 * _rectSize / _currentLOD);
-  }
-  else {
-    path.addEllipse(QPointF(), _rectSize / _currentLOD, _rectSize / _currentLOD);
-  }
+  path.addEllipse(QPointF(), 1.5 * _rectSize / _currentLOD, 1.5 * _rectSize / _currentLOD);
   return path;
 }
 

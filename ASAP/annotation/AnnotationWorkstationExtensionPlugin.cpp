@@ -793,25 +793,21 @@ void AnnotationWorkstationExtensionPlugin::deleteAnnotation(QtAnnotation* annota
       QTreeWidgetItemIterator it(_treeWidget);
       while (*it) {
         if (annotation == (*it)->data(1, Qt::UserRole).value<QtAnnotation*>()) {
-			if (_annotationService) {
-				std::vector<std::shared_ptr<Annotation> > annots = _annotationService->getList()->getAnnotations();
-				int annotInd = std::find(annots.begin(), annots.end(), annotation->getAnnotation()) - annots.begin();
-				_annotationService->getList()->removeAnnotation(annotInd);
-			}
-
-			_annotToItem.remove(annotation);
-			_qtAnnotations.removeOne(annotation);
-			_selectedAnnotations.remove(annotation);
-			(*it)->setSelected(false);
-			delete (*it);
-
-			// Interacts with the deleteLater, causing a race condition.
-			/*if (_viewer) {
-				_viewer->scene()->removeItem(annotation);
-			}*/
-			annotation->deleteLater();
-
-			break;
+          if (_viewer) {
+            _viewer->scene()->removeItem(annotation);
+          }
+          if (_annotationService) {
+            std::vector<std::shared_ptr<Annotation> > annots = _annotationService->getList()->getAnnotations();
+            int annotInd = std::find(annots.begin(), annots.end(), annotation->getAnnotation()) - annots.begin();
+            _annotationService->getList()->removeAnnotation(annotInd);
+          }
+          annotation->deleteLater();
+          _annotToItem.remove(annotation);
+          _qtAnnotations.removeOne(annotation);
+          _selectedAnnotations.remove(annotation);
+          (*it)->setSelected(false);
+          delete (*it);
+          break;
         }
         ++it;
       }
