@@ -26,7 +26,6 @@ public:
   void moveCoordinateBy(unsigned int index, const Point& moveBy);
   void moveCoordinatesBy(const Point& moveBy);
 
-  void decoupleAnnotation(void);
 	std::shared_ptr<Annotation> getAnnotation() const;
   
   virtual QRectF boundingRect() const = 0;
