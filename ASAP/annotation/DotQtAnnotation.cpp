@@ -5,7 +5,7 @@
 
 DotQtAnnotation::DotQtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject *parent, float scale) : 
   QtAnnotation(annotation, parent, scale),
-  _rectSize(3.),
+  _rectSize(5.),
   _rectColor(QColor("blue")),
   _rectSelectedColor(QColor("red")),
   _currentLOD(1.)
@@ -28,27 +28,37 @@ void DotQtAnnotation::moveCoordinateBy(const Point& moveBy) {
 
 QRectF DotQtAnnotation::boundingRect() const {
   QRectF bRect;
-  if (_annotation) {
-    QPointF tl(-4.5*_rectSize / _currentLOD, -4.5*_rectSize / _currentLOD);
-    QPointF br(4.5*_rectSize / _currentLOD, 4.5*_rectSize / _currentLOD);
-    bRect = QRectF(tl, br);
-  }
+  QPointF tl(-1.5*_rectSize, -1.5*_rectSize);
+  QPointF br(1.5*_rectSize, 1.5*_rectSize);
+  bRect = QRectF(tl, br);
   return bRect;
+}
+
+QPainterPath DotQtAnnotation::shape() const {
+  QPainterPath path;
+  if (isSelected()) {
+    path.addEllipse(QPointF(), 1.5 * _rectSize / _currentLOD, 1.5 * _rectSize / _currentLOD);
+  }
+  else {
+    path.addEllipse(QPointF(), _rectSize / _currentLOD, _rectSize / _currentLOD);
+  }
+  return path;
 }
 
 void DotQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
   QWidget *widget) {
-  if (_annotation) {
-    _currentLOD = option->levelOfDetailFromTransform(painter->worldTransform());
-    std::vector<Point> coords = _annotation->getCoordinates();
-    for (std::vector<Point>::const_iterator it = coords.begin(); it != coords.end(); ++it) {
-      if (isSelected()) {
-        painter->setPen(QPen(QBrush(_rectSelectedColor), 4.5 * _rectSize / _currentLOD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
-      }
-      else {
-        painter->setPen(QPen(QBrush(getDrawingColor()), 3 * _rectSize / _currentLOD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
-      }
-      painter->drawPoint(QPointF());
-    }
+  _currentLOD = option->levelOfDetailFromTransform(painter->worldTransform());
+  painter->setPen(Qt::NoPen);
+  if (isSelected()) {
+    painter->setBrush(QBrush(_rectSelectedColor));
   }
+  else {
+    painter->setBrush(QBrush(getDrawingColor()));
+  }
+  if (isSelected()) {
+    painter->drawEllipse(QPointF(), 1.5 * _rectSize / _currentLOD, 1.5 * _rectSize / _currentLOD);
+  }
+  else {
+    painter->drawEllipse(QPointF(), _rectSize / _currentLOD, _rectSize / _currentLOD);
+  }  
 }

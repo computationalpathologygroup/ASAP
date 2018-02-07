@@ -10,6 +10,7 @@ class ANNOTATIONPLUGIN_EXPORT DotQtAnnotation : public QtAnnotation
 public:
   DotQtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale = 1.0);
   QRectF boundingRect() const;
+  QPainterPath shape() const;
 
   void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     QWidget *widget);
