@@ -132,6 +132,9 @@ void MultiResolutionImageFactory::registerExternalFileFormats() {
 #ifdef _WIN32
   std::string fileFormatPluginDir = core::completePath("formats", rootDir);  
   core::getFiles(fileFormatPluginDir, "*.dll", formatPlugins);
+#elif __APPLE__
+  std::string fileFormatPluginDir = core::completePath("bin/formats", core::upOneLevel(rootDir));
+  core::getFiles(fileFormatPluginDir, "*.dylib", formatPlugins);
 #else
   std::string fileFormatPluginDir = core::completePath("bin/formats", core::upOneLevel(rootDir));  
   core::getFiles(fileFormatPluginDir, "*.so", formatPlugins);
