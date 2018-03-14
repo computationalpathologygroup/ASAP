@@ -50,9 +50,9 @@ std::set<std::string> MultiResolutionImageFactory::getAllSupportedExtensions()
   return _allSupportedExtensions;
 }
 
-bool operator < (MultiResolutionImageFactory const& lhs, MultiResolutionImageFactory const& rhs)
+bool MultiResolutionImageFactory::operator<(const MultiResolutionImageFactory& other) const
 {
-  return lhs._priority < rhs._priority;
+  return this->_priority < other._priority;
 }
 
 MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& fileName, const std::string factoryName) {
@@ -66,7 +66,7 @@ MultiResolutionImage* MultiResolutionImageFactory::openImage(const std::string& 
         suitableFactoriesByPriority.push_back(it->second.second);
       }
     }
-    std::sort(suitableFactoriesByPriority.begin(), suitableFactoriesByPriority.end());
+    std::sort(suitableFactoriesByPriority.begin(), suitableFactoriesByPriority.end(), [](MultiResolutionImageFactory* a, MultiResolutionImageFactory* b) {return (*a) < (*b);});
     for (auto it = suitableFactoriesByPriority.begin(); it != suitableFactoriesByPriority.end(); ++it) {
       MultiResolutionImage* img = MultiResolutionImageFactory::openImageWithFactory(fileName, *it);
       if (img) {

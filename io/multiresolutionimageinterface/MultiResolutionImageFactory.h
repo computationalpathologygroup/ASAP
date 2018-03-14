@@ -17,7 +17,7 @@ public:
   static void registerExternalFileFormats();
   static std::vector<std::pair<std::string, std::set<std::string> > > getLoadedFactoriesAndSupportedExtensions();
   static std::set<std::string> getAllSupportedExtensions();
-  friend bool operator< (MultiResolutionImageFactory const& a, MultiResolutionImageFactory const& b);
+  bool operator< (const MultiResolutionImageFactory &other) const;
 
 protected:
   typedef std::map<std::string, std::pair<std::set<std::string>, MultiResolutionImageFactory*> > FactoryMap;

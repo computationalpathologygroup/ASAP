@@ -83,7 +83,7 @@ private:
   void loadPlugins();
   void readSettings();
   void writeSettings();
-  void openFile(const QString& fileName, const QString& factoryName = QString("Default"));
+  void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };

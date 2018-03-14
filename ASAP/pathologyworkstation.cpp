@@ -75,7 +75,7 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
   readSettings();
   QStringList args = QApplication::arguments();
   if (args.size() > 1) {
-    openFile(args[1]);
+    openFile(args[1], "default");
   }
 }
 
