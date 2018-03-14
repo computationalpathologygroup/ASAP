@@ -120,6 +120,8 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  # Set module extension, platform specific
 	  IF(WIN32)
 		SET(module_extension ".pyd")
+	  ELSEIF(APPLE)
+	    SET(module_extension ".dylib")
 	  ELSE(WIN32)
 		SET(module_extension ".so")  
 	  ENDIF(WIN32)
