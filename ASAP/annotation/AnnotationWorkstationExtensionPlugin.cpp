@@ -292,7 +292,7 @@ bool AnnotationWorkstationExtensionPlugin::shouldClear() {
 void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string& filePath) {
   QString fileName;
   if (filePath.empty()) {
-    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Annotation files(*.xml;*.ndpa)"));
+    fileName = QFileDialog::getOpenFileName(NULL, tr("Load annotations"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), tr("Annotation files (*.xml *.ndpa)"));
   }
   else {
     fileName = QString::fromStdString(filePath);
