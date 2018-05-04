@@ -1,4 +1,8 @@
 #include "TIFFImage.h"
+#ifdef _WIN32
+#include <Windows.h>
+#include <Stringapiset.h>
+#endif
 #include "tiffio.h"
 #include "JPEG2000Codec.h"
 #include "core/PathologyEnums.h"
@@ -18,9 +22,16 @@ TIFFImage::~TIFFImage() {
 bool TIFFImage::initializeType(const std::string& imagePath) {
   boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
   cleanup();
-  
-  //Disable warning popups
+
+#ifdef _WIN32
+  int wchars_num = MultiByteToWideChar(CP_UTF8, 0, imagePath.c_str(), -1, NULL, 0);
+  wchar_t* w_imagePath = new wchar_t[wchars_num];
+  MultiByteToWideChar(CP_UTF8, 0, imagePath.c_str(), -1, w_imagePath, wchars_num);
+  _tiff = TIFFOpenW(w_imagePath, "rm");
+  delete[] w_imagePath;
+#else
   _tiff = TIFFOpen(imagePath.c_str(),"rm");
+#endif
 
   if (_tiff) {
   const char * img_desc = NULL;
