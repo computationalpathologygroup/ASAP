@@ -20,7 +20,8 @@ public:
     POLYGON,
     SPLINE,
     POINTSET,
-    MEASUREMENT
+    MEASUREMENT,
+    RECTANGLE
   };
 
   Annotation();
@@ -53,6 +54,6 @@ public:
 private:
   Type _type;
 	std::vector<Point> _coordinates;
-  static const char* _typeStrings[6];
+  static const char* _typeStrings[7];
 };
 #endif

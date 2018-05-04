@@ -5,6 +5,8 @@
 #include "core/filetools.h"
 #include "core/stringconversion.h"
 #include "core/PathologyEnums.h"
+#include "pugixml.hpp"
+
 
 using namespace pathology;
 

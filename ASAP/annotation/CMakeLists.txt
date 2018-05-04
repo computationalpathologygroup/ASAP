@@ -2,7 +2,6 @@ PROJECT(AnnotationPlugin)
 INCLUDE_DIRECTORIES(
   ${ANNOTATION_SOURCE_DIR}
   ${Boost_INCLUDE_DIRS}
-  ${PugiXML_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
   ${CORE_BINARY_DIR}
   ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
@@ -21,6 +20,7 @@ SET(ANNOTATION_PLUGIN_HEADERS
   DotAnnotationTool.h
   PolyAnnotationTool.h
   MeasurementAnnotationTool.h
+  RectangleAnnotationTool.h
   PointSetAnnotationTool.h
   SplineAnnotationTool.h
   QtAnnotation.h
@@ -35,6 +35,7 @@ SET(ANNOTATION_PLUGIN_SOURCE
   AnnotationTool.cpp
   AnnotationWorkstationExtensionPlugin.cpp
   MeasurementAnnotationTool.cpp
+  RectangleAnnotationTool.cpp
   DotAnnotationTool.cpp
   PolyAnnotationTool.cpp
   PointSetAnnotationTool.cpp
@@ -47,24 +48,16 @@ SET(ANNOTATION_PLUGIN_SOURCE
   DotQtAnnotation.cpp
 )
 
-IF(BUILD_USING_QT4)
-  set(ANNOTATION_WORKSTATION_EXTENSION_RESOURCE
-    resources/icons.qrc
-  )
-  qt4_add_resources(ANNOTATION_RESOURCE_ADDED ${ANNOTATION_WORKSTATION_EXTENSION_RESOURCE})
-  add_library(AnnotationPlugin SHARED ${ANNOTATION_PLUGIN_SOURCE} ${ANNOTATION_PLUGIN_HEADERS} ${ANNOTATION_RESOURCE_ADDED})
-  TARGET_LINK_LIBRARIES(AnnotationPlugin ${QT_LIBRARIES})
-ELSE()
-  find_package(Qt5 COMPONENTS Core Widgets Gui)
-  set(ANNOTATION_WORKSTATION_EXTENSION_RESOURCE
-    resources/AnnotationWorkstationExtensionPlugin_resources.qrc
-  )
-  qt5_add_resources(ANNOTATION_RESOURCE_ADDED ${ANNOTATION_WORKSTATION_EXTENSION_RESOURCE})
-  add_library(AnnotationPlugin SHARED ${ANNOTATION_PLUGIN_SOURCE} ${ANNOTATION_PLUGIN_HEADERS} ${ANNOTATION_RESOURCE_ADDED})
-  qt5_use_modules(AnnotationPlugin Core Widgets UiTools)
-ENDIF()
+find_package(Qt5 COMPONENTS Core Widgets Gui)
+set(ANNOTATION_WORKSTATION_EXTENSION_RESOURCE
+resources/AnnotationWorkstationExtensionPlugin_resources.qrc
+)
+qt5_add_resources(ANNOTATION_RESOURCE_ADDED ${ANNOTATION_WORKSTATION_EXTENSION_RESOURCE})
+add_library(AnnotationPlugin SHARED ${ANNOTATION_PLUGIN_SOURCE} ${ANNOTATION_PLUGIN_HEADERS} ${ANNOTATION_RESOURCE_ADDED})
+qt5_use_modules(AnnotationPlugin Core Widgets UiTools)
+
 generate_export_header(AnnotationPlugin)
-TARGET_LINK_LIBRARIES(AnnotationPlugin pugixml ASAP core annotation)
+TARGET_LINK_LIBRARIES(AnnotationPlugin ASAPLib core annotation)
 SET_TARGET_PROPERTIES(AnnotationPlugin PROPERTIES DEBUG_POSTFIX _d)
 
 INSTALL(TARGETS AnnotationPlugin

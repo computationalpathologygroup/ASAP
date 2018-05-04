@@ -10,7 +10,6 @@ INCLUDE_DIRECTORIES(
   ${TIFF_INCLUDE_DIR}
   ${JASPER_INCLUDE_DIR}
   ${OPENSLIDE_INCLUDE_DIR}
-  ${PugiXML_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CORE_BINARY_DIR}
@@ -80,15 +79,22 @@ IF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 # Required for lossless JPEG compression used in VSIs
 FIND_PACKAGE(DCMTKJPEG REQUIRED)
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff zlib core libjasper libjpeg pugixml Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff zlib core libjasper libjpeg Boost::disable_autolinking Boost::thread)
 TARGET_COMPILE_DEFINITIONS(multiresolutionimageinterface PRIVATE HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 ELSE(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE libtiff zlib core libjasper libjpeg pugixml Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE libtiff zlib core libjasper libjpeg Boost::disable_autolinking Boost::thread)
 ENDIF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 
 generate_export_header(multiresolutionimageinterface)
 SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
+target_compile_definitions(multiresolutionimageinterface PRIVATE "PUGIXML_HEADER_ONLY")
+get_target_property(PUGIXML_INCLUDE_DIR pugixml INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(
+	multiresolutionimageinterface
+	PRIVATE
+	${PUGIXML_INCLUDE_DIR}
+)
 
 ADD_LIBRARY(openslidefileformat SHARED ${EXTERNAL_OPENSLIDE_SRCS} ${EXTERNAL_OPENSLIDE_HS})
 generate_export_header(openslidefileformat)

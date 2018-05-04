@@ -4,8 +4,12 @@
 #include <vector>
 #include "MultiResolutionImage.h"
 #include "multiresolutionimageinterface_export.h"
-#include "pugixml.hpp"
 #include "core/PathologyEnums.h"
+
+namespace pugi {
+  class xml_document;
+  class xpath_node;
+}
 
 class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT LIFImage : public MultiResolutionImage {
 

@@ -18,23 +18,14 @@ SET(VisualizationWorkstationExtensionPlugin_SOURCE
   VisualizationWorkstationExtensionPlugin.h
 )
 
-IF(BUILD_USING_QT4)
-  set(VisualizationWorkstationExtensionPlugin_RESOURCE
-    resources/VisualizationWorkstationExtensionPlugin_resources.qrc
-  )
-  qt4_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
-  add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
-  TARGET_LINK_LIBRARIES(VisualizationWorkstationExtensionPlugin ${QT_LIBRARIES})
-ELSE()
-  find_package(Qt5 COMPONENTS Core Widgets Gui)
-  set(VisualizationWorkstationExtensionPlugin_RESOURCE
-    resources/VisualizationWorkstationExtensionPlugin_resources.qrc
-  )
-  qt5_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
-  add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
-  qt5_use_modules(VisualizationWorkstationExtensionPlugin Core Widgets UiTools)
-ENDIF()
-TARGET_LINK_LIBRARIES(VisualizationWorkstationExtensionPlugin ASAP multiresolutionimageinterface core annotation)
+find_package(Qt5 COMPONENTS Core Widgets Gui)
+set(VisualizationWorkstationExtensionPlugin_RESOURCE
+resources/VisualizationWorkstationExtensionPlugin_resources.qrc
+)
+qt5_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
+add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
+qt5_use_modules(VisualizationWorkstationExtensionPlugin Core Widgets UiTools)
+TARGET_LINK_LIBRARIES(VisualizationWorkstationExtensionPlugin ASAPLib multiresolutionimageinterface core annotation)
 SET_TARGET_PROPERTIES(VisualizationWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 
 INSTALL(TARGETS VisualizationWorkstationExtensionPlugin

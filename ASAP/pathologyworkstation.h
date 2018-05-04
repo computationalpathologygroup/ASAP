@@ -1,6 +1,7 @@
 #ifndef PATHOLOGYWORKSTATION_H
 #define PATHOLOGYWORKSTATION_H
 
+#include "ASAP_export.h"
 #include <QMainWindow>
 #include <QDir>
 #include <QStringList>
@@ -27,7 +28,7 @@ Viewer is the owner of RenderThread, TileManager, ScaleBar, MiniMap, RenderWorke
 
 */
 
-class PathologyWorkstation : public QMainWindow
+class ASAP_EXPORT PathologyWorkstation : public QMainWindow
 {
   Q_OBJECT
 

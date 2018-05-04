@@ -4,7 +4,7 @@
 #include <limits>
 #include <cmath>
 
-const char* Annotation::_typeStrings[6] = { "None", "Dot", "Polygon", "Spline", "PointSet", "Measurement"};
+const char* Annotation::_typeStrings[7] = { "None", "Dot", "Polygon", "Spline", "PointSet", "Measurement", "Rectangle"};
 
 Annotation::Annotation() :
   _type(Annotation::NONE),

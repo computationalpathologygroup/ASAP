@@ -26,7 +26,9 @@ SET(ANNOTATION_SOURCE
 )
 
 add_library(annotation SHARED ${ANNOTATION_SOURCE} ${ANNOTATION_HEADERS})
+target_compile_definitions(annotation PRIVATE "PUGIXML_HEADER_ONLY")
 generate_export_header(annotation)
+get_target_property(PUGIXML_INCLUDE_DIR pugixml INTERFACE_INCLUDE_DIRECTORIES)
 TARGET_INCLUDE_DIRECTORIES(
 annotation
 PRIVATE
@@ -34,13 +36,13 @@ PRIVATE
   ../
   ../io/multiresolutionimageinterface
   ${Boost_INCLUDE_DIRS}
-  ${PugiXML_INCLUDE_DIR}
+  ${PUGIXML_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CORE_BINARY_DIR}
   ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
 )
-TARGET_LINK_LIBRARIES(annotation PRIVATE pugixml core multiresolutionimageinterface)
+TARGET_LINK_LIBRARIES(annotation PRIVATE core multiresolutionimageinterface)
 SET_TARGET_PROPERTIES(annotation PROPERTIES DEBUG_POSTFIX _d)
 
 INSTALL(TARGETS annotation

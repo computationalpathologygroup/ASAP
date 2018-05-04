@@ -14,6 +14,7 @@
 #include "DotQtAnnotation.h"
 #include "PolyQtAnnotation.h"
 #include "MeasurementQtAnnotation.h"
+#include "RectangleAnnotationTool.h"
 #include "MeasurementAnnotationTool.h"
 #include "PointSetQtAnnotation.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
@@ -389,7 +390,7 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       if ((*it)->getType() == Annotation::Type::DOT) {
         annot = new DotQtAnnotation((*it), this, _viewer->getSceneScale());
       }
-      else if ((*it)->getType() == Annotation::Type::POLYGON) {
+      else if ((*it)->getType() == Annotation::Type::POLYGON || (*it)->getType() == Annotation::Type::RECTANGLE) {
         annot = new PolyQtAnnotation((*it), this, _viewer->getSceneScale());
         dynamic_cast<PolyQtAnnotation*>(annot)->setInterpolationType("linear");
       }
@@ -667,6 +668,8 @@ bool AnnotationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer) {
   _viewer = viewer;
   std::shared_ptr<ToolPluginInterface> tool(new DotAnnotationTool(this, viewer));
   _annotationTools.push_back(tool);
+  tool.reset(new RectangleAnnotationTool(this, viewer));
+  _annotationTools.push_back(tool);
   tool.reset(new PolyAnnotationTool(this, viewer));
   _annotationTools.push_back(tool);
   tool.reset(new SplineAnnotationTool(this, viewer));
@@ -713,6 +716,12 @@ void AnnotationWorkstationExtensionPlugin::startAnnotation(float x, float y, con
   else if (type == "measurementannotation") {
     annot->setType(Annotation::Type::MEASUREMENT);
     MeasurementQtAnnotation* temp = new MeasurementQtAnnotation(annot, this, _viewer->getSceneScale());
+    _generatedAnnotation = temp;
+  }
+  else if (type == "rectangleannotation") {
+    annot->setType(Annotation::Type::RECTANGLE);
+    PolyQtAnnotation* temp = new PolyQtAnnotation(annot, this, _viewer->getSceneScale());
+    temp->setInterpolationType("linear");
     _generatedAnnotation = temp;
   }
   else {
