@@ -117,7 +117,7 @@ void RectangleAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
     std::vector<double> spacing = local_img->getSpacing();
     QString suffix(" pixels");
     if (spacing.size() > 1) {
-      suffix = QString::fromUtf8(u8" µm");
+      suffix = QString::fromUtf8(u8" \u03bcm");
     }
     QDialog* createRectDiaglog = new QDialog();
     createRectDiaglog->setWindowTitle("Specify width and height for rectangular annotations");
