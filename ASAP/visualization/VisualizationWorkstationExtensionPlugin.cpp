@@ -53,7 +53,7 @@ bool VisualizationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer
 }
 
 QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
-  _dockWidget = new QDockWidget("Cancer detection visualization");
+  _dockWidget = new QDockWidget("Overlays");
   QUiLoader loader;
   QFile file(":/VisualizationWorkstationExtensionPlugin_ui/VisualizationWorkstationExtensionPlugin.ui");
   file.open(QFile::ReadOnly);

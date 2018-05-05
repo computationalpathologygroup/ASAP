@@ -43,6 +43,10 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
       return false;
     }
   }
+  if (TIFFIsTiled(_tiff) == 0) {
+    cleanup();
+    return false;
+  }
   unsigned int cType = 0, dType = 0, planarconfig=0, bitsPerSample = 0;
   TIFFGetField(_tiff, TIFFTAG_PHOTOMETRIC, &cType);
   

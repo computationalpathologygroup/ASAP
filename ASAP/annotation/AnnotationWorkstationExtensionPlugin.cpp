@@ -88,11 +88,21 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     connect(_treeWidget, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(resizeOnExpand()));
   }
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
+
+  for (int i = 0; i < QColorDialog::customCount(); ++i) {
+    QColor customColor = _settings->value("annotationCustomColor" + QString(i), QColor("white")).value<QColor>();
+    QColorDialog::setCustomColor(i, customColor);
+  }
+
   qRegisterMetaTypeStreamOperators<QtAnnotation*>("QtAnnotation*");
   qRegisterMetaTypeStreamOperators<QtAnnotationGroup*>("QtAnnotationGroup*");
 }
 
 AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
+  for (int i = 0; i < QColorDialog::customCount(); ++i) {
+    QColor customColor = QColorDialog::customColor(i);
+    _settings->setValue("annotationCustomColor" + QString(i), customColor);
+  }
   clear();
 }
 

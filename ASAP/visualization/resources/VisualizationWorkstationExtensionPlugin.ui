@@ -71,7 +71,7 @@ QLabel {
     <item>
      <widget class="QPushButton" name="OpenResultPushButton">
       <property name="text">
-       <string>Open result image</string>
+       <string>Open image for overlay</string>
       </property>
      </widget>
     </item>
