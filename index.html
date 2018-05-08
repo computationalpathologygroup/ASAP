@@ -1,1 +1,375 @@
-<p>Hello world</>
+<!DOCTYPE html>
+<!--
+ * A Design by GraphBerry
+ * Author: GraphBerry
+ * Author URL: http://graphberry.com
+ * License: http://graphberry.com/pages/license
+-->
+<html lang="en">
+    
+    <head>
+        <meta charset=utf-8>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ASAP - Automated Slide Analysis Platform</title>
+        <!-- Load Roboto font -->
+        <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <!-- Load css styles -->
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.css" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link rel="stylesheet" type="text/css" href="css/pluton.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.cslider.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.bxslider.css" />
+        <link rel="stylesheet" type="text/css" href="css/animate.css" />
+        <!-- Fav and touch icons -->
+        <link rel="shortcut icon" href="images/ico/favicon.ico">
+    </head>
+    
+    <body>
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a href="#" class="brand">
+                        <img src="images/application.png" width="40" height="40" alt="Logo" />
+                        <!-- This is website logo -->
+                    </a>
+                    <!-- Navigation button, visible on small resolution -->
+                    <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <i class="icon-menu"></i>
+                    </button>
+                    <!-- Main navigation -->
+                    <div class="nav-collapse collapse pull-right">
+                        <ul class="nav" id="top-navigation">
+                            <li class="active"><a href="#home">Home</a></li>
+                            <li><a href="#service">Features</a></li>
+                            <li><a href="#portfolio">Screenshots</a></li>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#contact">Download</a></li>
+                        </ul>
+                    </div>
+                    <!-- End main navigation -->
+                </div>
+            </div>
+        </div>
+        <!-- Start home section -->
+        <div id="home">
+            <!-- Start cSlider -->
+            <div id="da-slider" class="da-slider">
+                <div class="triangle"></div>
+                <!-- mask elemet use for masking background image -->
+                <div class="mask"></div>
+                <!-- All slides centred in container element -->
+                <div class="container">
+                    <!-- Start first slide -->
+                    <div class="da-slide">
+                        <h2 class="fittext2">Welcome to ASAP</h2>
+                        <h4>Fluid whole-slide image viewer</h4>
+                        <p>ASAP (Automated Slide Analysis Platform) is a fast and fluid viewer for digitized multi-resolution histopathology images.</p>
+                        <div class="da-img">
+                            <img src="images/Slider01.png" alt="image01" width="620">
+                        </div>
+                    </div>
+                    <!-- End first slide -->
+                    <!-- Start second slide -->
+                    <div class="da-slide">
+                        <h2>Extensive annotations tools</h2>
+                        <h4>Easy to use</h4>
+                        <p>ASAP offers several tools to make annotations in an intuitive way. Dots, rectangles, polygons are all supported. </p>
+                        <div class="da-img">
+                            <img src="images/Slider02.png" width="620" alt="image02">
+                        </div>
+                    </div>
+                    <!-- End second slide -->
+                    <!-- Start third slide -->
+                    <div class="da-slide">
+                        <h2>Visualize algorithm results</h2>
+                        <h4>Customizable overlays</h4>
+                        <p>ASAP allows on-slide visualization of image analysis and machine learning results such as segmentation masks with customizable lookup-tables.</p>
+                        <div class="da-img">
+                            <img src="images/Slider03.png" width="620" alt="image03">
+                        </div>
+                    </div>
+                    <!-- Start third slide -->
+                    <!-- Start cSlide navigation arrows -->
+                    <div class="da-arrows">
+                        <span class="da-arrows-prev"></span>
+                        <span class="da-arrows-next"></span>
+                    </div>
+                    <!-- End cSlide navigation arrows -->
+                </div>
+            </div>
+        </div>
+        <!-- End home section -->
+        <!-- Service section start -->
+        <div class="section primary-section" id="service">
+            <div class="container">
+                <!-- Start title section -->
+                <div class="title">
+                    <h1>What can it do?</h1>
+                    <!-- Section's title goes here -->
+                    <p>ASAP focuses on fast and fluid image viewing with an easy-to-use interface for making annotations. It consists of two main components: an IO library for reading and writing multi-resolution images and a viewer component for visualizing such images.</p>
+                    <!--Simple description for section goes here. -->
+                </div>
+                <div class="row-fluid">
+                    <div class="span4">
+                        <div class="centered service">
+                            <div class="circle-border zoom-in">
+                                <img class="img-circle" src="images/multivendor.png" alt="multivendor">
+                            </div>
+                            <h3>Multi-vendor</h3>
+                            <p>We support file formats from many vendors via <a style="color: #DA70D6;" href="http://www.openslide.org">OpenSlide</a> and custom file factories.</p>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="centered service">
+                            <div class="circle-border zoom-in">
+                                <img class="img-circle" src="images/python.png" alt="python" />
+                            </div>
+                            <h3>Python</h3>
+                            <p>The multi-resolution image IO and processing libraries are wrapped in Python for easy application of machine learning tools.</p>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="centered service">
+                            <div class="circle-border zoom-in">
+                                <img class="img-circle" src="images/fluid.png" alt="fluidity">
+                            </div>
+                            <h3>Fluidity</h3>
+                            <p>ASAP contains a fast and fluid viewing application for analysis of multi-resolution images including a mini-map and field of view tracking.</p>
+                        </div>
+                    </div>
+                </div>
+				<div class="row-fluid">
+                    <div class="span4">
+                        <div class="centered service">
+                            <div class="circle-border zoom-in">
+                                <img class="img-circle" src="images/annotation.png" alt="annotation">
+                            </div>
+                            <h3>Annotation</h3>
+                            <p>Several annotation tools are integrated, such as dots, polygons and measurements. Annotations are stored in human-readable XML.</p>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="centered service">
+                            <div class="circle-border zoom-in">
+                                <img class="img-circle" src="images/overlay.png" alt="overlay" />
+                            </div>
+                            <h3>Overlays</h3>
+                            <p>ASAP can visualize images as overlays, which allows inspection of segmentation results or likelihood maps. LUTs can be customized.</p>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="centered service">
+                            <div class="circle-border zoom-in">
+                                <img class="img-circle" src="images/plugin.png" alt="plugin">
+                            </div>
+                            <h3>Plugins</h3>
+                            <p>The entire application is extensible via a plugin framework which allows developers to add new functionality.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Service section end -->
+        <!-- Portfolio section start -->
+        <div class="section secondary-section " id="portfolio">
+            <div class="triangle"></div>
+            <div class="container">
+                <div class=" title">
+                    <h1>Screenshots</h1>
+                    <p>Below you can find some example images highlighting some of the features of the viewing application.</p>
+                </div>
+                <!-- Start details for portfolio project 1 -->
+                <div id="single-project">
+                    <div id="slidingDiv" class="toggleDiv row-fluid single-project">
+                        <div class="span6">
+                            <img src="images/Portfolio01.png" alt="project 1" />
+                        </div>
+                        <div class="span6">
+                            <div class="project-description">
+                                <div class="project-title clearfix">
+                                    <h3>Annotation tools</h3>
+                                    <span class="show_hide close">
+                                        <i class="icon-cancel"></i>
+                                    </span>
+                                </div>
+                                <p>ASAP currently supports several different types of annotation and allows easy correction of already made annotations. Currently we support the following types:</p>
+								<ul>
+								<li>Points</li>
+								<li>Rectangles</li>
+								<li>Polygons</li>
+								<li>Splines</li>
+								<li>Line measurements</li>
+								</ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End details for portfolio project 1 -->
+                    <!-- Start details for portfolio project 2 -->
+                    <div id="slidingDiv1" class="toggleDiv row-fluid single-project">
+                        <div class="span6">
+                            <img src="images/Portfolio02.png" alt="project 2">
+                        </div>
+                        <div class="span6">
+                            <div class="project-description">
+                                <div class="project-title clearfix">
+                                    <h3>Overlay support</h3>
+                                    <span class="show_hide close">
+                                        <i class="icon-cancel"></i>
+                                    </span>
+                                </div>
+                                <p>ASAP can overlay multi-resolution images with float and integer datatype on top of other multi-resolution images. Overlay colors can be determined manually with lookup tables and window leveling.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End details for portfolio project 2 -->
+                    <!-- Start details for portfolio project 3 -->
+                    <div id="slidingDiv2" class="toggleDiv row-fluid single-project">
+                        <div class="span6">
+                            <img src="images/Portfolio03.png" alt="project 3">
+                        </div>
+                        <div class="span6">
+                            <div class="project-description">
+                                <div class="project-title clearfix">
+                                    <h3>Analysis filters</h3>
+                                    <span class="show_hide close">
+                                        <i class="icon-cancel"></i>
+                                    </span>
+                                </div>
+                                <p>ASAP supports on-the-fly inspection of image analysis results via ImageFilters. Basic filters such as nuclei detection are implemented, but they can be extended by developers.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End details for portfolio project 3 -->
+                    <ul id="portfolio-grid" class="thumbnails row">
+                        <li class="span4 mix web">
+                            <div class="thumbnail">
+                                <img src="images/Portfolio01.png" alt="project 1">
+                                <a href="#single-project" class="more show_hide" rel="#slidingDiv">
+                                    <i class="icon-plus"></i>
+                                </a>
+                                <h3>Annotation tools</h3>
+                                <p>Tools for many types of annotations</p>
+                                <div class="mask"></div>
+                            </div>
+                        </li>
+                        <li class="span4 mix photo">
+                            <div class="thumbnail">
+                                <img src="images/Portfolio02.png" alt="project 2">
+                                <a href="#single-project" class="show_hide more" rel="#slidingDiv1">
+                                    <i class="icon-plus"></i>
+                                </a>
+                                <h3>Overlay support</h3>
+                                <p>Visualize segmentations or likelihood maps</p>
+                                <div class="mask"></div>
+                            </div>
+                        </li>
+                        <li class="span4 mix photo">
+                            <div class="thumbnail">
+                                <img src="images/Portfolio03.png" alt="image analysis">
+                                <a href="#single-project" class="show_hide more" rel="#slidingDiv2">
+                                    <i class="icon-plus"></i>
+                                </a>
+                                <h3>Analysis filters</h3>
+                                <p>Perform on-the-fly image analysis</p>
+                                <div class="mask"></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Portfolio section end -->
+        <!-- About us section start -->
+        <div class="section primary-section" id="about">
+            <div class="triangle"></div>
+            <div class="container">
+                <div class="about-text centered">
+                    <h3>About Us</h3>
+                    <p>ASAP (Automated Slide Analysis Platform) was developed by the <a style="color:#DA70D6" href="http://computationalpathologygroup.nl/">Computation Pathology Group</a>, part of the <a href="http://www.diagnijmegen.nl" style="color:#DA70D6">Diagnostic Image Analysis Group</a>, at the <a href="https://www.radboudumc.nl/en/" style="color:#DA70D6">Radboud University Medical Center</a>. 
+					   It was started after frustration with the current freely available software for annotating multi-resolution digital pathology images. Furthermore, the currently available software
+					   did not allow visualization of image analysis or machine learning results in a intuitive and useful manner. We hope that ASAP can function as a way for other users to jumpstart their digital pathology research and move the field ahead as a whole.</p>
+                </div>
+                <h3>Libraries used</h3>
+                <div class="row-fluid">
+                    <div class="span6">
+                        <ul class="skills">
+                            <li>
+                                <span class="bar" data-width="80%"></span>
+                                <h3>Qt</h3>
+                            </li>
+                            <li>
+                                <span class="bar" data-width="60%"></span>
+                                <h3>OpenCV</h3>
+                            </li>
+                            <li>
+                                <span class="bar" data-width="40%"></span>
+                                <h3>OpenSlide</h3>
+                            </li>							
+                            <li>
+                                <span class="bar" data-width="20%"></span>
+                                <h3>SWIG</h3>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="span6">
+                        <div class="highlighted-box center">
+                            <h1>Thanks to our supporters!</h1>
+                            <p>The development of this application would not have been possible without the support of the <a style="color:#DA70D6" href="https://www.kwf.nl/english/pages/default.aspx">Dutch Cancer Association</a> and the <a style="color:#DA70D6" href="http://stitpro.nl/">StITPro Foundation</a>, whom provided us with research funding.</p>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- About us section end -->
+        <div class="section secondary-section">
+            <div class="triangle"></div>
+            <div class="container centered">
+                <p class="large-text">Try it and let us know what you think!</p>
+                <a href="https://github.com/computationalpathologygroup/ASAP/releases" class="button">Download latest release</a>
+				<a href="https://github.com/computationalpathologygroup/ASAP" class="button">Inspect Git repository</a>
+            </div>
+        </div>
+        <!-- Contact section start -->
+        <div id="contact" class="contact">
+            <div class="section primary-section">
+			<div class="triangle"></div>
+                <div class="container">
+                    <div class="title">
+                        <h1>Contact Us</h1>
+                        <p>If your interested in this software or in our research, please reach out to us.</p>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="span9 center contact-info">
+                        <p>Geert Grootteplein-Zuid 10, 6525GA, Nijmegen, The Netherlands</p>
+                        <p><a style="color:#fff" href="http://www.computationalpathologygroup.nl">http://www.computationalpathologygroup.nl</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Contact section edn -->
+        <!-- Footer section start -->
+        <div class="footer">
+            <p>&copy; 2018 <a href="http://www.computationalpathologygroup.nl"> Geert Litjens</a></p>
+        </div>
+        <!-- Footer section end -->
+        <!-- ScrollUp button start -->
+        <div class="scrollup">
+            <a href="#">
+                <i class="icon-up-open"></i>
+            </a>
+        </div>
+        <!-- ScrollUp button end -->
+        <!-- Include javascript -->
+        <script src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery.mixitup.js"></script>
+        <script type="text/javascript" src="js/bootstrap.js"></script>
+        <script type="text/javascript" src="js/modernizr.custom.js"></script>
+        <script type="text/javascript" src="js/jquery.bxslider.js"></script>
+        <script type="text/javascript" src="js/jquery.cslider.js"></script>
+        <script type="text/javascript" src="js/jquery.placeholder.js"></script>
+        <script type="text/javascript" src="js/jquery.inview.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
+    </body>
+</html>
