@@ -11,7 +11,7 @@
 
     $.Slider.defaults = {
         width:1170, //Max slider width
-        height:500, //max slider height
+        height:520, //max slider height
         current: 0, // index of current slide
         bgincrement: 100, // increment the bg position (parallax effect) when sliding
         autoplay: true, // slideshow on / off
@@ -52,16 +52,6 @@
 
             this.bgpositer = 0;
             
-
-            this.cssAnimations = Modernizr.cssanimations;
-            this.cssTransitions = Modernizr.csstransitions;
-
-            if (!this.cssAnimations || !this.cssAnimations) {
-
-                this.$el.addClass('da-slider-fb');
-
-            }
-
             this._updatePage();
 
             // load the events
@@ -103,60 +93,35 @@
 
             }
 
-            if (this.cssAnimations && this.cssAnimations) {
+            if (d === 'next') {
 
-                if (d === 'next') {
+                classTo = 'da-slide-toleft';
+                classFrom = 'da-slide-fromright';
+                ++this.bgpositer;
 
-                    classTo = 'da-slide-toleft';
-                    classFrom = 'da-slide-fromright';
-                    ++this.bgpositer;
+            } else {
 
-                } else {
+                classTo = 'da-slide-toright';
+                classFrom = 'da-slide-fromleft';
+                --this.bgpositer;
 
-                    classTo = 'da-slide-toright';
-                    classFrom = 'da-slide-fromleft';
-                    --this.bgpositer;
-
-                }
-
-                this.$el.css('background-position', this.bgpositer * this.options.bgincrement + '% center');
             }
+
+            this.$el.css('background-position', this.bgpositer * this.options.bgincrement + '% center');
 
             this.current = page;
 
             $next = this.$slides.eq(this.current);
 
-            if (this.cssAnimations && this.cssAnimations) {
+            var rmClasses = 'da-slide-toleft da-slide-toright da-slide-fromleft da-slide-fromright';
+            $current.removeClass(rmClasses);
+            $next.removeClass(rmClasses);
 
-                var rmClasses = 'da-slide-toleft da-slide-toright da-slide-fromleft da-slide-fromright';
-                $current.removeClass(rmClasses);
-                $next.removeClass(rmClasses);
+            $current.addClass(classTo);
+            $next.addClass(classFrom);
 
-                $current.addClass(classTo);
-                $next.addClass(classFrom);
-
-                $current.removeClass('da-slide-current');
-                $next.addClass('da-slide-current');
-
-            }
-
-            // fallback
-            if (!this.cssAnimations || !this.cssAnimations) {
- $next.addClass('da-slide-current');
-                $next.css('left', (d === 'next') ? '100%' : '-100%').stop().animate({
-                    left: '0%'
-                }, 1000, function () {
-                    _self.isAnimating = false;
-
-                });
-
-                $current.stop().animate({
-                    left: (d === 'next') ? '-100%' : '100%'
-                }, 1000, function () {
-                    $current.removeClass('da-slide-current');                    
-                });
-
-            }
+            $current.removeClass('da-slide-current');
+            $next.addClass('da-slide-current');
 
             this._updatePage();
 
@@ -255,30 +220,26 @@
 
             });
 
-            if (this.cssTransitions) {
+            if (!this.options.bgincrement) {
 
-                if (!this.options.bgincrement) {
+                this.$el.on('webkitAnimationEnd.cslider animationend.cslider OAnimationEnd.cslider', function (event) {
 
-                    this.$el.on('webkitAnimationEnd.cslider animationend.cslider OAnimationEnd.cslider', function (event) {
+                    if (event.originalEvent.animationName === 'toRightAnim4' || event.originalEvent.animationName === 'toLeftAnim4') {
 
-                        if (event.originalEvent.animationName === 'toRightAnim4' || event.originalEvent.animationName === 'toLeftAnim4') {
+                        _self.isAnimating = false;
 
-                            _self.isAnimating = false;
+                    }
 
-                        }
+                });
 
-                    });
+            } else {
 
-                } else {
+                this.$el.on('webkitTransitionEnd.cslider transitionend.cslider OTransitionEnd.cslider', function (event) {
 
-                    this.$el.on('webkitTransitionEnd.cslider transitionend.cslider OTransitionEnd.cslider', function (event) {
+                    if (event.target.id === _self.$el.attr('id'))
+                        _self.isAnimating = false;
 
-                        if (event.target.id === _self.$el.attr('id'))
-                            _self.isAnimating = false;
-
-                    });
-
-                }
+                });
 
             }
 

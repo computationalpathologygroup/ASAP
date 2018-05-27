@@ -33,21 +33,27 @@
     line-height:1.2em;
     font-size:15px;
     line-height:20px;
+    position:relative;
 }
+
 a {
     color:#181A1C;
     text-decoration: none;
 }
+
 a:hover {
     color: #DA70D6;
     text-decoration:none;
 }
+
 h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
 }
+
 h1 {
     margin: 10px;
 }
+
 p {
     padding: 10px;
     font-weight: 100;
@@ -59,23 +65,21 @@ p {
     min-height:70px;
 }
 
-.navbar-fixed-top {
-    min-height:60px;
-    height:60px;
+.navbar .fixed-top {
+    min-height:70px;
     padding-top:0;
 }
-.navbar-inner {
-    background: #181A1C;
-    border-radius:0;
-    filter: none;
-    border: none;
-    box-shadow: none;
+
+.nav-item {
+    text-align: right;
 }
+
 .navbar .brand img {
     width:40px;
     height:40px;
 }
-.navbar .nav > li > a {
+
+.navbar-nav > li > a {
     text-transform:uppercase;
     line-height: auto;
     vertical-align: middle;
@@ -89,30 +93,14 @@ p {
     color: #fff;
     transition: border-color 1s ease;
 }
-.navbar .nav > li:hover> a, .navbar .nav > .active > a, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus {
+.navbar-nav > li:hover> a, .navbar-nav > li > a.active, .navbar-nav > li > a.active:hover, .navbar-nav > li >  a.active:focus {
     border: 1px solid #DA70D6;
     color: #fff;
     background-color: #181A1C;
     transition: border-color 1s ease;
 }
-.nav-pills {
-    margin-bottom: 30px;
-}
-.nav-pills > li > a {
-    background: transparent;
-    -webkit-border-radius: 0;
-    -moz-border-radius: 0;
-    border-radius: 0;
-    margin-right:5px;
-    padding-left:25px;
-    padding-right:25px;
-    border: 1px solid #181A1C;
-}
-.nav-pills > li > a:hover, .nav-pills > .active > a, .nav-pills > .active > a:hover, .nav-pills > .active > a:focus {
-    background: #181A1C;
-    color: #fff;
-}
-.navbar .btn-navbar:hover, .navbar .btn-navbar {
+
+.navbar .navbar-toggler:hover, .navbar .navbar-toggler {
     border-radius:0;
     background:#DA70D6;
     color: #000;
@@ -120,6 +108,9 @@ p {
 /******
 2. Layout
 **********************************************************************/
+#home {
+    padding-top: 70px
+}
 .centered {
     margin-left:auto;
     margin-right:auto;
@@ -156,6 +147,7 @@ p {
     border-radius: 500px;
     -khtml-border-radius: 500px;
     border: 3px solid #fff;
+    margin-bottom: 10px;
 }
 .left-align {
     text-align:left;
@@ -180,11 +172,13 @@ p {
     border-left: 585px outset transparent;
     border-right: 585px outset transparent;
     position: relative;
+    opacity: 0;
 }
 /*
 2.1 Animations
 **********/
  .zoom-in {
+    transform: scale(1, 1);
     -webkit-transform: scale(1, 1);
     -moz-transform: scale(1, 1);
     -o-transform: scale(1, 1);
@@ -196,6 +190,7 @@ p {
     transition: all 250ms ease;
 }
 .zoom-in:hover {
+    transform: scale(1, 1);
     -webkit-transform: scale(1.1, 1.1);
     -moz-transform: scale(1.1, 1.1);
     -o-transform: scale(1.1, 1.1);
@@ -249,6 +244,7 @@ p {
     box-shadow:none;
     text-align:center;
     background: #191a1c;
+    opacity: 0;
 }
 .thumbnail .more {
     display:block;
@@ -315,7 +311,7 @@ p {
     list-style: none;
     float: none;
     position:relative;
-    margin:5px; auto;
+    margin:5px auto;
 }
 .social li {
     display:inline-block;
@@ -422,8 +418,10 @@ p {
 /*
 3.2 Portfolio
 ***************************************/
- .single-project {
+.single-project {
     margin-bottom:30px;
+    margin-left:0px;
+    margin-right:0px;
     background:#181A1C;
 }
 .single-project img {
@@ -470,35 +468,18 @@ p {
     height: 40px;
     text-align: center;
 }
-#portfolio-grid .mix {
-    opacity: 0;
-    display: none;
+
+#portfolio-grid {
+    padding: 0px;
 }
+
+.portfolio_image_div {
+    padding: 0px;
+}
+
 /*
 3.3 About
 ******************************************************************/
- .team .thumbnail {
-    box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    padding: 10px;
-    border: 1px solid #fff;
-}
-.team .thumbnail:hover .social {
-    z-index: 5;
-}
-.team .thumbnail:hover .social a {
-    color:#fff;
-}
-.team .thumbnail .mask {
-    background: #DA70D6;
-}
-.team .thumbnail .mask h2 {
-    margin-top:20%;
-}
-.team .thumbnail .mask, .team .thumbnail .mask h3, .team .thumbnail .mask p, .team .thumbnail:hover h3, .team .thumbnail:hover .social a:hover {
-    color:#181A17;
-}
 .about-text {
     margin-top:30px;
 }
@@ -518,15 +499,16 @@ p {
     margin-bottom:30px;
     background:#FFF;
     height:40px;
-    padding:1px;
 }
 .skills li h3 {
     position: relative;
     font-size: 15px;
+    font-weight: bold;
     padding:0;
     margin:0;
     left: 10px;
     z-index: 1;
+    line-height: 40px;
     color: #181A1C;
 }
 .skills li .bar {

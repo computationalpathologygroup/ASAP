@@ -15,42 +15,39 @@
         <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700&amp;subset=latin,latin-ext' rel='stylesheet' type='text/css'>
         <!-- Load css styles -->
         <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
-        <link rel="stylesheet" type="text/css" href="css/bootstrap-responsive.css" />
-        <link rel="stylesheet" type="text/css" href="css/style.css" />
-        <link rel="stylesheet" type="text/css" href="css/pluton.css" />
         <link rel="stylesheet" type="text/css" href="css/jquery.cslider.css" />
-        <link rel="stylesheet" type="text/css" href="css/jquery.bxslider.css" />
         <link rel="stylesheet" type="text/css" href="css/animate.css" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link rel="stylesheet" type="text/css" href="css/pluton.css" />
         <!-- Fav and touch icons -->
         <link rel="shortcut icon" href="images/ico/favicon.ico">
     </head>
     
-    <body>
-        <div class="navbar">
-            <div class="navbar-inner">
-                <div class="container">
-                    <a href="#" class="brand">
-                        <img src="images/application.png" width="40" height="40" alt="Logo" />
-                        <!-- This is website logo -->
-                    </a>
-                    <!-- Navigation button, visible on small resolution -->
-                    <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <i class="icon-menu"></i>
-                    </button>
-                    <!-- Main navigation -->
-                    <div class="nav-collapse collapse pull-right">
-                        <ul class="nav" id="top-navigation">
-                            <li class="active"><a href="#home">Home</a></li>
-                            <li><a href="#service">Features</a></li>
-                            <li><a href="#portfolio">Screenshots</a></li>
-                            <li><a href="#about">About</a></li>
-                            <li><a href="#contact">Download</a></li>
-                        </ul>
-                    </div>
-                    <!-- End main navigation -->
-                </div>
-            </div>
-        </div>
+    <body data-spy="scroll" data-target="#nav_menu" data-offset="0">
+        <nav id="nav_menu" class="navbar fixed-top navbar-expand-sm">
+					<a href="#" class="navbar-brand">
+						<img src="images/application.png" width="40" height="40" alt="Logo" />
+						<!-- This is website logo -->
+					</a>				
+					<button type="button" class="icon-menu navbar-toggler" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>		
+				<!-- Main navigation -->
+				<div class="navbar-collapse collapse" id="bs-example-navbar-collapse-1">
+					<ul class="navbar-nav ml-auto" id="top-navigation">
+						<li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+						<li class="nav-item"><a class="nav-link" href="#service">Features</a></li>
+						<li class="nav-item"><a class="nav-link" href="#portfolio">Screenshots</a></li>
+						<li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+						<li class="nav-item"><a class="nav-link" href="#contact">Download</a></li>
+					</ul>
+				</div>
+			<!-- End main navigation -->
+		
+        </nav>
         <!-- Start home section -->
         <div id="home">
             <!-- Start cSlider -->
@@ -66,7 +63,7 @@
                         <h4>Fluid whole-slide image viewer</h4>
                         <p>ASAP (Automated Slide Analysis Platform) is a fast and fluid viewer for digitized multi-resolution histopathology images.</p>
                         <div class="da-img">
-                            <img src="images/Slider01.png" alt="image01" width="620">
+                            <img src="images/Slider01.png" alt="image01" width=620>
                         </div>
                     </div>
                     <!-- End first slide -->
@@ -76,7 +73,7 @@
                         <h4>Easy to use</h4>
                         <p>ASAP offers several tools to make annotations in an intuitive way. Dots, rectangles, polygons are all supported. </p>
                         <div class="da-img">
-                            <img src="images/Slider02.png" width="620" alt="image02">
+                            <img src="images/Slider02.png" alt="image02" width=620>
                         </div>
                     </div>
                     <!-- End second slide -->
@@ -86,7 +83,7 @@
                         <h4>Customizable overlays</h4>
                         <p>ASAP allows on-slide visualization of image analysis and machine learning results such as segmentation masks with customizable lookup-tables.</p>
                         <div class="da-img">
-                            <img src="images/Slider03.png" width="620" alt="image03">
+                            <img src="images/Slider03.png" alt="image03" width=620>
                         </div>
                     </div>
                     <!-- Start third slide -->
@@ -110,58 +107,58 @@
                     <p>ASAP focuses on fast and fluid image viewing with an easy-to-use interface for making annotations. It consists of two main components: an IO library for reading and writing multi-resolution images and a viewer component for visualizing such images.</p>
                     <!--Simple description for section goes here. -->
                 </div>
-                <div class="row-fluid">
-                    <div class="span4">
+                <div class="row">
+                    <div class="col-lg-4">
                         <div class="centered service">
                             <div class="circle-border zoom-in">
-                                <img class="img-circle" src="images/multivendor.png" alt="multivendor">
+                                <img class="rounded-circle" src="images/multivendor.png" alt="multivendor">
                             </div>
                             <h3>Multi-vendor</h3>
                             <p>We support file formats from many vendors via <a style="color: #DA70D6;" href="http://www.openslide.org">OpenSlide</a> and custom file factories.</p>
                         </div>
                     </div>
-                    <div class="span4">
+                    <div class="col-lg-4">
                         <div class="centered service">
                             <div class="circle-border zoom-in">
-                                <img class="img-circle" src="images/python.png" alt="python" />
+                                <img class="rounded-circle" src="images/python.png" alt="python" />
                             </div>
                             <h3>Python</h3>
                             <p>The multi-resolution image IO and processing libraries are wrapped in Python for easy application of machine learning tools.</p>
                         </div>
                     </div>
-                    <div class="span4">
+                    <div class="col-lg-4">
                         <div class="centered service">
                             <div class="circle-border zoom-in">
-                                <img class="img-circle" src="images/fluid.png" alt="fluidity">
+                                <img class="rounded-circle" src="images/fluid.png" alt="fluidity">
                             </div>
                             <h3>Fluidity</h3>
                             <p>ASAP contains a fast and fluid viewing application for analysis of multi-resolution images including a mini-map and field of view tracking.</p>
                         </div>
                     </div>
                 </div>
-				<div class="row-fluid">
-                    <div class="span4">
+				<div class="row">
+                    <div class="col-lg-4">
                         <div class="centered service">
                             <div class="circle-border zoom-in">
-                                <img class="img-circle" src="images/annotation.png" alt="annotation">
+                                <img class="rounded-circle" src="images/annotation.png" alt="annotation">
                             </div>
                             <h3>Annotation</h3>
                             <p>Several annotation tools are integrated, such as dots, polygons and measurements. Annotations are stored in human-readable XML.</p>
                         </div>
                     </div>
-                    <div class="span4">
+                    <div class="col-lg-4">
                         <div class="centered service">
                             <div class="circle-border zoom-in">
-                                <img class="img-circle" src="images/overlay.png" alt="overlay" />
+                                <img class="rounded-circle" src="images/overlay.png" alt="overlay" />
                             </div>
                             <h3>Overlays</h3>
                             <p>ASAP can visualize images as overlays, which allows inspection of segmentation results or likelihood maps. LUTs can be customized.</p>
                         </div>
                     </div>
-                    <div class="span4">
+                    <div class="col-lg-4">
                         <div class="centered service">
                             <div class="circle-border zoom-in">
-                                <img class="img-circle" src="images/plugin.png" alt="plugin">
+                                <img class="rounded-circle" src="images/plugin.png" alt="plugin">
                             </div>
                             <h3>Plugins</h3>
                             <p>The entire application is extensible via a plugin framework which allows developers to add new functionality.</p>
@@ -181,11 +178,11 @@
                 </div>
                 <!-- Start details for portfolio project 1 -->
                 <div id="single-project">
-                    <div id="slidingDiv" class="toggleDiv row-fluid single-project">
-                        <div class="span6">
+                    <div id="slidingDiv" class="toggleDiv row single-project">
+                        <div class="col-md-6 portfolio_image_div">
                             <img src="images/Portfolio01.png" alt="project 1" />
                         </div>
-                        <div class="span6">
+                        <div class="col-md-6">
                             <div class="project-description">
                                 <div class="project-title clearfix">
                                     <h3>Annotation tools</h3>
@@ -206,11 +203,11 @@
                     </div>
                     <!-- End details for portfolio project 1 -->
                     <!-- Start details for portfolio project 2 -->
-                    <div id="slidingDiv1" class="toggleDiv row-fluid single-project">
-                        <div class="span6">
+                    <div id="slidingDiv1" class="toggleDiv row single-project">
+                        <div class="col-md-6 portfolio_image_div">
                             <img src="images/Portfolio02.png" alt="project 2">
                         </div>
-                        <div class="span6">
+                        <div class="col-md-6">
                             <div class="project-description">
                                 <div class="project-title clearfix">
                                     <h3>Overlay support</h3>
@@ -224,11 +221,11 @@
                     </div>
                     <!-- End details for portfolio project 2 -->
                     <!-- Start details for portfolio project 3 -->
-                    <div id="slidingDiv2" class="toggleDiv row-fluid single-project">
-                        <div class="span6">
+                    <div id="slidingDiv2" class="toggleDiv row single-project">
+                        <div class="col-md-6 portfolio_image_div">
                             <img src="images/Portfolio03.png" alt="project 3">
                         </div>
-                        <div class="span6">
+                        <div class="col-md-6">
                             <div class="project-description">
                                 <div class="project-title clearfix">
                                     <h3>Analysis filters</h3>
@@ -242,9 +239,9 @@
                     </div>
                     <!-- End details for portfolio project 3 -->
                     <ul id="portfolio-grid" class="thumbnails row">
-                        <li class="span4 mix web">
+                        <li class="col-md-4" style="display:inline-block;">
                             <div class="thumbnail">
-                                <img src="images/Portfolio01.png" alt="project 1">
+                                <img class="img-fluid" src="images/Portfolio01.png" alt="project 1">
                                 <a href="#single-project" class="more show_hide" rel="#slidingDiv">
                                     <i class="icon-plus"></i>
                                 </a>
@@ -253,9 +250,9 @@
                                 <div class="mask"></div>
                             </div>
                         </li>
-                        <li class="span4 mix photo">
+                        <li class="col-md-4" style="display:inline-block;">
                             <div class="thumbnail">
-                                <img src="images/Portfolio02.png" alt="project 2">
+                                <img class="img-fluid" src="images/Portfolio02.png" alt="project 2">
                                 <a href="#single-project" class="show_hide more" rel="#slidingDiv1">
                                     <i class="icon-plus"></i>
                                 </a>
@@ -264,9 +261,9 @@
                                 <div class="mask"></div>
                             </div>
                         </li>
-                        <li class="span4 mix photo">
+                        <li class="col-md-4" style="display:inline-block;">
                             <div class="thumbnail">
-                                <img src="images/Portfolio03.png" alt="image analysis">
+                                <img class="img-fluid" src="images/Portfolio03.png" alt="image analysis">
                                 <a href="#single-project" class="show_hide more" rel="#slidingDiv2">
                                     <i class="icon-plus"></i>
                                 </a>
@@ -291,8 +288,8 @@
 					   did not allow visualization of image analysis or machine learning results in a intuitive and useful manner. We hope that ASAP can function as a way for other users to jumpstart their digital pathology research and move the field ahead as a whole.</p>
                 </div>
                 <h3>Libraries used</h3>
-                <div class="row-fluid">
-                    <div class="span6">
+                <div class="row">
+                    <div class="col-md-6">
                         <ul class="skills">
                             <li>
                                 <span class="bar" data-width="80%"></span>
@@ -312,7 +309,7 @@
                             </li>
                         </ul>
                     </div>
-                    <div class="span6">
+                    <div class="col-md-6">
                         <div class="highlighted-box center">
                             <h1>Thanks to our supporters!</h1>
                             <p>The development of this application would not have been possible without the support of the <a style="color:#DA70D6" href="https://www.kwf.nl/english/pages/default.aspx">Dutch Cancer Association</a> and the <a style="color:#DA70D6" href="http://stitpro.nl/">StITPro Foundation</a>, whom provided us with research funding.</p>                            
@@ -362,14 +359,11 @@
         </div>
         <!-- ScrollUp button end -->
         <!-- Include javascript -->
-        <script src="js/jquery.js"></script>
-        <script type="text/javascript" src="js/jquery.mixitup.js"></script>
-        <script type="text/javascript" src="js/bootstrap.js"></script>
-        <script type="text/javascript" src="js/modernizr.custom.js"></script>
-        <script type="text/javascript" src="js/jquery.bxslider.js"></script>
-        <script type="text/javascript" src="js/jquery.cslider.js"></script>
-        <script type="text/javascript" src="js/jquery.placeholder.js"></script>
+        <script type="text/javascript" src="js/jquery-3.3.1.js"></script>		
+        <script type="text/javascript" src="js/bootstrap.bundle.js"></script>		
+        <script type="text/javascript" src="js/jquery.cslider.js"></script>        
         <script type="text/javascript" src="js/jquery.inview.js"></script>
         <script type="text/javascript" src="js/app.js"></script>
+        
     </body>
 </html>
