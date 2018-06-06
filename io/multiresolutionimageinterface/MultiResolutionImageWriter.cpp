@@ -382,7 +382,6 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
     unsigned int prevLevelw = (unsigned int)(w/pow(2.,(double)level-1));
     unsigned int prevLevelh = (unsigned int)(h/pow(2.,(double)level-1));
     setTempPyramidTags(levelTiff, levelw, levelh);
-    unsigned int prevLevelTiles = TIFFNumberOfTiles(prevLevelTiff);
     unsigned int nrTilesX = (unsigned int)ceil(float(levelw)/_tileSize);
     unsigned int nrTilesY = (unsigned int)ceil(float(levelh)/_tileSize);
     unsigned int levelTiles = nrTilesX*nrTilesY;
@@ -400,85 +399,136 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
       T* tile3 = (T*) _TIFFmalloc(npixels * sizeof(T));
       T* tile4 = (T*) _TIFFmalloc(npixels * sizeof(T));
       T* outTile = (T*) _TIFFmalloc(npixels * sizeof(T));
+      bool tile1Valid = false, tile2Valid = false, tile3Valid = false, tile4Valid = false;
       unsigned int size =  npixels * sizeof(T);
       JPEG2000Codec cod;
       if (level == 1 && (getCompression() == JPEG2000_LOSSY || getCompression() == JPEG2000_LOSSLESS)) {
         int tileNr = TIFFComputeTile(prevLevelTiff, xpos, ypos, 0, 0);
         unsigned int outTileSize = _tileSize*_tileSize*nrsamples*(nrbits/8);
-        unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile1, outTileSize);
-        cod.decode((char*)tile1, rawSize, outTileSize);
+        int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile1, outTileSize);
+        if (rawSize > 0) {
+          cod.decode((char*)tile1, rawSize, outTileSize);
+          tile1Valid = true;
+        }
+        else {
+          std::fill_n(tile1, npixels, 0);
+        }
         if (xpos+_tileSize>=prevLevelw) {
-          std::fill_n(tile2, npixels, 0);
+          std::fill_n(tile2, npixels, 0);          
         } else {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos+_tileSize, ypos, 0, 0);
-          unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile2, outTileSize);
-          cod.decode((char*)tile2, rawSize, outTileSize);
+          int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile2, outTileSize);
+          if (rawSize > 0) {
+            cod.decode((char*)tile2, rawSize, outTileSize);
+            tile2Valid = true;
+          }
+          else {
+            std::fill_n(tile2, npixels, 0);
+          }
         }
         if (ypos+_tileSize>=prevLevelh) {
           std::fill_n(tile3, npixels, 0);
         } else {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos, ypos+_tileSize, 0, 0);
-          unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile3, outTileSize);
-          cod.decode((char*)tile3, rawSize, outTileSize);
+          int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile3, outTileSize);
+          if (rawSize > 0) {
+            cod.decode((char*)tile3, rawSize, outTileSize);
+            tile3Valid = true;
+          }
+          else {
+            std::fill_n(tile3, npixels, 0);
+          }
         }
         if (xpos+_tileSize>=prevLevelw || ypos+_tileSize>=prevLevelh) {
           std::fill_n(tile4, npixels, 0);
         } else {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos+_tileSize, ypos+_tileSize, 0, 0);
-          unsigned int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile4, outTileSize);
-          cod.decode((char*)tile4, rawSize, outTileSize);
+          int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile4, outTileSize);
+          if (rawSize > 0) {
+            cod.decode((char*)tile4, rawSize, outTileSize);
+            tile4Valid = true;
+          }
+          else {
+            std::fill_n(tile4, npixels, 0);
+          }
         }
       } else {
-        TIFFReadTile(prevLevelTiff, tile1, xpos, ypos, 0, 0);
+        if (TIFFReadTile(prevLevelTiff, tile1, xpos, ypos, 0, 0) < 0) {
+          std::fill_n(tile1, npixels, 0);
+        }
+        else {
+          tile1Valid = true;
+        }
         if (xpos+_tileSize>=prevLevelw) {
           std::fill_n(tile2, npixels, 0);
         } else {
-          TIFFReadTile(prevLevelTiff, tile2, xpos+_tileSize, ypos, 0, 0);
+          if (TIFFReadTile(prevLevelTiff, tile2, xpos + _tileSize, ypos, 0, 0) < 0) {
+            std::fill_n(tile2, npixels, 0);
+          }
+          else {
+            tile2Valid = true;
+          }
         }
         if (ypos+_tileSize>=prevLevelh) {
           std::fill_n(tile3, npixels, 0);
         } else {
-          TIFFReadTile(prevLevelTiff, tile3, xpos, ypos+_tileSize, 0, 0);
+          if (TIFFReadTile(prevLevelTiff, tile3, xpos, ypos + _tileSize, 0, 0) < 0) {
+            std::fill_n(tile3, npixels, 0);
+          }
+          else {
+            tile3Valid = true;
+          }
         }
         if (xpos+_tileSize>=prevLevelw || ypos+_tileSize>=prevLevelh) {
           std::fill_n(tile4, npixels, 0);
         } else {
-          TIFFReadTile(prevLevelTiff, tile4, xpos+_tileSize, ypos+_tileSize, 0, 0);
-        }
-      }
-      T* dsTile1 = downscaleTile(tile1, _tileSize, nrsamples);
-      T* dsTile2 = downscaleTile(tile2, _tileSize, nrsamples);
-      T* dsTile3 = downscaleTile(tile3, _tileSize, nrsamples);
-      T* dsTile4 = downscaleTile(tile4, _tileSize, nrsamples);
-      unsigned int dsSize = _tileSize/2;
-      for (unsigned int y = 0; y < _tileSize; ++y) {
-        for (unsigned int x = 0; x < _tileSize; ++x) {
-          for (unsigned int s = 0; s < nrsamples; ++s) {
-            unsigned int outIndex = nrsamples*(y*_tileSize + x) + s;
-            T* usedTile = dsTile1;
-            unsigned int inIndex = y*dsSize*nrsamples + x*nrsamples +s;
-            if (x >= dsSize && y < dsSize) {
-              usedTile = dsTile2;
-              inIndex = y*dsSize*nrsamples + ((x-dsSize)*nrsamples) + s;
-            }
-            else if (x < dsSize && y >= dsSize) {
-              usedTile = dsTile3;
-              inIndex = (y-dsSize)*dsSize*nrsamples + x*nrsamples + s;
-            }
-            else if (x >= dsSize && y >= dsSize) {
-              usedTile = dsTile4;
-              inIndex = (y-dsSize)*dsSize*nrsamples + (x-dsSize)*nrsamples + s;
-            }
-            T val = *(usedTile+inIndex);
-            *(outTile+outIndex) = val;
+          if (TIFFReadTile(prevLevelTiff, tile4, xpos + _tileSize, ypos + _tileSize, 0, 0) < 0) {
+            std::fill_n(tile4, npixels, 0);
+          }
+          else {
+            tile4Valid = true;
           }
         }
       }
-      TIFFWriteEncodedTile(levelTiff, i, outTile, npixels * sizeof(T));
-      _TIFFfree(tile1);_TIFFfree(dsTile1);
-      _TIFFfree(tile2);_TIFFfree(dsTile2);
-      _TIFFfree(tile3);_TIFFfree(dsTile3);
-      _TIFFfree(tile4);_TIFFfree(dsTile4);
+      if (tile1Valid || tile2Valid || tile3Valid || tile4Valid) {
+        T* dsTile1 = downscaleTile(tile1, _tileSize, nrsamples);
+        T* dsTile2 = downscaleTile(tile2, _tileSize, nrsamples);
+        T* dsTile3 = downscaleTile(tile3, _tileSize, nrsamples);
+        T* dsTile4 = downscaleTile(tile4, _tileSize, nrsamples);
+        unsigned int dsSize = _tileSize / 2;
+        for (unsigned int y = 0; y < _tileSize; ++y) {
+          for (unsigned int x = 0; x < _tileSize; ++x) {
+            for (unsigned int s = 0; s < nrsamples; ++s) {
+              unsigned int outIndex = nrsamples * (y*_tileSize + x) + s;
+              T* usedTile = dsTile1;
+              unsigned int inIndex = y * dsSize*nrsamples + x * nrsamples + s;
+              if (x >= dsSize && y < dsSize) {
+                usedTile = dsTile2;
+                inIndex = y * dsSize*nrsamples + ((x - dsSize)*nrsamples) + s;
+              }
+              else if (x < dsSize && y >= dsSize) {
+                usedTile = dsTile3;
+                inIndex = (y - dsSize)*dsSize*nrsamples + x * nrsamples + s;
+              }
+              else if (x >= dsSize && y >= dsSize) {
+                usedTile = dsTile4;
+                inIndex = (y - dsSize)*dsSize*nrsamples + (x - dsSize)*nrsamples + s;
+              }
+              T val = *(usedTile + inIndex);
+              *(outTile + outIndex) = val;
+            }
+          }
+        }
+        TIFFWriteEncodedTile(levelTiff, i, outTile, npixels * sizeof(T));
+        _TIFFfree(dsTile1);
+        _TIFFfree(dsTile2);
+        _TIFFfree(dsTile3);
+        _TIFFfree(dsTile4);
+      }
+      _TIFFfree(tile1);
+      _TIFFfree(tile2);
+      _TIFFfree(tile3);
+      _TIFFfree(tile4);
       _TIFFfree(outTile);
       colOrg += 2;
     }
@@ -646,15 +696,17 @@ template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* l
 		  rate = getJPEGQuality()/100.;
 	  }
 	  for (unsigned int i = 0; i < TIFFNumberOfTiles(levelTiff); ++i) {
-      TIFFReadEncodedTile(levelTiff, i, raster, npixels * sizeof(T));
-		  unsigned int size = npixels * sizeof(T);
-      cod.encode((char*)raster, size, _tileSize, depth, nrComponents, rate, (getColorType() == pathology::ARGB || getColorType() == pathology::RGB));
-		  TIFFWriteRawTile(_tiff, i, raster, size);
+      if (TIFFReadEncodedTile(levelTiff, i, raster, npixels * sizeof(T)) > 0) {
+        unsigned int size = npixels * sizeof(T);
+        cod.encode((char*)raster, size, _tileSize, depth, nrComponents, rate, (getColorType() == pathology::ARGB || getColorType() == pathology::RGB));
+        TIFFWriteRawTile(_tiff, i, raster, size);
+      }
 	  }
   } else {
 		for (unsigned int i = 0; i < TIFFNumberOfTiles(levelTiff); ++i) {
-			TIFFReadEncodedTile(levelTiff, i, raster, npixels * sizeof(T));
-			TIFFWriteEncodedTile(_tiff, i, raster, npixels * sizeof(T));
+      if (TIFFReadEncodedTile(levelTiff, i, raster, npixels * sizeof(T)) > 0) {
+        TIFFWriteEncodedTile(_tiff, i, raster, npixels * sizeof(T));
+      }
 		}
 	}
 	_TIFFfree(raster);

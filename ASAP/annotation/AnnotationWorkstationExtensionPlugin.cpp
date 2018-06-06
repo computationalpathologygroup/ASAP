@@ -414,6 +414,9 @@ void AnnotationWorkstationExtensionPlugin::onLoadButtonPressed(const std::string
       else if ((*it)->getType() == Annotation::Type::POINTSET) {
         annot = new PointSetQtAnnotation((*it), this, _viewer->getSceneScale());
       }
+      else if ((*it)->getType() == Annotation::Type::RECTANGLE) {
+        annot = new PolyQtAnnotation((*it), this, _viewer->getSceneScale());
+      }
       if (annot) {
         annot->finish();
         _qtAnnotations.append(annot);
