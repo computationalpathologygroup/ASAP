@@ -26,6 +26,7 @@
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImageWriter.h"
 #include "MultiResolutionImage.h"
+#include "TIFFImage.h"
 #include "multiresolutionimageinterface_export.h"
 #include "../../config/ASAPMacros.h"
 #include "../../core/Point.h"
@@ -111,6 +112,7 @@ import_array();
 
 %numpy_typemaps(void, NPY_NOTYPE, int)
 %include "MultiResolutionImage.h";
+%include "TIFFImage.h";
 %extend MultiResolutionImage {
      void close() { 
 		self->~MultiResolutionImage();
@@ -184,6 +186,30 @@ import_array();
 		return patch;
 	}
 };
+%extend TIFFImage {
+     PyObject* getEncodedTile(const long long& startX, const long long& startY, const unsigned int& level) { 
+		long long encoded_tile_size = self->getEncodedTileSize(startX, startY, level);
+		if (encoded_tile_size > 0) {
+			npy_intp dimsDesc[1];
+			dimsDesc[0] = encoded_tile_size;
+			PyObject* patch = PyArray_SimpleNew(1, dimsDesc, NPY_UBYTE);
+			unsigned char* tmp = self->readEncodedDataFromImage(startX, startY, level);
+			unsigned char* array_data = (unsigned char*)PyArray_DATA((PyArrayObject*)patch);
+			std::copy(tmp, tmp + encoded_tile_size, array_data);
+			delete[] tmp;
+			return patch;
+		} else {
+			return NULL;
+		}
+	}
+};
+
+%inline %{
+  TIFFImage* MultiResolutionImageToTIFFImage(MultiResolutionImage* base) {
+    return static_cast<TIFFImage*>(base);
+  }
+%}
+
 %include "MultiResolutionImageReader.h"
 
 %apply (void* IN_ARRAY1_UNKNOWN_SIZE) {(void* data)};
