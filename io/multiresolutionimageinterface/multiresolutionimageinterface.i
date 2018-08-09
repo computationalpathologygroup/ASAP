@@ -205,8 +205,8 @@ import_array();
 };
 
 %inline %{
-  TIFFImage* MultiResolutionImageToTIFFImage(MultiResolutionImage* base) {
-    return static_cast<TIFFImage*>(base);
+  std::shared_ptr<TIFFImage> MultiResolutionImageToTIFFImage(std::shared_ptr<MultiResolutionImage> base) {
+    return std::dynamic_pointer_cast<TIFFImage>(base);
   }
 %}
 

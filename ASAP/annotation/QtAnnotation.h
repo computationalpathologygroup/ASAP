@@ -26,6 +26,7 @@ public:
   void moveCoordinateBy(unsigned int index, const Point& moveBy);
   void moveCoordinatesBy(const Point& moveBy);
 
+  static float selectionSensitivity;
 	std::shared_ptr<Annotation> getAnnotation() const;
   
   virtual QRectF boundingRect() const = 0;
@@ -35,7 +36,6 @@ public:
 
   virtual void finish();
 
-  int getLastClickedPointIndex() const;
   std::pair<int, int> getLastClickedCoordinateIndices() const;
 
   void setActiveSeedPoint(const unsigned int seedPointIndex);

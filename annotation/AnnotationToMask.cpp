@@ -48,7 +48,8 @@ void AnnotationToMask::convert(const std::shared_ptr<AnnotationList>& annotation
 		writer.setTileSize(512);
 		writer.setDataType(pathology::UChar);
 		writer.setInterpolation(pathology::NearestNeighbor);
-		writer.setOverrideSpacing(spacing);
+    std::vector<double> spacing_copy(spacing);
+		writer.setSpacing(spacing_copy);
 		writer.writeImageInformation(dimensions[0], dimensions[1]);
 		unsigned char* buffer = new unsigned char[512 * 512];
 		for (unsigned long long ty = 0; ty < dimensions[1]; ty += 512) {

@@ -4,6 +4,8 @@
 
 using namespace std;
 
+float QtAnnotation::selectionSensitivity = 100.;
+
 QtAnnotation::QtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale) :
 QGraphicsItem(),
 QObject(parent),

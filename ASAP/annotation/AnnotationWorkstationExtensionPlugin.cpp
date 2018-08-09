@@ -72,6 +72,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     QPushButton* clearButton = _dockWidget->findChild<QPushButton*>("clearButton");
     QPushButton* saveButton = _dockWidget->findChild<QPushButton*>("saveButton");
     QPushButton* loadButton = _dockWidget->findChild<QPushButton*>("loadButton");
+    QPushButton* optionsButton = _dockWidget->findChild<QPushButton*>("optionsButton");
     _currentAnnotationLine = _dockWidget->findChild<QFrame*>("currentAnnotationLine");
     _currentAnnotationLabel = _dockWidget->findChild<QLabel*>("currentAnnotationLabel");
     _currentAnnotationHeaderLabel = _dockWidget->findChild<QLabel*>("currentAnnotationHeaderLabel");
@@ -82,6 +83,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     connect(clearButton, SIGNAL(clicked()), this, SLOT(onClearButtonPressed()));
     connect(saveButton, SIGNAL(clicked()), this, SLOT(onSaveButtonPressed()));
     connect(loadButton, SIGNAL(clicked()), this, SLOT(onLoadButtonPressed()));
+    connect(optionsButton, SIGNAL(clicked()), this, SLOT(onOptionsButtonPressed()));
     connect(_treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(onItemNameChanged(QTreeWidgetItem*, int)));
     connect(_treeWidget, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(onTreeWidgetItemDoubleClicked(QTreeWidgetItem*, int)));
     connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
@@ -93,6 +95,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     QColor customColor = _settings->value("annotationCustomColor" + QString(i), QColor("white")).value<QColor>();
     QColorDialog::setCustomColor(i, customColor);
   }
+  QtAnnotation::selectionSensitivity = _settings->value("annotationSelectionSensitivity", 100.).value<float>();
 
   qRegisterMetaTypeStreamOperators<QtAnnotation*>("QtAnnotation*");
   qRegisterMetaTypeStreamOperators<QtAnnotationGroup*>("QtAnnotationGroup*");
@@ -109,6 +112,38 @@ AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
 void AnnotationWorkstationExtensionPlugin::onClearButtonPressed() {
   if (shouldClear()) {
     clear();
+  }
+}
+
+void AnnotationWorkstationExtensionPlugin::onOptionsButtonPressed() {
+  QDialog* optionsDialog = new QDialog();
+  optionsDialog->setWindowTitle("Set options for annotation tools");
+  QVBoxLayout* dialogLayout = new QVBoxLayout();
+  QFormLayout* optionsDialogLayout = new QFormLayout();
+  QHBoxLayout* buttonLayout = new QHBoxLayout();
+  QDoubleSpinBox * selSensSpinBox = new QDoubleSpinBox();
+  selSensSpinBox->setMinimum(20);
+  selSensSpinBox->setMaximum(1000);
+  selSensSpinBox->setValue(QtAnnotation::selectionSensitivity);
+  selSensSpinBox->setSingleStep(20);
+  selSensSpinBox->setObjectName("SelectionSensitivity");
+  selSensSpinBox->setToolTip("Sets the selection sensitivy for clicking individual points in an annatation. Higher means easier to click.");
+  optionsDialogLayout->addRow("Selection sensitivity", selSensSpinBox);
+  dialogLayout->addLayout(optionsDialogLayout);
+  QPushButton* cancel = new QPushButton("Cancel");
+  QPushButton* ok = new QPushButton("Ok");
+  cancel->setDefault(true);
+  connect(cancel, SIGNAL(clicked()), optionsDialog, SLOT(reject()));
+  connect(ok, SIGNAL(clicked()), optionsDialog, SLOT(accept()));
+  buttonLayout->addWidget(cancel);
+  buttonLayout->addWidget(ok);
+  dialogLayout->addLayout(buttonLayout);
+  optionsDialog->setLayout(dialogLayout);
+  int rval = optionsDialog->exec();
+  if (rval) {
+    float newSelectionSensitivity = static_cast<float>(selSensSpinBox->value());
+    QtAnnotation::selectionSensitivity = newSelectionSensitivity;
+    _settings->setValue("annotationSelectionSensitivity", newSelectionSensitivity);
   }
 }
 

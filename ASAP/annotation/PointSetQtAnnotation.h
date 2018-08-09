@@ -21,7 +21,6 @@ public:
 private:
   QColor _rectColor;
   QColor _rectSelectedColor;
-  float _selectionSensitivity;
   float _currentLoD;
   float _rectSize;
   QRectF _bRect;
