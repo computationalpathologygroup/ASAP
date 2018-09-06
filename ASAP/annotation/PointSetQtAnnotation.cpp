@@ -5,6 +5,7 @@
 #include <QPainterPathStroker>
 #include <QStyleOptionGraphicsItem>
 #include <iostream>
+#include <cmath>
 
 PointSetQtAnnotation::PointSetQtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale) : 
   QtAnnotation(annotation, parent, scale),

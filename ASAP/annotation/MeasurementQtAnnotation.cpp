@@ -8,6 +8,7 @@
 #include "AnnotationWorkstationExtensionPlugin.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
 #include <iostream>
+#include <cmath>
 
 MeasurementQtAnnotation::MeasurementQtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale) :
   QtAnnotation(annotation, parent, scale),

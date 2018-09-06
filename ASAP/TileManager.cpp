@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include <QPainterPath>
 #include <QCoreApplication>
+#include <cmath>
 
 TileManager::TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 _renderThread(renderThread),

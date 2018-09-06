@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "ImageFilter.h"
+#include <cmath>
 
 template <class inType>  
 class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {

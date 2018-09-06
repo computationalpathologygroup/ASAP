@@ -16,6 +16,7 @@
 #include "Annotation.h"
 #include "../PathologyViewer.h"
 #include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include <cmath>
 
 RectangleAnnotationTool::QGraphicsTextItemWithBackground::QGraphicsTextItemWithBackground(const QString &text) :
 QGraphicsTextItem(text) { }
@@ -170,8 +171,8 @@ void RectangleAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 void RectangleAnnotationTool::addCoordinate(const QPointF& scenePos) {
   if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 0) {
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->clearCoordinates();
-    float width = abs(2 * (scenePos.x() - _start.getX()) / _viewer->getSceneScale());
-    float height = abs(2 * (scenePos.y() - _start.getY()) / _viewer->getSceneScale());
+    float width = std::abs(2 * (scenePos.x() - _start.getX()) / _viewer->getSceneScale());
+    float height = std::abs(2 * (scenePos.y() - _start.getY()) / _viewer->getSceneScale());
     float left = (_start.getX() / _viewer->getSceneScale()) - width / 2.;
     float top = (_start.getY() / _viewer->getSceneScale()) - height / 2.;    
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->addCoordinate(left, top);
