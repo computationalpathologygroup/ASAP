@@ -23,40 +23,47 @@ namespace ASAP::Worklist::Data
 		std::wstring worklist_patient_relation_addition;
 	};
 
-	void ParseJsonResponse();
+	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json);
 
-	class DjangoDataAcquisition : public AbstractWorklistDataAcquisition
+	int ParseJsonToRecords(const web::http::http_response& response, DataTable& table);
+	int ParseJsonToTable(const web::http::http_response& response, DataTable& table);
+
+	class DjangoDataAcquisition //: public AbstractWorklistDataAcquisition
 	{
-	public:
-		DjangoDataAcquisition(const DjangoRestURI uri_info);
+		public:
+			DjangoDataAcquisition(const DjangoRestURI uri_info);
 
-		DataTable GetWorklistRecords(const std::function<void(DataTable, const web::http::http_exception&)>& table_receiver);
-		DataTable GetPatientRecords(const std::function<void(DataTable, const web::http::http_exception&)>& table_receiver, const size_t worklist_index);
-		DataTable GetStudyRecords(const std::function<void(DataTable, const web::http::http_exception&)>& table_receiver, const size_t patient_index);
-		DataTable GetImageRecords(const std::function<void(DataTable, const web::http::http_exception&)>& table_receiver, const size_t study_index);
+			size_t GetWorklistRecords(const std::function<void(DataTable, const int)>& receiver);
+			size_t GetPatientRecords(const std::function<void(DataTable, const int)>& receiver, const size_t worklist_index);
+			size_t GetStudyRecords(const std::function<void(DataTable, const int)>& receiver, const size_t patient_index);
+			size_t GetImageRecords(const std::function<void(DataTable, const int)>& receiver, const size_t study_index);
 
-		std::vector<std::string> GetPatientHeaders(void);
-		std::vector<std::string> GetStudyHeaders(void);
-		std::vector<std::string> GetImageHeaders(void);
+			std::vector<std::string> GetPatientHeaders(void);
+			std::vector<std::string> GetStudyHeaders(void);
+			std::vector<std::string> GetImageHeaders(void);
 
-		void CancelTask(const size_t task_id);
+			void CancelTask(const size_t task_id);
 
-	private:
-		struct TokenTaskPair
-		{
-			pplx::task<void>						task;
-			concurrency::cancellation_token_source	token;
-		};
+		private:
+			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE, WORKLIST_PATIENT_RELATION };
 
 
-		std::vector<DataTable>	m_tables_;
+			struct TokenTaskPair
+			{
+				pplx::task<void>						task;
+				concurrency::cancellation_token_source	token;
+			};
 
-		web::http::client::http_client				m_client_;
-		DjangoRestURI								m_rest_uri_;
-		size_t										m_token_counter_;
-		std::unordered_map<size_t, TokenTaskPair>	m_active_tasks_;
 
-		void ProcessRequest_(const web::http::http_request& request, std::function<void(web::http::http_response&)> observer);
+			std::vector<DataTable>	m_tables_;
+
+			web::http::client::http_client				m_client_;
+			DjangoRestURI								m_rest_uri_;
+			size_t										m_token_counter_;
+			std::unordered_map<size_t, TokenTaskPair>	m_active_tasks_;
+
+			void InitializeTables_(void);
+			size_t ProcessRequest_(const web::http::http_request& request, std::function<void(web::http::http_response&)> observer);
 	};
 }
 #endif // __REST_DATA_AQUISITION_H__
