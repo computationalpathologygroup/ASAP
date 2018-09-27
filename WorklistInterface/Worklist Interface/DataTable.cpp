@@ -12,6 +12,11 @@ DataTable::DataTable(const std::vector<std::string>& columns)
     {
         m_column_order_.insert({columns[column], column});
     }
+
+	for (auto it = m_column_order_.begin(); it != m_column_order_.end(); ++it)
+	{
+		m_visible_columns_.push_back(it);
+	}
 }
 
 DataTable::DataTable(const std::vector<std::string>& columns, const std::vector<bool>& visibility)

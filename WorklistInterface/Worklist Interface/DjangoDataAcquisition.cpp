@@ -1,4 +1,4 @@
-#include "REST_Data_Acquisition.h"
+#include "DjangoDataAcquisition.h"
 
 #include <codecvt>
 #include <stdexcept>
@@ -7,6 +7,7 @@
 #include <cpprest/json.h>
 
 #include <system_error>
+#include <cstdio>
 
 namespace ASAP::Worklist::Data
 {
@@ -36,20 +37,30 @@ namespace ASAP::Worklist::Data
 		{
 			try
 			{
-				web::json::array objects(previousTask.get().as_array());
-				if (objects.size() > 0)
+				web::json::value json_response(previousTask.get());
+				if (json_response.size() > 0)
 				{
 					std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 
 					std::vector<std::string> values;
-					values.reserve(objects[0].size());
+					values.reserve(json_response[0].as_object().size());
 
-					for (web::json::value& object : objects)
+					for (size_t o = 0; o < json_response.size(); ++o)
 					{
-						web::json::object concrete_object(object.as_object());
-						for (auto it = concrete_object.cbegin(); it != concrete_object.cend(); ++it)
+						web::json::object object(json_response[o].as_object());
+						for (auto it = object.cbegin(); it != object.cend(); ++it)
 						{
-							values.push_back(converter.to_bytes(it->second.as_string()));
+							values.push_back(converter.to_bytes(it->second.to_string()));
+							
+							if (values.back()[0] == '"' && values.back()[values.back().size() - 1] == '"')
+							{
+								values.back() = values.back().substr(1, values.back().size() - 2);
+							}
+							else if (values.back() == "null")
+							{
+								values.back().clear();
+								values.back().shrink_to_fit();
+							}
 						}
 
 						table.Insert(values);
@@ -59,9 +70,11 @@ namespace ASAP::Worklist::Data
 			}
 			catch (const web::http::http_exception& e)
 			{
-				// Leave table empty to notify an error.
-				table = DataTable();
 				error_code = e.error_code().value();
+			}
+			catch (const std::exception& e)
+			{
+				error_code = -1;
 			}
 		}).wait();
 		return error_code;
@@ -102,25 +115,34 @@ namespace ASAP::Worklist::Data
 		return error_code;
 	}
 
-	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_client_(uri_info.base_url), m_rest_uri_(uri_info), m_tables_(5)
+	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_client_(web::uri(uri_info.base_url.c_str())), m_rest_uri_(uri_info), m_tables_(5)
 	{
 		InitializeTables_();
 	}
 
-	size_t DjangoDataAcquisition::GetWorklistRecords(const std::function<void(DataTable, const int)>& receiver)
+	DjangoDataAcquisition::~DjangoDataAcquisition(void)
+	{
+		for (auto task : m_active_tasks_)
+		{
+			CancelTask(task.first);
+		}
+	}
+
+	size_t DjangoDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
 		web::http::http_request request(web::http::methods::GET);
-		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
+		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition + L"/");
 
 		DataTable* table(&m_tables_[TableEntry::WORKLIST]);
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			receiver(*table, ParseJsonToRecords(response, *table));
+			int error_code = ParseJsonToRecords(response, *table);
+			receiver(*table, error_code);
 		});
 	}
 
-	size_t DjangoDataAcquisition::GetPatientRecords(const std::function<void(DataTable, const int)>& receiver, const size_t worklist_index)
+	size_t DjangoDataAcquisition::GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring index_wide_char = converter.from_bytes(std::to_string(worklist_index));
@@ -133,6 +155,9 @@ namespace ASAP::Worklist::Data
 		DataTable* patient_table(&m_tables_[TableEntry::PATIENT]);
 		web::http::client::http_client* client(&m_client_);
 		std::wstring* patient_addition(&m_rest_uri_.patient_addition);
+
+		relation_table->Clear();
+		patient_table->Clear();
 
 		return ProcessRequest_(relations_request, [relation_table, patient_table, client, patient_addition, receiver](web::http::http_response& response)
 		{
@@ -151,16 +176,21 @@ namespace ASAP::Worklist::Data
 				}
 			}
 
-			web::http::http_request patient_request(web::http::methods::GET);
-			patient_request.set_request_uri(L"/" + *patient_addition + L"/ids=" + ids);
-			client->request(patient_request).then([patient_table](web::http::http_response& response)
+			if (!ids.empty())
 			{
-				ParseJsonToRecords(response, *patient_table);
-			}).wait();
+				web::http::http_request patient_request(web::http::methods::GET);
+				patient_request.set_request_uri(L"/" + *patient_addition + L"/?ids=" + ids);
+				client->request(patient_request).then([patient_table](web::http::http_response& response)
+				{
+					ParseJsonToRecords(response, *patient_table);
+				}).wait();
+			}
+
+			receiver(*patient_table, 0);
 		});
 	}
 
-	size_t DjangoDataAcquisition::GetStudyRecords(const std::function<void(DataTable, const int)>& receiver, const size_t patient_index)
+	size_t DjangoDataAcquisition::GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring index_wide_char = converter.from_bytes(std::to_string(patient_index));
@@ -168,16 +198,17 @@ namespace ASAP::Worklist::Data
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(L"/" + m_rest_uri_.study_addition + L"/?patient=" + index_wide_char);
 
-		DataTable* table(&m_tables_[TableEntry::WORKLIST]);
+		DataTable* table(&m_tables_[TableEntry::STUDY]);
 		table->Clear();
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			receiver(*table, ParseJsonToRecords(response, *table));
+			int error_code = ParseJsonToRecords(response, *table);
+			receiver(*table, error_code);
 		});
 	}
 
-	size_t DjangoDataAcquisition::GetImageRecords(const std::function<void(DataTable, int)>& receiver, const size_t study_index)
+	size_t DjangoDataAcquisition::GetImageRecords(const size_t study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring index_wide_char = converter.from_bytes(std::to_string(study_index));
@@ -185,12 +216,13 @@ namespace ASAP::Worklist::Data
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(L"/" + m_rest_uri_.image_addition + L"/?study=" + index_wide_char);
 
-		DataTable* table(&m_tables_[TableEntry::WORKLIST]);
+		DataTable* table(&m_tables_[TableEntry::IMAGE]);
 		table->Clear();
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			receiver(*table, ParseJsonToRecords(response, *table));
+			int error_code = ParseJsonToRecords(response, *table);
+			receiver(*table, error_code);
 		});
 	}
 
@@ -236,13 +268,13 @@ namespace ASAP::Worklist::Data
 		for (size_t table = 0; table < table_url_addition.size(); ++table)
 		{
 			web::http::http_request request(web::http::methods::OPTIONS);
-			request.set_request_uri(L"/" + table_url_addition[table]);
+			request.set_request_uri(L"/" + table_url_addition[table] + L"/");
 
 			DataTable* datatable(&m_tables_[table]);
-			ProcessRequest_(request, [datatable](web::http::http_response& response)
+			m_client_.request(request).then([datatable](web::http::http_response& response)
 			{
 				ParseJsonToTable(response, *datatable);
-			});
+			}).wait();
 		}
 	}
 
@@ -254,14 +286,14 @@ namespace ASAP::Worklist::Data
 		++m_token_counter_;
 
 		// Catches the response so the attached token can be removed.
-		inserted_pair->second.task = m_client_.request(request, inserted_pair->second.token.get_token()).then([observer, token_id, this](web::http::http_response& response)
+		inserted_pair->second.task = std::move(m_client_.request(request, inserted_pair->second.token.get_token()).then([observer, token_id, this](web::http::http_response& response)
 		{
-			// Remove token
-			this->CancelTask(token_id);
-
 			// Passes the response to the observer
 			observer(response);
-		});
+
+			// Remove token
+			this->CancelTask(token_id);		
+		}));
 
 		return token_id;
 	}

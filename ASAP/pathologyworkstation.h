@@ -40,6 +40,8 @@ public:
 
   unsigned long long getCacheSize() const;
 
+  void openFile(const QString& fileName, const QString& factoryName = QString("default"));
+
 signals:
   void newImageLoaded(std::weak_ptr<MultiResolutionImage>, const std::string&);
   void imageClosed();
@@ -84,7 +86,6 @@ private:
   void loadPlugins();
   void readSettings();
   void writeSettings();
-  void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };

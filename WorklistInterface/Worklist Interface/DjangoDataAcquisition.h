@@ -32,11 +32,12 @@ namespace ASAP::Worklist::Data
 	{
 		public:
 			DjangoDataAcquisition(const DjangoRestURI uri_info);
+			~DjangoDataAcquisition(void);
 
-			size_t GetWorklistRecords(const std::function<void(DataTable, const int)>& receiver);
-			size_t GetPatientRecords(const std::function<void(DataTable, const int)>& receiver, const size_t worklist_index);
-			size_t GetStudyRecords(const std::function<void(DataTable, const int)>& receiver, const size_t patient_index);
-			size_t GetImageRecords(const std::function<void(DataTable, const int)>& receiver, const size_t study_index);
+			size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver);
+			size_t GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver);
+			size_t GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver);
+			size_t GetImageRecords(const size_t study_index, const std::function<void(DataTable&, const int)>& receiver);
 
 			std::vector<std::string> GetPatientHeaders(void);
 			std::vector<std::string> GetStudyHeaders(void);
@@ -45,21 +46,18 @@ namespace ASAP::Worklist::Data
 			void CancelTask(const size_t task_id);
 
 		private:
-			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE, WORKLIST_PATIENT_RELATION };
-
-
 			struct TokenTaskPair
 			{
 				pplx::task<void>						task;
 				concurrency::cancellation_token_source	token;
 			};
 
-
-			std::vector<DataTable>	m_tables_;
+			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE, WORKLIST_PATIENT_RELATION };
 
 			web::http::client::http_client				m_client_;
 			DjangoRestURI								m_rest_uri_;
 			size_t										m_token_counter_;
+			std::vector<DataTable>						m_tables_;
 			std::unordered_map<size_t, TokenTaskPair>	m_active_tasks_;
 
 			void InitializeTables_(void);

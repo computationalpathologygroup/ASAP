@@ -20,40 +20,40 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_ASAP_GUI_Window_t {
+struct qt_meta_stringdata_ASAP__Worklist__GUI__ASAP_GUI_Window_t {
     QByteArrayData data[12];
-    char stringdata0[147];
+    char stringdata0[168];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_ASAP_GUI_Window_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_ASAP__Worklist__GUI__ASAP_GUI_Window_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_ASAP_GUI_Window_t qt_meta_stringdata_ASAP_GUI_Window = {
+static const qt_meta_stringdata_ASAP__Worklist__GUI__ASAP_GUI_Window_t qt_meta_stringdata_ASAP__Worklist__GUI__ASAP_GUI_Window = {
     {
-QT_MOC_LITERAL(0, 0, 15), // "ASAP_GUI_Window"
-QT_MOC_LITERAL(1, 16, 16), // "OnWorklistClear_"
-QT_MOC_LITERAL(2, 33, 0), // ""
-QT_MOC_LITERAL(3, 34, 5), // "index"
-QT_MOC_LITERAL(4, 40, 3), // "row"
-QT_MOC_LITERAL(5, 44, 6), // "column"
-QT_MOC_LITERAL(6, 51, 16), // "OnPatientsClear_"
-QT_MOC_LITERAL(7, 68, 13), // "OnStudyClear_"
-QT_MOC_LITERAL(8, 82, 17), // "OnWorklistSelect_"
-QT_MOC_LITERAL(9, 100, 16), // "OnPatientSelect_"
-QT_MOC_LITERAL(10, 117, 14), // "OnStudySelect_"
-QT_MOC_LITERAL(11, 132, 14) // "OnImageSelect_"
+QT_MOC_LITERAL(0, 0, 36), // "ASAP::Worklist::GUI::ASAP_GUI..."
+QT_MOC_LITERAL(1, 37, 16), // "OnWorklistClear_"
+QT_MOC_LITERAL(2, 54, 0), // ""
+QT_MOC_LITERAL(3, 55, 5), // "index"
+QT_MOC_LITERAL(4, 61, 3), // "row"
+QT_MOC_LITERAL(5, 65, 6), // "column"
+QT_MOC_LITERAL(6, 72, 16), // "OnPatientsClear_"
+QT_MOC_LITERAL(7, 89, 13), // "OnStudyClear_"
+QT_MOC_LITERAL(8, 103, 17), // "OnWorklistSelect_"
+QT_MOC_LITERAL(9, 121, 16), // "OnPatientSelect_"
+QT_MOC_LITERAL(10, 138, 14), // "OnStudySelect_"
+QT_MOC_LITERAL(11, 153, 14) // "OnImageSelect_"
 
     },
-    "ASAP_GUI_Window\0OnWorklistClear_\0\0"
-    "index\0row\0column\0OnPatientsClear_\0"
-    "OnStudyClear_\0OnWorklistSelect_\0"
-    "OnPatientSelect_\0OnStudySelect_\0"
-    "OnImageSelect_"
+    "ASAP::Worklist::GUI::ASAP_GUI_Window\0"
+    "OnWorklistClear_\0\0index\0row\0column\0"
+    "OnPatientsClear_\0OnStudyClear_\0"
+    "OnWorklistSelect_\0OnPatientSelect_\0"
+    "OnStudySelect_\0OnImageSelect_"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_ASAP_GUI_Window[] = {
+static const uint qt_meta_data_ASAP__Worklist__GUI__ASAP_GUI_Window[] = {
 
  // content:
        7,       // revision
@@ -87,7 +87,7 @@ static const uint qt_meta_data_ASAP_GUI_Window[] = {
        0        // eod
 };
 
-void ASAP_GUI_Window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void ASAP::Worklist::GUI::ASAP_GUI_Window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         ASAP_GUI_Window *_t = static_cast<ASAP_GUI_Window *>(_o);
@@ -105,26 +105,26 @@ void ASAP_GUI_Window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
     }
 }
 
-QT_INIT_METAOBJECT const QMetaObject ASAP_GUI_Window::staticMetaObject = {
-    { &QMainWindow::staticMetaObject, qt_meta_stringdata_ASAP_GUI_Window.data,
-      qt_meta_data_ASAP_GUI_Window,  qt_static_metacall, nullptr, nullptr}
+QT_INIT_METAOBJECT const QMetaObject ASAP::Worklist::GUI::ASAP_GUI_Window::staticMetaObject = {
+    { &QMainWindow::staticMetaObject, qt_meta_stringdata_ASAP__Worklist__GUI__ASAP_GUI_Window.data,
+      qt_meta_data_ASAP__Worklist__GUI__ASAP_GUI_Window,  qt_static_metacall, nullptr, nullptr}
 };
 
 
-const QMetaObject *ASAP_GUI_Window::metaObject() const
+const QMetaObject *ASAP::Worklist::GUI::ASAP_GUI_Window::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *ASAP_GUI_Window::qt_metacast(const char *_clname)
+void *ASAP::Worklist::GUI::ASAP_GUI_Window::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_ASAP_GUI_Window.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_ASAP__Worklist__GUI__ASAP_GUI_Window.stringdata0))
         return static_cast<void*>(this);
     return QMainWindow::qt_metacast(_clname);
 }
 
-int ASAP_GUI_Window::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int ASAP::Worklist::GUI::ASAP_GUI_Window::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     if (_id < 0)

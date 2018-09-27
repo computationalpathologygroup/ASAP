@@ -5,44 +5,53 @@
 #include <QStandardItemModel>
 
 #include "abstractworklistdataacquisition.h"
+#include "DjangoDataAcquisition.h"
 #include "DataTable.h"
-
 #include "ui_ASAP_GUI_Layout.h"
 
-class ASAP_GUI_Window : public QMainWindow
+#include "../../ASAP/pathologyworkstation.h"
+
+namespace ASAP::Worklist::GUI
 {
-	Q_OBJECT
+	class ASAP_GUI_Window : public QMainWindow
+	{
+			Q_OBJECT
 
-	public:
-		explicit ASAP_GUI_Window(AbstractWorklistDataAcquisition* data_acquisition, QWidget *parent = 0);
+		public:
+			explicit ASAP_GUI_Window(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent = 0);
 
-	private:
-		std::unique_ptr<Ui::ASAP_GUI_Layout> m_ui_;
-		std::unique_ptr<AbstractWorklistDataAcquisition> m_data_acquisition_;
+			void SetWorklistItems(const DataTable& items, QStandardItemModel* model);
+			void SetPatientsItems(const DataTable& items, QStandardItemModel* model);
+			void SetStudyItems(const DataTable& items, QStandardItemModel* model);
+			void SetImageItems(const DataTable& items, QStandardItemModel* model);
 
-		QStandardItemModel* m_images_model_;
-		QStandardItemModel* m_patients_model_;
-		QStandardItemModel* m_studies_model_;
-		QStandardItemModel* m_worklist_model_;
+			PathologyWorkstation* workstation_window;
 
-		void SetWorklistItems_(const DataTable& items, QStandardItemModel* model);
-		void SetPatientsItems_(const DataTable& items, QStandardItemModel* model);
-		void SetStudyItems_(const DataTable& items, QStandardItemModel* model);
-		void SetImageItems_(const DataTable& items, QStandardItemModel* model);
+		private:
+			std::unique_ptr<Ui::ASAP_GUI_Layout>			m_ui_;
+			std::unique_ptr<Data::DjangoDataAcquisition>	m_data_acquisition_;
 
-		void SetImageInfo_(const QList<QVariant>& info_list, QStandardItemModel* model);
-		void SetPatientInfo_(const QList<QVariant>& info_list, QStandardItemModel* model);
+			QStandardItemModel* m_images_model_;
+			QStandardItemModel* m_patients_model_;
+			QStandardItemModel* m_studies_model_;
+			QStandardItemModel* m_worklist_model_;
 
-		void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
-		void SetSlots_(void);
+			QIcon CreateIcon_(const std::string absolute_filepath);
 
-	private slots:
-		void OnWorklistClear_(QModelIndex index, int row, int column);
-		void OnPatientsClear_(QModelIndex index, int row, int column);
-		void OnStudyClear_(QModelIndex index, int row, int column);
+			void SetImageInfo_(const QList<QVariant>& info_list, QStandardItemModel* model);
+			void SetPatientInfo_(const QList<QVariant>& info_list, QStandardItemModel* model);
 
-		void OnWorklistSelect_(QModelIndex index);
-		void OnPatientSelect_(QModelIndex index);
-		void OnStudySelect_(QModelIndex index);
-		void OnImageSelect_(QModelIndex index);
-};
+			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
+			void SetSlots_(void);
+
+			private slots:
+			void OnWorklistClear_(QModelIndex index, int row, int column);
+			void OnPatientsClear_(QModelIndex index, int row, int column);
+			void OnStudyClear_(QModelIndex index, int row, int column);
+
+			void OnWorklistSelect_(QModelIndex index);
+			void OnPatientSelect_(QModelIndex index);
+			void OnStudySelect_(QModelIndex index);
+			void OnImageSelect_(QModelIndex index);
+	};
+}

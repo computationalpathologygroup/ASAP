@@ -11,7 +11,7 @@
     <ClCompile Include="Worklist_CSV_Example.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="REST_Data_Acquisition.cpp">
+    <ClCompile Include="DjangoDataAcquisition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,7 +62,7 @@
     <ClInclude Include="Worklist_CSV_Example.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="REST_Data_Acquisition.h">
+    <ClInclude Include="DjangoDataAcquisition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
