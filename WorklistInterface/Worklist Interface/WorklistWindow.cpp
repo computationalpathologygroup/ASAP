@@ -1,4 +1,4 @@
-#include "ASAP_GUI_Window.h"
+#include "WorklistWindow.h"
 
 #include <cctype>
 #include <unordered_map>
@@ -7,7 +7,7 @@ namespace ASAP::Worklist::GUI
 {
 	WorklistWindow::WorklistWindow(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent) :
 		QMainWindow(parent),
-		m_ui_(new Ui::ASAP_GUI_Layout),
+		m_ui_(new Ui::WorklistWindowLayout),
 		m_data_acquisition_(data_acquisition),
 		m_images_model_(new QStandardItemModel(0, 0)),
 		m_patients_model_(new QStandardItemModel(0, 0)),
