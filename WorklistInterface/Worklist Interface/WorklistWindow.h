@@ -7,18 +7,18 @@
 #include "abstractworklistdataacquisition.h"
 #include "DjangoDataAcquisition.h"
 #include "DataTable.h"
-#include "ui_ASAP_GUI_Layout.h"
+#include "ui_WorklistWindowLayout.h"
 
 #include "../../ASAP/pathologyworkstation.h"
 
 namespace ASAP::Worklist::GUI
 {
-	class ASAP_GUI_Window : public QMainWindow
+	class WorklistWindow : public QMainWindow
 	{
-			Q_OBJECT
+		Q_OBJECT
 
 		public:
-			explicit ASAP_GUI_Window(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent = 0);
+			explicit WorklistWindow(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent = 0);
 
 			void SetWorklistItems(const DataTable& items, QStandardItemModel* model);
 			void SetPatientsItems(const DataTable& items, QStandardItemModel* model);
@@ -28,7 +28,7 @@ namespace ASAP::Worklist::GUI
 			PathologyWorkstation* workstation_window;
 
 		private:
-			std::unique_ptr<Ui::ASAP_GUI_Layout>			m_ui_;
+			std::unique_ptr<Ui::WorklistWindowLayout>		m_ui_;
 			std::unique_ptr<Data::DjangoDataAcquisition>	m_data_acquisition_;
 
 			QStandardItemModel* m_images_model_;
@@ -44,7 +44,7 @@ namespace ASAP::Worklist::GUI
 			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetSlots_(void);
 
-			private slots:
+		private slots:
 			void OnWorklistClear_(QModelIndex index, int row, int column);
 			void OnPatientsClear_(QModelIndex index, int row, int column);
 			void OnStudyClear_(QModelIndex index, int row, int column);

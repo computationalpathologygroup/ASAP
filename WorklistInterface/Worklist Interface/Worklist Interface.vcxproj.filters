@@ -43,11 +43,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="ASAP_GUI_Layout.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-  </ItemGroup>
-  <ItemGroup>
     <QtRcc Include="WorklistInterface.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
@@ -65,5 +60,10 @@
     <ClInclude Include="DjangoDataAcquisition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="WorklistWindowLayout.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>

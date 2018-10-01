@@ -125,7 +125,7 @@
     <QtMoc Include="ASAP_GUI_Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="ASAP_GUI_Layout.ui" />
+    <QtUic Include="WorklistWindowLayout.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="WorklistInterface.qrc" />

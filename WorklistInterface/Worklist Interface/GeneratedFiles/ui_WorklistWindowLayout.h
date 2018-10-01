@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'ASAP_GUI_Layout.ui'
+** Form generated from reading UI file 'WorklistWindowLayout.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.10.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_ASAP_GUI_LAYOUT_H
-#define UI_ASAP_GUI_LAYOUT_H
+#ifndef UI_WORKLISTWINDOWLAYOUT_H
+#define UI_WORKLISTWINDOWLAYOUT_H
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -26,7 +26,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_ASAP_GUI_Layout
+class Ui_WorklistWindowLayout
 {
 public:
     QWidget *centralWidget;
@@ -42,12 +42,12 @@ public:
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
-    void setupUi(QMainWindow *ASAP_GUI_Layout)
+    void setupUi(QMainWindow *WorklistWindowLayout)
     {
-        if (ASAP_GUI_Layout->objectName().isEmpty())
-            ASAP_GUI_Layout->setObjectName(QStringLiteral("ASAP_GUI_Layout"));
-        ASAP_GUI_Layout->resize(1000, 850);
-        centralWidget = new QWidget(ASAP_GUI_Layout);
+        if (WorklistWindowLayout->objectName().isEmpty())
+            WorklistWindowLayout->setObjectName(QStringLiteral("WorklistWindowLayout"));
+        WorklistWindowLayout->resize(1000, 850);
+        centralWidget = new QWidget(WorklistWindowLayout);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         WorklistView = new QTreeView(centralWidget);
         WorklistView->setObjectName(QStringLiteral("WorklistView"));
@@ -85,38 +85,38 @@ public:
         label_images = new QLabel(centralWidget);
         label_images->setObjectName(QStringLiteral("label_images"));
         label_images->setGeometry(QRect(270, 470, 81, 21));
-        ASAP_GUI_Layout->setCentralWidget(centralWidget);
-        menuBar = new QMenuBar(ASAP_GUI_Layout);
+        WorklistWindowLayout->setCentralWidget(centralWidget);
+        menuBar = new QMenuBar(WorklistWindowLayout);
         menuBar->setObjectName(QStringLiteral("menuBar"));
         menuBar->setGeometry(QRect(0, 0, 1000, 24));
-        ASAP_GUI_Layout->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(ASAP_GUI_Layout);
+        WorklistWindowLayout->setMenuBar(menuBar);
+        mainToolBar = new QToolBar(WorklistWindowLayout);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        ASAP_GUI_Layout->addToolBar(Qt::TopToolBarArea, mainToolBar);
-        statusBar = new QStatusBar(ASAP_GUI_Layout);
+        WorklistWindowLayout->addToolBar(Qt::TopToolBarArea, mainToolBar);
+        statusBar = new QStatusBar(WorklistWindowLayout);
         statusBar->setObjectName(QStringLiteral("statusBar"));
-        ASAP_GUI_Layout->setStatusBar(statusBar);
+        WorklistWindowLayout->setStatusBar(statusBar);
 
-        retranslateUi(ASAP_GUI_Layout);
+        retranslateUi(WorklistWindowLayout);
 
-        QMetaObject::connectSlotsByName(ASAP_GUI_Layout);
+        QMetaObject::connectSlotsByName(WorklistWindowLayout);
     } // setupUi
 
-    void retranslateUi(QMainWindow *ASAP_GUI_Layout)
+    void retranslateUi(QMainWindow *WorklistWindowLayout)
     {
-        ASAP_GUI_Layout->setWindowTitle(QApplication::translate("ASAP_GUI_Layout", "Worklistinterface", nullptr));
-        label_worklists->setText(QApplication::translate("ASAP_GUI_Layout", "Worklists", nullptr));
-        label_patients->setText(QApplication::translate("ASAP_GUI_Layout", "Patients", nullptr));
-        label_studies->setText(QApplication::translate("ASAP_GUI_Layout", "Studies", nullptr));
-        label_images->setText(QApplication::translate("ASAP_GUI_Layout", "Images", nullptr));
+        WorklistWindowLayout->setWindowTitle(QApplication::translate("WorklistWindowLayout", "Worklistinterface", nullptr));
+        label_worklists->setText(QApplication::translate("WorklistWindowLayout", "Worklists", nullptr));
+        label_patients->setText(QApplication::translate("WorklistWindowLayout", "Patients", nullptr));
+        label_studies->setText(QApplication::translate("WorklistWindowLayout", "Studies", nullptr));
+        label_images->setText(QApplication::translate("WorklistWindowLayout", "Images", nullptr));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class ASAP_GUI_Layout: public Ui_ASAP_GUI_Layout {};
+    class WorklistWindowLayout: public Ui_WorklistWindowLayout {};
 } // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // UI_ASAP_GUI_LAYOUT_H
+#endif // UI_WORKLISTWINDOWLAYOUT_H

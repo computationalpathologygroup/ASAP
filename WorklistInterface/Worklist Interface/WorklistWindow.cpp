@@ -5,7 +5,7 @@
 
 namespace ASAP::Worklist::GUI
 {
-	ASAP_GUI_Window::ASAP_GUI_Window(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent) :
+	WorklistWindow::WorklistWindow(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent) :
 		QMainWindow(parent),
 		m_ui_(new Ui::ASAP_GUI_Layout),
 		m_data_acquisition_(data_acquisition),
@@ -35,7 +35,7 @@ namespace ASAP::Worklist::GUI
 		});
 	}
 
-	void ASAP_GUI_Window::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
 	{
 		std::unordered_map<std::string, QStandardItem*> inserted_items;
 		model->removeRows(0, model->rowCount());
@@ -62,7 +62,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void ASAP_GUI_Window::SetPatientsItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetPatientsItems(const DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
@@ -80,7 +80,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void ASAP_GUI_Window::SetStudyItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetStudyItems(const DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
@@ -98,7 +98,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void ASAP_GUI_Window::SetImageItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
@@ -112,7 +112,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	QIcon ASAP_GUI_Window::CreateIcon_(const std::string absolute_filepath)
+	QIcon WorklistWindow::CreateIcon_(const std::string absolute_filepath)
 	{
 		QPixmap pixmap(QString(absolute_filepath.data()));
 		if (pixmap.isNull())
@@ -123,7 +123,7 @@ namespace ASAP::Worklist::GUI
 		return icon;
 	}
 
-	void ASAP_GUI_Window::SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
+	void WorklistWindow::SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
 	{
 		QStringList q_headers;
 		for (std::string& header : headers)
@@ -136,7 +136,7 @@ namespace ASAP::Worklist::GUI
 		view->update();
 	}
 
-	void ASAP_GUI_Window::SetSlots_(void)
+	void WorklistWindow::SetSlots_(void)
 	{
 		connect(m_worklist_model_,
 			SIGNAL(rowsRemoved(QModelIndex, int, int)),
@@ -174,25 +174,25 @@ namespace ASAP::Worklist::GUI
 			SLOT(OnImageSelect_(QModelIndex)));
 	}
 
-	void ASAP_GUI_Window::OnWorklistClear_(QModelIndex index, int, int)
+	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
 	{
 		m_patients_model_->removeRows(0, m_patients_model_->rowCount());
 		m_ui_->PatientView->update();
 	}
 
-	void ASAP_GUI_Window::OnPatientsClear_(QModelIndex index, int, int)
+	void WorklistWindow::OnPatientsClear_(QModelIndex index, int, int)
 	{
 		m_studies_model_->removeRows(0, m_studies_model_->rowCount());
 		m_ui_->StudyView->update();
 	}
 
-	void ASAP_GUI_Window::OnStudyClear_(QModelIndex index, int, int)
+	void WorklistWindow::OnStudyClear_(QModelIndex index, int, int)
 	{
 		m_images_model_->removeRows(0, m_images_model_->rowCount());
 		m_ui_->ImageView->update();
 	}
 
-	void ASAP_GUI_Window::OnWorklistSelect_(QModelIndex index)
+	void WorklistWindow::OnWorklistSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_worklist_model_->itemFromIndex(index));
 		int worklist_id = item->data().toInt();
@@ -209,7 +209,7 @@ namespace ASAP::Worklist::GUI
 		});
 	}
 
-	void ASAP_GUI_Window::OnPatientSelect_(QModelIndex index)
+	void WorklistWindow::OnPatientSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_patients_model_->itemFromIndex(index));
 		int patient_id = item->data().toInt();
@@ -226,7 +226,7 @@ namespace ASAP::Worklist::GUI
 		});
 	}
 
-	void ASAP_GUI_Window::OnStudySelect_(QModelIndex index)
+	void WorklistWindow::OnStudySelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_studies_model_->itemFromIndex(index));
 		int study_id = item->data().toInt();
@@ -243,7 +243,7 @@ namespace ASAP::Worklist::GUI
 		});
 	}
 
-	void ASAP_GUI_Window::OnImageSelect_(QModelIndex index)
+	void WorklistWindow::OnImageSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_images_model_->itemFromIndex(index));
 		QString image_handle = item->data().toString();
