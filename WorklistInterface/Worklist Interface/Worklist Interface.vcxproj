@@ -70,8 +70,8 @@
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;%(AdditionalIncludeDirectories)</IncludePath>
-      <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</Define>
+      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
+      <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
     </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
@@ -102,8 +102,8 @@
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;%(AdditionalIncludeDirectories)</IncludePath>
-      <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</Define>
+      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
+      <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
     </QtMoc>
     <QtUic>
       <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
@@ -115,26 +115,22 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ASAP_GUI_Window.cpp" />
-    <ClCompile Include="DataTable.cpp" />
-    <ClCompile Include="DjangoDataAcquisition.cpp" />
+    <ClCompile Include="CompositeWindow.cpp" />
+    <ClCompile Include="Data\DataTable.cpp" />
+    <ClCompile Include="Data\DjangoDataAcquisition.cpp" />
+    <ClCompile Include="Data\Worklist_CSV_Example.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Worklist_CSV_Example.cpp" />
+    <ClCompile Include="WorklistWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="ASAP_GUI_Window.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <QtUic Include="CompositeWindowLayout.ui" />
     <QtUic Include="WorklistWindowLayout.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="WorklistInterface.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AbstractWorklistDataAcquisition.h" />
-    <ClInclude Include="DataTable.h" />
-    <ClInclude Include="DjangoDataAcquisition.h" />
-    <ClInclude Include="Worklist_CSV_Example.h" />
+    <QtMoc Include="WorklistWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Build\ASAP\ASAP\ASAP.vcxproj">
@@ -143,6 +139,13 @@
     <ProjectReference Include="..\..\..\..\Build\ASAP\ASAP\ASAPLib.vcxproj">
       <Project>{be54e793-f1c6-3304-81e8-617223a18afb}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="CompositeWindow.h" />
+    <ClInclude Include="Data\DataTable.h" />
+    <ClInclude Include="Data\DjangoDataAcquisition.h" />
+    <ClInclude Include="Data\WorklistDataAcquisitionInterface.h" />
+    <ClInclude Include="Data\Worklist_CSV_Example.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

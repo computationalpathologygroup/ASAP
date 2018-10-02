@@ -4,9 +4,8 @@
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
 
-#include "abstractworklistdataacquisition.h"
-#include "DjangoDataAcquisition.h"
-#include "DataTable.h"
+#include "Data/DjangoDataAcquisition.h"
+#include "Data/DataTable.h"
 #include "ui_WorklistWindowLayout.h"
 
 #include "../../ASAP/pathologyworkstation.h"
@@ -18,7 +17,7 @@ namespace ASAP::Worklist::GUI
 		Q_OBJECT
 
 		public:
-			explicit WorklistWindow(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent = 0);
+			explicit WorklistWindow(Data::DjangoDataAcquisition* data_acquisition, QWidget* parent = 0);
 
 			void SetWorklistItems(const DataTable& items, QStandardItemModel* model);
 			void SetPatientsItems(const DataTable& items, QStandardItemModel* model);
@@ -37,10 +36,6 @@ namespace ASAP::Worklist::GUI
 			QStandardItemModel* m_worklist_model_;
 
 			QIcon CreateIcon_(const std::string absolute_filepath);
-
-			void SetImageInfo_(const QList<QVariant>& info_list, QStandardItemModel* model);
-			void SetPatientInfo_(const QList<QVariant>& info_list, QStandardItemModel* model);
-
 			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetSlots_(void);
 

@@ -13,6 +13,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListView>
@@ -30,14 +31,15 @@ class Ui_WorklistWindowLayout
 {
 public:
     QWidget *centralWidget;
-    QTreeView *WorklistView;
-    QTableView *PatientView;
-    QTableView *StudyView;
-    QListView *ImageView;
+    QGridLayout *gridLayout;
     QLabel *label_worklists;
     QLabel *label_patients;
+    QTreeView *WorklistView;
+    QTableView *PatientView;
     QLabel *label_studies;
+    QTableView *StudyView;
     QLabel *label_images;
+    QListView *ImageView;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -46,49 +48,71 @@ public:
     {
         if (WorklistWindowLayout->objectName().isEmpty())
             WorklistWindowLayout->setObjectName(QStringLiteral("WorklistWindowLayout"));
-        WorklistWindowLayout->resize(1000, 850);
+        WorklistWindowLayout->resize(1113, 850);
         centralWidget = new QWidget(WorklistWindowLayout);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
+        gridLayout = new QGridLayout(centralWidget);
+        gridLayout->setSpacing(6);
+        gridLayout->setContentsMargins(11, 11, 11, 11);
+        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        label_worklists = new QLabel(centralWidget);
+        label_worklists->setObjectName(QStringLiteral("label_worklists"));
+
+        gridLayout->addWidget(label_worklists, 0, 0, 1, 1);
+
+        label_patients = new QLabel(centralWidget);
+        label_patients->setObjectName(QStringLiteral("label_patients"));
+
+        gridLayout->addWidget(label_patients, 0, 1, 1, 1);
+
         WorklistView = new QTreeView(centralWidget);
         WorklistView->setObjectName(QStringLiteral("WorklistView"));
-        WorklistView->setGeometry(QRect(10, 40, 256, 741));
+        WorklistView->setMinimumSize(QSize(300, 0));
+        WorklistView->setMaximumSize(QSize(300, 16777215));
         WorklistView->setRootIsDecorated(true);
         WorklistView->setHeaderHidden(true);
+
+        gridLayout->addWidget(WorklistView, 1, 0, 5, 1);
+
         PatientView = new QTableView(centralWidget);
         PatientView->setObjectName(QStringLiteral("PatientView"));
-        PatientView->setGeometry(QRect(270, 40, 721, 190));
         PatientView->horizontalHeader()->setCascadingSectionResizes(true);
         PatientView->horizontalHeader()->setProperty("showSortIndicator", QVariant(false));
         PatientView->horizontalHeader()->setStretchLastSection(true);
         PatientView->verticalHeader()->setVisible(false);
         PatientView->verticalHeader()->setDefaultSectionSize(33);
         PatientView->verticalHeader()->setMinimumSectionSize(20);
+
+        gridLayout->addWidget(PatientView, 1, 1, 1, 1);
+
+        label_studies = new QLabel(centralWidget);
+        label_studies->setObjectName(QStringLiteral("label_studies"));
+
+        gridLayout->addWidget(label_studies, 2, 1, 1, 1);
+
         StudyView = new QTableView(centralWidget);
         StudyView->setObjectName(QStringLiteral("StudyView"));
-        StudyView->setGeometry(QRect(270, 270, 721, 190));
         StudyView->verticalHeader()->setVisible(false);
+
+        gridLayout->addWidget(StudyView, 3, 1, 1, 1);
+
+        label_images = new QLabel(centralWidget);
+        label_images->setObjectName(QStringLiteral("label_images"));
+
+        gridLayout->addWidget(label_images, 4, 1, 1, 1);
+
         ImageView = new QListView(centralWidget);
         ImageView->setObjectName(QStringLiteral("ImageView"));
-        ImageView->setGeometry(QRect(270, 500, 721, 281));
         ImageView->setIconSize(QSize(200, 200));
         ImageView->setResizeMode(QListView::Fixed);
         ImageView->setViewMode(QListView::IconMode);
-        label_worklists = new QLabel(centralWidget);
-        label_worklists->setObjectName(QStringLiteral("label_worklists"));
-        label_worklists->setGeometry(QRect(20, 10, 121, 21));
-        label_patients = new QLabel(centralWidget);
-        label_patients->setObjectName(QStringLiteral("label_patients"));
-        label_patients->setGeometry(QRect(270, 10, 71, 21));
-        label_studies = new QLabel(centralWidget);
-        label_studies->setObjectName(QStringLiteral("label_studies"));
-        label_studies->setGeometry(QRect(270, 240, 101, 21));
-        label_images = new QLabel(centralWidget);
-        label_images->setObjectName(QStringLiteral("label_images"));
-        label_images->setGeometry(QRect(270, 470, 81, 21));
+
+        gridLayout->addWidget(ImageView, 5, 1, 1, 1);
+
         WorklistWindowLayout->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(WorklistWindowLayout);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1000, 24));
+        menuBar->setGeometry(QRect(0, 0, 1113, 24));
         WorklistWindowLayout->setMenuBar(menuBar);
         mainToolBar = new QToolBar(WorklistWindowLayout);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));

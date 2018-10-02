@@ -1,9 +1,8 @@
-#include "ASAP_GUI_Window.h"
+#include "WorklistWindow.h"
+#include "CompositeWindow.h"
 #include <QtWidgets/QApplication>
 
 #include "../../ASAP/pathologyworkstation.h"
-
-#include "worklist_csv_example.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,13 +26,16 @@ int main(int argc, char *argv[])
 
 	ASAP::Worklist::Data::DjangoDataAcquisition example(uri_info);
 
-	ASAP::Worklist::GUI::ASAP_GUI_Window worklist(&example);
+	ASAP::Worklist::GUI::CompositeWindow main_window;
+	ASAP::Worklist::GUI::WorklistWindow worklist(&example);	
 	PathologyWorkstation workstation;
 
 	worklist.workstation_window = &workstation;
 
-	workstation.show();
-	worklist.show();
+	main_window.AddTab(&worklist, "Worklist");
+	main_window.AddTab(&workstation, "Viewer");
+
+	main_window.show();
 
 	return a.exec();
 }

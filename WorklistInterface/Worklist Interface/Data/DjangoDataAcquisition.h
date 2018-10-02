@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "abstractworklistdataacquisition.h"
+#include "WorklistDataAcquisitionInterface.h"
 #include "DataTable.h"
 
 #include <cpprest/http_client.h>
