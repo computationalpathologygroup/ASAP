@@ -1,5 +1,5 @@
-#ifndef __REST_DATA_AQUISITION_H__
-#define __REST_DATA_AQUISITION_H__
+#ifndef __DJANGO_DATA_AQUISITION_H__
+#define __DJANGO_DATA_AQUISITION_H__
 
 #include <functional>
 #include <string>
@@ -23,12 +23,7 @@ namespace ASAP::Worklist::Data
 		std::wstring worklist_patient_relation_addition;
 	};
 
-	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json);
-
-	int ParseJsonToRecords(const web::http::http_response& response, DataTable& table);
-	int ParseJsonToTable(const web::http::http_response& response, DataTable& table);
-
-	class DjangoDataAcquisition //: public AbstractWorklistDataAcquisition
+	class DjangoDataAcquisition : public WorklistDataAcquisitionInterface
 	{
 		public:
 			DjangoDataAcquisition(const DjangoRestURI uri_info);
@@ -64,4 +59,4 @@ namespace ASAP::Worklist::Data
 			size_t ProcessRequest_(const web::http::http_request& request, std::function<void(web::http::http_response&)> observer);
 	};
 }
-#endif // __REST_DATA_AQUISITION_H__
+#endif // __DJANGO_DATA_AQUISITION_H__

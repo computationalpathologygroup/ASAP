@@ -2,119 +2,14 @@
 
 #include <codecvt>
 #include <stdexcept>
-#include <fstream>
 #include <locale>
-#include <cpprest/json.h>
-
 #include <system_error>
 #include <cstdio>
 
+#include "JSON_Parsing.h"
+
 namespace ASAP::Worklist::Data
 {
-	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json)
-	{
-		web::json::object object(json.as_object());
-		for (auto it = object.cbegin(); it != object.cend(); ++it)
-		{
-			if (it->first == tag)
-			{
-				return it->second.as_object();
-			}
-			else if (it->second.size() > 0)
-			{
-				return GetTagRecursive(tag, it->second);
-			}
-		}
-
-		throw std::runtime_error("Tag not found.");
-	}
-
-	// Located within the namespace
-	int ParseJsonToRecords(const web::http::http_response& response, DataTable& table)
-	{
-		int error_code = 0;
-		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
-		{
-			try
-			{
-				web::json::value json_response(previousTask.get());
-				if (json_response.size() > 0)
-				{
-					std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-
-					std::vector<std::string> values;
-					values.reserve(json_response[0].as_object().size());
-
-					for (size_t o = 0; o < json_response.size(); ++o)
-					{
-						web::json::object object(json_response[o].as_object());
-						for (auto it = object.cbegin(); it != object.cend(); ++it)
-						{
-							values.push_back(converter.to_bytes(it->second.to_string()));
-							
-							if (values.back()[0] == '"' && values.back()[values.back().size() - 1] == '"')
-							{
-								values.back() = values.back().substr(1, values.back().size() - 2);
-							}
-							else if (values.back() == "null")
-							{
-								values.back().clear();
-								values.back().shrink_to_fit();
-							}
-						}
-
-						table.Insert(values);
-						values.clear();
-					}
-				}
-			}
-			catch (const web::http::http_exception& e)
-			{
-				error_code = e.error_code().value();
-			}
-			catch (const std::exception& e)
-			{
-				error_code = -1;
-			}
-		}).wait();
-		return error_code;
-	}
-
-	int ParseJsonToTable(const web::http::http_response& response, DataTable& table)
-	{
-		int error_code = 0;
-		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previous_task)
-		{
-			try
-			{
-				web::json::value json_object(previous_task.get());
-				try
-				{
-					web::json::object post_actions(GetTagRecursive(L"POST", json_object));
-
-					std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-					std::vector<std::string> columns;
-					for (auto it = post_actions.cbegin(); it != post_actions.cend(); ++it)
-					{
-						columns.push_back(converter.to_bytes(it->first));
-					}
-
-					table = DataTable(columns);
-				}
-				catch (const std::exception& e)
-				{
-					// Indicates a parsing error.
-					error_code = -1;
-				}
-			}
-			catch (const web::http::http_exception& e)
-			{
-				error_code = e.error_code().value();
-			}
-		}).wait();
-		return error_code;
-	}
-
 	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_client_(web::uri(uri_info.base_url.c_str())), m_rest_uri_(uri_info), m_tables_(5)
 	{
 		InitializeTables_();
@@ -137,7 +32,7 @@ namespace ASAP::Worklist::Data
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = ParseJsonToRecords(response, *table);
+			int error_code = JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
 		});
 	}
@@ -161,7 +56,7 @@ namespace ASAP::Worklist::Data
 
 		return ProcessRequest_(relations_request, [relation_table, patient_table, client, patient_addition, receiver](web::http::http_response& response)
 		{
-			ParseJsonToRecords(response, *relation_table);
+			JSON::ParseJsonResponseToRecords(response, *relation_table);
 
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 			std::vector<std::string> field_selection({ "id" });
@@ -182,7 +77,7 @@ namespace ASAP::Worklist::Data
 				patient_request.set_request_uri(L"/" + *patient_addition + L"/?ids=" + ids);
 				client->request(patient_request).then([patient_table](web::http::http_response& response)
 				{
-					ParseJsonToRecords(response, *patient_table);
+					JSON::ParseJsonResponseToRecords(response, *patient_table);
 				}).wait();
 			}
 
@@ -203,7 +98,7 @@ namespace ASAP::Worklist::Data
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = ParseJsonToRecords(response, *table);
+			int error_code = JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
 		});
 	}
@@ -221,7 +116,7 @@ namespace ASAP::Worklist::Data
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = ParseJsonToRecords(response, *table);
+			int error_code = JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
 		});
 	}
@@ -273,7 +168,7 @@ namespace ASAP::Worklist::Data
 			DataTable* datatable(&m_tables_[table]);
 			m_client_.request(request).then([datatable](web::http::http_response& response)
 			{
-				ParseJsonToTable(response, *datatable);
+				JSON::ParseJsonResponseToTableSchema(response, *datatable);
 			}).wait();
 		}
 	}
