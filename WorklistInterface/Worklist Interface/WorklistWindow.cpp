@@ -1,14 +1,19 @@
 #include "WorklistWindow.h"
 
 #include <cctype>
+#include <codecvt>
 #include <unordered_map>
+#include <boost/filesystem.hpp>
+
+#include "INI_Parsing.h"
+#include "Data/DjangoDataAcquisition.h"
 
 namespace ASAP::Worklist::GUI
 {
-	WorklistWindow::WorklistWindow(Data::DjangoDataAcquisition* data_acquisition, QWidget *parent) :
+	WorklistWindow::WorklistWindow(QWidget *parent) :
 		QMainWindow(parent),
 		m_ui_(new Ui::WorklistWindowLayout),
-		m_data_acquisition_(data_acquisition),
+		m_data_acquisition_(nullptr),
 		m_images_model_(new QStandardItemModel(0, 0)),
 		m_patients_model_(new QStandardItemModel(0, 0)),
 		m_studies_model_(new QStandardItemModel(0, 0)),
@@ -16,23 +21,18 @@ namespace ASAP::Worklist::GUI
 	{
 		m_ui_->setupUi(this);
 		SetSlots_();
+		SetModels_();
+		LoadSettings_();
+	}
 
-		m_ui_->ImageView->setModel(m_images_model_);
-		m_ui_->PatientView->setModel(m_patients_model_);
-		m_ui_->StudyView->setModel(m_studies_model_);
-		m_ui_->WorklistView->setModel(m_worklist_model_);
+	void WorklistWindow::AttachWorkstation(PathologyWorkstation& workstation)
+	{
+		m_workstation_ = &workstation;
+	}
 
-		SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->PatientView);
-		SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->StudyView);
-
-		QStandardItemModel* worklist_model = m_worklist_model_;
-		m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable table, int error)
-		{
-			if (error == 0)
-			{
-				this->SetWorklistItems(table, worklist_model);
-			}
-		});
+	WorklistWindowSettings WorklistWindow::GetStandardSettings(void)
+	{
+		return WorklistWindowSettings();
 	}
 
 	void WorklistWindow::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
@@ -112,6 +112,30 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
+	void WorklistWindow::AdjustGuiToSource_(const Data::WorklistDataAcquisitionInterface::SourceType type)
+	{
+		// Default is regarded as the FILELIST sourcetype
+		switch (type)
+		{
+			case Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST: 
+				m_ui_->label_worklists->setVisible(true);
+				m_ui_->label_patients->setVisible(true);
+				m_ui_->label_studies->setVisible(true);
+				m_ui_->WorklistView->setVisible(true);
+				m_ui_->PatientView->setVisible(true);
+				m_ui_->StudyView->setVisible(true);
+				break;
+			default:
+				m_ui_->label_worklists->setVisible(false);
+				m_ui_->label_patients->setVisible(false);
+				m_ui_->label_studies->setVisible(false);
+				m_ui_->WorklistView->setVisible(false);
+				m_ui_->PatientView->setVisible(false);
+				m_ui_->StudyView->setVisible(false);
+				break;
+		}
+	}
+
 	QIcon WorklistWindow::CreateIcon_(const std::string absolute_filepath)
 	{
 		QPixmap pixmap(QString(absolute_filepath.data()));
@@ -121,6 +145,52 @@ namespace ASAP::Worklist::GUI
 		}
 		QIcon icon(pixmap);
 		return icon;
+	}
+
+	void WorklistWindow::InitializeSource_(const std::string& source_path, const bool is_file)
+	{
+		if (is_file)
+		{
+			// Create File Acquisition
+		}
+		else if (source_path.find("http") != std::string::npos)
+		{
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+			Data::DjangoRestURI uri_info = Data::DjangoDataAcquisition::GetStandardURI();
+			uri_info.base_url = converter.from_bytes(source_path);
+
+			m_data_acquisition_ = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::DjangoDataAcquisition(uri_info));
+		}
+		else
+		{
+			// Assume directory
+		}
+
+		if (m_data_acquisition_)
+		{
+			SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->PatientView);
+			SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->StudyView);
+
+			QStandardItemModel* worklist_model = m_worklist_model_;
+			m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable table, int error)
+			{
+				if (error == 0)
+				{
+					this->SetWorklistItems(table, worklist_model);
+				}
+			});
+		}
+	}
+
+	void WorklistWindow::LoadSettings_(void)
+	{
+		std::unordered_map<std::string, std::string> values(INI::ParseINI("worklist_config.ini"));
+		auto source_value(values.find("source"));
+		if (source_value != values.end())
+		{
+			boost::filesystem::path potential_system_path(source_value->second);
+			InitializeSource_(source_value->second, potential_system_path.has_filename());
+		}
 	}
 
 	void WorklistWindow::SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
@@ -136,6 +206,16 @@ namespace ASAP::Worklist::GUI
 		view->update();
 	}
 
+	void WorklistWindow::SetModels_(void)
+	{
+		m_ui_->ImageView->setModel(m_images_model_);
+		m_ui_->PatientView->setModel(m_patients_model_);
+		m_ui_->StudyView->setModel(m_studies_model_);
+		m_ui_->WorklistView->setModel(m_worklist_model_);
+	}
+
+	//================================= Slots =================================//
+	
 	void WorklistWindow::SetSlots_(void)
 	{
 		connect(m_worklist_model_,
@@ -248,9 +328,9 @@ namespace ASAP::Worklist::GUI
 		QStandardItem* item(m_images_model_->itemFromIndex(index));
 		QString image_handle = item->data().toString();
 
-		if (workstation_window)
+		if (m_workstation_)
 		{
-			workstation_window->openFile(image_handle);
+			m_workstation_->openFile(image_handle);
 		}
 	}
 }

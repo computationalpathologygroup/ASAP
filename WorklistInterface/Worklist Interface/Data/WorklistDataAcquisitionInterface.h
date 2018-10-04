@@ -3,19 +3,20 @@
 
 #include "datatable.h"
 #include <functional>
-
-/// <summary>
-/// Provides a basic interface that all Worklist GUI operations are based upon. Because it assumes
-/// a asynchronous environment, the acquirement of actual DataTables is done through lambda
-/// functions, while the called method itself only returns a task or token id that can be used to
-/// cancel the methods execution.
-///
-/// If a source isn't required to deal with asynchronous actions, it can simply ignore the
-/// implementation of the CancelTask method.
-/// </summary>
-class WorklistDataAcquisitionInterface
+namespace ASAP::Worklist::Data
 {
-    public:
+	/// <summary>
+	/// Provides a basic interface that all Worklist GUI operations are based upon. Because it assumes
+	/// a asynchronous environment, the acquirement of actual DataTables is done through lambda
+	/// functions, while the called method itself only returns a task or token id that can be used to
+	/// cancel the methods execution.
+	///
+	/// If a source isn't required to deal with asynchronous actions, it can simply ignore the
+	/// implementation of the CancelTask method.
+	/// </summary>
+	class WorklistDataAcquisitionInterface
+	{
+	public:
 		/// <summary>
 		/// Describes the amount of information the source can provide.
 		/// </summary>
@@ -32,14 +33,14 @@ class WorklistDataAcquisitionInterface
 		/// </summary>
 		/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 		/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-        virtual size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver) = 0;
+		virtual size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver) = 0;
 		/// <summary>
 		/// Acquires the patient records in a asynchronous manner, offering them to the receiver lambda.
 		/// </summary>
 		/// <param name="worklist_index">The id from the selected worklist.</param>
 		/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 		/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-        virtual size_t GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
+		virtual size_t GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
 		/// <summary>
 		/// Acquires the study records in a asynchronous manner, offering them to the receiver lambda.
 		/// </summary>
@@ -59,22 +60,23 @@ class WorklistDataAcquisitionInterface
 		/// Returns the headers for the Patient table.
 		/// </summary>
 		/// <return>A vector with the headers for the patient records.</return>
-        virtual std::vector<std::string> GetPatientHeaders(void) = 0;
+		virtual std::vector<std::string> GetPatientHeaders(void) = 0;
 		/// <summary>
 		/// Returns the headers for the Study table.
 		/// </summary>
 		/// <return>A vector with the headers for the study records.</return>
-        virtual std::vector<std::string> GetStudyHeaders(void) = 0;
+		virtual std::vector<std::string> GetStudyHeaders(void) = 0;
 		/// <summary>
 		/// Returns the headers for the Image table.
 		/// </summary>
 		/// <return>A vector with the headers for the study records.</return>
-        virtual std::vector<std::string> GetImageHeaders(void) = 0;
+		virtual std::vector<std::string> GetImageHeaders(void) = 0;
 
 		/// <summary>
 		/// Cancels the asynchronous task if it hasn't finished yet.
 		/// </summary>
 		/// <param name="id">The id of the task to cancel.</param>
 		void CancelTask(size_t id);
-};
+	};
+}
 #endif // __WORKLIST_DATA_ACQUISITION_INTERFACE_H__

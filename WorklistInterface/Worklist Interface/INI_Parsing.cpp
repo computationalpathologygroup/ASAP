@@ -6,10 +6,10 @@
 
 namespace ASAP::Worklist::INI
 {
-	std::unordered_map<std::string, std::string> ParseINI(const std::string absolute_filepath)
+	std::unordered_map<std::string, std::string> ParseINI(const std::string filepath)
 	{
 		std::fstream stream;
-		stream.open(absolute_filepath);
+		stream.open(filepath);
 
 		std::unordered_map<std::string, std::string> variable_map;
 		if (stream.is_open())
@@ -27,7 +27,7 @@ namespace ASAP::Worklist::INI
 		}
 		else
 		{
-			throw std::runtime_error("Unable to open: " + absolute_filepath);
+			throw std::runtime_error("Unable to open: " + filepath);
 		}
 
 		return variable_map;

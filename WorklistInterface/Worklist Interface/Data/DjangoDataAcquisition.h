@@ -29,6 +29,9 @@ namespace ASAP::Worklist::Data
 			DjangoDataAcquisition(const DjangoRestURI uri_info);
 			~DjangoDataAcquisition(void);
 
+			static DjangoRestURI GetStandardURI(void);
+			WorklistDataAcquisitionInterface::SourceType GetSourceType(void);
+
 			size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver);

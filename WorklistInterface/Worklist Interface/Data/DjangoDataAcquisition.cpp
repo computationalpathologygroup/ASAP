@@ -23,6 +23,16 @@ namespace ASAP::Worklist::Data
 		}
 	}
 
+	WorklistDataAcquisitionInterface::SourceType DjangoDataAcquisition::GetSourceType(void)
+	{
+		return WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST;
+	}
+
+	DjangoRestURI DjangoDataAcquisition::GetStandardURI(void)
+	{
+		return { L"", L"worklists", L"patients", L"studies", L"images", L"worklist_patient_relations" };
+	}
+
 	size_t DjangoDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
 		web::http::http_request request(web::http::methods::GET);
