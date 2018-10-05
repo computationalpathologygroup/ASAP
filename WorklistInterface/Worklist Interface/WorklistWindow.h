@@ -1,11 +1,9 @@
 #pragma once
-
 #include <memory>
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
 
 #include "Data/WorklistDataAcquisitionInterface.h"
-#include "Data/DataTable.h"
 #include "ui_WorklistWindowLayout.h"
 
 #include "../../ASAP/pathologyworkstation.h"
@@ -27,6 +25,7 @@ namespace ASAP::Worklist::GUI
 			void AttachWorkstation(PathologyWorkstation& workstation);
 			WorklistWindowSettings GetStandardSettings(void);
 
+			void SetDataSource(const std::string source_path);
 			void SetWorklistItems(const DataTable& items, QStandardItemModel* model);
 			void SetPatientsItems(const DataTable& items, QStandardItemModel* model);
 			void SetStudyItems(const DataTable& items, QStandardItemModel* model);
@@ -35,6 +34,7 @@ namespace ASAP::Worklist::GUI
 		private:
 			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
 			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
+			WorklistWindowSettings									m_settings_;
 			PathologyWorkstation*									m_workstation_;
 
 			QStandardItemModel* m_images_model_;
@@ -42,9 +42,8 @@ namespace ASAP::Worklist::GUI
 			QStandardItemModel* m_studies_model_;
 			QStandardItemModel* m_worklist_model_;
 
-			void AdjustGuiToSource_(const Data::WorklistDataAcquisitionInterface::SourceType type);
+			void AdjustGuiToSource_(void);
 			QIcon CreateIcon_(const std::string absolute_filepath);
-			void InitializeSource_(const std::string& source_path, const bool is_file);
 			void LoadSettings_(void);
 
 			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);

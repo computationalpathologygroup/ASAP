@@ -11,10 +11,16 @@
     <ClCompile Include="Data\DjangoDataAcquisition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Data\Worklist_CSV_Example.cpp">
+    <ClCompile Include="CompositeWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CompositeWindow.cpp">
+    <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JSON_Parsing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="INI_Parsing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,10 +74,13 @@
     <ClInclude Include="Data\DjangoDataAcquisition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data\Worklist_CSV_Example.h">
+    <ClInclude Include="Data\WorklistDataAcquisitionInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Data\WorklistDataAcquisitionInterface.h">
+    <ClInclude Include="JSON_Parsing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INI_Parsing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

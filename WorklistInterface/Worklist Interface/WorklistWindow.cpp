@@ -1,12 +1,10 @@
 #include "WorklistWindow.h"
 
 #include <cctype>
-#include <codecvt>
 #include <unordered_map>
-#include <boost/filesystem.hpp>
 
+#include "Data/SourceLoading.h"
 #include "INI_Parsing.h"
-#include "Data/DjangoDataAcquisition.h"
 
 namespace ASAP::Worklist::GUI
 {
@@ -23,6 +21,7 @@ namespace ASAP::Worklist::GUI
 		SetSlots_();
 		SetModels_();
 		LoadSettings_();
+		SetDataSource(m_settings_.source_location);
 	}
 
 	void WorklistWindow::AttachWorkstation(PathologyWorkstation& workstation)
@@ -33,6 +32,12 @@ namespace ASAP::Worklist::GUI
 	WorklistWindowSettings WorklistWindow::GetStandardSettings(void)
 	{
 		return WorklistWindowSettings();
+	}
+
+	void WorklistWindow::SetDataSource(const std::string source_path)
+	{
+		m_data_acquisition_ = Data::LoadDataSource(source_path);
+		AdjustGuiToSource_();
 	}
 
 	void WorklistWindow::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
@@ -112,8 +117,30 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::AdjustGuiToSource_(const Data::WorklistDataAcquisitionInterface::SourceType type)
+	void WorklistWindow::AdjustGuiToSource_(void)
 	{
+		Data::WorklistDataAcquisitionInterface::SourceType type = Data::WorklistDataAcquisitionInterface::SourceType::FILELIST;
+
+		if (m_data_acquisition_)
+		{
+			type = m_data_acquisition_->GetSourceType();
+
+			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
+			{
+				SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->PatientView);
+				SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->StudyView);
+
+				QStandardItemModel* worklist_model = m_worklist_model_;
+				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable table, int error)
+				{
+					if (error == 0)
+					{
+						this->SetWorklistItems(table, worklist_model);
+					}
+				});
+			}
+		}
+
 		// Default is regarded as the FILELIST sourcetype
 		switch (type)
 		{
@@ -147,49 +174,23 @@ namespace ASAP::Worklist::GUI
 		return icon;
 	}
 
-	void WorklistWindow::InitializeSource_(const std::string& source_path, const bool is_file)
-	{
-		if (is_file)
-		{
-			// Create File Acquisition
-		}
-		else if (source_path.find("http") != std::string::npos)
-		{
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-			Data::DjangoRestURI uri_info = Data::DjangoDataAcquisition::GetStandardURI();
-			uri_info.base_url = converter.from_bytes(source_path);
-
-			m_data_acquisition_ = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::DjangoDataAcquisition(uri_info));
-		}
-		else
-		{
-			// Assume directory
-		}
-
-		if (m_data_acquisition_)
-		{
-			SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->PatientView);
-			SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->StudyView);
-
-			QStandardItemModel* worklist_model = m_worklist_model_;
-			m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable table, int error)
-			{
-				if (error == 0)
-				{
-					this->SetWorklistItems(table, worklist_model);
-				}
-			});
-		}
-	}
-
 	void WorklistWindow::LoadSettings_(void)
 	{
-		std::unordered_map<std::string, std::string> values(INI::ParseINI("worklist_config.ini"));
-		auto source_value(values.find("source"));
-		if (source_value != values.end())
+		try
 		{
-			boost::filesystem::path potential_system_path(source_value->second);
-			InitializeSource_(source_value->second, potential_system_path.has_filename());
+			std::unordered_map<std::string, std::string> values(INI::ParseINI("worklist_config.ini"));
+			auto source_value(values.find("source"));
+			if (source_value != values.end())
+			{
+				m_settings_.source_location = source_value->second;
+			}
+		}
+		catch (const std::runtime_error& e)
+		{
+			// Creates an INI file with standard settings.
+			std::unordered_map<std::string, std::string> values;
+			values.insert({ "source", "" });
+			INI::WriteINI("worklist_config.ini", values);
 		}
 	}
 
