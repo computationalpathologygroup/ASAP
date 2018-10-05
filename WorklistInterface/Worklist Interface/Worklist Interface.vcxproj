@@ -118,6 +118,7 @@
     <ClCompile Include="CompositeWindow.cpp" />
     <ClCompile Include="Data\DataTable.cpp" />
     <ClCompile Include="Data\DjangoDataAcquisition.cpp" />
+    <ClCompile Include="Data\SourceLoading.cpp" />
     <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp" />
     <ClCompile Include="INI_Parsing.cpp" />
     <ClCompile Include="JSON_Parsing.cpp" />
@@ -143,6 +144,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Data\SourceLoading.h" />
     <ClInclude Include="INI_Parsing.h" />
     <ClInclude Include="JSON_Parsing.h" />
     <QtMoc Include="CompositeWindow.h" />

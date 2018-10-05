@@ -75,7 +75,7 @@ namespace ASAP::Worklist::INI
 				std::string value(line.substr(value_start, value_size));
 				std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 
-				if (!key.empty())
+				if (!key.empty() && (int)key[0] > 31)
 				{
 					variable_map.insert({ key, value });
 				}

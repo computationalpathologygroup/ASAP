@@ -16,9 +16,10 @@ namespace ASAP::Worklist::Data
 		{
 			pointer = nullptr;
 		}
-		else if (potential_system_path.has_filename())
+		else if (potential_system_path.has_extension())
 		{
 			// Create File Acquisition
+			pointer = nullptr;
 		}
 		else if (source_path.find("http") != std::string::npos)
 		{
@@ -31,6 +32,7 @@ namespace ASAP::Worklist::Data
 		else
 		{
 			// Assume directory
+			pointer = nullptr;
 		}
 
 		return pointer;
