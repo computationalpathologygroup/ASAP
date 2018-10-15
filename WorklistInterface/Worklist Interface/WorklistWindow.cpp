@@ -369,34 +369,27 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::OnSelectLocalSource_(const bool checked)
 	{
-		/*QFileDialog* dialog = new QFileDialog(this);
+		QFileDialog* dialog = new QFileDialog(this);
 		dialog->setFileMode(QFileDialog::Directory);
 		dialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
-		// Try to select multiple files and directories at the same time in QFileDialog
 		QListView* listview = dialog->findChild<QListView*>("listView");
 		if (listview)
 		{
-			listview->setSelectionMode(QAbstractItemView::MultiSelection);
+			listview->setSelectionMode(QAbstractItemView::SingleSelection);
 		}
 		QTreeView* treeview = dialog->findChild<QTreeView*>();
 		if (treeview)
 		{
-			treeview->setSelectionMode(QAbstractItemView::MultiSelection);
+			treeview->setSelectionMode(QAbstractItemView::SingleSelection);
 		}
 
 		dialog->exec();
-		QStringList _fnames = _f_dlg->selectedFiles();
-
-		*/
-
-		QFileDialog* dialog;
-		dialog->setProxyModel(nullptr);
-		dialog->exec();
+		QStringList names = dialog->selectedFiles();
 		SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
 	}
 
-	void WorklistWindow::OnSelectExternalSource(const bool checked)
+	void WorklistWindow::OnSelectExternalSource_(const bool checked)
 	{
 
 	}
