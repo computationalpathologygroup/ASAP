@@ -30,6 +30,11 @@ namespace ASAP::Worklist::GUI
 		SetDataSource(m_settings_.source_location);
 	}
 
+	WorklistWindow::~WorklistWindow(void)
+	{
+		StoreSettings_();
+	}
+
 	void WorklistWindow::AttachWorkstation(PathologyWorkstation& workstation)
 	{
 		m_workstation_ = &workstation;
@@ -45,6 +50,7 @@ namespace ASAP::Worklist::GUI
 		try
 		{
 			m_data_acquisition_ = Data::LoadDataSource(source_path);
+			m_settings_.source_location = source_path;
 			AdjustGuiToSource_();
 		}
 		catch (const std::exception& e)
@@ -214,6 +220,13 @@ namespace ASAP::Worklist::GUI
 			values.insert({ "source", "" });
 			INI::WriteINI("worklist_config.ini", values);
 		}
+	}
+	
+	void WorklistWindow::StoreSettings_(void)
+	{
+		std::unordered_map<std::string, std::string> values;
+		values.insert({ "source", m_settings_.source_location });
+		INI::WriteINI("worklist_config.ini", values);
 	}
 
 	void WorklistWindow::SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)

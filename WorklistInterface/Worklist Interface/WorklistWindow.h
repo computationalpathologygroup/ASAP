@@ -21,6 +21,7 @@ namespace ASAP::Worklist::GUI
 
 		public:
 			explicit WorklistWindow(QWidget* parent = 0);
+			~WorklistWindow(void);
 
 			void AttachWorkstation(PathologyWorkstation& workstation);
 			WorklistWindowSettings GetStandardSettings(void);
@@ -44,6 +45,7 @@ namespace ASAP::Worklist::GUI
 
 			void AdjustGuiToSource_(void);
 			void LoadSettings_(void);
+			void StoreSettings_(void);
 
 			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);
