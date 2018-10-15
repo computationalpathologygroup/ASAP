@@ -276,12 +276,17 @@ namespace ASAP::Worklist::GUI
 			this,
 			SLOT(OnImageSelect_(QModelIndex)));
 
-		connect(m_ui_->actionOpenSource,
+		connect(m_ui_->action_open_file,
 			&QAction::triggered,
 			this,
-			&WorklistWindow::OnSelectLocalSource_);
+			&WorklistWindow::OnSelectFileSource_);
 
-		connect(m_ui_->actionOpenExternalSource,
+		connect(m_ui_->action_open_folder,
+			&QAction::triggered,
+			this,
+			&WorklistWindow::OnSelectFolderSource_);
+
+		connect(m_ui_->action_open_external,
 			&QAction::triggered,
 			this,
 			&WorklistWindow::OnSelectExternalSource_);
@@ -369,30 +374,29 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::OnSelectFileSource_(bool checked)
 	{
-
+		QFileDialog* dialog = new QFileDialog(this);
+		dialog->setFileMode(QFileDialog::AnyFile);
+		dialog->setNameFilter({ "*.txt" });
+		dialog->exec();
+		QStringList names = dialog->selectedFiles();
+		
+		if (names.size() > 0)
+		{
+			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
+		}
 	}
 	
 	void WorklistWindow::OnSelectFolderSource_(bool checked)
 	{
 		QFileDialog* dialog = new QFileDialog(this);
 		dialog->setFileMode(QFileDialog::Directory);
-		/*dialog->setFileMode(QFileDialog::file)
-			dialog->setOption(QFileDialog::DontUseNativeDialog, true);
-
-		QListView* listview = dialog->findChild<QListView*>("listView");
-		if (listview)
-		{
-			listview->setSelectionMode(QAbstractItemView::SingleSelection);
-		}
-		QTreeView* treeview = dialog->findChild<QTreeView*>();
-		if (treeview)
-		{
-			treeview->setSelectionMode(QAbstractItemView::SingleSelection);
-		}*/
-
 		dialog->exec();
 		QStringList names = dialog->selectedFiles();
-		SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
+
+		if (names.size() > 0)
+		{
+			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
+		}
 	}
 
 	void WorklistWindow::OnSelectExternalSource_(bool checked)
