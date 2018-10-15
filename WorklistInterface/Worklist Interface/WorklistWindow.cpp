@@ -367,11 +367,17 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::OnSelectLocalSource_(const bool checked)
+	void WorklistWindow::OnSelectFileSource_(bool checked)
+	{
+
+	}
+	
+	void WorklistWindow::OnSelectFolderSource_(bool checked)
 	{
 		QFileDialog* dialog = new QFileDialog(this);
 		dialog->setFileMode(QFileDialog::Directory);
-		dialog->setOption(QFileDialog::DontUseNativeDialog, true);
+		/*dialog->setFileMode(QFileDialog::file)
+			dialog->setOption(QFileDialog::DontUseNativeDialog, true);
 
 		QListView* listview = dialog->findChild<QListView*>("listView");
 		if (listview)
@@ -382,14 +388,14 @@ namespace ASAP::Worklist::GUI
 		if (treeview)
 		{
 			treeview->setSelectionMode(QAbstractItemView::SingleSelection);
-		}
+		}*/
 
 		dialog->exec();
 		QStringList names = dialog->selectedFiles();
 		SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
 	}
 
-	void WorklistWindow::OnSelectExternalSource_(const bool checked)
+	void WorklistWindow::OnSelectExternalSource_(bool checked)
 	{
 
 	}

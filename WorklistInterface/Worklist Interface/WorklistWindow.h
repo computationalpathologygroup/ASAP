@@ -59,7 +59,8 @@ namespace ASAP::Worklist::GUI
 			void OnStudySelect_(QModelIndex index);
 			void OnImageSelect_(QModelIndex index);
 
-			void OnSelectLocalSource_(bool checked);
+			void OnSelectFileSource_(bool checked);
+			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
 	};
 }

@@ -158,8 +158,9 @@
     <property name="title">
      <string>Start</string>
     </property>
-    <addaction name="actionOpenSource"/>
-    <addaction name="actionOpenExternalSource"/>
+    <addaction name="action_open_file_source"/>
+    <addaction name="action_open_folder_source"/>
+    <addaction name="action_open_external_source"/>
     <addaction name="actionSettings"/>
    </widget>
    <addaction name="menuStart"/>
@@ -185,14 +186,22 @@
     <string>Open External Source</string>
    </property>
   </action>
-  <action name="actionOpenSource">
+  <action name="action_open_file_source">
    <property name="text">
-    <string>Open Source</string>
+    <string>Open File</string>
    </property>
   </action>
-  <action name="actionOpenExternalSource">
+  <action name="action_open_external_source">
    <property name="text">
     <string>Open External Source</string>
+   </property>
+   <property name="iconText">
+    <string>Open External</string>
+   </property>
+  </action>
+  <action name="action_open_folder_source">
+   <property name="text">
+    <string>Open Folder</string>
    </property>
   </action>
  </widget>
