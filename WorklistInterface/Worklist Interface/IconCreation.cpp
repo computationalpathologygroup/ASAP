@@ -52,7 +52,7 @@ namespace ASAP::Worklist::GUI
 						base_index += 3;
 					}
 				}
-				QPixmap pixmap(QPixmap::fromImage(image).scaled(size, size, Qt::KeepAspectRatio));
+				QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
 				icon = QIcon(pixmap);
 			}
 			else

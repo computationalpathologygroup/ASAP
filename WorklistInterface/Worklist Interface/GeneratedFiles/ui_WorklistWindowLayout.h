@@ -72,6 +72,7 @@ public:
         view_studies = new QTableView(centralWidget);
         view_studies->setObjectName(QStringLiteral("view_studies"));
         view_studies->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed);
+        view_studies->setAlternatingRowColors(true);
         view_studies->setSelectionMode(QAbstractItemView::SingleSelection);
         view_studies->setSortingEnabled(true);
         view_studies->verticalHeader()->setVisible(false);
@@ -102,6 +103,7 @@ public:
         view_patients->setObjectName(QStringLiteral("view_patients"));
         view_patients->setEnabled(true);
         view_patients->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed);
+        view_patients->setAlternatingRowColors(true);
         view_patients->setSelectionMode(QAbstractItemView::SingleSelection);
         view_patients->setSortingEnabled(true);
         view_patients->horizontalHeader()->setCascadingSectionResizes(true);
@@ -123,7 +125,11 @@ public:
         view_images->setEditTriggers(QAbstractItemView::EditKeyPressed);
         view_images->setIconSize(QSize(200, 200));
         view_images->setResizeMode(QListView::Fixed);
+        view_images->setLayoutMode(QListView::Batched);
+        view_images->setSpacing(0);
+        view_images->setGridSize(QSize(250, 250));
         view_images->setViewMode(QListView::IconMode);
+        view_images->setUniformItemSizes(true);
 
         gridLayout->addWidget(view_images, 5, 1, 1, 1);
 
