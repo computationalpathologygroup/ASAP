@@ -60,17 +60,17 @@ namespace ASAP::Worklist::Data
 		/// Returns the headers for the Patient table.
 		/// </summary>
 		/// <return>A vector with the headers for the patient records.</return>
-		virtual std::vector<std::string> GetPatientHeaders(void) = 0;
+		virtual std::vector<std::string> GetVisiblePatientHeaders(void) = 0;
 		/// <summary>
 		/// Returns the headers for the Study table.
 		/// </summary>
 		/// <return>A vector with the headers for the study records.</return>
-		virtual std::vector<std::string> GetStudyHeaders(void) = 0;
+		virtual std::vector<std::string> GetVisibleStudyHeaders(void) = 0;
 		/// <summary>
 		/// Returns the headers for the Image table.
 		/// </summary>
 		/// <return>A vector with the headers for the study records.</return>
-		virtual std::vector<std::string> GetImageHeaders(void) = 0;
+		virtual std::vector<std::string> GetVisibleImageHeaders(void) = 0;
 
 		/// <summary>
 		/// Cancels the asynchronous task if it hasn't finished yet.

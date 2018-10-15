@@ -19,9 +19,9 @@ namespace ASAP::Worklist::Data
 			size_t GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetImageRecords(const size_t study_index, const std::function<void(DataTable&, const int)>& receiver);
 
-			std::vector<std::string> GetPatientHeaders(void);
-			std::vector<std::string> GetStudyHeaders(void);
-			std::vector<std::string> GetImageHeaders(void);
+			std::vector<std::string> GetVisiblePatientHeaders(void);
+			std::vector<std::string> GetVisibleStudyHeaders(void);
+			std::vector<std::string> GetVisibleImageHeaders(void);
 
 		private:
 			DataTable m_images_;

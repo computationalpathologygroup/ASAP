@@ -93,7 +93,7 @@ namespace ASAP::Worklist::GUI
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
-			size_t record_id = std::stoi(*record[0]);
+			size_t record_id = std::stoi(*record[items.GetColumnIndex("id")]);
 
 			for (size_t field = 0; field < record.size(); ++field)
 			{
@@ -111,7 +111,7 @@ namespace ASAP::Worklist::GUI
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
-			size_t record_id = std::stoi(*record[0]);
+			size_t record_id = std::stoi(*record[items.GetColumnIndex("id")]);
 
 			for (size_t field = 0; field < record.size(); ++field)
 			{

@@ -51,6 +51,8 @@ namespace ASAP::Worklist::GUI
 			void SetModels_(void);
 			void SetSlots_(void);
 
+			bool 
+
 		private slots:
 			void OnWorklistClear_(QModelIndex index, int row, int column);
 			void OnPatientsClear_(QModelIndex index, int row, int column);

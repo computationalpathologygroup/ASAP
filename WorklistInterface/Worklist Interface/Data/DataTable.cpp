@@ -1,13 +1,16 @@
 #include "DataTable.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 DataTable::DataTable(void)
 {
 }
 
-DataTable::DataTable(const std::vector<std::string>& columns)
+DataTable::DataTable(std::vector<std::string> columns)
 {
+	ConvertColumnsToLower_(columns);
+
     for (size_t column = 0; column < columns.size(); ++column)
     {
         m_column_order_.insert({columns[column], column});
@@ -19,8 +22,10 @@ DataTable::DataTable(const std::vector<std::string>& columns)
 	}
 }
 
-DataTable::DataTable(const std::vector<std::string>& columns, const std::vector<bool>& visibility)
+DataTable::DataTable(std::vector<std::string> columns, const std::vector<bool>& visibility)
 {
+	ConvertColumnsToLower_(columns);
+
     if (columns.size() != visibility.size())
     {
         throw std::runtime_error("Vectors are required to be of the same size.");
@@ -160,6 +165,19 @@ size_t DataTable::GetColumnCount(void) const
     return m_column_order_.size();
 }
 
+size_t DataTable::GetColumnIndex(const std::string column) const
+{
+	auto iterator = m_column_order_.find(column);
+	if (iterator != m_column_order_.end())
+	{
+		return iterator->second;
+	}
+	else
+	{
+		throw std::runtime_error("Column " + column + " not found.");
+	}
+}
+
 size_t DataTable::GetVisibleColumnCount(void) const
 {
     return m_visible_columns_.size();
@@ -227,4 +245,12 @@ void DataTable::SetColumnAsVisible(const std::string column)
 size_t DataTable::Size(void) const
 {
     return m_data_.size() / m_column_order_.size();
+}
+
+void DataTable::ConvertColumnsToLower_(std::vector<std::string>& columns)
+{
+	for (std::string& column : columns)
+	{
+		std::transform(column.begin(), column.end(), column.begin(), ::tolower);
+	}
 }

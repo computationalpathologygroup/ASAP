@@ -11,8 +11,8 @@ class DataTable
         enum FIELD_SELECTION { ALL, VISIBLE, INVISIBLE };
 		
 		DataTable(void);
-        DataTable(const std::vector<std::string>& columns);
-        DataTable(const std::vector<std::string>& columns, const std::vector<bool>& visibility);
+        DataTable(std::vector<std::string> columns);
+        DataTable(std::vector<std::string> columns, const std::vector<bool>& visibility);
 
 		DataTable(const DataTable& other);
 		DataTable(DataTable&& other);
@@ -27,6 +27,7 @@ class DataTable
         void Insert(const std::vector<std::string>& record);
         size_t GetRecordCount(void) const;
         size_t GetColumnCount(void) const;
+		size_t GetColumnIndex(const std::string column) const;
         size_t GetVisibleColumnCount(void) const;
         size_t GetInvisibleColumnCount(void) const;
         std::vector<std::string> GetColumnNames(void) const;
@@ -41,6 +42,8 @@ class DataTable
         std::vector<std::map<std::string, size_t>::iterator>  m_visible_columns_;
         std::vector<std::map<std::string, size_t>::iterator>  m_invisible_columns_;
         std::vector<std::string>                              m_data_;
+
+		void ConvertColumnsToLower_(std::vector<std::string>& columns);
 };
 
 #endif // DATATABLE_H
