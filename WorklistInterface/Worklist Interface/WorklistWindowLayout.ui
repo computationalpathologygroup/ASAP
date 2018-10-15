@@ -158,50 +158,26 @@
     <property name="title">
      <string>Start</string>
     </property>
-    <addaction name="action_open_file_source"/>
-    <addaction name="action_open_folder_source"/>
-    <addaction name="action_open_external_source"/>
-    <addaction name="actionSettings"/>
+    <addaction name="action_open_file"/>
+    <addaction name="action_open_folder"/>
+    <addaction name="action_open_external"/>
    </widget>
    <addaction name="menuStart"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionOpen_Source">
-   <property name="text">
-    <string>Open Source</string>
-   </property>
-  </action>
-  <action name="actionSettings">
-   <property name="text">
-    <string>Settings</string>
-   </property>
-  </action>
-  <action name="actionOpen_Local_Source">
-   <property name="text">
-    <string>Open Local Source</string>
-   </property>
-  </action>
-  <action name="actionOpen_External_Source">
-   <property name="text">
-    <string>Open External Source</string>
-   </property>
-  </action>
-  <action name="action_open_file_source">
+  <action name="action_open_file">
    <property name="text">
     <string>Open File</string>
    </property>
   </action>
-  <action name="action_open_external_source">
-   <property name="text">
-    <string>Open External Source</string>
-   </property>
-   <property name="iconText">
-    <string>Open External</string>
-   </property>
-  </action>
-  <action name="action_open_folder_source">
+  <action name="action_open_folder">
    <property name="text">
     <string>Open Folder</string>
+   </property>
+  </action>
+  <action name="action_open_external">
+   <property name="text">
+    <string>Open External</string>
    </property>
   </action>
  </widget>

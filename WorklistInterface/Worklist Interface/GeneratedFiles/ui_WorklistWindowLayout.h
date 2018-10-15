@@ -30,12 +30,9 @@ QT_BEGIN_NAMESPACE
 class Ui_WorklistWindowLayout
 {
 public:
-    QAction *actionOpen_Source;
-    QAction *actionSettings;
-    QAction *actionOpen_Local_Source;
-    QAction *actionOpen_External_Source;
-    QAction *actionOpenSource;
-    QAction *actionOpenExternalSource;
+    QAction *action_open_file;
+    QAction *action_open_folder;
+    QAction *action_open_external;
     QWidget *centralWidget;
     QGridLayout *gridLayout;
     QLabel *label_studies;
@@ -55,18 +52,12 @@ public:
         if (WorklistWindowLayout->objectName().isEmpty())
             WorklistWindowLayout->setObjectName(QStringLiteral("WorklistWindowLayout"));
         WorklistWindowLayout->resize(1113, 850);
-        actionOpen_Source = new QAction(WorklistWindowLayout);
-        actionOpen_Source->setObjectName(QStringLiteral("actionOpen_Source"));
-        actionSettings = new QAction(WorklistWindowLayout);
-        actionSettings->setObjectName(QStringLiteral("actionSettings"));
-        actionOpen_Local_Source = new QAction(WorklistWindowLayout);
-        actionOpen_Local_Source->setObjectName(QStringLiteral("actionOpen_Local_Source"));
-        actionOpen_External_Source = new QAction(WorklistWindowLayout);
-        actionOpen_External_Source->setObjectName(QStringLiteral("actionOpen_External_Source"));
-        actionOpenSource = new QAction(WorklistWindowLayout);
-        actionOpenSource->setObjectName(QStringLiteral("actionOpenSource"));
-        actionOpenExternalSource = new QAction(WorklistWindowLayout);
-        actionOpenExternalSource->setObjectName(QStringLiteral("actionOpenExternalSource"));
+        action_open_file = new QAction(WorklistWindowLayout);
+        action_open_file->setObjectName(QStringLiteral("action_open_file"));
+        action_open_folder = new QAction(WorklistWindowLayout);
+        action_open_folder->setObjectName(QStringLiteral("action_open_folder"));
+        action_open_external = new QAction(WorklistWindowLayout);
+        action_open_external->setObjectName(QStringLiteral("action_open_external"));
         centralWidget = new QWidget(WorklistWindowLayout);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         gridLayout = new QGridLayout(centralWidget);
@@ -153,9 +144,9 @@ public:
         WorklistWindowLayout->setStatusBar(statusBar);
 
         menuBar->addAction(menuStart->menuAction());
-        menuStart->addAction(actionOpenSource);
-        menuStart->addAction(actionOpenExternalSource);
-        menuStart->addAction(actionSettings);
+        menuStart->addAction(action_open_file);
+        menuStart->addAction(action_open_folder);
+        menuStart->addAction(action_open_external);
 
         retranslateUi(WorklistWindowLayout);
 
@@ -165,12 +156,9 @@ public:
     void retranslateUi(QMainWindow *WorklistWindowLayout)
     {
         WorklistWindowLayout->setWindowTitle(QApplication::translate("WorklistWindowLayout", "Worklistinterface", nullptr));
-        actionOpen_Source->setText(QApplication::translate("WorklistWindowLayout", "Open Source", nullptr));
-        actionSettings->setText(QApplication::translate("WorklistWindowLayout", "Settings", nullptr));
-        actionOpen_Local_Source->setText(QApplication::translate("WorklistWindowLayout", "Open Local Source", nullptr));
-        actionOpen_External_Source->setText(QApplication::translate("WorklistWindowLayout", "Open External Source", nullptr));
-        actionOpenSource->setText(QApplication::translate("WorklistWindowLayout", "Open Source", nullptr));
-        actionOpenExternalSource->setText(QApplication::translate("WorklistWindowLayout", "Open External Source", nullptr));
+        action_open_file->setText(QApplication::translate("WorklistWindowLayout", "Open File", nullptr));
+        action_open_folder->setText(QApplication::translate("WorklistWindowLayout", "Open Folder", nullptr));
+        action_open_external->setText(QApplication::translate("WorklistWindowLayout", "Open External", nullptr));
         label_studies->setText(QApplication::translate("WorklistWindowLayout", "Studies", nullptr));
         label_patients->setText(QApplication::translate("WorklistWindowLayout", "Patients", nullptr));
         label_worklists->setText(QApplication::translate("WorklistWindowLayout", "Worklists", nullptr));
