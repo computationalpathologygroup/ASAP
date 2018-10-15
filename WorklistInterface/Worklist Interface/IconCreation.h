@@ -4,8 +4,10 @@
 
 #include <QStandardItemModel>
 
+#include <Data/DataTable.h>
+
 namespace ASAP::Worklist::GUI
 {
-	void CreateIcons(const std::vector<std::pair<QStandardItem*, std::string>>& files, const size_t size);
+	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size);
 	QIcon CreateIcon(const std::string& filepath, const size_t size);
 }

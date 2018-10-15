@@ -8,14 +8,18 @@
 
 namespace ASAP::Worklist::GUI
 {
-	void CreateIcons(const std::vector<std::pair<QStandardItem*, std::string>>& files, const size_t size)
+	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
 	{
-		for (const std::pair<QStandardItem*, std::string>& file : files)
+		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
-			file.first->setIcon(CreateIcon(file.second, size));
+			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
+
+			QStandardItem* model_item = new QStandardItem(CreateIcon(*record[1], size), QString(record[2]->data()));
+			model_item->setData(QVariant(QString(record[1]->data())));
+			image_model->setItem(item, 0, model_item);
 		}
 	}
-	
+
 	QIcon CreateIcon(const std::string& filepath, const size_t size)
 	{
 		QIcon icon;
@@ -52,6 +56,8 @@ namespace ASAP::Worklist::GUI
 						base_index += 3;
 					}
 				}
+
+				delete data;
 				QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
 				icon = QIcon(pixmap);
 			}
