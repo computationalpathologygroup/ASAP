@@ -277,13 +277,14 @@ namespace ASAP::Worklist::GUI
 			SLOT(OnImageSelect_(QModelIndex)));
 
 		connect(m_ui_->actionOpenSource,
-			SIGNAL(triggered),
+			&QAction::triggered,
 			this,
-			SLOT(OnSelectLocalSource_()));
+			&WorklistWindow::OnSelectLocalSource_);
+
 		connect(m_ui_->actionOpenExternalSource,
-			SIGNAL(triggered),
+			&QAction::triggered,
 			this,
-			SLOT(OnSelectExternalSource_()));
+			&WorklistWindow::OnSelectExternalSource_);
 	}
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
@@ -366,7 +367,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::OnSelectLocalSource_(void)
+	void WorklistWindow::OnSelectLocalSource_(const bool checked)
 	{
 		/*QFileDialog* dialog = new QFileDialog(this);
 		dialog->setFileMode(QFileDialog::Directory);
@@ -395,7 +396,7 @@ namespace ASAP::Worklist::GUI
 		SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
 	}
 
-	void WorklistWindow::OnSelectExternalSource(void)
+	void WorklistWindow::OnSelectExternalSource(const bool checked)
 	{
 
 	}
