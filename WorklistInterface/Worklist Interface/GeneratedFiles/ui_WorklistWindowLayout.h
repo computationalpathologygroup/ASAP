@@ -18,10 +18,10 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListView>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTableView>
-#include <QtWidgets/QToolBar>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QWidget>
 
@@ -30,18 +30,24 @@ QT_BEGIN_NAMESPACE
 class Ui_WorklistWindowLayout
 {
 public:
+    QAction *actionOpen_Source;
+    QAction *actionSettings;
+    QAction *actionOpen_Local_Source;
+    QAction *actionOpen_External_Source;
+    QAction *actionOpenSource;
+    QAction *actionOpenExternalSource;
     QWidget *centralWidget;
     QGridLayout *gridLayout;
-    QLabel *label_worklists;
-    QLabel *label_patients;
-    QTreeView *WorklistView;
-    QTableView *PatientView;
     QLabel *label_studies;
-    QTableView *StudyView;
+    QTableView *view_studies;
+    QLabel *label_patients;
+    QLabel *label_worklists;
+    QTreeView *view_worklists;
+    QTableView *view_patients;
+    QListView *view_images;
     QLabel *label_images;
-    QListView *ImageView;
     QMenuBar *menuBar;
-    QToolBar *mainToolBar;
+    QMenu *menuStart;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *WorklistWindowLayout)
@@ -49,77 +55,107 @@ public:
         if (WorklistWindowLayout->objectName().isEmpty())
             WorklistWindowLayout->setObjectName(QStringLiteral("WorklistWindowLayout"));
         WorklistWindowLayout->resize(1113, 850);
+        actionOpen_Source = new QAction(WorklistWindowLayout);
+        actionOpen_Source->setObjectName(QStringLiteral("actionOpen_Source"));
+        actionSettings = new QAction(WorklistWindowLayout);
+        actionSettings->setObjectName(QStringLiteral("actionSettings"));
+        actionOpen_Local_Source = new QAction(WorklistWindowLayout);
+        actionOpen_Local_Source->setObjectName(QStringLiteral("actionOpen_Local_Source"));
+        actionOpen_External_Source = new QAction(WorklistWindowLayout);
+        actionOpen_External_Source->setObjectName(QStringLiteral("actionOpen_External_Source"));
+        actionOpenSource = new QAction(WorklistWindowLayout);
+        actionOpenSource->setObjectName(QStringLiteral("actionOpenSource"));
+        actionOpenExternalSource = new QAction(WorklistWindowLayout);
+        actionOpenExternalSource->setObjectName(QStringLiteral("actionOpenExternalSource"));
         centralWidget = new QWidget(WorklistWindowLayout);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         gridLayout = new QGridLayout(centralWidget);
         gridLayout->setSpacing(6);
         gridLayout->setContentsMargins(11, 11, 11, 11);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        label_worklists = new QLabel(centralWidget);
-        label_worklists->setObjectName(QStringLiteral("label_worklists"));
+        label_studies = new QLabel(centralWidget);
+        label_studies->setObjectName(QStringLiteral("label_studies"));
 
-        gridLayout->addWidget(label_worklists, 0, 0, 1, 1);
+        gridLayout->addWidget(label_studies, 2, 1, 1, 1);
+
+        view_studies = new QTableView(centralWidget);
+        view_studies->setObjectName(QStringLiteral("view_studies"));
+        view_studies->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed);
+        view_studies->setSelectionMode(QAbstractItemView::SingleSelection);
+        view_studies->setSortingEnabled(true);
+        view_studies->verticalHeader()->setVisible(false);
+
+        gridLayout->addWidget(view_studies, 3, 1, 1, 1);
 
         label_patients = new QLabel(centralWidget);
         label_patients->setObjectName(QStringLiteral("label_patients"));
 
         gridLayout->addWidget(label_patients, 0, 1, 1, 1);
 
-        WorklistView = new QTreeView(centralWidget);
-        WorklistView->setObjectName(QStringLiteral("WorklistView"));
-        WorklistView->setMinimumSize(QSize(300, 0));
-        WorklistView->setMaximumSize(QSize(300, 16777215));
-        WorklistView->setRootIsDecorated(true);
-        WorklistView->setHeaderHidden(true);
+        label_worklists = new QLabel(centralWidget);
+        label_worklists->setObjectName(QStringLiteral("label_worklists"));
 
-        gridLayout->addWidget(WorklistView, 1, 0, 5, 1);
+        gridLayout->addWidget(label_worklists, 0, 0, 1, 1);
 
-        PatientView = new QTableView(centralWidget);
-        PatientView->setObjectName(QStringLiteral("PatientView"));
-        PatientView->horizontalHeader()->setCascadingSectionResizes(true);
-        PatientView->horizontalHeader()->setProperty("showSortIndicator", QVariant(false));
-        PatientView->horizontalHeader()->setStretchLastSection(true);
-        PatientView->verticalHeader()->setVisible(false);
-        PatientView->verticalHeader()->setDefaultSectionSize(33);
-        PatientView->verticalHeader()->setMinimumSectionSize(20);
+        view_worklists = new QTreeView(centralWidget);
+        view_worklists->setObjectName(QStringLiteral("view_worklists"));
+        view_worklists->setMinimumSize(QSize(300, 0));
+        view_worklists->setMaximumSize(QSize(300, 16777215));
+        view_worklists->setEditTriggers(QAbstractItemView::EditKeyPressed);
+        view_worklists->setRootIsDecorated(true);
+        view_worklists->setHeaderHidden(true);
 
-        gridLayout->addWidget(PatientView, 1, 1, 1, 1);
+        gridLayout->addWidget(view_worklists, 1, 0, 5, 1);
 
-        label_studies = new QLabel(centralWidget);
-        label_studies->setObjectName(QStringLiteral("label_studies"));
+        view_patients = new QTableView(centralWidget);
+        view_patients->setObjectName(QStringLiteral("view_patients"));
+        view_patients->setEnabled(true);
+        view_patients->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed);
+        view_patients->setSelectionMode(QAbstractItemView::SingleSelection);
+        view_patients->setSortingEnabled(true);
+        view_patients->horizontalHeader()->setCascadingSectionResizes(true);
+        view_patients->horizontalHeader()->setProperty("showSortIndicator", QVariant(true));
+        view_patients->horizontalHeader()->setStretchLastSection(true);
+        view_patients->verticalHeader()->setVisible(false);
+        view_patients->verticalHeader()->setDefaultSectionSize(33);
+        view_patients->verticalHeader()->setMinimumSectionSize(20);
 
-        gridLayout->addWidget(label_studies, 2, 1, 1, 1);
+        gridLayout->addWidget(view_patients, 1, 1, 1, 1);
 
-        StudyView = new QTableView(centralWidget);
-        StudyView->setObjectName(QStringLiteral("StudyView"));
-        StudyView->verticalHeader()->setVisible(false);
+        view_images = new QListView(centralWidget);
+        view_images->setObjectName(QStringLiteral("view_images"));
+        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(view_images->sizePolicy().hasHeightForWidth());
+        view_images->setSizePolicy(sizePolicy);
+        view_images->setEditTriggers(QAbstractItemView::EditKeyPressed);
+        view_images->setIconSize(QSize(200, 200));
+        view_images->setResizeMode(QListView::Fixed);
+        view_images->setViewMode(QListView::IconMode);
 
-        gridLayout->addWidget(StudyView, 3, 1, 1, 1);
+        gridLayout->addWidget(view_images, 5, 1, 1, 1);
 
         label_images = new QLabel(centralWidget);
         label_images->setObjectName(QStringLiteral("label_images"));
 
         gridLayout->addWidget(label_images, 4, 1, 1, 1);
 
-        ImageView = new QListView(centralWidget);
-        ImageView->setObjectName(QStringLiteral("ImageView"));
-        ImageView->setIconSize(QSize(200, 200));
-        ImageView->setResizeMode(QListView::Fixed);
-        ImageView->setViewMode(QListView::IconMode);
-
-        gridLayout->addWidget(ImageView, 5, 1, 1, 1);
-
         WorklistWindowLayout->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(WorklistWindowLayout);
         menuBar->setObjectName(QStringLiteral("menuBar"));
         menuBar->setGeometry(QRect(0, 0, 1113, 24));
+        menuStart = new QMenu(menuBar);
+        menuStart->setObjectName(QStringLiteral("menuStart"));
         WorklistWindowLayout->setMenuBar(menuBar);
-        mainToolBar = new QToolBar(WorklistWindowLayout);
-        mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        WorklistWindowLayout->addToolBar(Qt::TopToolBarArea, mainToolBar);
         statusBar = new QStatusBar(WorklistWindowLayout);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         WorklistWindowLayout->setStatusBar(statusBar);
+
+        menuBar->addAction(menuStart->menuAction());
+        menuStart->addAction(actionOpenSource);
+        menuStart->addAction(actionOpenExternalSource);
+        menuStart->addAction(actionSettings);
 
         retranslateUi(WorklistWindowLayout);
 
@@ -129,10 +165,17 @@ public:
     void retranslateUi(QMainWindow *WorklistWindowLayout)
     {
         WorklistWindowLayout->setWindowTitle(QApplication::translate("WorklistWindowLayout", "Worklistinterface", nullptr));
-        label_worklists->setText(QApplication::translate("WorklistWindowLayout", "Worklists", nullptr));
-        label_patients->setText(QApplication::translate("WorklistWindowLayout", "Patients", nullptr));
+        actionOpen_Source->setText(QApplication::translate("WorklistWindowLayout", "Open Source", nullptr));
+        actionSettings->setText(QApplication::translate("WorklistWindowLayout", "Settings", nullptr));
+        actionOpen_Local_Source->setText(QApplication::translate("WorklistWindowLayout", "Open Local Source", nullptr));
+        actionOpen_External_Source->setText(QApplication::translate("WorklistWindowLayout", "Open External Source", nullptr));
+        actionOpenSource->setText(QApplication::translate("WorklistWindowLayout", "Open Source", nullptr));
+        actionOpenExternalSource->setText(QApplication::translate("WorklistWindowLayout", "Open External Source", nullptr));
         label_studies->setText(QApplication::translate("WorklistWindowLayout", "Studies", nullptr));
+        label_patients->setText(QApplication::translate("WorklistWindowLayout", "Patients", nullptr));
+        label_worklists->setText(QApplication::translate("WorklistWindowLayout", "Worklists", nullptr));
         label_images->setText(QApplication::translate("WorklistWindowLayout", "Images", nullptr));
+        menuStart->setTitle(QApplication::translate("WorklistWindowLayout", "Start", nullptr));
     } // retranslateUi
 
 };

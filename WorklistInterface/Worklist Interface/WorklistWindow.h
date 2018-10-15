@@ -43,7 +43,6 @@ namespace ASAP::Worklist::GUI
 			QStandardItemModel* m_worklist_model_;
 
 			void AdjustGuiToSource_(void);
-			QIcon CreateIcon_(const std::string absolute_filepath);
 			void LoadSettings_(void);
 
 			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
@@ -59,5 +58,8 @@ namespace ASAP::Worklist::GUI
 			void OnPatientSelect_(QModelIndex index);
 			void OnStudySelect_(QModelIndex index);
 			void OnImageSelect_(QModelIndex index);
+
+			void OnSelectLocalSource_(void);
+			void OnSelectExternalSource(void);
 	};
 }

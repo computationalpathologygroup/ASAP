@@ -1,16 +1,15 @@
 #include "DirectoryDataAcquisition.h"
 
-#include <codecvt>
-#include <stdexcept>
-#include <locale>
-#include <system_error>
-#include <cstdio>
+#include <functional>
+#include <set>
+#include <boost/filesystem.hpp>
 
 #include "JSON_Parsing.h"
+#include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
 namespace ASAP::Worklist::Data
 {
-	DirectoryDataAcquisition::DirectoryDataAcquisition(const std::string directory_path)
+	DirectoryDataAcquisition::DirectoryDataAcquisition(const std::string directory_path) : m_images_(GetImageFilelist_(directory_path))
 	{
 	}
 
@@ -36,8 +35,8 @@ namespace ASAP::Worklist::Data
 
 	size_t DirectoryDataAcquisition::GetImageRecords(const size_t study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
+		receiver(m_images_, 0);
 		return 0;
-	//	return m_directory_images_;
 	}
 
 	std::vector<std::string> DirectoryDataAcquisition::GetPatientHeaders(void)
@@ -55,8 +54,20 @@ namespace ASAP::Worklist::Data
 		return std::vector<std::string>();
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetImageFilelist_(const std::string directory_path)
+	DataTable DirectoryDataAcquisition::GetImageFilelist_(const std::string directory_path)
 	{
+		std::set<std::string> allowed_extensions = MultiResolutionImageFactory::getAllSupportedExtensions();	
+		DataTable images({ "id", "location", "title" });
 
+		boost::filesystem::path directory(directory_path);
+		boost::filesystem::directory_iterator end_it;
+		for (boost::filesystem::directory_iterator it(directory); it != end_it; ++it)
+		{
+			if (boost::filesystem::is_regular_file(it->path()) && (allowed_extensions.find(it->path().extension().string().substr(1)) != allowed_extensions.end()))
+			{
+				images.Insert({ std::to_string(images.Size()), it->path().string(), it->path().filename().string() });
+			}
+		}
+		return images;
 	}
 }

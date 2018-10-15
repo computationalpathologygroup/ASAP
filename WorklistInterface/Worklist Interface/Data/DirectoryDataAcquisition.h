@@ -1,10 +1,7 @@
 #ifndef __DIRECTORY_DATA_AQUISITION_H__
 #define __DIRECTORY_DATA_AQUISITION_H__
 
-#include <functional>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 #include "WorklistDataAcquisitionInterface.h"
 
@@ -27,7 +24,9 @@ namespace ASAP::Worklist::Data
 			std::vector<std::string> GetImageHeaders(void);
 
 		private:
-			std::vector<std::string> GetImageFilelist_(const std::string directory_path);
+			DataTable m_images_;
+
+			DataTable GetImageFilelist_(const std::string directory_path);
 	};
 }
 #endif // __DIRECTORY_DATA_AQUISITION_H__

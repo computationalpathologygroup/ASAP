@@ -86,7 +86,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -97,12 +97,12 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;D:\Libraries\cpprestsdk-master\Build\Binaries/Release\cpprest141_2_10.lib;D:\Libraries\Boost-1-65-1\boost_1_65_1\lib\libboost_filesystem-vc141-mt-1_65_1.lib;D:\Libraries\Boost-1-65-1\boost_1_65_1\lib\libboost_system-vc141-mt-1_65_1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;D:\Libraries\cpprestsdk-master\Build\Binaries/Release\cpprest141_2_10.lib;D:\Libraries\Boost-1-65-1\boost_1_65_1\lib\libboost_filesystem-vc141-mt-1_65_1.lib;D:\Libraries\Boost-1-65-1\boost_1_65_1\lib\libboost_system-vc141-mt-1_65_1.lib;D:\Build\ASAP\io\multiresolutionimageinterface\Release/multiresolutionimageinterface.lib;D:\Build\ASAP\core\Release\core.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
-      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;%(AdditionalIncludeDirectories)</IncludePath>
+      <IncludePath>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP\include;%(AdditionalIncludeDirectories)</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
     </QtMoc>
     <QtUic>
@@ -117,9 +117,11 @@
   <ItemGroup>
     <ClCompile Include="CompositeWindow.cpp" />
     <ClCompile Include="Data\DataTable.cpp" />
+    <ClCompile Include="Data\DirectoryDataAcquisition.cpp" />
     <ClCompile Include="Data\DjangoDataAcquisition.cpp" />
     <ClCompile Include="Data\SourceLoading.cpp" />
     <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp" />
+    <ClCompile Include="IconCreation.cpp" />
     <ClCompile Include="INI_Parsing.cpp" />
     <ClCompile Include="JSON_Parsing.cpp" />
     <ClCompile Include="main.cpp" />
@@ -142,9 +144,20 @@
     <ProjectReference Include="..\..\..\..\Build\ASAP\ASAP\ASAPLib.vcxproj">
       <Project>{be54e793-f1c6-3304-81e8-617223a18afb}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Build\ASAP\core\core.vcxproj">
+      <Project>{0f0e72a4-6231-381d-98c9-bb1bb7ec076c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Build\ASAP\io\multiresolutionimageinterface\multiresolutionimageinterface.vcxproj">
+      <Project>{f3212ff2-916d-34c4-a2f0-8fdc1b889068}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Data\DirectoryDataAcquisition.h" />
     <ClInclude Include="Data\SourceLoading.h" />
+    <ClInclude Include="IconCreation.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\Build\ASAP\io\multiresolutionimageinterface;.\..\ASAP\core;.\..\ASAP</IncludePath>
+    </ClInclude>
     <ClInclude Include="INI_Parsing.h" />
     <ClInclude Include="JSON_Parsing.h" />
     <QtMoc Include="CompositeWindow.h" />

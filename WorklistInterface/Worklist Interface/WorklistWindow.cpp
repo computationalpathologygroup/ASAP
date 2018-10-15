@@ -3,8 +3,14 @@
 #include <cctype>
 #include <unordered_map>
 
-#include "Data/SourceLoading.h"
+#include <boost/bind.hpp>
+#include <qfiledialog.h>
+#include <qmessagebox.h>
+#include <QtConcurrent\qtconcurrentrun.h>
+
+#include "IconCreation.h"
 #include "INI_Parsing.h"
+#include "Data/SourceLoading.h"
 
 namespace ASAP::Worklist::GUI
 {
@@ -36,8 +42,15 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::SetDataSource(const std::string source_path)
 	{
-		m_data_acquisition_ = Data::LoadDataSource(source_path);
-		AdjustGuiToSource_();
+		try
+		{
+			m_data_acquisition_ = Data::LoadDataSource(source_path);
+			AdjustGuiToSource_();
+		}
+		catch (const std::exception& e)
+		{
+			QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
+		}
 	}
 
 	void WorklistWindow::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
@@ -107,14 +120,23 @@ namespace ASAP::Worklist::GUI
 	{
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
+
+		std::vector<std::pair<QStandardItem*, std::string>> icon_items;
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, { "id", "location", "title" }));
 
-			QStandardItem* model_item = new QStandardItem(CreateIcon_(*record[1]), QString(record[2]->data()));
+			QStandardItem* model_item = new QStandardItem(QString(record[2]->data()));
 			model_item->setData(QVariant(QString(record[1]->data())));
 			model->setItem(item, 0, model_item);
+
+			icon_items.push_back({ model_item, *record[1] });
 		}
+
+		QtConcurrent::run([icon_items, size=500]()
+		{
+			CreateIcons(icon_items, size);
+		});
 	}
 
 	void WorklistWindow::AdjustGuiToSource_(void)
@@ -125,13 +147,24 @@ namespace ASAP::Worklist::GUI
 		{
 			type = m_data_acquisition_->GetSourceType();
 
-			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
+			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FILELIST)
 			{
-				SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->PatientView);
-				SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->StudyView);
+				QStandardItemModel* image_model = m_images_model_;
+				m_data_acquisition_->GetImageRecords(0, [this, image_model](DataTable& table, int error)
+				{
+					if (error == 0)
+					{
+						this->SetImageItems(table, image_model);
+					}
+				});
+			}
+			else if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
+			{
+				SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->view_patients);
+				SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->view_studies);
 
 				QStandardItemModel* worklist_model = m_worklist_model_;
-				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable table, int error)
+				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable& table, int error)
 				{
 					if (error == 0)
 					{
@@ -148,30 +181,19 @@ namespace ASAP::Worklist::GUI
 				m_ui_->label_worklists->setVisible(true);
 				m_ui_->label_patients->setVisible(true);
 				m_ui_->label_studies->setVisible(true);
-				m_ui_->WorklistView->setVisible(true);
-				m_ui_->PatientView->setVisible(true);
-				m_ui_->StudyView->setVisible(true);
+				m_ui_->view_worklists->setVisible(true);
+				m_ui_->view_patients->setVisible(true);
+				m_ui_->view_studies->setVisible(true);
 				break;
 			default:
 				m_ui_->label_worklists->setVisible(false);
 				m_ui_->label_patients->setVisible(false);
 				m_ui_->label_studies->setVisible(false);
-				m_ui_->WorklistView->setVisible(false);
-				m_ui_->PatientView->setVisible(false);
-				m_ui_->StudyView->setVisible(false);
+				m_ui_->view_worklists->setVisible(false);
+				m_ui_->view_patients->setVisible(false);
+				m_ui_->view_studies->setVisible(false);
 				break;
 		}
-	}
-
-	QIcon WorklistWindow::CreateIcon_(const std::string absolute_filepath)
-	{
-		QPixmap pixmap(QString(absolute_filepath.data()));
-		if (pixmap.isNull())
-		{
-			pixmap = QPixmap(QString("./img/unavailable.png"));
-		}
-		QIcon icon(pixmap);
-		return icon;
 	}
 
 	void WorklistWindow::LoadSettings_(void)
@@ -209,10 +231,10 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::SetModels_(void)
 	{
-		m_ui_->ImageView->setModel(m_images_model_);
-		m_ui_->PatientView->setModel(m_patients_model_);
-		m_ui_->StudyView->setModel(m_studies_model_);
-		m_ui_->WorklistView->setModel(m_worklist_model_);
+		m_ui_->view_images->setModel(m_images_model_);
+		m_ui_->view_patients->setModel(m_patients_model_);
+		m_ui_->view_studies->setModel(m_studies_model_);
+		m_ui_->view_worklists->setModel(m_worklist_model_);
 	}
 
 	//================================= Slots =================================//
@@ -234,43 +256,52 @@ namespace ASAP::Worklist::GUI
 			this,
 			SLOT(OnStudyClear_(QModelIndex, int, int)));
 
-		connect(m_ui_->WorklistView,
+		connect(m_ui_->view_worklists,
 			SIGNAL(clicked(QModelIndex)),
 			this,
 			SLOT(OnWorklistSelect_(QModelIndex)));
 
-		connect(m_ui_->PatientView,
+		connect(m_ui_->view_patients,
 			SIGNAL(clicked(QModelIndex)),
 			this,
 			SLOT(OnPatientSelect_(QModelIndex)));
 
-		connect(m_ui_->StudyView,
+		connect(m_ui_->view_studies,
 			SIGNAL(clicked(QModelIndex)),
 			this,
 			SLOT(OnStudySelect_(QModelIndex)));
 
-		connect(m_ui_->ImageView,
+		connect(m_ui_->view_images,
 			SIGNAL(clicked(QModelIndex)),
 			this,
 			SLOT(OnImageSelect_(QModelIndex)));
+
+		connect(m_ui_->actionOpenSource,
+			SIGNAL(triggered),
+			this,
+			SLOT(OnSelectLocalSource_()));
+		connect(m_ui_->actionOpenExternalSource,
+			SIGNAL(triggered),
+			this,
+			SLOT(OnSelectExternalSource_()));
 	}
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
 	{
 		m_patients_model_->removeRows(0, m_patients_model_->rowCount());
-		m_ui_->PatientView->update();
+		m_ui_->view_patients->update();
 	}
 
 	void WorklistWindow::OnPatientsClear_(QModelIndex index, int, int)
 	{
 		m_studies_model_->removeRows(0, m_studies_model_->rowCount());
-		m_ui_->StudyView->update();
+		m_ui_->view_studies->update();
 	}
 
 	void WorklistWindow::OnStudyClear_(QModelIndex index, int, int)
 	{
 		m_images_model_->removeRows(0, m_images_model_->rowCount());
-		m_ui_->ImageView->update();
+		m_ui_->view_images->update();
 	}
 
 	void WorklistWindow::OnWorklistSelect_(QModelIndex index)
@@ -279,7 +310,7 @@ namespace ASAP::Worklist::GUI
 		int worklist_id = item->data().toInt();
 
 		QStandardItemModel* patient_model = m_patients_model_;
-		QTableView* patient_view = m_ui_->PatientView;
+		QTableView* patient_view = m_ui_->view_patients;
 		m_data_acquisition_->GetPatientRecords(worklist_id, [this, patient_model, patient_view](DataTable table, int error)
 		{
 			if (error == 0)
@@ -296,7 +327,7 @@ namespace ASAP::Worklist::GUI
 		int patient_id = item->data().toInt();
 
 		QStandardItemModel* study_model = m_studies_model_;
-		QTableView* study_view = m_ui_->StudyView;
+		QTableView* study_view = m_ui_->view_studies;
 		m_data_acquisition_->GetStudyRecords(patient_id, [this, study_model, study_view](DataTable table, int error)
 		{
 			if (error == 0)
@@ -313,7 +344,7 @@ namespace ASAP::Worklist::GUI
 		int study_id = item->data().toInt();
 
 		QStandardItemModel* image_model = m_images_model_;
-		QListView* image_view = m_ui_->ImageView;
+		QListView* image_view = m_ui_->view_images;
 		m_data_acquisition_->GetImageRecords(study_id, [this, image_model, image_view](DataTable table, int error)
 		{
 			if (error == 0)
@@ -333,5 +364,39 @@ namespace ASAP::Worklist::GUI
 		{
 			m_workstation_->openFile(image_handle);
 		}
+	}
+
+	void WorklistWindow::OnSelectLocalSource_(void)
+	{
+		/*QFileDialog* dialog = new QFileDialog(this);
+		dialog->setFileMode(QFileDialog::Directory);
+		dialog->setOption(QFileDialog::DontUseNativeDialog, true);
+
+		// Try to select multiple files and directories at the same time in QFileDialog
+		QListView* listview = dialog->findChild<QListView*>("listView");
+		if (listview)
+		{
+			listview->setSelectionMode(QAbstractItemView::MultiSelection);
+		}
+		QTreeView* treeview = dialog->findChild<QTreeView*>();
+		if (treeview)
+		{
+			treeview->setSelectionMode(QAbstractItemView::MultiSelection);
+		}
+
+		dialog->exec();
+		QStringList _fnames = _f_dlg->selectedFiles();
+
+		*/
+
+		QFileDialog* dialog;
+		dialog->setProxyModel(nullptr);
+		dialog->exec();
+		SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
+	}
+
+	void WorklistWindow::OnSelectExternalSource(void)
+	{
+
 	}
 }

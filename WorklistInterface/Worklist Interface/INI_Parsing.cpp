@@ -15,11 +15,9 @@ namespace ASAP::Worklist::INI
 		if (stream.is_open())
 		{
 			std::string line;
-			line.resize(4096);
-
 			while (!stream.eof())
 			{
-				stream.getline(&line[0], 4096);
+				std::getline(stream, line);
 				ParseLine(line, variable_map);
 				std::fill(line.begin(), line.end(), 0);
 			}
