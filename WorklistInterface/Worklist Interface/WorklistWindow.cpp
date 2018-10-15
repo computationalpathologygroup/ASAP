@@ -127,10 +127,22 @@ namespace ASAP::Worklist::GUI
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
 
-		QtConcurrent::run([&items, model, size=200]()
+		std::vector<std::pair<QStandardItem*, std::string>> icon_items;
+		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			CreateIcons(items, model, size);
-		});
+			std::vector<const std::string*> record(items.At(item, { "id", "location", "title" }));
+
+			QStandardItem* model_item = new QStandardItem(CreateIcon(*record[1], 200), QString(record[2]->data()));
+			model_item->setData(QVariant(QString(record[1]->data())));
+			model->setItem(item, 0, model_item);
+
+			icon_items.push_back({ model_item, *record[1] });
+		}
+
+		/*QtConcurrent::run([icon_items, size=500]()
+		{
+			CreateIcons(icon_items, size);
+		});*/
 	}
 
 	void WorklistWindow::AdjustGuiToSource_(void)

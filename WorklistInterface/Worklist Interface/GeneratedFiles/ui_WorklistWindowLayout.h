@@ -124,7 +124,7 @@ public:
         view_images->setSizePolicy(sizePolicy);
         view_images->setEditTriggers(QAbstractItemView::EditKeyPressed);
         view_images->setIconSize(QSize(200, 200));
-        view_images->setResizeMode(QListView::Fixed);
+        view_images->setResizeMode(QListView::Adjust);
         view_images->setLayoutMode(QListView::Batched);
         view_images->setSpacing(0);
         view_images->setGridSize(QSize(250, 250));

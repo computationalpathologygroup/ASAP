@@ -135,7 +135,7 @@
        </size>
       </property>
       <property name="resizeMode">
-       <enum>QListView::Fixed</enum>
+       <enum>QListView::Adjust</enum>
       </property>
       <property name="layoutMode">
        <enum>QListView::Batched</enum>
