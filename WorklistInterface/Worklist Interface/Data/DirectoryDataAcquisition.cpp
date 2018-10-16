@@ -39,17 +39,22 @@ namespace ASAP::Worklist::Data
 		return 0;
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetPatientHeaders(void)
+	std::vector<std::string> GetWorklistHeaders(const DataTable::FIELD_SELECTION selectionL)
 	{
 		return std::vector<std::string>();
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetStudyHeaders(void)
+	std::vector<std::string> DirectoryDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return std::vector<std::string>();
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetImageHeaders(void)
+	std::vector<std::string> DirectoryDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
+	{
+		return std::vector<std::string>();
+	}
+
+	std::vector<std::string> DirectoryDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return std::vector<std::string>();
 	}

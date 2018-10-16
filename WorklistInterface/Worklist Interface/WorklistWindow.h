@@ -44,14 +44,13 @@ namespace ASAP::Worklist::GUI
 			QStandardItemModel* m_worklist_model_;
 
 			void AdjustGuiToSource_(void);
+			bool CheckSchema_(void);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
 
 			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);
 			void SetSlots_(void);
-
-			bool 
 
 		private slots:
 			void OnWorklistClear_(QModelIndex index, int row, int column);

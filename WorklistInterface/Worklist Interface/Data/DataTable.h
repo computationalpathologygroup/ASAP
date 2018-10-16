@@ -30,9 +30,7 @@ class DataTable
 		size_t GetColumnIndex(const std::string column) const;
         size_t GetVisibleColumnCount(void) const;
         size_t GetInvisibleColumnCount(void) const;
-        std::vector<std::string> GetColumnNames(void) const;
-        std::vector<std::string> GetVisibleColumnNames(void) const;
-        std::vector<std::string> GetInvisibleColumnNames(void) const;
+        std::vector<std::string> GetColumnNames(const FIELD_SELECTION selection = FIELD_SELECTION::ALL) const;
 		void SetColumnAsInvisible(const std::string column);
 		void SetColumnAsVisible(const std::string column);
 		size_t Size(void) const;

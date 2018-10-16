@@ -131,19 +131,24 @@ namespace ASAP::Worklist::Data
 		});
 	}
 
-	std::vector<std::string> DjangoDataAcquisition::GetPatientHeaders(void)
+	std::vector<std::string> DjangoDataAcquisition::GetWorklistHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::PATIENT].GetColumnNames();
+		return m_tables_[TableEntry::WORKLIST].GetColumnNames(selection);
 	}
 
-	std::vector<std::string> DjangoDataAcquisition::GetStudyHeaders(void)
+	std::vector<std::string> DjangoDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::STUDY].GetColumnNames();
+		return m_tables_[TableEntry::PATIENT].GetColumnNames(selection);
 	}
 
-	std::vector<std::string> DjangoDataAcquisition::GetImageHeaders(void)
+	std::vector<std::string> DjangoDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::IMAGE].GetColumnNames();
+		return m_tables_[TableEntry::STUDY].GetColumnNames(selection);
+	}
+
+	std::vector<std::string> DjangoDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
+	{
+		return m_tables_[TableEntry::IMAGE].GetColumnNames(selection);
 	}
 
 

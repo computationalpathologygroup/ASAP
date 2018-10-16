@@ -202,6 +202,20 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
+	bool CheckSchema_(Data::WorklistDataAcquisitionInterface* source)
+	{
+		if (source)
+		{
+			// No schema check is required for a filelist source.
+			if (source->GetSourceType() == Data::WorklistDataAcquisitionInterface::FULL_WORKLIST)
+			{
+				source->GetWorklistHeaders
+			}
+			return true;
+		}
+		return false;
+	}
+
 	void WorklistWindow::LoadSettings_(void)
 	{
 		try
