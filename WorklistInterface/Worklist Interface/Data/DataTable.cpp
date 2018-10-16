@@ -188,29 +188,28 @@ size_t DataTable:: GetInvisibleColumnCount(void) const
     return m_invisible_columns_.size();
 }
 
-std::vector<std::string> DataTable::GetColumnNames(const FIELD_SELECTION selection = FIELD_SELECTION::ALL) const
+std::unordered_set<std::string> DataTable::GetColumnNames(const FIELD_SELECTION selection) const
 {
-	std::vector<std::string> header;	
+	std::unordered_set<std::string> header;
 	if (selection == FIELD_SELECTION::ALL)
 	{
-		header.resize(m_column_order_.size());
 		for (const auto& entry : m_column_order_)
 		{
-			header[entry.second] = entry.first;
+			header.insert(entry.first);
 		}
 	}
 	else if (selection == FIELD_SELECTION::INVISIBLE)
 	{
 		for (const std::map<std::string, size_t>::iterator& it : m_invisible_columns_)
 		{
-			header.push_back(it->first);
+			header.insert(it->first);
 		}
 	}
 	else
 	{
 		for (size_t column = 0; column < m_visible_columns_.size(); ++column)
 		{
-			header.push_back(m_visible_columns_[column]->first);
+			header.insert(m_visible_columns_[column]->first);
 		}
 	}
     return header;

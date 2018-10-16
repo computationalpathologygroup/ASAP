@@ -39,24 +39,24 @@ namespace ASAP::Worklist::Data
 		return 0;
 	}
 
-	std::vector<std::string> GetWorklistHeaders(const DataTable::FIELD_SELECTION selectionL)
+	std::unordered_set<std::string> DirectoryDataAcquisition::GetWorklistHeaders(const DataTable::FIELD_SELECTION selectionL)
 	{
-		return std::vector<std::string>();
+		return std::unordered_set<std::string>();
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
+	std::unordered_set<std::string> DirectoryDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return std::vector<std::string>();
+		return std::unordered_set<std::string>();
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
+	std::unordered_set<std::string> DirectoryDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return std::vector<std::string>();
+		return std::unordered_set<std::string>();
 	}
 
-	std::vector<std::string> DirectoryDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
+	std::unordered_set<std::string> DirectoryDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return std::vector<std::string>();
+		return std::unordered_set<std::string>();
 	}
 
 	DataTable DirectoryDataAcquisition::GetImageFilelist_(const std::string directory_path)

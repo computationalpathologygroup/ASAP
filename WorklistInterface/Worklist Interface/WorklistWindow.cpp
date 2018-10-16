@@ -93,7 +93,7 @@ namespace ASAP::Worklist::GUI
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
-			size_t record_id = std::stoi(*record[items.GetColumnIndex("id")]);
+			size_t record_id = std::stoi(*items.At(item, { "id" })[0]);
 
 			for (size_t field = 0; field < record.size(); ++field)
 			{
@@ -111,7 +111,7 @@ namespace ASAP::Worklist::GUI
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
-			size_t record_id = std::stoi(*record[items.GetColumnIndex("id")]);
+			size_t record_id = std::stoi(*items.At(item, { "id" })[0]);
 
 			for (size_t field = 0; field < record.size(); ++field)
 			{
@@ -209,7 +209,20 @@ namespace ASAP::Worklist::GUI
 			// No schema check is required for a filelist source.
 			if (source->GetSourceType() == Data::WorklistDataAcquisitionInterface::FULL_WORKLIST)
 			{
-				source->GetWorklistHeaders
+				std::unordered_set<std::string> worklist_headers(source->GetWorklistHeaders());
+				std::unordered_set<std::string> patient_headers(source->GetPatientHeaders());
+				std::unordered_set<std::string> study_headers(source->GetStudyHeaders());
+				std::unordered_set<std::string> image_headers(source->GetImageHeaders());
+
+				return	(worklist_headers.find("id") != worklist_headers.end()) &&
+						(worklist_headers.find("parent") != worklist_headers.end()) &&
+						(patient_headers.find("id") != worklist_headers.end()) &&
+						(study_headers.find("id") != worklist_headers.end()) &&
+						(image_headers.find("id") != worklist_headers.end()) &&
+						(image_headers.find("location") != worklist_headers.end()) &&
+						(image_headers.find("title") != worklist_headers.end());
+
+				std::find(worklist_headers.begin(), worklist_headers.end(), "id");
 			}
 			return true;
 		}
@@ -243,13 +256,14 @@ namespace ASAP::Worklist::GUI
 		INI::WriteINI("worklist_config.ini", values);
 	}
 
-	void WorklistWindow::SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
+	void WorklistWindow::SetHeaders_(const std::unordered_set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
 	{
 		QStringList q_headers;
-		for (std::string& header : headers)
+		for (const std::string& column : headers)
 		{
-			header[0] = std::toupper(header[0]);
-			q_headers.push_back(QString(header.c_str()));
+			std::string capital_column = column;
+			capital_column = std::toupper(capital_column[0]);
+			q_headers.push_back(QString(capital_column.c_str()));
 		}
 		model->setColumnCount(q_headers.size());
 		model->setHorizontalHeaderLabels(q_headers);

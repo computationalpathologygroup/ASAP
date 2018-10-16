@@ -48,7 +48,7 @@ namespace ASAP::Worklist::GUI
 			void LoadSettings_(void);
 			void StoreSettings_(void);
 
-			void SetHeaders_(std::vector<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
+			void SetHeaders_(const std::unordered_set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);
 			void SetSlots_(void);
 

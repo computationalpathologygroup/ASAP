@@ -61,25 +61,25 @@ namespace ASAP::Worklist::Data
 		/// </summary>
 		/// <param name="selection">The selection criteria for which header fields to return.</param>
 		/// <return>A vector with the headers for the worklist records.</return>
-		virtual std::vector<std::string> GetWorklistHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
+		virtual std::unordered_set<std::string> GetWorklistHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
 		/// <summary>
 		/// Returns the headers for the Patient table.
 		/// </summary>
 		/// <param name="selection">The selection criteria for which header fields to return.</param>
 		/// <return>A vector with the headers for the patient records.</return>
-		virtual std::vector<std::string> GetPatientHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
+		virtual std::unordered_set<std::string> GetPatientHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
 		/// <summary>
 		/// Returns the headers for the Study table.
 		/// </summary>
 		/// <param name="selection">The selection criteria for which header fields to return.</param>
 		/// <return>A vector with the headers for the study records.</return>
-		virtual std::vector<std::string> GetStudyHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
+		virtual std::unordered_set<std::string> GetStudyHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
 		/// <summary>
 		/// Returns the headers for the Image table.
 		/// </summary>
 		/// <param name="selection">The selection criteria for which header fields to return.</param>
 		/// <return>A vector with the headers for the study records.</return>
-		virtual std::vector<std::string> GetImageHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
+		virtual std::unordered_set<std::string> GetImageHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL) = 0;
 
 		/// <summary>
 		/// Cancels the asynchronous task if it hasn't finished yet.
