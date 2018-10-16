@@ -119,12 +119,13 @@
     <ClCompile Include="Data\DataTable.cpp" />
     <ClCompile Include="Data\DirectoryDataAcquisition.cpp" />
     <ClCompile Include="Data\DjangoDataAcquisition.cpp" />
+    <ClCompile Include="Data\FilelistDataAcquisition.cpp" />
     <ClCompile Include="Data\SourceLoading.cpp" />
     <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp" />
     <ClCompile Include="IconCreation.cpp" />
-    <ClCompile Include="INI_Parsing.cpp" />
-    <ClCompile Include="JSON_Parsing.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Serialization\INI.cpp" />
+    <ClCompile Include="Serialization\JSON.cpp" />
     <ClCompile Include="WorklistWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,13 +154,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Data\DirectoryDataAcquisition.h" />
+    <ClInclude Include="Data\FilelistDataAcquisition.h" />
     <ClInclude Include="Data\SourceLoading.h" />
     <ClInclude Include="IconCreation.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\Build\ASAP\io\multiresolutionimageinterface;.\..\ASAP\core;.\..\ASAP</IncludePath>
     </ClInclude>
-    <ClInclude Include="INI_Parsing.h" />
-    <ClInclude Include="JSON_Parsing.h" />
+    <ClInclude Include="Serialization\INI.h" />
+    <ClInclude Include="Serialization\JSON.h" />
     <QtMoc Include="CompositeWindow.h" />
     <ClInclude Include="Data\DataTable.h" />
     <ClInclude Include="Data\DjangoDataAcquisition.h" />

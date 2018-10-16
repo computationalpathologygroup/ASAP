@@ -6,7 +6,7 @@
 #include <system_error>
 #include <cstdio>
 
-#include "JSON_Parsing.h"
+#include "../Serialization/JSON.h"
 
 namespace ASAP::Worklist::Data
 {
@@ -42,7 +42,7 @@ namespace ASAP::Worklist::Data
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = JSON::ParseJsonResponseToRecords(response, *table);
+			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
 		});
 	}
@@ -66,7 +66,7 @@ namespace ASAP::Worklist::Data
 
 		return ProcessRequest_(relations_request, [relation_table, patient_table, client, patient_addition, receiver](web::http::http_response& response)
 		{
-			JSON::ParseJsonResponseToRecords(response, *relation_table);
+			Serialization::JSON::ParseJsonResponseToRecords(response, *relation_table);
 
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 			std::vector<std::string> field_selection({ "id" });
@@ -87,7 +87,7 @@ namespace ASAP::Worklist::Data
 				patient_request.set_request_uri(L"/" + *patient_addition + L"/?ids=" + ids);
 				client->request(patient_request).then([patient_table](web::http::http_response& response)
 				{
-					JSON::ParseJsonResponseToRecords(response, *patient_table);
+					Serialization::JSON::ParseJsonResponseToRecords(response, *patient_table);
 				}).wait();
 			}
 
@@ -108,7 +108,7 @@ namespace ASAP::Worklist::Data
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = JSON::ParseJsonResponseToRecords(response, *table);
+			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
 		});
 	}
@@ -126,7 +126,7 @@ namespace ASAP::Worklist::Data
 		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = JSON::ParseJsonResponseToRecords(response, *table);
+			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
 		});
 	}
@@ -183,7 +183,7 @@ namespace ASAP::Worklist::Data
 			DataTable* datatable(&m_tables_[table]);
 			m_client_.request(request).then([datatable](web::http::http_response& response)
 			{
-				JSON::ParseJsonResponseToTableSchema(response, *datatable);
+				Serialization::JSON::ParseJsonResponseToTableSchema(response, *datatable);
 			}).wait();
 		}
 	}

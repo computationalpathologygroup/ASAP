@@ -2,7 +2,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace ASAP::Worklist::INI
+namespace ASAP::Worklist::Serialization::INI
 {
 	std::unordered_map<std::string, std::string> ParseINI(const std::string filepath);
 	void WriteINI(const std::string absolute_filepath, const std::unordered_map<std::string, std::string>& records);

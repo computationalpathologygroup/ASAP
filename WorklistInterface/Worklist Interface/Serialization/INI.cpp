@@ -1,10 +1,10 @@
-#include "INI_Parsing.h"
+#include "INI.h"
 
 #include <algorithm>
 #include <fstream>
 #include <stdexcept>
 
-namespace ASAP::Worklist::INI
+namespace ASAP::Worklist::Serialization::INI
 {
 	std::unordered_map<std::string, std::string> ParseINI(const std::string filepath)
 	{

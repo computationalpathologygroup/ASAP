@@ -3,7 +3,7 @@
 
 #include "Data/DataTable.h"
 
-namespace ASAP::Worklist::JSON
+namespace ASAP::Worklist::Serialization::JSON
 {
 	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json);
 

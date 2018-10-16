@@ -17,12 +17,6 @@
     <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JSON_Parsing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="INI_Parsing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Data\SourceLoading.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,6 +24,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IconCreation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data\FilelistDataAcquisition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\INI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\JSON.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,12 +89,6 @@
     <ClInclude Include="Data\WorklistDataAcquisitionInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="JSON_Parsing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="INI_Parsing.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Data\SourceLoading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -99,6 +96,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IconCreation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\FilelistDataAcquisition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\INI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\JSON.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

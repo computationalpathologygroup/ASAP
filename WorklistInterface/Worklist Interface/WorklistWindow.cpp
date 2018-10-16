@@ -9,7 +9,7 @@
 #include <QtConcurrent\qtconcurrentrun.h>
 
 #include "IconCreation.h"
-#include "INI_Parsing.h"
+#include "Serialization/INI.h"
 #include "Data/SourceLoading.h"
 
 namespace ASAP::Worklist::GUI
@@ -233,7 +233,7 @@ namespace ASAP::Worklist::GUI
 	{
 		try
 		{
-			std::unordered_map<std::string, std::string> values(INI::ParseINI("worklist_config.ini"));
+			std::unordered_map<std::string, std::string> values(Serialization::INI::ParseINI("worklist_config.ini"));
 			auto source_value(values.find("source"));
 			if (source_value != values.end())
 			{
@@ -245,7 +245,7 @@ namespace ASAP::Worklist::GUI
 			// Creates an INI file with standard settings.
 			std::unordered_map<std::string, std::string> values;
 			values.insert({ "source", "" });
-			INI::WriteINI("worklist_config.ini", values);
+			Serialization::INI::WriteINI("worklist_config.ini", values);
 		}
 	}
 	
@@ -253,7 +253,7 @@ namespace ASAP::Worklist::GUI
 	{
 		std::unordered_map<std::string, std::string> values;
 		values.insert({ "source", m_settings_.source_location });
-		INI::WriteINI("worklist_config.ini", values);
+		Serialization::INI::WriteINI("worklist_config.ini", values);
 	}
 
 	void WorklistWindow::SetHeaders_(const std::unordered_set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
