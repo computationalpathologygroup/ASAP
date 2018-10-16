@@ -46,7 +46,7 @@ namespace ASAP::Worklist::GUI
 			QStandardItemModel* m_worklist_model_;
 
 			void AdjustGuiToSource_(void);
-			bool CheckSchema_(void);
+			bool CheckSchema_(Data::WorklistDataAcquisitionInterface* source);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
 

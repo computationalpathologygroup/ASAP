@@ -51,11 +51,22 @@ namespace ASAP::Worklist::GUI
 		{
 			// Attempts to load the data source and then confirms it has the required fields for the UI to function.
 			m_data_acquisition_ = Data::LoadDataSource(source_path);
-			CheckSchema_();
+
+			if (!CheckSchema_(m_data_acquisition_.get()))
+			{
+				m_data_acquisition_.reset(nullptr);
+				throw std::runtime_error("Selected source has schema errors. Unable to open.");
+			}
 
 			m_settings_.source_location = source_path;
-			
-			if (m_settings_.previous_sources.size() == 5)
+
+			// Adds the new source to the previous sources.
+			auto already_added(std::find(m_settings_.previous_sources.begin(), m_settings_.previous_sources.end(), source_path));
+			if (already_added != m_settings_.previous_sources.end())
+			{
+				m_settings_.previous_sources.erase(already_added);
+			}
+			else if (m_settings_.previous_sources.size() == 5)
 			{
 				m_settings_.previous_sources.pop_back();
 			}
@@ -212,7 +223,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	bool CheckSchema_(Data::WorklistDataAcquisitionInterface* source)
+	bool WorklistWindow::CheckSchema_(Data::WorklistDataAcquisitionInterface* source)
 	{
 		if (source)
 		{
