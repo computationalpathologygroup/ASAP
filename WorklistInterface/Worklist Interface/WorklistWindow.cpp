@@ -49,8 +49,18 @@ namespace ASAP::Worklist::GUI
 	{
 		try
 		{
+			// Attempts to load the data source and then confirms it has the required fields for the UI to function.
 			m_data_acquisition_ = Data::LoadDataSource(source_path);
+			CheckSchema_();
+
 			m_settings_.source_location = source_path;
+			
+			if (m_settings_.previous_sources.size() == 5)
+			{
+				m_settings_.previous_sources.pop_back();
+			}
+			m_settings_.previous_sources.push_front(source_path);
+
 			AdjustGuiToSource_();
 		}
 		catch (const std::exception& e)
@@ -234,10 +244,35 @@ namespace ASAP::Worklist::GUI
 		try
 		{
 			std::unordered_map<std::string, std::string> values(Serialization::INI::ParseINI("worklist_config.ini"));
+
+			// Acquires the last known source.
 			auto source_value(values.find("source"));
 			if (source_value != values.end())
 			{
 				m_settings_.source_location = source_value->second;
+			}
+
+			// Acquires the five most recent sources.
+			auto previous_sources_value(values.find("previous_sources"));
+			if (previous_sources_value != values.end())
+			{
+				if (!previous_sources_value->second.empty())
+				{
+					size_t current_loc = 0;
+					size_t comma_loc = previous_sources_value->second.find_first_of(',');
+					while (comma_loc != std::string::npos)
+					{
+						m_settings_.previous_sources.push_back(previous_sources_value->second.substr(current_loc + 1, comma_loc - 2));
+						current_loc = comma_loc + 1;
+						comma_loc = previous_sources_value->second.find_first_of(',', current_loc);
+					}
+
+					std::string final_source = previous_sources_value->second.substr(current_loc);
+					if (!final_source.empty())
+					{
+						m_settings_.previous_sources.push_back(final_source);
+					}
+				}
 			}
 		}
 		catch (const std::runtime_error& e)
@@ -245,6 +280,7 @@ namespace ASAP::Worklist::GUI
 			// Creates an INI file with standard settings.
 			std::unordered_map<std::string, std::string> values;
 			values.insert({ "source", "" });
+			values.insert({ "previous_sources", "" });
 			Serialization::INI::WriteINI("worklist_config.ini", values);
 		}
 	}
@@ -253,6 +289,15 @@ namespace ASAP::Worklist::GUI
 	{
 		std::unordered_map<std::string, std::string> values;
 		values.insert({ "source", m_settings_.source_location });
+		
+		std::string previous_sources;
+		for (const std::string& source : m_settings_.previous_sources)
+		{
+			previous_sources += "\"" + source + "\",";
+		}
+		// Removes the last comma and then inserts.
+		values.insert({ "previous_sources", previous_sources.substr(0, previous_sources.size() - 1)});
+
 		Serialization::INI::WriteINI("worklist_config.ini", values);
 	}
 

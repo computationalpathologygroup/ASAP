@@ -1,4 +1,5 @@
 #pragma once
+#include <deque>
 #include <memory>
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
@@ -12,7 +13,8 @@ namespace ASAP::Worklist::GUI
 {
 	struct WorklistWindowSettings
 	{
-		std::string source_location;
+		std::string				source_location;
+		std::deque<std::string>	previous_sources;
 	};
 
 	class WorklistWindow : public QMainWindow
