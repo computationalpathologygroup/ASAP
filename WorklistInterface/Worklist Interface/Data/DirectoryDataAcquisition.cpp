@@ -1,10 +1,8 @@
 #include "DirectoryDataAcquisition.h"
 
-#include <functional>
 #include <set>
 #include <boost/filesystem.hpp>
 
-#include "JSON_Parsing.h"
 #include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
 namespace ASAP::Worklist::Data

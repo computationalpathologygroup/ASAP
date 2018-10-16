@@ -7,6 +7,7 @@
 
 #include "DjangoDataAcquisition.h"
 #include "DirectoryDataAcquisition.h"
+#include "FilelistDataAcquisition.h"
 
 namespace ASAP::Worklist::Data
 {
@@ -24,7 +25,7 @@ namespace ASAP::Worklist::Data
 			else if (boost::filesystem::is_regular_file(potential_system_path))
 			{
 				// Create File Acquisition
-				pointer = nullptr;
+				pointer = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::FilelistDataAcquisition(source_path));
 			}
 			else if (boost::filesystem::is_directory(potential_system_path))
 			{
