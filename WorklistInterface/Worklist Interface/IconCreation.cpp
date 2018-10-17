@@ -8,7 +8,7 @@
 
 namespace ASAP::Worklist::GUI
 {
-	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
+	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, QListView* image_view, const size_t size)
 	{
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
@@ -18,6 +18,7 @@ namespace ASAP::Worklist::GUI
 			model_item->setData(QVariant(QString(record[1]->data())));
 			image_model->setItem(item, 0, model_item);
 		}
+			image_view->repaint();
 	}
 
 	QIcon CreateIcon(const std::string& filepath, const size_t size)

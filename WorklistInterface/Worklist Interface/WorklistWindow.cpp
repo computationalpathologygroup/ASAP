@@ -157,7 +157,7 @@ namespace ASAP::Worklist::GUI
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
 
-		std::vector<std::pair<QStandardItem*, std::string>> icon_items;
+	/*	std::vector<std::pair<QStandardItem*, std::string>> icon_items;
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, { "id", "location", "title" }));
@@ -167,12 +167,14 @@ namespace ASAP::Worklist::GUI
 			model->setItem(item, 0, model_item);
 
 			icon_items.push_back({ model_item, *record[1] });
-		}
+		}*/
 
-		/*QtConcurrent::run([icon_items, size=500]()
+		
+
+		QtConcurrent::run([items, model, view=m_ui_->view_images, size=200]()
 		{
-			CreateIcons(icon_items, size);
-		});*/
+			CreateIcons(items, model, view, 200);
+		});
 	}
 
 	bool WorklistWindow::CheckSchema_(Data::WorklistDataAcquisitionInterface* source)
