@@ -44,7 +44,8 @@ public:
     QListView *view_images;
     QLabel *label_images;
     QMenuBar *menuBar;
-    QMenu *menuStart;
+    QMenu *menu_start;
+    QMenu *menu_history;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *WorklistWindowLayout)
@@ -142,17 +143,20 @@ public:
         menuBar = new QMenuBar(WorklistWindowLayout);
         menuBar->setObjectName(QStringLiteral("menuBar"));
         menuBar->setGeometry(QRect(0, 0, 1113, 24));
-        menuStart = new QMenu(menuBar);
-        menuStart->setObjectName(QStringLiteral("menuStart"));
+        menu_start = new QMenu(menuBar);
+        menu_start->setObjectName(QStringLiteral("menu_start"));
+        menu_history = new QMenu(menuBar);
+        menu_history->setObjectName(QStringLiteral("menu_history"));
         WorklistWindowLayout->setMenuBar(menuBar);
         statusBar = new QStatusBar(WorklistWindowLayout);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         WorklistWindowLayout->setStatusBar(statusBar);
 
-        menuBar->addAction(menuStart->menuAction());
-        menuStart->addAction(action_open_file);
-        menuStart->addAction(action_open_folder);
-        menuStart->addAction(action_open_external);
+        menuBar->addAction(menu_start->menuAction());
+        menuBar->addAction(menu_history->menuAction());
+        menu_start->addAction(action_open_file);
+        menu_start->addAction(action_open_folder);
+        menu_start->addAction(action_open_external);
 
         retranslateUi(WorklistWindowLayout);
 
@@ -169,7 +173,8 @@ public:
         label_patients->setText(QApplication::translate("WorklistWindowLayout", "Patients", nullptr));
         label_worklists->setText(QApplication::translate("WorklistWindowLayout", "Worklists", nullptr));
         label_images->setText(QApplication::translate("WorklistWindowLayout", "Images", nullptr));
-        menuStart->setTitle(QApplication::translate("WorklistWindowLayout", "Start", nullptr));
+        menu_start->setTitle(QApplication::translate("WorklistWindowLayout", "Start", nullptr));
+        menu_history->setTitle(QApplication::translate("WorklistWindowLayout", "History", nullptr));
     } // retranslateUi
 
 };

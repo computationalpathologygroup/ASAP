@@ -72,7 +72,8 @@ namespace ASAP::Worklist::GUI
 			}
 			m_settings_.previous_sources.push_front(source_path);
 
-			AdjustGuiToSource_();
+			UpdatePreviousSources_();
+			UpdateSourceViews_();
 		}
 		catch (const std::exception& e)
 		{
@@ -166,63 +167,6 @@ namespace ASAP::Worklist::GUI
 		});*/
 	}
 
-	void WorklistWindow::AdjustGuiToSource_(void)
-	{
-		Data::WorklistDataAcquisitionInterface::SourceType type = Data::WorklistDataAcquisitionInterface::SourceType::FILELIST;
-
-		if (m_data_acquisition_)
-		{
-			type = m_data_acquisition_->GetSourceType();
-
-			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FILELIST)
-			{
-				QStandardItemModel* image_model = m_images_model_;
-				m_data_acquisition_->GetImageRecords(0, [this, image_model](DataTable& table, int error)
-				{
-					if (error == 0)
-					{
-						this->SetImageItems(table, image_model);
-					}
-				});
-			}
-			else if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
-			{
-				SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->view_patients);
-				SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->view_studies);
-
-				QStandardItemModel* worklist_model = m_worklist_model_;
-				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable& table, int error)
-				{
-					if (error == 0)
-					{
-						this->SetWorklistItems(table, worklist_model);
-					}
-				});
-			}
-		}
-
-		// Default is regarded as the FILELIST sourcetype
-		switch (type)
-		{
-			case Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST: 
-				m_ui_->label_worklists->setVisible(true);
-				m_ui_->label_patients->setVisible(true);
-				m_ui_->label_studies->setVisible(true);
-				m_ui_->view_worklists->setVisible(true);
-				m_ui_->view_patients->setVisible(true);
-				m_ui_->view_studies->setVisible(true);
-				break;
-			default:
-				m_ui_->label_worklists->setVisible(false);
-				m_ui_->label_patients->setVisible(false);
-				m_ui_->label_studies->setVisible(false);
-				m_ui_->view_worklists->setVisible(false);
-				m_ui_->view_patients->setVisible(false);
-				m_ui_->view_studies->setVisible(false);
-				break;
-		}
-	}
-
 	bool WorklistWindow::CheckSchema_(Data::WorklistDataAcquisitionInterface* source)
 	{
 		if (source)
@@ -310,6 +254,68 @@ namespace ASAP::Worklist::GUI
 		values.insert({ "previous_sources", previous_sources.substr(0, previous_sources.size() - 1)});
 
 		Serialization::INI::WriteINI("worklist_config.ini", values);
+	}
+
+	void WorklistWindow::UpdatePreviousSources_(void)
+	{
+
+	}
+
+	void WorklistWindow::UpdateSourceViews_(void)
+	{
+		Data::WorklistDataAcquisitionInterface::SourceType type = Data::WorklistDataAcquisitionInterface::SourceType::FILELIST;
+
+		if (m_data_acquisition_)
+		{
+			type = m_data_acquisition_->GetSourceType();
+
+			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FILELIST)
+			{
+				QStandardItemModel* image_model = m_images_model_;
+				m_data_acquisition_->GetImageRecords(0, [this, image_model](DataTable& table, int error)
+				{
+					if (error == 0)
+					{
+						this->SetImageItems(table, image_model);
+					}
+				});
+			}
+			else if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
+			{
+				SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->view_patients);
+				SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->view_studies);
+
+				QStandardItemModel* worklist_model = m_worklist_model_;
+				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable& table, int error)
+				{
+					if (error == 0)
+					{
+						this->SetWorklistItems(table, worklist_model);
+					}
+				});
+			}
+		}
+
+		// Default is regarded as the FILELIST sourcetype
+		switch (type)
+		{
+		case Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST:
+			m_ui_->label_worklists->setVisible(true);
+			m_ui_->label_patients->setVisible(true);
+			m_ui_->label_studies->setVisible(true);
+			m_ui_->view_worklists->setVisible(true);
+			m_ui_->view_patients->setVisible(true);
+			m_ui_->view_studies->setVisible(true);
+			break;
+		default:
+			m_ui_->label_worklists->setVisible(false);
+			m_ui_->label_patients->setVisible(false);
+			m_ui_->label_studies->setVisible(false);
+			m_ui_->view_worklists->setVisible(false);
+			m_ui_->view_patients->setVisible(false);
+			m_ui_->view_studies->setVisible(false);
+			break;
+		}
 	}
 
 	void WorklistWindow::SetHeaders_(const std::unordered_set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)

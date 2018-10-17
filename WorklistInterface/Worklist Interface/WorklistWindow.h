@@ -45,10 +45,11 @@ namespace ASAP::Worklist::GUI
 			QStandardItemModel* m_studies_model_;
 			QStandardItemModel* m_worklist_model_;
 
-			void AdjustGuiToSource_(void);
 			bool CheckSchema_(Data::WorklistDataAcquisitionInterface* source);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
+			void UpdatePreviousSources_(void);
+			void UpdateSourceViews_(void);
 
 			void SetHeaders_(const std::unordered_set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);
