@@ -18,11 +18,14 @@ namespace ASAP::Worklist::GUI
 			void AddTab(QMainWindow* window, const std::string tab_name);
 
 		private:
+			int												m_current_child_;
 			std::vector<QMainWindow*>						m_children_;
 			std::unordered_map<std::string, QMainWindow*>	m_mapped_children_;
 			std::unique_ptr<Ui::CompositeWindowLayout>		m_ui_;
 
-		private slots:
+			void SetSlots_(void);
+		
+			private slots:
 			void OnTabChange_(int index);
 	};
 }
