@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <QtWidgets/QMainWindow>
 
 #include "ui_CompositeWindowLayout.h"
@@ -17,7 +18,9 @@ namespace ASAP::Worklist::GUI
 			void AddTab(QMainWindow* window, const std::string tab_name);
 
 		private:
-			std::unique_ptr<Ui::CompositeWindowLayout> m_ui_;
+			std::vector<QMainWindow*>						m_children_;
+			std::unordered_map<std::string, QMainWindow*>	m_mapped_children_;
+			std::unique_ptr<Ui::CompositeWindowLayout>		m_ui_;
 
 		private slots:
 			void OnTabChange_(int index);
