@@ -5,8 +5,10 @@
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
 
-#include "Data/WorklistDataAcquisitionInterface.h"
+#include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
+#include "Data/WorklistDataAcquisitionInterface.h"
+
 
 #include "../../ASAP/pathologyworkstation.h"
 
@@ -18,7 +20,7 @@ namespace ASAP::Worklist::GUI
 		std::deque<std::string>	previous_sources;
 	};
 
-	class WorklistWindow : public QMainWindow
+	class WorklistWindow : public QMainWindow, public CompositeChild
 	{
 		Q_OBJECT
 
@@ -27,6 +29,7 @@ namespace ASAP::Worklist::GUI
 			~WorklistWindow(void);
 
 			void AttachWorkstation(PathologyWorkstation& workstation);
+			QMenuBar* GetMenuElement(void);
 			WorklistWindowSettings GetStandardSettings(void);
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);

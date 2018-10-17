@@ -41,6 +41,11 @@ namespace ASAP::Worklist::GUI
 		m_workstation_ = &workstation;
 	}
 
+	QMenuBar* WorklistWindow::GetMenuElement(void)
+	{
+		return m_ui_->menuBar;
+	}
+
 	WorklistWindowSettings WorklistWindow::GetStandardSettings(void)
 	{
 		return WorklistWindowSettings();
