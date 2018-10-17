@@ -15,17 +15,18 @@ namespace ASAP::Worklist::GUI
 		public:
 			explicit CompositeWindow(QWidget* parent = 0);
 
-			void AddTab(QMainWindow* window, const std::string tab_name);
+			int AddTab(QMainWindow* window, const std::string tab_name);
 
 		private:
-			int												m_current_child_;
-			std::vector<QMainWindow*>						m_children_;
-			std::unordered_map<std::string, QMainWindow*>	m_mapped_children_;
-			std::unique_ptr<Ui::CompositeWindowLayout>		m_ui_;
+			int											m_current_child_;
+			std::vector<QMainWindow*>					m_children_;
+			std::unordered_map<std::string, size_t>		m_mapped_children_;
+			std::unique_ptr<Ui::CompositeWindowLayout>	m_ui_;
 
 			void SetSlots_(void);
 		
-			private slots:
+		private slots:
 			void OnTabChange_(int index);
+			void OnTabRequest_(int tab_id);
 	};
 }

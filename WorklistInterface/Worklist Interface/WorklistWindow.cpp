@@ -36,9 +36,10 @@ namespace ASAP::Worklist::GUI
 		StoreSettings_();
 	}
 
-	void WorklistWindow::AttachWorkstation(PathologyWorkstation& workstation)
+	void WorklistWindow::AttachWorkstation(PathologyWorkstation& workstation, const int tab_id)
 	{
-		m_workstation_ = &workstation;
+		m_workstation_			= &workstation;
+		m_workstation_tab_id_	= tab_id;
 	}
 
 	WorklistWindowSettings WorklistWindow::GetStandardSettings(void)
@@ -485,6 +486,7 @@ namespace ASAP::Worklist::GUI
 		if (m_workstation_)
 		{
 			m_workstation_->openFile(image_handle);
+			RequiresTabSwitch(m_workstation_tab_id_);
 		}
 	}
 

@@ -13,10 +13,12 @@ int main(int argc, char *argv[])
 
 	ASAP::Worklist::GUI::WorklistWindow worklist;	
 	PathologyWorkstation workstation;
-	worklist.AttachWorkstation(workstation);
+	
 
 	main_window.AddTab(&worklist, "Worklist");
-	main_window.AddTab(&workstation, "Viewer");
+	int viewer_tab = main_window.AddTab(&workstation, "Viewer");
+
+	worklist.AttachWorkstation(workstation, viewer_tab);
 
 	return a.exec();
 }

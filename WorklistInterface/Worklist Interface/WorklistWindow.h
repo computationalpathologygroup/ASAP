@@ -28,7 +28,7 @@ namespace ASAP::Worklist::GUI
 			explicit WorklistWindow(QWidget* parent = 0);
 			~WorklistWindow(void);
 
-			void AttachWorkstation(PathologyWorkstation& workstation);
+			void AttachWorkstation(PathologyWorkstation& workstation, const int tab_id);
 			WorklistWindowSettings GetStandardSettings(void);
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
@@ -42,6 +42,7 @@ namespace ASAP::Worklist::GUI
 			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
 			WorklistWindowSettings									m_settings_;
 			PathologyWorkstation*									m_workstation_;
+			int														m_workstation_tab_id_;
 			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
 
 			QStandardItemModel* m_images_model_;

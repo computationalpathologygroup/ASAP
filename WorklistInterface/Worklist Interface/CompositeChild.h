@@ -9,10 +9,10 @@ namespace ASAP::Worklist::GUI
 		public:
 			CompositeChild(QWidget *parent);
 
-	/*	public slots:
-			virtual void IsCompositeChild(void) = 0;
+		/*public slots:
+			virtual void IsCompositeChild(void) = 0;*/
 
 		signals:
-			void RequiresContextSwitch(const std::string context_id);*/
+			void RequiresTabSwitch(int tab_id);
 	};
 }

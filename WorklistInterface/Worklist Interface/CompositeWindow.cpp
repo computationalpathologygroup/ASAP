@@ -12,12 +12,22 @@ namespace ASAP::Worklist::GUI
 		SetSlots_();
 	}
 
-	void CompositeWindow::AddTab(QMainWindow* window, const std::string tab_name)
+	int CompositeWindow::AddTab(QMainWindow* window, const std::string tab_name)
 	{
 		m_children_.push_back(window);
-		m_mapped_children_.insert({tab_name, window});
+		m_mapped_children_.insert({tab_name, m_children_.size() - 1});
+		int id = m_ui_->tabWidget->addTab(window, QString(tab_name.data()));
 
-		m_ui_->tabWidget->addTab(window, QString(tab_name.data()));
+		CompositeChild* child = dynamic_cast<CompositeChild*>(window);
+		if (child)
+		{
+			connect(child,
+					SIGNAL(RequiresTabSwitch(const std::string)),
+					this,
+					OnTabRequest_(std::string));
+		}
+
+		return id;
 	}
 
 	void CompositeWindow::SetSlots_(void)
@@ -43,5 +53,10 @@ namespace ASAP::Worklist::GUI
 		}
 
 		m_current_child_ = index;
+	}
+
+	void CompositeWindow::OnTabRequest_(int tab_id)
+	{
+		m_ui_->tabWidget->setCurrentIndex(tab_id);
 	}
 }
