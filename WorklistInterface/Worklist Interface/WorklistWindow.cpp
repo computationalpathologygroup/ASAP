@@ -267,7 +267,8 @@ namespace ASAP::Worklist::GUI
 		for (const std::string& prev_source : m_settings_.previous_sources)
 		{
 			m_history_actions_.push_back(std::unique_ptr<QAction>(new QAction(QString(prev_source.data()), this)));
-			
+			m_ui_->menu_history->addAction(m_history_actions_.back().get());
+
 			connect(m_history_actions_.back().get(),
 				&QAction::triggered,
 				this,
