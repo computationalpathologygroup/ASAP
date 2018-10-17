@@ -258,7 +258,24 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::UpdatePreviousSources_(void)
 	{
+		for (const std::unique_ptr<QAction>& action : m_history_actions_)
+		{
+			m_ui_->menu_history->removeAction(action.get());
+		}
+		m_history_actions_.clear();
 
+		for (const std::string& prev_source : m_settings_.previous_sources)
+		{
+			m_history_actions_.push_back(std::unique_ptr<QAction>(new QAction(QString(prev_source.data()), this)));
+			
+			connect(m_history_actions_.back().get(),
+				&QAction::triggered,
+				this,
+				[action = m_history_actions_.back().get(), this](bool checked)
+				{
+					this->SetDataSource(std::string(action->text().toUtf8().constData()));
+				});
+		}
 	}
 
 	void WorklistWindow::UpdateSourceViews_(void)
