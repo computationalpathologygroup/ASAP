@@ -18,6 +18,7 @@ namespace ASAP::Worklist::GUI
 			model_item->setData(QVariant(QString(record[1]->data())));
 			image_model->setItem(item, 0, model_item);
 		}
+		// TODO: Figure out why async view / model updating doesn't seem to refresh the image_view.
 		image_view->resize(image_view->width() - 1, image_view->height());
 		image_view->resize(image_view->width() + 1, image_view->height());
 	}
