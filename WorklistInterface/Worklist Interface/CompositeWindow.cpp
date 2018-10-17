@@ -42,7 +42,7 @@ namespace ASAP::Worklist::GUI
 	void CompositeWindow::OnTabChange_(int index)
 	{
 		// Stores the menu bar back into the originating child.
-		if (m_current_child_ > -1)
+		if (m_current_child_ > -1 && index > -1)
 		{
 			m_children_[m_current_child_]->setMenuBar(this->menuBar());
 		}
