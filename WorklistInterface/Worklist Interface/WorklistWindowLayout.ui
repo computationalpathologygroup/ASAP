@@ -191,7 +191,7 @@
    <addaction name="menu_start"/>
    <addaction name="menu_history"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="status_bar"/>
   <action name="action_open_file">
    <property name="text">
     <string>Open File</string>
