@@ -1,6 +1,7 @@
 #pragma once
 #include <deque>
 #include <memory>
+#include <unordered_map>
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
 
@@ -28,7 +29,7 @@ namespace ASAP::Worklist::GUI
 			void AttachWorkstation(PathologyWorkstation& workstation);
 			WorklistWindowSettings GetStandardSettings(void);
 
-			void SetDataSource(const std::string source_path);
+			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
 			void SetWorklistItems(const DataTable& items, QStandardItemModel* model);
 			void SetPatientsItems(const DataTable& items, QStandardItemModel* model);
 			void SetStudyItems(const DataTable& items, QStandardItemModel* model);

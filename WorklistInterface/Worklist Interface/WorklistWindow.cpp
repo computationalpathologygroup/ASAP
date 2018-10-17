@@ -27,7 +27,7 @@ namespace ASAP::Worklist::GUI
 		SetSlots_();
 		SetModels_();
 		LoadSettings_();
-		SetDataSource(m_settings_.source_location);
+		SetDataSource(m_settings_.source_location, std::unordered_map<std::string, std::string>());
 	}
 
 	WorklistWindow::~WorklistWindow(void)
@@ -45,39 +45,42 @@ namespace ASAP::Worklist::GUI
 		return WorklistWindowSettings();
 	}
 
-	void WorklistWindow::SetDataSource(const std::string source_path)
+	void WorklistWindow::SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params)
 	{
-		try
+		if (source_path != m_settings_.source_location)
 		{
-			// Attempts to load the data source and then confirms it has the required fields for the UI to function.
-			m_data_acquisition_ = Data::LoadDataSource(source_path);
-
-			if (!CheckSchema_(m_data_acquisition_.get()))
+			try
 			{
-				m_data_acquisition_.reset(nullptr);
-				throw std::runtime_error("Selected source has schema errors. Unable to open.");
+				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
+				m_data_acquisition_ = Data::LoadDataSource(source_path, additional_params);
+
+				if (!CheckSchema_(m_data_acquisition_.get()))
+				{
+					m_data_acquisition_.reset(nullptr);
+					throw std::runtime_error("Selected source has schema errors. Unable to open.");
+				}
+
+				m_settings_.source_location = source_path;
+
+				// Adds the new source to the previous sources.
+				auto already_added(std::find(m_settings_.previous_sources.begin(), m_settings_.previous_sources.end(), source_path));
+				if (already_added != m_settings_.previous_sources.end())
+				{
+					m_settings_.previous_sources.erase(already_added);
+				}
+				else if (m_settings_.previous_sources.size() == 5)
+				{
+					m_settings_.previous_sources.pop_back();
+				}
+				m_settings_.previous_sources.push_front(source_path);
+
+				UpdatePreviousSources_();
+				UpdateSourceViews_();
 			}
-
-			m_settings_.source_location = source_path;
-
-			// Adds the new source to the previous sources.
-			auto already_added(std::find(m_settings_.previous_sources.begin(), m_settings_.previous_sources.end(), source_path));
-			if (already_added != m_settings_.previous_sources.end())
+			catch (const std::exception& e)
 			{
-				m_settings_.previous_sources.erase(already_added);
+				QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
 			}
-			else if (m_settings_.previous_sources.size() == 5)
-			{
-				m_settings_.previous_sources.pop_back();
-			}
-			m_settings_.previous_sources.push_front(source_path);
-
-			UpdatePreviousSources_();
-			UpdateSourceViews_();
-		}
-		catch (const std::exception& e)
-		{
-			QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
 		}
 	}
 
@@ -274,7 +277,7 @@ namespace ASAP::Worklist::GUI
 				this,
 				[action = m_history_actions_.back().get(), this](bool checked)
 				{
-					this->SetDataSource(std::string(action->text().toUtf8().constData()));
+					this->SetDataSource(std::string(action->text().toUtf8().constData()), std::unordered_map<std::string, std::string>());
 				});
 		}
 	}
@@ -503,7 +506,7 @@ namespace ASAP::Worklist::GUI
 		
 		if (names.size() > 0)
 		{
-			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
+			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData(), std::unordered_map<std::string, std::string>());
 		}
 	}
 	
@@ -516,7 +519,7 @@ namespace ASAP::Worklist::GUI
 
 		if (names.size() > 0)
 		{
-			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData());
+			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData(), std::unordered_map<std::string, std::string>());
 		}
 	}
 
