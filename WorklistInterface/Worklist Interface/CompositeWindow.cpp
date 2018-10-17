@@ -22,9 +22,9 @@ namespace ASAP::Worklist::GUI
 		if (child)
 		{
 			connect(child,
-					SIGNAL(RequiresTabSwitch(const std::string)),
+					&CompositeChild::RequiresTabSwitch,
 					this,
-					OnTabRequest_(std::string));
+					&CompositeWindow::OnTabRequest_);
 		}
 
 		return id;
