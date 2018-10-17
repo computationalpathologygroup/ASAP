@@ -29,7 +29,6 @@ namespace ASAP::Worklist::GUI
 			~WorklistWindow(void);
 
 			void AttachWorkstation(PathologyWorkstation& workstation);
-			QMenuBar* GetMenuElement(void);
 			WorklistWindowSettings GetStandardSettings(void);
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);

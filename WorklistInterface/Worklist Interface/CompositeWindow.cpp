@@ -30,22 +30,16 @@ namespace ASAP::Worklist::GUI
 
 	void CompositeWindow::OnTabChange_(int index)
 	{
+		// Stores the menu bar back into the originating child.
 		if (m_current_child_ > -1)
 		{
-			CompositeChild* previous_window = dynamic_cast<CompositeChild*>(m_children_[m_current_child_]);
-			if (previous_window)
-			{
-				previous_window->setMenuBar(m_ui_->menu_bar);
-			}
+			m_children_[m_current_child_]->setMenuBar(this->menuBar());
 		}
 		
+		// Acquires the menu bar from the current child.
 		if (index > -1)
 		{
-			CompositeChild* current_window = dynamic_cast<CompositeChild*>(m_children_[index]);
-			if (current_window)
-			{
-				this->setMenuBar(current_window->GetMenuElement());
-			}
+			this->setMenuBar(m_children_[index]->menuBar());
 		}
 
 		m_current_child_ = index;

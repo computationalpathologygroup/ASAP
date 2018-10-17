@@ -9,8 +9,6 @@ namespace ASAP::Worklist::GUI
 		public:
 			CompositeChild(QWidget *parent);
 
-			virtual QMenuBar* GetMenuElement(void) = 0;
-
 	/*	public slots:
 			virtual void IsCompositeChild(void) = 0;
 
