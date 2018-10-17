@@ -8,6 +8,13 @@
 
 namespace ASAP::Worklist::GUI
 {
+	/// <summary>
+	/// Hosts QMainwindows in a unified window with a TabWidget to switch between
+	/// each child. If a MenuBar is available, it's placed ontop of the TabWidget.
+	///
+	/// For signal based context switching, the CompositeChild can be implemented
+	/// by a hosted window.
+	/// </summary>
 	class CompositeWindow : public QMainWindow
 	{
 		Q_OBJECT

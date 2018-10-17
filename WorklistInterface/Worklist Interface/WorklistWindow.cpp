@@ -485,8 +485,10 @@ namespace ASAP::Worklist::GUI
 
 		if (m_workstation_)
 		{
+			m_ui_->status_bar->showMessage("Loading image: " + image_handle);
 			m_workstation_->openFile(image_handle);
 			RequiresTabSwitch(m_workstation_tab_id_);
+			m_ui_->status_bar->showMessage("Finished loading image: " + image_handle);
 		}
 	}
 

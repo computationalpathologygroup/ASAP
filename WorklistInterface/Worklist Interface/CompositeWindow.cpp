@@ -18,6 +18,7 @@ namespace ASAP::Worklist::GUI
 		m_mapped_children_.insert({tab_name, m_children_.size() - 1});
 		int id = m_ui_->tabWidget->addTab(window, QString(tab_name.data()));
 
+		// Connects a TabRequest signal if the added tab has implemented the CompositeChild interface.
 		CompositeChild* child = dynamic_cast<CompositeChild*>(window);
 		if (child)
 		{
