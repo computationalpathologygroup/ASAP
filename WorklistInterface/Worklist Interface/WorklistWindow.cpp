@@ -51,6 +51,7 @@ namespace ASAP::Worklist::GUI
 		{
 			try
 			{
+				m_ui_->status_bar->showMessage("Loading source: " + QString(source_path.data()));
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
 				m_data_acquisition_ = Data::LoadDataSource(source_path, additional_params);
 
@@ -76,9 +77,11 @@ namespace ASAP::Worklist::GUI
 
 				UpdatePreviousSources_();
 				UpdateSourceViews_();
+				m_ui_->status_bar->showMessage("Succesfully loaded source: " + QString(source_path.data()));
 			}
 			catch (const std::exception& e)
 			{
+				m_ui_->status_bar->showMessage("Unable to load source: " + QString(source_path.data()));
 				QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
 			}
 		}
