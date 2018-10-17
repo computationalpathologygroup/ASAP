@@ -18,7 +18,8 @@ namespace ASAP::Worklist::GUI
 			model_item->setData(QVariant(QString(record[1]->data())));
 			image_model->setItem(item, 0, model_item);
 		}
-			image_view->repaint();
+		image_view->resize(image_view->width() - 1, image_view->height());
+		image_view->resize(image_view->width() + 1, image_view->height());
 	}
 
 	QIcon CreateIcon(const std::string& filepath, const size_t size)
