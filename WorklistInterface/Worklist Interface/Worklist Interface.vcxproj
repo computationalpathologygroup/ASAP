@@ -126,6 +126,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Serialization\INI.cpp" />
     <ClCompile Include="Serialization\JSON.cpp" />
+    <ClCompile Include="Serialization\Misc.cpp" />
     <ClCompile Include="WorklistWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,7 @@
     </ClInclude>
     <ClInclude Include="Serialization\INI.h" />
     <ClInclude Include="Serialization\JSON.h" />
+    <ClInclude Include="Serialization\Misc.h" />
     <QtMoc Include="CompositeWindow.h" />
     <ClInclude Include="Data\DataTable.h" />
     <ClInclude Include="Data\DjangoDataAcquisition.h" />

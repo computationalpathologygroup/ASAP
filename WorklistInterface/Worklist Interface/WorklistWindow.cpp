@@ -10,6 +10,7 @@
 
 #include "IconCreation.h"
 #include "Serialization/INI.h"
+#include "Serialization/Misc.h"
 #include "Data/SourceLoading.h"
 
 namespace ASAP::Worklist::GUI
@@ -47,7 +48,7 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params)
 	{
-		if (source_path != m_settings_.source_location)
+		if (!m_data_acquisition_ || source_path != m_settings_.source_location)
 		{
 			try
 			{
@@ -215,24 +216,12 @@ namespace ASAP::Worklist::GUI
 
 			// Acquires the five most recent sources.
 			auto previous_sources_value(values.find("previous_sources"));
-			if (previous_sources_value != values.end())
+			if (previous_sources_value != values.end() && !previous_sources_value->second.empty())
 			{
-				if (!previous_sources_value->second.empty())
+				std::vector<std::string> split_sources(Serialization::Misc::Split(previous_sources_value->second));
+				for (const std::string& source : split_sources)
 				{
-					size_t current_loc = 0;
-					size_t comma_loc = previous_sources_value->second.find_first_of(',');
-					while (comma_loc != std::string::npos)
-					{
-						m_settings_.previous_sources.push_back(previous_sources_value->second.substr(current_loc + 1, comma_loc - 2));
-						current_loc = comma_loc + 1;
-						comma_loc = previous_sources_value->second.find_first_of(',', current_loc);
-					}
-
-					std::string final_source = previous_sources_value->second.substr(current_loc);
-					if (!final_source.empty())
-					{
-						m_settings_.previous_sources.push_back(final_source);
-					}
+					m_settings_.previous_sources.push_back(source);
 				}
 			}
 		}
