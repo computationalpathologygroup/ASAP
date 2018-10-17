@@ -18,5 +18,8 @@ namespace ASAP::Worklist::GUI
 
 		private:
 			std::unique_ptr<Ui::CompositeWindowLayout> m_ui_;
+
+		private slots:
+			void OnTabChange_(int index);
 	};
 }

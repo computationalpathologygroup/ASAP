@@ -15,8 +15,8 @@
 
 namespace ASAP::Worklist::GUI
 {
-	WorklistWindow::WorklistWindow(QWidget *parent) :
-		QMainWindow(parent),
+	WorklistWindow::WorklistWindow(QWidget* parent) :
+		CompositeChild(parent),
 		m_ui_(new Ui::WorklistWindowLayout),
 		m_data_acquisition_(nullptr),
 		m_images_model_(new QStandardItemModel(0, 0)),
@@ -57,8 +57,8 @@ namespace ASAP::Worklist::GUI
 		{
 			try
 			{
-				m_ui_->status_bar->showMessage("Loading source: " + QString(source_path.data()));
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
+				m_ui_->status_bar->showMessage("Loading source: " + QString(source_path.data()));
 				m_data_acquisition_ = Data::LoadDataSource(source_path, additional_params);
 
 				if (!CheckSchema_(m_data_acquisition_.get()))

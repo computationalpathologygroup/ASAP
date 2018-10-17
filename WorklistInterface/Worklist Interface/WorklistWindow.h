@@ -20,7 +20,7 @@ namespace ASAP::Worklist::GUI
 		std::deque<std::string>	previous_sources;
 	};
 
-	class WorklistWindow : public QMainWindow, public CompositeChild
+	class WorklistWindow : public CompositeChild // public QMainWindow,
 	{
 		Q_OBJECT
 
