@@ -50,13 +50,20 @@ namespace ASAP::Worklist::GUI
 				image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
 			}
 
-			QImage image(dimensions[0], dimensions[1], QImage::Format::Format_BGR30);
+			// Gets the largest dimension and creates an offset for the smallest.
+			size_t max_dim = std::max(dimensions[0], dimensions[1]);
+			std::pair<size_t, size_t> offsets;
+			offsets.first = dimensions[0] == max_dim ? 0 : dimensions[0] / 2;
+			offsets.first = dimensions[1] == max_dim ? 0 : dimensions[1] / 2;
+			
+
+			QImage image(max_dim, max_dim, QImage::Format::Format_BGR30);
 			size_t base_index = 0;
 			for (size_t y = 0; y < dimensions[1]; ++y)
 			{
 				for (size_t x = 0; x < dimensions[0]; ++x)
 				{
-					image.setPixel(x, y, qRgb(data[base_index + 2], data[base_index + 1], data[base_index]));
+					image.setPixel(x + offsets.first, y + offsets.second, qRgb(data[base_index + 2], data[base_index + 1], data[base_index]));
 					base_index += 3;
 				}
 			}
