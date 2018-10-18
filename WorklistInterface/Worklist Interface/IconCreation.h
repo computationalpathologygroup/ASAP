@@ -26,6 +26,7 @@ namespace ASAP::Worklist::GUI
 			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size);
 
 		private:
+			bool		m_message_shown_;
 			std::mutex	m_next_message_access_;
 			QString		m_next_message_;
 			QStatusBar*	m_status_bar_;

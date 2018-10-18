@@ -15,12 +15,15 @@ namespace ASAP::Worklist::GUI
 
 	IconCreator::~IconCreator(void)
 	{
-		m_next_message_access_.lock();
-		m_next_message_access_.unlock();
+		//m_next_message_access_.lock();
+		//m_next_message_access_.unlock();
 	}
 
 	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size)
 	{
+		m_message_shown_ = true;
+		m_status_bar_ = status_bar;
+
 		// Stops the message bar from being overriden during a message writing.
 		connect(status_bar,
 				&QStatusBar::messageChanged,
@@ -34,8 +37,18 @@ namespace ASAP::Worklist::GUI
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
 			m_next_message_access_.lock();
-			m_next_message_ = "Loading " + QString(std::to_string(item).data()) + "out of " + total_size;
-			m_next_message_access_.unlock();			
+			bool shown = m_message_shown_;
+			m_next_message_access_.unlock();
+			if (m_status_bar_ && shown)
+			{
+				m_next_message_access_.lock();
+				m_message_shown_ = false;
+				m_next_message_access_.unlock();
+
+				m_next_message_ = "Loading " + QString(std::to_string(item).data()) + " out of " + total_size;
+				m_status_bar_->showMessage(m_next_message_);
+			}
+						
 
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 			try
@@ -109,10 +122,11 @@ namespace ASAP::Worklist::GUI
 	void IconCreator::OnMessageChanged_(const QString& text)
 	{
 		m_next_message_access_.lock();
-		if (text != m_next_message_)
+		m_message_shown_ = true;
+		/*if (text != m_next_message_)
 		{
 			m_status_bar_->showMessage(m_next_message_);
-		}
+		}*/
 		m_next_message_access_.unlock();
 	}
 }
