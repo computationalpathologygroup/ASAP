@@ -51,25 +51,26 @@ namespace ASAP::Worklist::GUI
 			}
 
 			// Gets the largest dimension and creates an offset for the smallest.
-			size_t max_dim = std::max(dimensions[0], dimensions[1]);
-			std::pair<size_t, size_t> offsets;
-			offsets.first = dimensions[0] == max_dim ? 0 : dimensions[0] / 2;
-			offsets.first = dimensions[1] == max_dim ? 0 : dimensions[1] / 2;
-			
+			unsigned long long max_dim	= std::max(dimensions[0], dimensions[1]);
+			size_t offset_x				= dimensions[0] == max_dim ? 0 : (dimensions[1] - dimensions[0]) / 2;
+			size_t offset_y				= dimensions[1] == max_dim ? 0 : (dimensions[0] - dimensions[1]) / 2;
 
 			QImage image(max_dim, max_dim, QImage::Format::Format_BGR30);
+			image.fill(Qt::white);
+
+			// Writes the multiresolution pixel data into the image.
 			size_t base_index = 0;
 			for (size_t y = 0; y < dimensions[1]; ++y)
 			{
 				for (size_t x = 0; x < dimensions[0]; ++x)
 				{
-					image.setPixel(x + offsets.first, y + offsets.second, qRgb(data[base_index + 2], data[base_index + 1], data[base_index]));
+					image.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index + 2], data[base_index + 1], data[base_index]));
 					base_index += 3;
 				}
 			}
 
 			delete data;
-			QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+			QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
 			return QIcon(pixmap);
 		}
 		else
