@@ -9,28 +9,24 @@
 
 namespace ASAP::Worklist::GUI
 {
-	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, QListView* image_view, const size_t size)
+	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
 	{
-		QList<QStandardItem*> items_to_insert;
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
-
 			try
 			{
-				items_to_insert.push_back(new QStandardItem(CreateIcon(*record[1], size), QString(record[2]->data())));
-				items_to_insert.back()->setData(QVariant(QString(record[1]->data())));
+				QStandardItem* standard_item(new QStandardItem(CreateIcon(*record[1], size), QString(record[2]->data())));
+				standard_item->setData(QVariant(QString(record[1]->data())));
+
+				image_model->setRowCount(image_model->rowCount() + 1);
+				image_model->setItem(image_model->rowCount() - 1, 0, standard_item);
 			}
 			catch (const std::exception& e)
 			{
 				// Ignore icon creation.
 			}
 		}
-		image_model->insertColumn(0, items_to_insert);
-
-		// TODO: Figure out why async view / model updating doesn't seem to refresh the image_view.
-		image_view->resize(image_view->width() - 1, image_view->height());
-		image_view->resize(image_view->width() + 1, image_view->height());
 	}
 
 	QIcon CreateIcon(const std::string& filepath, const size_t size)

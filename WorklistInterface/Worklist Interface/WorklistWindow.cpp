@@ -155,25 +155,9 @@ namespace ASAP::Worklist::GUI
 	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
-		model->setRowCount(items.Size());
-
-	/*	std::vector<std::pair<QStandardItem*, std::string>> icon_items;
-		for (size_t item = 0; item < items.Size(); ++item)
-		{
-			std::vector<const std::string*> record(items.At(item, { "id", "location", "title" }));
-
-			QStandardItem* model_item = new QStandardItem(CreateIcon(*record[1], 200), QString(record[2]->data()));
-			model_item->setData(QVariant(QString(record[1]->data())));
-			model->setItem(item, 0, model_item);
-
-			icon_items.push_back({ model_item, *record[1] });
-		}*/
-
-		
-
 		QtConcurrent::run([items, model, view=m_ui_->view_images, size=200]()
 		{
-			CreateIcons(items, model, view, 200);
+			CreateIcons(items, model, 200);
 		});
 	}
 
