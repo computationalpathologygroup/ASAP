@@ -14,8 +14,8 @@ namespace ASAP::Worklist::GUI
 		{
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 
-			QIcon icon(CreateIcon(*record[1], size));
-			if (!icon.isNull())
+			QIcon* icon(CreateIcon(*record[1], size));
+			if (icon)
 			{
 				QStandardItem* model_item = new QStandardItem(icon, QString(record[2]->data()));
 				model_item->setData(QVariant(QString(record[1]->data())));
@@ -27,9 +27,9 @@ namespace ASAP::Worklist::GUI
 		image_view->resize(image_view->width() + 1, image_view->height());
 	}
 
-	QIcon CreateIcon(const std::string& filepath, const size_t size)
+	QIcon* CreateIcon(const std::string& filepath, const size_t size)
 	{
-		QIcon icon;
+		QIcon* icon = nullptr;
 		bool encountered_error = false;
 
 		try
@@ -66,7 +66,7 @@ namespace ASAP::Worklist::GUI
 
 				delete data;
 				QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
-				icon = QIcon(pixmap);
+				icon = new QIcon(pixmap);
 			}
 			else
 			{
