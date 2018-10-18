@@ -9,10 +9,15 @@
 
 namespace ASAP::Worklist::GUI
 {
-	void CreateIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
+	void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size)
 	{
+		QString total_size(std::to_string(image_items.Size()).data());
+		QString current;
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
+			current = QString(std::to_string(item).data());
+			status_bar->showMessage("Loading " + current + "out of " + total_size);
+
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 			try
 			{
@@ -27,6 +32,7 @@ namespace ASAP::Worklist::GUI
 				// Ignore icon creation.
 			}
 		}
+		status_bar->showMessage("Finished thumbnail loading.");
 	}
 
 	QIcon CreateIcon(const std::string& filepath, const size_t size)

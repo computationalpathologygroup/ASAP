@@ -155,9 +155,9 @@ namespace ASAP::Worklist::GUI
 	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
-		QtConcurrent::run([items, model, view=m_ui_->view_images, size=200]()
+		QtConcurrent::run([items, model, status_bar=m_ui_->status_bar, size=200]()
 		{
-			CreateIcons(items, model, 200);
+			InsertIcons(items, model, status_bar, 200);
 		});
 	}
 
@@ -376,6 +376,11 @@ namespace ASAP::Worklist::GUI
 
 		connect(m_ui_->view_images,
 			SIGNAL(clicked(QModelIndex)),
+			this,
+			SLOT(OnImageSelect_(QModelIndex)));
+
+		connect(m_ui_->view_images,
+			SIGNAL(activated(QModelIndex)),
 			this,
 			SLOT(OnImageSelect_(QModelIndex)));
 
