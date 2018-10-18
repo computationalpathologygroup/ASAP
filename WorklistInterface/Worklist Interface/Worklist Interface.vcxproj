@@ -162,10 +162,10 @@
     <ClInclude Include="Data\DirectoryDataAcquisition.h" />
     <ClInclude Include="Data\FilelistDataAcquisition.h" />
     <ClInclude Include="Data\SourceLoading.h" />
-    <ClInclude Include="IconCreation.h">
+    <QtMoc Include="IconCreation.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\Build\ASAP\io\multiresolutionimageinterface;.\..\ASAP\core;.\..\ASAP</IncludePath>
-    </ClInclude>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP\include</IncludePath>
+    </QtMoc>
     <ClInclude Include="Serialization\INI.h" />
     <ClInclude Include="Serialization\JSON.h" />
     <ClInclude Include="Serialization\Misc.h" />

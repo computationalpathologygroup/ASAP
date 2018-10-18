@@ -9,19 +9,38 @@
 
 namespace ASAP::Worklist::GUI
 {
-	void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size)
+	IconCreator::IconCreator(void)
 	{
+	}
+
+	IconCreator::~IconCreator(void)
+	{
+		m_next_message_access_.lock();
+		m_next_message_access_.unlock();
+	}
+
+	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size)
+	{
+		// Stops the message bar from being overriden during a message writing.
+		connect(status_bar,
+				&QStatusBar::messageChanged,
+				this,
+				&IconCreator::OnMessageChanged_);
+
+		// TODO: Create placeholders
+
+		// Fills the placerholders
 		QString total_size(std::to_string(image_items.Size()).data());
-		QString current;
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
-			current = QString(std::to_string(item).data());
-			status_bar->showMessage("Loading " + current + "out of " + total_size);
+			m_next_message_access_.lock();
+			m_next_message_ = "Loading " + QString(std::to_string(item).data()) + "out of " + total_size;
+			m_next_message_access_.unlock();			
 
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 			try
 			{
-				QStandardItem* standard_item(new QStandardItem(CreateIcon(*record[1], size), QString(record[2]->data())));
+				QStandardItem* standard_item(new QStandardItem(CreateIcon_(*record[1], size), QString(record[2]->data())));
 				standard_item->setData(QVariant(QString(record[1]->data())));
 
 				image_model->setRowCount(image_model->rowCount() + 1);
@@ -32,10 +51,12 @@ namespace ASAP::Worklist::GUI
 				// Ignore icon creation.
 			}
 		}
-		status_bar->showMessage("Finished thumbnail loading.");
+
+		m_next_message_.clear();
+		m_status_bar_ = nullptr;
 	}
 
-	QIcon CreateIcon(const std::string& filepath, const size_t size)
+	QIcon IconCreator::CreateIcon_(const std::string& filepath, const size_t size)
 	{
 		MultiResolutionImageReader reader;
 		std::unique_ptr<MultiResolutionImage> image(reader.open(filepath));
@@ -83,5 +104,15 @@ namespace ASAP::Worklist::GUI
 		{
 			throw std::runtime_error("Unable to read image: " + filepath);
 		}
+	}
+
+	void IconCreator::OnMessageChanged_(const QString& text)
+	{
+		m_next_message_access_.lock();
+		if (text != m_next_message_)
+		{
+			m_status_bar_->showMessage(m_next_message_);
+		}
+		m_next_message_access_.unlock();
 	}
 }

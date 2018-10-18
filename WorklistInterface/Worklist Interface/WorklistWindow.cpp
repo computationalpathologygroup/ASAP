@@ -157,7 +157,8 @@ namespace ASAP::Worklist::GUI
 		model->removeRows(0, model->rowCount());
 		QtConcurrent::run([items, model, status_bar=m_ui_->status_bar, size=200]()
 		{
-			InsertIcons(items, model, status_bar, 200);
+			IconCreator creator;
+			creator.InsertIcons(items, model, status_bar, 200);
 		});
 	}
 

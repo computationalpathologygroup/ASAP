@@ -87,6 +87,9 @@
     <QtMoc Include="CompositeChild.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="IconCreation.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Data\DataTable.h">
@@ -102,9 +105,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Data\DirectoryDataAcquisition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IconCreation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Data\FilelistDataAcquisition.h">
