@@ -62,7 +62,7 @@ namespace ASAP::Worklist::GUI
 			}
 
 			delete data;
-			QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
+			QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatioByExpanding));
 			return QIcon(pixmap);
 		}
 		else
