@@ -14,9 +14,13 @@ namespace ASAP::Worklist::GUI
 		{
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 
-			QStandardItem* model_item = new QStandardItem(CreateIcon(*record[1], size), QString(record[2]->data()));
-			model_item->setData(QVariant(QString(record[1]->data())));
-			image_model->setItem(item, 0, model_item);
+			QIcon icon(CreateIcon(*record[1], size));
+			if (!icon.isNull())
+			{
+				QStandardItem* model_item = new QStandardItem(icon, QString(record[2]->data()));
+				model_item->setData(QVariant(QString(record[1]->data())));
+				image_model->setItem(item, 0, model_item);
+			}
 		}
 		// TODO: Figure out why async view / model updating doesn't seem to refresh the image_view.
 		image_view->resize(image_view->width() - 1, image_view->height());
@@ -72,16 +76,6 @@ namespace ASAP::Worklist::GUI
 		catch (const std::exception& e)
 		{
 			encountered_error = true;
-		}
-
-		if (encountered_error)
-		{
-			QPixmap pixmap(QString(filepath.data()));
-			if (pixmap.isNull())
-			{
-				pixmap = QPixmap(QString("./img/unavailable.png"));
-			}
-			icon = QIcon(pixmap);
 		}
 
 		return icon;
