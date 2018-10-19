@@ -414,21 +414,34 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::MoveImageSelectionLeft(void)
 	{
+		m_image_switch_access_.lock();
 		QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
 		if (indexes[0].row() > 0)
 		{
 			m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() - 1, 0), QItemSelectionModel::SelectCurrent);
+			m_image_switch_access_.unlock();
 			m_ui_->view_images->activated(m_images_model_->index(indexes[0].row() - 1, 0));
+		}
+		else
+		{
+			m_image_switch_access_.unlock();
 		}
 	}
 
 	void WorklistWindow::MoveImageSelectionRight(void)
 	{
+		m_image_switch_access_.lock();
 		QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
 		if (indexes[0].row() < m_images_model_->rowCount() - 1)
 		{
+			
 			m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() + 1, 0), QItemSelectionModel::SelectCurrent);
+			m_image_switch_access_.unlock();
 			m_ui_->view_images->activated(m_images_model_->index(indexes[0].row() + 1, 0));
+		}
+		else
+		{
+			m_image_switch_access_.unlock();
 		}
 	}
 
@@ -513,6 +526,7 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::OnImageSelect_(QModelIndex index)
 	{
+		m_image_switch_access_.lock();
 		QStandardItem* item(m_images_model_->itemFromIndex(index));
 		QString image_handle = item->data().toString();
 
@@ -523,6 +537,7 @@ namespace ASAP::Worklist::GUI
 			RequiresTabSwitch(m_workstation_tab_id_);
 			m_ui_->statusBar->showMessage("Finished loading image: " + image_handle);
 		}
+		m_image_switch_access_.unlock();
 	}
 
 	void WorklistWindow::OnSelectFileSource_(bool checked)
