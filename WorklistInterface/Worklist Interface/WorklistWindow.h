@@ -38,7 +38,8 @@ namespace ASAP::Worklist::GUI
 			void SetImageItems(const DataTable& items, QStandardItemModel* model);
 
 		public slots:
-			void MoveSelectionLeft(void);
+			void MoveImageSelectionLeft(void);
+			void MoveImageSelectionRight(void);
 			void UpdateImageIcons(void);
 			void UpdateStatusBar(const QString& message);
 

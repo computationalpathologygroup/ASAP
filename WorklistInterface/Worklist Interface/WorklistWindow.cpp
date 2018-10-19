@@ -412,9 +412,24 @@ namespace ASAP::Worklist::GUI
 			&WorklistWindow::OnSelectExternalSource_);
 	}
 
-	void WorklistWindow::MoveSelectionLeft(void)
+	void WorklistWindow::MoveImageSelectionLeft(void)
 	{
+		QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
+		if (indexes[0].row() > 0)
+		{
+			m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() - 1, 0), QItemSelectionModel::SelectCurrent);
+			m_ui_->view_images->activated(m_images_model_->index(indexes[0].row() - 1, 0));
+		}
+	}
 
+	void WorklistWindow::MoveImageSelectionRight(void)
+	{
+		QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
+		if (indexes[0].row() < m_images_model_->rowCount() - 1)
+		{
+			m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() + 1, 0), QItemSelectionModel::SelectCurrent);
+			m_ui_->view_images->activated(m_images_model_->index(indexes[0].row() + 1, 0));
+		}
 	}
 
 	void WorklistWindow::UpdateImageIcons(void)

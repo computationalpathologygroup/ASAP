@@ -20,8 +20,14 @@ int main(int argc, char *argv[])
 	std::vector<ASAP::Worklist::GUI::ShortcutAction> worklist_shortcuts;
 	worklist_shortcuts.push_back(
 	{
-		std::function<void(void)>(std::bind(&ASAP::Worklist::GUI::WorklistWindow::MoveSelectionLeft, &worklist)),
+		std::function<void(void)>(std::bind(&ASAP::Worklist::GUI::WorklistWindow::MoveImageSelectionLeft, &worklist)),
 		QKeySequence(Qt::CTRL + Qt::Key_Left)
+	});
+
+	worklist_shortcuts.push_back(
+	{
+		std::function<void(void)>(std::bind(&ASAP::Worklist::GUI::WorklistWindow::MoveImageSelectionRight, &worklist)),
+		QKeySequence(Qt::CTRL + Qt::Key_Right)
 	});
 
 	// Adds the tabs to the composite window and then connects the viewer to the worklist
