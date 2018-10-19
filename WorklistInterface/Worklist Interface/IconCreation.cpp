@@ -44,10 +44,7 @@ namespace ASAP::Worklist::GUI
 			}
 
 			// Signals the model that the item has had a certain amount of icon changes.
-			if (item % 5)
-			{
-				RequiresItemRefresh();
-			}
+			RequiresItemRefresh();
 		}
 
 		RequiresItemRefresh();
