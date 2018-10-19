@@ -14,6 +14,9 @@ namespace ASAP::Worklist::GUI
 		public:
 			CompositeChild(QWidget *parent);
 
+		public slots:
+
+
 		signals:
 			void RequiresTabSwitch(int tab_id);
 	};

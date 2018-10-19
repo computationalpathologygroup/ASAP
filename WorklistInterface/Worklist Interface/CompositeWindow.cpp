@@ -1,7 +1,5 @@
 #include "CompositeWindow.h"
 
-#include "CompositeChild.h"
-
 namespace ASAP::Worklist::GUI
 {
 	CompositeWindow::CompositeWindow(QWidget* parent) : QMainWindow(parent), m_ui_(new Ui::CompositeWindowLayout), m_current_child_(-1)
@@ -29,6 +27,17 @@ namespace ASAP::Worklist::GUI
 		}
 
 		return id;
+	}
+
+	int CompositeWindow::AddTab(CompositeChild* window, const std::string tab_name, std::vector<QKeySequence>& shortscuts)
+	{
+	
+		return AddTab(window, tab_name);
+	}
+
+	void CompositeWindow::RegisterKeySequence_(const CompositeChild* window, const QKeySequence& sequence)
+	{
+	//	new QShortcut(sequence, window, )
 	}
 
 	void CompositeWindow::SetSlots_(void)
