@@ -27,8 +27,10 @@ namespace ASAP::Worklist::GUI
 		
 		private:
 			QIcon CreateBlankIcon_(const size_t size);
+			QIcon CreateInvalidIcon_(const size_t size);
 
 		signals:
 			void RequiresStatusBarChange(const QString& message);
+			void RequiresItemRefresh();
 	};
 }

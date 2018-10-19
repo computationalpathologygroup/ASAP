@@ -15,12 +15,15 @@ namespace ASAP::Worklist::GUI
 
 	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
 	{
+		QIcon placeholder_icon(CreateBlankIcon_(size));
+		QIcon invalid_icon(CreateInvalidIcon_(size));
+
 		// Creates placeholder items
 		image_model->setRowCount(image_items.Size());
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(image_items.At(item, { "location", "title" }));
-			QStandardItem* standard_item(new QStandardItem(CreateBlankIcon_(size), QString(record[1]->data())));
+			QStandardItem* standard_item(new QStandardItem(placeholder_icon, QString(record[1]->data())));
 			standard_item->setData(QVariant(QString(record[0]->data())));
 			image_model->setItem(item, 0, standard_item);
 		}
@@ -37,10 +40,8 @@ namespace ASAP::Worklist::GUI
 			}
 			catch (const std::exception& e)
 			{
-				// Ignore icon creation.
+				image_model->item(item, 0)->setIcon(invalid_icon);
 			}
-
-			
 
 			// Signals the model that the item has had its icon changed.
 
@@ -103,5 +104,20 @@ namespace ASAP::Worklist::GUI
 		QImage image(size, size, QImage::Format::Format_BGR30);
 		image.fill(Qt::white);
 		return QIcon(QPixmap::fromImage(image));
+	}
+
+	QIcon IconCreator::CreateInvalidIcon_(const size_t size)
+	{
+		QImage image(10, 10, QImage::Format::Format_BGR30);
+		image.fill(Qt::white);
+		for (size_t p = 0; p < 10; ++p)
+		{
+			image.setPixel(p, p, Qt::black);
+		}
+		for (size_t p = 9; p >= 0; ++p)
+		{
+			image.setPixel(p, p, Qt::black);
+		}
+		return QIcon(QPixmap::fromImage(image).scaled(size, size));
 	}
 }
