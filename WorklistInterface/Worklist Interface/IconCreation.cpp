@@ -43,9 +43,14 @@ namespace ASAP::Worklist::GUI
 				image_model->item(item, 0)->setIcon(invalid_icon);
 			}
 
-			// Signals the model that the item has had its icon changed.
-
+			// Signals the model that the item has had a certain amount of icon changes.
+			if (item % 5)
+			{
+				RequiresItemRefresh();
+			}
 		}
+
+		RequiresItemRefresh();
 		RequiresStatusBarChange("Finished loading thumbnails");
 	}
 

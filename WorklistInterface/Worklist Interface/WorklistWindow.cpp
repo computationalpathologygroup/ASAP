@@ -160,6 +160,11 @@ namespace ASAP::Worklist::GUI
 			IconCreator creator;
 
 			connect(&creator,
+					&IconCreator::RequiresItemRefresh,
+					this,
+					&WorklistWindow::UpdateImageIcons);
+
+			connect(&creator,
 					&IconCreator::RequiresStatusBarChange,
 					this,
 					&WorklistWindow::UpdateStatusBar);
@@ -405,6 +410,11 @@ namespace ASAP::Worklist::GUI
 			&QAction::triggered,
 			this,
 			&WorklistWindow::OnSelectExternalSource_);
+	}
+
+	void WorklistWindow::UpdateImageIcons(void)
+	{
+		m_images_model_->layoutChanged();
 	}
 
 	void WorklistWindow::UpdateStatusBar(const QString& message)

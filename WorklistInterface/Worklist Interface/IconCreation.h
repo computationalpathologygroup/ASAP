@@ -31,6 +31,6 @@ namespace ASAP::Worklist::GUI
 
 		signals:
 			void RequiresStatusBarChange(const QString& message);
-			void RequiresItemRefresh();
+			void RequiresItemRefresh(void);
 	};
 }

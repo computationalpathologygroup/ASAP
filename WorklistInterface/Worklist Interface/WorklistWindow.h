@@ -37,7 +37,9 @@ namespace ASAP::Worklist::GUI
 			void SetStudyItems(const DataTable& items, QStandardItemModel* model);
 			void SetImageItems(const DataTable& items, QStandardItemModel* model);
 
-		void UpdateStatusBar(const QString& message);
+		public slots:
+			void UpdateImageIcons(void);
+			void UpdateStatusBar(const QString& message);
 
 		private:
 			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
