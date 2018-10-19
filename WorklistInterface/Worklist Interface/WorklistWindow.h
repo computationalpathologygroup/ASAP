@@ -37,6 +37,8 @@ namespace ASAP::Worklist::GUI
 			void SetStudyItems(const DataTable& items, QStandardItemModel* model);
 			void SetImageItems(const DataTable& items, QStandardItemModel* model);
 
+		void UpdateStatusBar(const QString& message);
+
 		private:
 			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
 			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
@@ -73,6 +75,5 @@ namespace ASAP::Worklist::GUI
 			void OnSelectFileSource_(bool checked);
 			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
-			void UpdateStatusBar_(const QString& message);
 	};
 }

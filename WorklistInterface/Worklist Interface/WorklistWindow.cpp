@@ -159,10 +159,10 @@ namespace ASAP::Worklist::GUI
 		{
 			IconCreator creator;
 
-			connect(creator,
+			connect(&creator,
 					&IconCreator::RequiresStatusBarChange,
 					this,
-					&WorklistWindow::UpdateStatusBar_);
+					&WorklistWindow::UpdateStatusBar);
 
 			creator.InsertIcons(items, model, size);
 		});
@@ -407,6 +407,11 @@ namespace ASAP::Worklist::GUI
 			&WorklistWindow::OnSelectExternalSource_);
 	}
 
+	void WorklistWindow::UpdateStatusBar(const QString& message)
+	{
+		m_ui_->statusBar->showMessage(message);
+	}
+
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
 	{
 		m_patients_model_->removeRows(0, m_patients_model_->rowCount());
@@ -520,10 +525,5 @@ namespace ASAP::Worklist::GUI
 	void WorklistWindow::OnSelectExternalSource_(bool checked)
 	{
 
-	}
-
-	void WorklistWindow::UpdateStatusBar_(const QString& message)
-	{
-		m_ui_->statusBar->showMessage(message);
 	}
 }
