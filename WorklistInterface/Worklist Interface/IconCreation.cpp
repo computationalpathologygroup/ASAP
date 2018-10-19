@@ -23,7 +23,7 @@ namespace ASAP::Worklist::GUI
 			std::vector<const std::string*> record(image_items.At(item, { "id", "title" }));
 			standard_items.push_back(new QStandardItem(CreateBlankIcon_(size), QString(record[1]->data())));
 			standard_items.back()->setData(QVariant(QString(record[0]->data())));
-			image_model->setItem(image_model->rowCount() - 1, 0, standard_items.back());
+			image_model->setItem(item, 0, standard_items.back());
 		}
 
 		// Fills the placeholders		
