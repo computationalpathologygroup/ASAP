@@ -54,7 +54,7 @@ namespace ASAP::Worklist::GUI
 			try
 			{
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
-				m_ui_->status_bar->showMessage("Loading source: " + QString(source_path.data()));
+				m_ui_->statusBar->showMessage("Loading source: " + QString(source_path.data()));
 				m_data_acquisition_ = Data::LoadDataSource(source_path, additional_params);
 
 				if (!CheckSchema_(m_data_acquisition_.get()))
@@ -79,11 +79,11 @@ namespace ASAP::Worklist::GUI
 
 				UpdatePreviousSources_();
 				UpdateSourceViews_();
-				m_ui_->status_bar->showMessage("Succesfully loaded source: " + QString(source_path.data()));
+				m_ui_->statusBar->showMessage("Succesfully loaded source: " + QString(source_path.data()));
 			}
 			catch (const std::exception& e)
 			{
-				m_ui_->status_bar->showMessage("Unable to load source: " + QString(source_path.data()));
+				m_ui_->statusBar->showMessage("Unable to load source: " + QString(source_path.data()));
 				QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
 			}
 		}
@@ -155,10 +155,16 @@ namespace ASAP::Worklist::GUI
 	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
-		QtConcurrent::run([items, model, status_bar=m_ui_->status_bar, size=200]()
+		QtConcurrent::run([this, items, model, size=200]()
 		{
 			IconCreator creator;
-			creator.InsertIcons(items, model, status_bar, 200);
+
+			connect(creator,
+					&IconCreator::RequiresStatusBarChange,
+					this,
+					&WorklistWindow::UpdateStatusBar_);
+
+			creator.InsertIcons(items, model, size);
 		});
 	}
 
@@ -477,10 +483,10 @@ namespace ASAP::Worklist::GUI
 
 		if (m_workstation_)
 		{
-			m_ui_->status_bar->showMessage("Loading image: " + image_handle);
+			m_ui_->statusBar->showMessage("Loading image: " + image_handle);
 			m_workstation_->openFile(image_handle);
 			RequiresTabSwitch(m_workstation_tab_id_);
-			m_ui_->status_bar->showMessage("Finished loading image: " + image_handle);
+			m_ui_->statusBar->showMessage("Finished loading image: " + image_handle);
 		}
 	}
 
@@ -514,5 +520,10 @@ namespace ASAP::Worklist::GUI
 	void WorklistWindow::OnSelectExternalSource_(bool checked)
 	{
 
+	}
+
+	void WorklistWindow::UpdateStatusBar_(const QString& message)
+	{
+		m_ui_->statusBar->showMessage(message);
 	}
 }

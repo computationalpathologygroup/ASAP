@@ -13,42 +13,15 @@ namespace ASAP::Worklist::GUI
 	{
 	}
 
-	IconCreator::~IconCreator(void)
+	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
 	{
-		//m_next_message_access_.lock();
-		//m_next_message_access_.unlock();
-	}
-
-	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size)
-	{
-		m_message_shown_ = true;
-		m_status_bar_ = status_bar;
-
-		// Stops the message bar from being overriden during a message writing.
-		connect(status_bar,
-				&QStatusBar::messageChanged,
-				this,
-				&IconCreator::OnMessageChanged_);
-
 		// TODO: Create placeholders
 
 		// Fills the placerholders
 		QString total_size(std::to_string(image_items.Size()).data());
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
-			m_next_message_access_.lock();
-			bool shown = m_message_shown_;
-			m_next_message_access_.unlock();
-			if (m_status_bar_ && shown)
-			{
-				m_next_message_access_.lock();
-				m_message_shown_ = false;
-				m_next_message_access_.unlock();
-
-				m_next_message_ = "Loading " + QString(std::to_string(item).data()) + " out of " + total_size;
-				m_status_bar_->showMessage(m_next_message_);
-			}
-						
+			RequiresStatusBarChange("Loading " + QString::fromStdString(std::to_string(item)) + " out of " + total_size);
 
 			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 			try
@@ -64,9 +37,7 @@ namespace ASAP::Worklist::GUI
 				// Ignore icon creation.
 			}
 		}
-
-		m_next_message_.clear();
-		m_status_bar_ = nullptr;
+		RequiresStatusBarChange("Finished loading thumbnails");
 	}
 
 	QIcon IconCreator::CreateIcon_(const std::string& filepath, const size_t size)
@@ -117,16 +88,5 @@ namespace ASAP::Worklist::GUI
 		{
 			throw std::runtime_error("Unable to read image: " + filepath);
 		}
-	}
-
-	void IconCreator::OnMessageChanged_(const QString& text)
-	{
-		m_next_message_access_.lock();
-		m_message_shown_ = true;
-		/*if (text != m_next_message_)
-		{
-			m_status_bar_->showMessage(m_next_message_);
-		}*/
-		m_next_message_access_.unlock();
 	}
 }

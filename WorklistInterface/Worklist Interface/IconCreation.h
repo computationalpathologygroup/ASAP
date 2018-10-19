@@ -21,19 +21,11 @@ namespace ASAP::Worklist::GUI
 
 		public:
 			IconCreator(void);
-			~IconCreator(void);
 	
-			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, QStatusBar* status_bar, const size_t size);
-
-		private:
-			bool		m_message_shown_;
-			std::mutex	m_next_message_access_;
-			QString		m_next_message_;
-			QStatusBar*	m_status_bar_;
-
+			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
-
-		private slots:
-			void OnMessageChanged_(const QString& text);
+		
+		signals:
+			void RequiresStatusBarChange(const QString& message);
 	};
 }

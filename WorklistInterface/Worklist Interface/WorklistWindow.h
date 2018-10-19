@@ -73,5 +73,6 @@ namespace ASAP::Worklist::GUI
 			void OnSelectFileSource_(bool checked);
 			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
+			void UpdateStatusBar_(const QString& message);
 	};
 }
