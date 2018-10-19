@@ -20,7 +20,7 @@ namespace ASAP::Worklist::GUI
 		std::vector<QStandardItem*> standard_items;
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(image_items.At(item, { "id", "title" }));
+			std::vector<const std::string*> record(image_items.At(item, { "location", "title" }));
 			standard_items.push_back(new QStandardItem(CreateBlankIcon_(size), QString(record[1]->data())));
 			standard_items.back()->setData(QVariant(QString(record[0]->data())));
 			image_model->setItem(item, 0, standard_items.back());
@@ -33,8 +33,8 @@ namespace ASAP::Worklist::GUI
 			RequiresStatusBarChange("Loading " + QString::fromStdString(std::to_string(item)) + " out of " + total_size);
 			try
 			{
-				std::vector<const std::string*> record(image_items.At(item, { "location", "title" }));
-				standard_items[item]->setIcon(CreateIcon_(*record[1], size));
+				std::vector<const std::string*> record(image_items.At(item, { "location" }));
+				standard_items[item]->setIcon(CreateIcon_(*record[0], size));
 			}
 			catch (const std::exception& e)
 			{
