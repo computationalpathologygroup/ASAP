@@ -1,21 +1,18 @@
 #pragma once
 #include <QMainWindow>
 
-/// <summary>
-/// Provides an interface that interacts with the CompositeWindow class,
-/// allowing the implementation to request a tab or context switch 
-/// through a signal.
-/// </summary>
 namespace ASAP::Worklist::GUI
 {
+	/// <summary>
+	/// Provides an interface that interacts with the CompositeWindow class,
+	/// allowing the implementation to request a tab or context switch 
+	/// through a signal.
+	/// </summary>
 	class CompositeChild : public QMainWindow
 	{
 		Q_OBJECT
 		public:
 			CompositeChild(QWidget *parent);
-
-		public slots:
-
 
 		signals:
 			void RequiresTabSwitch(int tab_id);

@@ -417,7 +417,7 @@ namespace ASAP::Worklist::GUI
 		if (m_image_switch_access_.try_lock())
 		{
 			QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
-			if (indexes[0].row() > 0)
+			if (indexes.size() > 0 && indexes[0].row() > 0)
 			{
 				m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() - 1, 0), QItemSelectionModel::SelectCurrent);
 				OnImageSelect_(m_images_model_->index(indexes[0].row() - 1, 0));
@@ -431,7 +431,7 @@ namespace ASAP::Worklist::GUI
 		if (m_image_switch_access_.try_lock())
 		{
 			QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
-			if (indexes[0].row() < m_images_model_->rowCount() - 1)
+			if (indexes.size() > 0 && indexes[0].row() < m_images_model_->rowCount() - 1)
 			{
 
 				m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() + 1, 0), QItemSelectionModel::SelectCurrent);
