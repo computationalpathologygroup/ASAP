@@ -25,6 +25,9 @@ namespace ASAP::Worklist::GUI
 			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
 		
+		private:
+			QIcon CreateBlankIcon_(const size_t size);
+
 		signals:
 			void RequiresStatusBarChange(const QString& message);
 	};

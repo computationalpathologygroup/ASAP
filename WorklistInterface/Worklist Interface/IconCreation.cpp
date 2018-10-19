@@ -15,22 +15,26 @@ namespace ASAP::Worklist::GUI
 
 	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
 	{
-		// TODO: Create placeholders
+		// Creates placeholder items
+		image_model->setRowCount(image_items.Size());
+		std::vector<QStandardItem*> standard_items;
+		for (size_t item = 0; item < image_items.Size(); ++item)
+		{
+			std::vector<const std::string*> record(image_items.At(item, { "id", "title" }));
+			standard_items.push_back(new QStandardItem(CreateBlankIcon_(size), QString(record[1]->data())));
+			standard_items.back()->setData(QVariant(QString(record[0]->data())));
+			image_model->setItem(image_model->rowCount() - 1, 0, standard_items.back());
+		}
 
-		// Fills the placerholders
+		// Fills the placeholders		
 		QString total_size(std::to_string(image_items.Size()).data());
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
 			RequiresStatusBarChange("Loading " + QString::fromStdString(std::to_string(item)) + " out of " + total_size);
-
-			std::vector<const std::string*> record(image_items.At(item, { "id", "location", "title" }));
 			try
 			{
-				QStandardItem* standard_item(new QStandardItem(CreateIcon_(*record[1], size), QString(record[2]->data())));
-				standard_item->setData(QVariant(QString(record[1]->data())));
-
-				image_model->setRowCount(image_model->rowCount() + 1);
-				image_model->setItem(image_model->rowCount() - 1, 0, standard_item);
+				std::vector<const std::string*> record(image_items.At(item, { "location", "title" }));
+				standard_items[item]->setIcon(CreateIcon_(*record[1], size));
 			}
 			catch (const std::exception& e)
 			{
@@ -88,5 +92,12 @@ namespace ASAP::Worklist::GUI
 		{
 			throw std::runtime_error("Unable to read image: " + filepath);
 		}
+	}
+
+	QIcon IconCreator::CreateBlankIcon_(const size_t size)
+	{
+		QImage image(size, size, QImage::Format::Format_BGR30);
+		image.fill(Qt::white);
+		return QIcon(QPixmap::fromImage(image));
 	}
 }
