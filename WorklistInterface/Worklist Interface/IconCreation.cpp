@@ -17,13 +17,12 @@ namespace ASAP::Worklist::GUI
 	{
 		// Creates placeholder items
 		image_model->setRowCount(image_items.Size());
-		std::vector<QStandardItem*> standard_items;
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(image_items.At(item, { "location", "title" }));
-			standard_items.push_back(new QStandardItem(CreateBlankIcon_(size), QString(record[1]->data())));
-			standard_items.back()->setData(QVariant(QString(record[0]->data())));
-			image_model->setItem(item, 0, standard_items.back());
+			QStandardItem* standard_item(new QStandardItem(CreateBlankIcon_(size), QString(record[1]->data())));
+			standard_item->setData(QVariant(QString(record[0]->data())));
+			image_model->setItem(item, 0, standard_item);
 		}
 
 		// Fills the placeholders		
@@ -34,12 +33,17 @@ namespace ASAP::Worklist::GUI
 			try
 			{
 				std::vector<const std::string*> record(image_items.At(item, { "location" }));
-				standard_items[item]->setIcon(CreateIcon_(*record[0], size));
+				image_model->item(item, 0)->setIcon(CreateIcon_(*record[0], size));
 			}
 			catch (const std::exception& e)
 			{
 				// Ignore icon creation.
 			}
+
+			
+
+			// Signals the model that the item has had its icon changed.
+
 		}
 		RequiresStatusBarChange("Finished loading thumbnails");
 	}
