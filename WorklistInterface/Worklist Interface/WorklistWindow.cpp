@@ -412,6 +412,11 @@ namespace ASAP::Worklist::GUI
 			&WorklistWindow::OnSelectExternalSource_);
 	}
 
+	void WorklistWindow::MoveSelectionLeft(void)
+	{
+
+	}
+
 	void WorklistWindow::UpdateImageIcons(void)
 	{
 		m_images_model_->layoutChanged();

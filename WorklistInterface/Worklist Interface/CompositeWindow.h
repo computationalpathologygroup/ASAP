@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <unordered_map>
 #include <QtWidgets/QMainWindow>
@@ -9,6 +10,15 @@
 
 namespace ASAP::Worklist::GUI
 {
+	/// <summary>
+	/// Holds a shortcut bound to an action.
+	/// </summary>
+	struct ShortcutAction
+	{
+		std::function<void(void)>	action;
+		QKeySequence				sequence;
+	};
+
 	/// <summary>
 	/// Hosts QMainwindows in a unified window with a TabWidget to switch between
 	/// each child. If a MenuBar is available, it's placed ontop of the TabWidget.
@@ -24,7 +34,7 @@ namespace ASAP::Worklist::GUI
 			explicit CompositeWindow(QWidget* parent = 0);
 
 			int AddTab(QMainWindow* window, const std::string tab_name);
-			int AddTab(CompositeChild* window, const std::string tab_name, std::vector<QKeySequence>& shortscuts);
+			int AddTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts);
 
 		private:
 			int											m_current_child_;
@@ -32,7 +42,7 @@ namespace ASAP::Worklist::GUI
 			std::unordered_map<std::string, size_t>		m_mapped_children_;
 			std::unique_ptr<Ui::CompositeWindowLayout>	m_ui_;
 
-			void RegisterKeySequence_(const CompositeChild* window, const QKeySequence& sequence);
+			void RegisterKeySequence_(const ShortcutAction& shortcut);
 			void SetSlots_(void);
 			
 		private slots:
