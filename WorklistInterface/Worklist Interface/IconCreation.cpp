@@ -108,16 +108,18 @@ namespace ASAP::Worklist::GUI
 
 	QIcon IconCreator::CreateInvalidIcon_(const size_t size)
 	{
-		QImage image(10, 10, QImage::Format::Format_BGR30);
+		size_t reduced_size = (size / 10) - 1;
+
+		QImage image(reduced_size, reduced_size, QImage::Format::Format_BGR30);
 		image.fill(Qt::white);
-		for (size_t p = 0; p < 10; ++p)
+		for (size_t p = 0; p < reduced_size; ++p)
 		{
 			image.setPixel(p, p, Qt::black);
 		}
-		for (size_t p = 9; p >= 0; ++p)
+		for (size_t p = 0; p < reduced_size; ++p)
 		{
-			image.setPixel(p, p, Qt::black);
+			image.setPixel((reduced_size - 1) - p, p, Qt::black);
 		}
-		return QIcon(QPixmap::fromImage(image).scaled(size, size));
+		return QIcon(QPixmap::fromImage(image).scaled(size, size, Qt::AspectRatioMode::KeepAspectRatio));
 	}
 }
