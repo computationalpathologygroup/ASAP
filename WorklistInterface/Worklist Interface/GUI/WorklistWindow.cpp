@@ -51,6 +51,9 @@ namespace ASAP::Worklist::GUI
 	{
 		if (!m_data_acquisition_ || source_path != m_settings_.source_location)
 		{
+			// Halts any leftover thumbnail loading.
+			StopThumbnailLoading_();
+
 			try
 			{
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
@@ -172,7 +175,7 @@ namespace ASAP::Worklist::GUI
 					&WorklistWindow::UpdateStatusBar);
 
 			lock->lock();
-			creator.InsertIcons(items, model, size, stop_loading);
+			creator.InsertIcons(items, model, size, *stop_loading);
 			lock->unlock();
 		});
 	}
@@ -252,6 +255,13 @@ namespace ASAP::Worklist::GUI
 		values.insert({ "previous_sources", previous_sources.substr(0, previous_sources.size() - 1)});
 
 		Serialization::INI::WriteINI("worklist_config.ini", values);
+	}
+
+	void WorklistWindow::StopThumbnailLoading_(void)
+	{
+		m_stop_loading_ = true;
+		m_image_loading_access_.lock();
+		m_image_loading_access_.unlock();
 	}
 
 	void WorklistWindow::UpdatePreviousSources_(void)

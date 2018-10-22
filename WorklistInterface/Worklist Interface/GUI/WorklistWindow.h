@@ -63,6 +63,7 @@ namespace ASAP::Worklist::GUI
 			bool CheckSchema_(Data::WorklistDataAcquisitionInterface* source);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
+			void StopThumbnailLoading_(void);
 			void UpdatePreviousSources_(void);
 			void UpdateSourceViews_(void);
 
