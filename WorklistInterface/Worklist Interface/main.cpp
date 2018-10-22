@@ -1,5 +1,5 @@
-#include "WorklistWindow.h"
-#include "CompositeWindow.h"
+#include "GUI/WorklistWindow.h"
+#include "GUI/CompositeWindow.h"
 #include <QtWidgets/QApplication>
 
 #include "../../ASAP/pathologyworkstation.h"
@@ -34,8 +34,6 @@ int main(int argc, char *argv[])
 	main_window.AddTab(&worklist, "Worklist", worklist_shortcuts);
 	int viewer_tab = main_window.AddTab(&workstation, "Viewer");
 	worklist.AttachWorkstation(workstation, viewer_tab);
-
-	
 
 	return a.exec();
 }

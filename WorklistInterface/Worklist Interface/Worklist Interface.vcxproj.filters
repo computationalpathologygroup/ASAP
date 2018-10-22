@@ -2,16 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="WorklistWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Data\DataTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Data\DjangoDataAcquisition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CompositeWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp">
@@ -21,9 +15,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Data\DirectoryDataAcquisition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IconCreation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Data\FilelistDataAcquisition.cpp">
@@ -38,10 +29,19 @@
     <ClCompile Include="Serialization\Misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CompositeChild.cpp">
+    <ClCompile Include="GUI\ExternalSourceDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GUI\ExternalSourceDialog.cpp">
+    <ClCompile Include="GUI\IconCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\WorklistWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\CompositeChild.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\CompositeWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -81,19 +81,19 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="WorklistWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="CompositeWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="CompositeChild.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="IconCreation.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="GUI\ExternalSourceDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="GUI\IconCreator.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="GUI\WorklistWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="GUI\CompositeChild.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="GUI\CompositeWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
