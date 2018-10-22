@@ -13,7 +13,7 @@ namespace ASAP::Worklist::GUI
 	{
 	}
 
-	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size)
+	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading)
 	{
 		QIcon placeholder_icon(CreateBlankIcon_(size));
 		QIcon invalid_icon(CreateInvalidIcon_(size));
@@ -32,6 +32,12 @@ namespace ASAP::Worklist::GUI
 		QString total_size(std::to_string(image_items.Size()).data());
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
+			// Exits the loading loop if the signal is flipped to true.
+			if (stop_loading)
+			{
+				break;
+			}
+
 			RequiresStatusBarChange("Loading " + QString::fromStdString(std::to_string(item)) + " out of " + total_size);
 			try
 			{

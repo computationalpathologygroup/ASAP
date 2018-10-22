@@ -154,8 +154,10 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
 	{
+		m_stop_loading_ = false;
+
 		model->removeRows(0, model->rowCount());
-		QtConcurrent::run([this, items, model, size=200]()
+		QtConcurrent::run([this, items, model, lock=&m_image_loading_access_, stop_loading=&m_stop_loading_, size=200]()
 		{
 			IconCreator creator;
 
@@ -169,7 +171,9 @@ namespace ASAP::Worklist::GUI
 					this,
 					&WorklistWindow::UpdateStatusBar);
 
-			creator.InsertIcons(items, model, size);
+			lock->lock();
+			creator.InsertIcons(items, model, size, stop_loading);
+			lock->unlock();
 		});
 	}
 

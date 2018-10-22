@@ -48,6 +48,8 @@ namespace ASAP::Worklist::GUI
 			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
 			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
 			WorklistWindowSettings									m_settings_;
+			bool													m_stop_loading_;
+			std::mutex												m_image_loading_access_;
 			std::mutex												m_image_switch_access_;
 			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
 			PathologyWorkstation*									m_workstation_;

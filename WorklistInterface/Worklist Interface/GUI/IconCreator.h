@@ -22,7 +22,7 @@ namespace ASAP::Worklist::GUI
 		public:
 			IconCreator(void);
 	
-			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size);
+			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
 		
 		private:
