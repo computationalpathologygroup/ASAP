@@ -180,10 +180,10 @@ namespace ASAP::Worklist::GUI
 			// No schema check is required for a filelist source.
 			if (source->GetSourceType() == Data::WorklistDataAcquisitionInterface::FULL_WORKLIST)
 			{
-				std::unordered_set<std::string> worklist_headers(source->GetWorklistHeaders());
-				std::unordered_set<std::string> patient_headers(source->GetPatientHeaders());
-				std::unordered_set<std::string> study_headers(source->GetStudyHeaders());
-				std::unordered_set<std::string> image_headers(source->GetImageHeaders());
+				std::set<std::string> worklist_headers(source->GetWorklistHeaders());
+				std::set<std::string> patient_headers(source->GetPatientHeaders());
+				std::set<std::string> study_headers(source->GetStudyHeaders());
+				std::set<std::string> image_headers(source->GetImageHeaders());
 
 				return	(worklist_headers.find("id") != worklist_headers.end()) &&
 						(worklist_headers.find("parent") != worklist_headers.end()) &&
@@ -302,8 +302,8 @@ namespace ASAP::Worklist::GUI
 			}
 			else if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
 			{
-				SetHeaders_(m_data_acquisition_->GetPatientHeaders(), m_patients_model_, m_ui_->view_patients);
-				SetHeaders_(m_data_acquisition_->GetStudyHeaders(), m_studies_model_, m_ui_->view_studies);
+				SetHeaders_(m_data_acquisition_->GetPatientHeaders(DataTable::FIELD_SELECTION::VISIBLE), m_patients_model_, m_ui_->view_patients);
+				SetHeaders_(m_data_acquisition_->GetStudyHeaders(DataTable::FIELD_SELECTION::VISIBLE), m_studies_model_, m_ui_->view_studies);
 
 				QStandardItemModel* worklist_model = m_worklist_model_;
 				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable& table, int error)
@@ -338,13 +338,13 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::SetHeaders_(const std::unordered_set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
+	void WorklistWindow::SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
 	{
 		QStringList q_headers;
 		for (const std::string& column : headers)
 		{
 			std::string capital_column = column;
-			capital_column = std::toupper(capital_column[0]);
+			capital_column[0] = std::toupper(capital_column[0]);
 			q_headers.push_back(QString(capital_column.c_str()));
 		}
 		model->setColumnCount(q_headers.size());

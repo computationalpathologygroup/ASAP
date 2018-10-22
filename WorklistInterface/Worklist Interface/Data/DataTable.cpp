@@ -188,9 +188,9 @@ size_t DataTable:: GetInvisibleColumnCount(void) const
     return m_invisible_columns_.size();
 }
 
-std::unordered_set<std::string> DataTable::GetColumnNames(const FIELD_SELECTION selection) const
+std::set<std::string> DataTable::GetColumnNames(const FIELD_SELECTION selection) const
 {
-	std::unordered_set<std::string> header;
+	std::set<std::string> header;
 	if (selection == FIELD_SELECTION::ALL)
 	{
 		for (const auto& entry : m_column_order_)
