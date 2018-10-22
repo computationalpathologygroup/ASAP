@@ -1,4 +1,4 @@
-#include "IconCreation.h"
+#include "IconCreator.h"
 
 #include <functional>
 #include <stdexcept>

@@ -41,6 +41,9 @@
     <ClCompile Include="CompositeChild.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GUI\ExternalSourceDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Resource Files">
@@ -88,6 +91,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="IconCreation.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="GUI\ExternalSourceDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

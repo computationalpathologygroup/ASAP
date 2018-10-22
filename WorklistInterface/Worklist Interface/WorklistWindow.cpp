@@ -8,7 +8,7 @@
 #include <qmessagebox.h>
 #include <QtConcurrent\qtconcurrentrun.h>
 
-#include "IconCreation.h"
+#include "IconCreator.h"
 #include "Serialization/INI.h"
 #include "Serialization/Misc.h"
 #include "Data/SourceLoading.h"
