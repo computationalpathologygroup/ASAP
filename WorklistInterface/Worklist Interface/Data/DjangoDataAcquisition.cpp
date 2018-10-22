@@ -69,7 +69,7 @@ namespace ASAP::Worklist::Data
 			Serialization::JSON::ParseJsonResponseToRecords(response, *relation_table);
 
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-			std::vector<std::string> field_selection({ "id" });
+			std::vector<std::string> field_selection({ "patient" });
 
 			std::wstring ids;
 			for (size_t relation = 0; relation < relation_table->Size(); ++relation)
