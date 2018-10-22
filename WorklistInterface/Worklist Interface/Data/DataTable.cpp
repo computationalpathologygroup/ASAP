@@ -241,7 +241,7 @@ void DataTable::SetColumnAsVisible(const std::string column)
 
 size_t DataTable::Size(void) const
 {
-    return m_data_.size() / m_column_order_.size();
+    return (!m_data_.empty() && !m_column_order_.empty()) ?  m_data_.size() / m_column_order_.size() : 0;
 }
 
 void DataTable::ConvertColumnsToLower_(std::vector<std::string>& columns)

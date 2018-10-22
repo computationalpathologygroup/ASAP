@@ -275,8 +275,16 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::UpdateSourceViews_(void)
 	{
+		// Clears all previous source information.
+		SetWorklistItems(DataTable(), m_worklist_model_);
+		SetPatientsItems(DataTable(), m_patients_model_);
+		SetStudyItems(DataTable(), m_studies_model_);
+		SetImageItems(DataTable(), m_images_model_);
+
+		// Resets the view to the Filelist standard.
 		Data::WorklistDataAcquisitionInterface::SourceType type = Data::WorklistDataAcquisitionInterface::SourceType::FILELIST;
 
+		// Adjusts the GUI to the actual new source, if it was initialized succesfully.
 		if (m_data_acquisition_)
 		{
 			type = m_data_acquisition_->GetSourceType();

@@ -1,6 +1,15 @@
 PROJECT(WorklistInterface)
 
+IF (WIN32)
+	SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}\ /std:c++latest)
+ELSE()
+	SET(CMAKE_CXX_STANDARD 17)
+ENDIF()
+
 SET(CMAKE_AUTOMOC ON)
+
+
+add_compile_definitions(BOOST_ALL_DYN_LINK)
 
 SET(GROUP_DATA
 	Data/DataTable.h
