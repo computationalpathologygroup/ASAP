@@ -48,11 +48,11 @@ namespace ASAP::Worklist::GUI
 			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
 			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
 			WorklistWindowSettings									m_settings_;
-			bool													m_stop_loading_;
-			std::mutex												m_image_loading_access_;
+			bool													m_stop_loading_; // Todo: Refactor into something cleaner
+			std::mutex												m_image_loading_access_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_switch_access_;
 			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
-			PathologyWorkstation*									m_workstation_;
+			PathologyWorkstation*									m_workstation_; // Todo: Clean up or perhaps combine in struct
 			int														m_workstation_tab_id_;
 
 			QStandardItemModel* m_images_model_;

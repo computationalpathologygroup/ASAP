@@ -47,6 +47,7 @@ namespace ASAP::Worklist::GUI
 		return WorklistWindowSettings();
 	}
 
+	// Todo: Refactor previous source storage into its own function. Decouple schema checks from UI
 	void WorklistWindow::SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params)
 	{
 		if (!m_data_acquisition_ || source_path != m_settings_.source_location)
@@ -155,6 +156,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
+	// Todo: Loading and halting might be a bit too messy in terms of tasks and code calling, refactor
 	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
 	{
 		m_stop_loading_ = false;
@@ -180,6 +182,7 @@ namespace ASAP::Worklist::GUI
 		});
 	}
 
+	// Todo: Decouple and create abstraction of schema's
 	bool WorklistWindow::CheckSchema_(Data::WorklistDataAcquisitionInterface* source)
 	{
 		if (source)
