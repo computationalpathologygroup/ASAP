@@ -10,6 +10,24 @@
 
 namespace ASAP::Worklist::Data
 {
+	// Placeholder function for acquiring a Django REST Framework authentication token
+	std::wstring GetAuthenticationToken(web::http::client::http_client& client, std::wstring token_path, std::wstring username, std::wstring password)
+	{
+		web::http::http_request request(web::http::methods::POST);
+		request.set_body(std::wstring(L"{ \"username\": \"") + username + std::wstring(L"\", \"password\": \"") + password + std::wstring(L"\" }", L"application/json"));
+		request.set_request_uri(L"auth/token/");
+		request.set_method(web::http::methods::POST);
+
+		std::wstring token;
+		client.request(request).then([&token](web::http::http_response response)
+		{
+			token				= response.extract_string().get();
+			size_t separator	= token.find(L"\":\"") + 3;
+			token = token.substr(separator, token.find_first_of(L'"', separator + 3) - separator);
+		}).wait();
+		return token;
+	}
+
 	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_client_(web::uri(uri_info.base_url.c_str())), m_rest_uri_(uri_info), m_tables_(5)
 	{
 		InitializeTables_();
