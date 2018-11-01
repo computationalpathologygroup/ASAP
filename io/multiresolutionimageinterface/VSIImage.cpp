@@ -226,7 +226,7 @@ char* VSIImage::decodeTile(int no, int row, int col) const {
     }
     else if (_compressionType == 3) {
       JPEG2000Codec cod;
-      cod.decode(buf, size, size);
+      cod.decode((unsigned char*)buf, size, size);
     }
     else if (_compressionType == 2 || _compressionType == 5) {
       jpeg_decompress_struct cinfo;

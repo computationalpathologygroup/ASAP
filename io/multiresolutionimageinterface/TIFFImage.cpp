@@ -432,7 +432,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
           }
           unsigned int byteSize = tileW*tileH*getSamplesPerPixel()*sizeof(T);
           unsigned int rawSize = TIFFReadRawTile(_tiff, TIFFComputeTile(_tiff, ix, iy, 0, 0), tile, byteSize);
-          _jp2000->decode((char*)tile, rawSize, byteSize);
+          _jp2000->decode((unsigned char*)tile, rawSize, byteSize);
         }
         else {
           unsigned int ycbcr = 0;
