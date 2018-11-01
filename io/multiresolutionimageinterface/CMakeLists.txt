@@ -8,7 +8,6 @@ INCLUDE_DIRECTORIES(
   ../
   ${Boost_INCLUDE_DIRS}
   ${TIFF_INCLUDE_DIR}
-  ${JASPER_INCLUDE_DIR}
   ${OPENSLIDE_INCLUDE_DIR}
   ${DIAGPathology_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
@@ -27,7 +26,6 @@ if(WIN32 AND NOT MINGW)
 endif(WIN32 AND NOT MINGW)
 
 SET(MULTIRESOLUTIONIMAGEINTERFACE_HS
-    JPEG2000Codec.h 
     MultiResolutionImageReader.h 
     MultiResolutionImageWriter.h 
 	AperioSVSWriter.h
@@ -41,7 +39,6 @@ SET(MULTIRESOLUTIONIMAGEINTERFACE_HS
 )
 
 SET(MULTIRESOLUTIONIMAGEINTERFACE_SRCS 
-    JPEG2000Codec.cpp 
     MultiResolutionImageReader.cpp 
     MultiResolutionImageWriter.cpp 
 	AperioSVSWriter.cpp
@@ -75,15 +72,21 @@ SET(VSI_SOURCE_SRCS
 	VSIImageFactory.cpp
 )
 
+ADD_LIBRARY(jpeg2kcodec SHARED JPEG2000Codec.h JPEG2000Codec.cpp)
+generate_export_header(jpeg2kcodec)
+SET_TARGET_PROPERTIES(jpeg2kcodec PROPERTIES DEBUG_POSTFIX _d)
+TARGET_LINK_LIBRARIES(jpeg2kcodec PRIVATE openjp2)
+target_include_directories(jpeg2kcodec PRIVATE ${OPENJPEG_INCLUDE_DIRS})
+
 IF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 # Required for lossless JPEG compression used in VSIs
 FIND_PACKAGE(DCMTKJPEG REQUIRED)
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} libtiff zlib core libjasper libjpeg Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY} jpeg2kcodec zlib core libjpeg libtiff Boost::disable_autolinking Boost::thread)
 TARGET_COMPILE_DEFINITIONS(multiresolutionimageinterface PRIVATE HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 ELSE(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 ADD_LIBRARY(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
-TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE libtiff zlib core libjasper libjpeg Boost::disable_autolinking Boost::thread)
+TARGET_LINK_LIBRARIES(multiresolutionimageinterface PRIVATE jpeg2kcodec zlib core libjpeg libtiff Boost::disable_autolinking Boost::thread)
 ENDIF(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 
 generate_export_header(multiresolutionimageinterface)
@@ -103,6 +106,7 @@ SET_TARGET_PROPERTIES(openslidefileformat PROPERTIES DEBUG_POSTFIX _d)
 
 IF(WIN32)  
   SET_TARGET_PROPERTIES(multiresolutionimageinterface PROPERTIES FOLDER pathology/diag/io)    
+  SET_TARGET_PROPERTIES(jpeg2kcodec PROPERTIES FOLDER pathology/diag/io)    
   SET_TARGET_PROPERTIES(openslidefileformat PROPERTIES FOLDER pathology/diag/io)
 ENDIF(WIN32)
 
@@ -134,11 +138,11 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-builtin")
-      IF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
+      IF(PYTHONLIBS_VERSION_STRING MATCHES "3.6")
 	      set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-py3")
-	  ELSEIF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
+	  ELSEIF(PYTHONLIBS_VERSION_STRING MATCHES "3.6")
 	      set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-builtin")
-      ENDIF(PYTHONLIBS_VERSION_STRING MATCHES "3.5")
+      ENDIF(PYTHONLIBS_VERSION_STRING MATCHES "3.6")
 
 	  SWIG_ADD_LIBRARY(multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
 	  SWIG_LINK_LIBRARIES(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
@@ -160,12 +164,20 @@ IF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 ENDIF(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 
 INSTALL(FILES ${MULTIRESOLUTIONIMAGEINTERFACE_HS} DESTINATION include/multiresolutionimageinterface)
+INSTALL(FILES JPEG2000Codec.h DESTINATION include/multiresolutionimageinterface)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface_export.h DESTINATION include/multiresolutionimageinterface)
 
 INSTALL(FILES ${EXTERNAL_OPENSLIDE_HS} DESTINATION include/multiresolutionimageinterface)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/openslidefileformat_export.h DESTINATION include/multiresolutionimageinterface)
 
 INSTALL(TARGETS multiresolutionimageinterface
+  EXPORT asap-targets
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+INSTALL(TARGETS jpeg2kcodec
   EXPORT asap-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib

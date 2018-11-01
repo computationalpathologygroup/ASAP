@@ -29,7 +29,6 @@ private:
   float _lineThickness;
   float _lineAnnotationSelectedThickness;
   bool _closed;
-  float _selectionSensitivity;
   QPainterPath _currentPath;
   QPolygonF _polys;
   std::string _type;

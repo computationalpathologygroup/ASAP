@@ -35,6 +35,7 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
 
   if (_tiff) {
   const char * img_desc = NULL;
+  
   if (TIFFGetFieldDefaulted(_tiff, TIFFTAG_IMAGEDESCRIPTION, &img_desc)) {
     std::string img_desc_string(img_desc);
     if (img_desc_string.find("DICOM") != std::string::npos || img_desc_string.find("xml") != std::string::npos || img_desc_string.find("XML") != std::string::npos) {
@@ -43,6 +44,7 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
       return false;
     }
   }
+  
   if (TIFFIsTiled(_tiff) == 0) {
     cleanup();
     return false;
@@ -94,7 +96,7 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
     return false;
   }
 
-  // Check the multi-resolution pyramid is stored nicely
+  // Check if the multi-resolution pyramid is stored nicely
   TIFFSetDirectory(_tiff,0);
   unsigned int width = 0;
   TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &width);
@@ -103,25 +105,31 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
   unsigned int dir = 0;
   for (int level = 0; level < TIFFNumberOfDirectories(_tiff); ++level) {
     TIFFSetDirectory(_tiff, level);
-    TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &x);
-    TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &y);
-    TIFFGetField(_tiff, TIFFTAG_TILEWIDTH, &tileW);
-    TIFFGetField(_tiff, TIFFTAG_TILELENGTH, &tileH);
-    std::vector<unsigned long long> tmp;
-    std::vector<unsigned int> levelTileSize;
-    tmp.push_back(x);
-    tmp.push_back(y);
-    levelTileSize.push_back(tileW);
-    levelTileSize.push_back(tileH);
-    _levelDimensions.push_back(tmp);   
-    _tileSizesPerLevel.push_back(levelTileSize);
-    if (level > 0) {
-      if (width > x) {
-        width = x;        
-      } else {
-        cleanup();
-        return false;
+    if (TIFFIsTiled(_tiff) == 1) {
+      TIFFGetField(_tiff, TIFFTAG_IMAGEWIDTH, &x);
+      TIFFGetField(_tiff, TIFFTAG_IMAGELENGTH, &y);
+      TIFFGetField(_tiff, TIFFTAG_TILEWIDTH, &tileW);
+      TIFFGetField(_tiff, TIFFTAG_TILELENGTH, &tileH);
+      std::vector<unsigned long long> tmp;
+      std::vector<unsigned int> levelTileSize;
+      tmp.push_back(x);
+      tmp.push_back(y);
+      levelTileSize.push_back(tileW);
+      levelTileSize.push_back(tileH);
+      _levelDimensions.push_back(tmp);
+      _tileSizesPerLevel.push_back(levelTileSize);
+      if (level > 0) {
+        if (width > x) {
+          width = x;
+        }
+        else {
+          cleanup();
+          return false;
+        }
       }
+    }
+    else {
+      _numberOfLevels -= 1;
     }
   }
 
@@ -279,6 +287,106 @@ void* TIFFImage::readDataFromImage(const long long& startX, const long long& sta
   }
 }
 
+long long TIFFImage::getEncodedTileSize(const long long& startX, const long long& startY, const unsigned int& level) {
+  if (_tiff && level < this->_numberOfLevels) {
+    long long levelStartX = std::floor(startX / getLevelDownsample(level) + 0.5);
+    long long levelStartY = std::floor(startY / getLevelDownsample(level) + 0.5);
+    TIFFSetDirectory(_tiff, level);
+    unsigned int tileNr = TIFFComputeTile(_tiff, levelStartX, levelStartY, 0, 0);
+    unsigned int total_tiles = TIFFNumberOfTiles(_tiff);
+    if (tileNr < total_tiles) {
+      unsigned long long* tbc = NULL;
+      TIFFGetField(_tiff, TIFFTAG_TILEBYTECOUNTS, &tbc);
+      unsigned long long k = tbc[tileNr];
+      if (k == 0) {
+        return -1;
+      }
+      unsigned int count = 0;
+      unsigned char* jpt;
+      if (TIFFGetField(_tiff, TIFFTAG_JPEGTABLES, &count, &jpt) != 0) {
+        if (count > 4) {
+          k = k + count;
+          k -= 2; /* don't use EOI of header or SOI of tile */
+        }
+      }
+      return k;
+    }
+    else {
+      return -1;
+    }
+  }
+  else {
+    return -1;
+  }
+}
+
+unsigned char* TIFFImage::readEncodedDataFromImage(const long long& startX, const long long& startY, const unsigned int& level) {
+  if (_tiff) {
+    unsigned int codec = 0;
+    TIFFGetField(_tiff, TIFFTAG_COMPRESSION, &codec);
+    if (codec == 7) { // New style JPEG
+      long long levelStartX = std::floor(startX / getLevelDownsample(level) + 0.5);
+      long long levelStartY = std::floor(startY / getLevelDownsample(level) + 0.5);
+      TIFFSetDirectory(_tiff, level);
+      unsigned int tileNr = TIFFComputeTile(_tiff, levelStartX, levelStartY, 0, 0);
+      if (tileNr < TIFFNumberOfTiles(_tiff)) {
+        unsigned char table_end[2];
+        unsigned int count = 0;
+        unsigned char* jpt;
+        float* xfloatp;
+        unsigned int endOfBuffer = 0;
+        unsigned long long datasize = this->getEncodedTileSize(startX, startY, level);
+        if (datasize < 0) {
+          return NULL;
+        }
+        unsigned long long bufferoffset = 0;
+        unsigned char* buffer = new unsigned char[datasize];
+
+        if (TIFFGetField(_tiff, TIFFTAG_JPEGTABLES, &count, &jpt) != 0) {
+          if (count > 4) {
+            int retTIFFReadRawTile;
+            /* Ignore EOI marker of JpegTables */
+            _TIFFmemcpy(buffer, jpt, count - 2);
+            bufferoffset += count - 2;
+            /* Store last 2 bytes of the JpegTables */
+            table_end[0] = buffer[bufferoffset - 2];
+            table_end[1] = buffer[bufferoffset - 1];
+            endOfBuffer = bufferoffset;
+            bufferoffset -= 2;
+            retTIFFReadRawTile = TIFFReadRawTile(
+              _tiff,
+              tileNr,
+              (void*) &(((unsigned char*)buffer)[bufferoffset]),
+              -1);
+            bufferoffset += retTIFFReadRawTile;
+            /* Overwrite SOI marker of image scan with previously */
+            /* saved end of JpegTables */
+            buffer[endOfBuffer - 2] = table_end[0];
+            buffer[endOfBuffer - 1] = table_end[1];
+          }
+        }
+        else {
+          TIFFReadRawTile(
+            _tiff,
+            tileNr,
+            (void*) &(((unsigned char*)buffer)[bufferoffset]),
+            -1);
+        }
+        return buffer;
+      }
+      else {
+        return NULL;
+      }
+    }
+    else {
+      return NULL;
+    }
+  }
+  else {
+    return NULL;
+  }
+}
+
 template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long& startX, const long long& startY, const unsigned long long& width, 
                                                                                  const unsigned long long& height, const unsigned int& level, unsigned int nrSamples)
 {
@@ -324,7 +432,7 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
           }
           unsigned int byteSize = tileW*tileH*getSamplesPerPixel()*sizeof(T);
           unsigned int rawSize = TIFFReadRawTile(_tiff, TIFFComputeTile(_tiff, ix, iy, 0, 0), tile, byteSize);
-          _jp2000->decode((char*)tile, rawSize, byteSize);
+          _jp2000->decode((unsigned char*)tile, rawSize, byteSize);
         }
         else {
           unsigned int ycbcr = 0;

@@ -12,7 +12,6 @@ PointSetQtAnnotation::PointSetQtAnnotation(const std::shared_ptr<Annotation>& an
   _rectColor(QColor("blue")),
   _rectSelectedColor(QColor("red")),
   _currentLoD(1.0),
-  _selectionSensitivity(100.0),
   _rectSize(3.)
 {
   onAnnotationChanged();
@@ -56,7 +55,7 @@ bool PointSetQtAnnotation::collidesWithPath(const QPainterPath & path, Qt::ItemS
 bool PointSetQtAnnotation::contains(const QPointF & point) const {
   if (shape().controlPointRect().contains(point)) {
     QPointF imgPoint = this->mapToScene(point) / _scale;
-    double curSelectionSensitivity = (_selectionSensitivity * 1.5*_rectSize / _currentLoD);
+    double curSelectionSensitivity = (selectionSensitivity * 1.5*_rectSize / _currentLoD);
     double curSelectionSensitivitySquared = curSelectionSensitivity * curSelectionSensitivity;
     double imgX = imgPoint.x();
     double imgY = imgPoint.y();

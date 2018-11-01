@@ -11,6 +11,7 @@ typedef struct tiff TIFF;
 
 class MultiResolutionImage;
 class ProgressMonitor;
+class JPEG2000Codec;
 
 //! This class can be used to write images to disk in a multi-resolution pyramid fashion.
 //! It supports writing the image in parts, to facilitate processing pipelines or in one go,
@@ -31,6 +32,15 @@ protected:
 
   //! Tile size
   unsigned int _tileSize;
+
+  //! Timing info
+  unsigned int _totalWritingTime;
+  unsigned int _totalReadingTime;
+  unsigned int _totalMinMaxTime;
+  unsigned int _jpeg2kCompressionTime;
+  unsigned int _totalBaseWritingTime;
+  unsigned int _totalDownsamplingtime;
+  unsigned int _totalPyramidTime;
 
   //! Number of indexed colors (only for ColorType Indexed)
   unsigned int _numberOfIndexedColors;
@@ -74,6 +84,7 @@ protected:
 
   //! Temporary storage for the levelFiles
   std::vector<std::string> _levelFiles;
+  JPEG2000Codec* _jpeg2000Codec;
 
 public:
   MultiResolutionImageWriter();
@@ -169,7 +180,7 @@ public:
 
   //! Set JPEG quality (default value = 30)
   const int setJPEGQuality(const float& quality) 
-  {if (quality > 0 && quality < 100) {_quality = quality; return 0;} else {return -1;} }
+  {if (quality > 0 && quality <= 100) {_quality = quality; return 0;} else {return -1;} }
 
   const float getJPEGQuality() const 
   {{return _quality;}} 

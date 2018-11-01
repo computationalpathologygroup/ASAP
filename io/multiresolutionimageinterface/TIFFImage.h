@@ -19,6 +19,8 @@ public:
 
   double getMinValue(int channel = -1);
   double getMaxValue(int channel = -1);
+  long long getEncodedTileSize(const long long& startX, const long long& startY, const unsigned int& level);
+  unsigned char* readEncodedDataFromImage(const long long& startX, const long long& startY, const unsigned int& level);
 
 protected :
   void cleanup();

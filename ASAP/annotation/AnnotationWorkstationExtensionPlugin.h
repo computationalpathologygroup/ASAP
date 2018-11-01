@@ -50,6 +50,7 @@ public slots:
     void onImageClosed();
     void addAnnotationGroup();
     void onClearButtonPressed();
+    void onOptionsButtonPressed();
     void onLoadButtonPressed(const std::string& filePath = std::string());
     bool onSaveButtonPressed();
     void onItemNameChanged(QTreeWidgetItem* item, int column);
