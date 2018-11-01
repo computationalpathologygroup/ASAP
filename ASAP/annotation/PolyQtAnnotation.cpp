@@ -16,7 +16,6 @@ PolyQtAnnotation::PolyQtAnnotation(const std::shared_ptr<Annotation>& annotation
   _closed(false),
   _type("spline"),
   _currentLoD(1.0),
-  _selectionSensitivity(100.0),
   _lastClickedLinePoint(QPointF()),
   _fill(false)
 {
@@ -190,7 +189,7 @@ bool PolyQtAnnotation::collidesWithPath(const QPainterPath & path, Qt::ItemSelec
 bool PolyQtAnnotation::contains(const QPointF & point) const {
   if (shape().controlPointRect().contains(point)) {
     QPointF imgPoint = this->mapToScene(point) / _scale;
-    double curSelectionSensitivity = (_selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
+    double curSelectionSensitivity = (selectionSensitivity * _lineAnnotationSelectedThickness / _currentLoD);
     double curSelectionSensitivitySquared = curSelectionSensitivity * curSelectionSensitivity;
     double imgX = imgPoint.x();
     double imgY = imgPoint.y();

@@ -34,8 +34,7 @@ namespace pathology {
     RAW,
     JPEG,
     LZW,
-    JPEG2000_LOSSLESS,
-    JPEG2000_LOSSY
+    JPEG2000
   };
 
   enum Interpolation {

@@ -40,8 +40,8 @@ endif()
 # Use boost for cross-platform use of threading, file system and date_time handling
 FIND_PACKAGE(Boost QUIET REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
 
-# Jasper for JPEG2000 codec
-FIND_PACKAGE(Jasper REQUIRED)
+# OpenJPEG for JPEG2000 codec
+FIND_PACKAGE(OpenJPEG REQUIRED)
 
 # TIFF is the main multi-tiled format used in this package
 FIND_PACKAGE(TIFF REQUIRED)
@@ -57,9 +57,6 @@ FIND_PACKAGE(PugiXML REQUIRED)
 
 ADD_LIBRARY(libtiff STATIC IMPORTED)
 SET_PROPERTY(TARGET libtiff PROPERTY IMPORTED_LOCATION ${TIFF_LIBRARY})
-
-ADD_LIBRARY(libjasper STATIC IMPORTED)
-SET_PROPERTY(TARGET libjasper PROPERTY IMPORTED_LOCATION ${JASPER_LIBRARY})
 
 ADD_LIBRARY(libjpeg STATIC IMPORTED)
 SET_PROPERTY(TARGET libjpeg PROPERTY IMPORTED_LOCATION ${JPEG_LIBRARY})
