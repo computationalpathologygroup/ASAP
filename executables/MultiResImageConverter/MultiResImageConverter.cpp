@@ -42,11 +42,8 @@ void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std
         else if (compression == string("JPEG")) {
           writer->setCompression(JPEG);
         }
-        else if (compression == string("JPEG2000Lossless")) {
-          writer->setCompression(JPEG2000_LOSSLESS);
-        }
-        else if (compression == string("JPEG2000Lossy")) {
-          writer->setCompression(JPEG2000_LOSSY);
+        else if (compression == string("JPEG2000")) {
+          writer->setCompression(JPEG2000);
         }
         else {
           cout << "Invalid compression, setting default LZW as compression" << endl;
@@ -97,8 +94,8 @@ int main(int argc, char *argv[]) {
     desc.add_options()
       ("help,h", "Displays this message")
       ("svs,s", "Convert to Aperio SVS instead of regular TIFF")
-      ("codec,c", po::value<std::string>(&codec)->default_value("LZW"), "Set compression codec. Can be one of the following: RAW, LZW, JPEG, JPEG2000Lossless or JPEG2000Lossy")
-      ("rate,r", po::value<double>(&rate)->default_value(70.), "Set compression rate for JPEG and JPEG2000Lossy")
+      ("codec,c", po::value<std::string>(&codec)->default_value("LZW"), "Set compression codec. Can be one of the following: RAW, LZW, JPEG, JPEG2000")
+      ("rate,r", po::value<double>(&rate)->default_value(70.), "Set compression rate for JPEG and JPEG2000")
       ("spacingX,x", po::value<double>(&spacingX)->default_value(-1.0), "Set the pixel spacing of the x-dimension")
       ("spacingY,y", po::value<double>(&spacingY)->default_value(-1.0), "Set the pixel spacing of the y-dimension")
       ("tileSize,t", po::value<unsigned int>(&tileSize)->default_value(512), "Sets the tile size for the TIF")

@@ -321,7 +321,7 @@ namespace
       MultiResolutionImage* img = testRead.open(g_dataPath + "/images/OpenSlideInterfaceTestImage.tif");
       testWrite.openFile(g_dataPath + "/images/OpenSlideInterfaceMultiResOutJPEG2000.tif");
       testWrite.setTileSize(512);
-      testWrite.setCompression(JPEG2000_LOSSY);
+      testWrite.setCompression(JPEG2000);
       testWrite.setJPEGQuality(10);
       testWrite.setDataType(UChar);
       testWrite.setColorType(RGB);
@@ -347,7 +347,7 @@ namespace
       MultiResolutionImage* img = testRead.open(g_dataPath + "/images/OpenSlideInterfaceTestImage.tif");
       testWrite.openFile(g_dataPath + "/images/OpenSlideInterfaceMultiResOutJPEG2000Lossless.tif");
       testWrite.setTileSize(512);
-      testWrite.setCompression(JPEG2000_LOSSLESS);
+      testWrite.setCompression(JPEG2000);
       testWrite.setDataType(UChar);
       testWrite.setColorType(RGB);
       vector<unsigned long long> dims = img->getDimensions();

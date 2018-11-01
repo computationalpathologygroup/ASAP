@@ -5,6 +5,7 @@
 #include <cmath>
 #include <math.h>
 #include <algorithm>
+#include <chrono>
 
 extern "C" {
 #include "tiffio.h"
@@ -17,9 +18,11 @@ using namespace std;
 using namespace pathology;
 
 MultiResolutionImageWriter::MultiResolutionImageWriter() : _tiff(NULL),
-  _codec(LZW), _quality(30),_tileSize(512), _pos(0), _numberOfIndexedColors(0), 
+  _codec(LZW), _quality(30), _tileSize(512), _pos(0), _numberOfIndexedColors(0),
   _interpolation(pathology::Linear), _monitor(NULL), _cType(pathology::InvalidColorType),
-  _dType(pathology::InvalidDataType), _min_vals(NULL), _max_vals(NULL)
+  _dType(pathology::InvalidDataType), _min_vals(NULL), _max_vals(NULL), _jpeg2000Codec(NULL),
+  _totalWritingTime(0), _totalReadingTime(0), _jpeg2kCompressionTime(0), _totalBaseWritingTime(0),
+  _totalDownsamplingtime(0), _totalPyramidTime(0), _totalMinMaxTime(0)
 {
   TIFFSetWarningHandler(NULL);
 }
@@ -28,6 +31,10 @@ MultiResolutionImageWriter::~MultiResolutionImageWriter() {
   if (_tiff) {
     TIFFClose(_tiff);
     _tiff = NULL;
+  }
+  if (_jpeg2000Codec) {
+    delete _jpeg2000Codec;
+    _jpeg2000Codec = NULL;
   }
 }
 
@@ -76,6 +83,7 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
     if (writeImageInformation(dims[0], dims[1]) == 0) {
       for (int y =0; y < dims[1]; y+=_tileSize) {
         for (int x =0; x < dims[0]; x+=_tileSize) {
+          auto startReadingTime = std::chrono::steady_clock::now();
           unsigned char* data = new unsigned char[_tileSize*_tileSize*cDepth*(nrBits/8)];
           if (_dType == pathology::UInt32) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,(unsigned int*&)data);
@@ -89,6 +97,8 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
           else if (_dType == pathology::UChar) {
             img->getRawRegion(x,y,_tileSize,_tileSize,0,data);            
           }
+          auto endReadingTime = std::chrono::steady_clock::now();
+          _totalReadingTime += std::chrono::duration<double, milli>(endReadingTime - startReadingTime).count();
           writeBaseImagePart((void*)data);
           delete[] data;
           data = NULL;
@@ -139,6 +149,16 @@ int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& 
       _monitor->setMaximumProgress(2 * totalSteps);
       _monitor->setProgress(0);
     }
+    if (_codec == JPEG2000) {
+      _jpeg2000Codec = new JPEG2000Codec();
+    }
+    _totalWritingTime = 0;
+    _totalReadingTime = 0;
+    _totalMinMaxTime = 0;
+    _jpeg2kCompressionTime = 0;
+    _totalBaseWritingTime = 0;
+    _totalDownsamplingtime = 0;
+    _totalPyramidTime = 0;
     return 0;
   } else {
     return -1;
@@ -172,6 +192,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
   unsigned int npixels = _tileSize * _tileSize * cDepth;
 
   //Determine min/max of tile part
+  auto startMinMax = std::chrono::steady_clock::now();
   if (_dType == pathology::UInt32) {
     unsigned int *temp = (unsigned int*)data;
     for (unsigned int i = 0; i < _tileSize*_tileSize*cDepth; i += cDepth) {
@@ -228,8 +249,10 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       }
     }
   }
+  auto endMinMax = std::chrono::steady_clock::now();
+  _totalMinMaxTime += std::chrono::duration<double, milli>(endMinMax - startMinMax).count();
 
-  if (getCompression() == JPEG2000_LOSSLESS || getCompression() == JPEG2000_LOSSY) {
+  if (getCompression() == JPEG2000) {
     int depth = 8;
     unsigned int size = npixels * sizeof(unsigned char);
     if (getDataType() == UInt32 || getDataType() == Float) {
@@ -252,15 +275,18 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
       nrComponents = _numberOfIndexedColors;
     }
 
-    float rate = 1.0;
-    if (getCompression() == JPEG2000_LOSSY) {
-      rate = getJPEGQuality() / 100.;
-    }
-    JPEG2000Codec cod;
-    cod.encode((char*)data, size, _tileSize, depth, nrComponents, rate, (getColorType() == pathology::ARGB || getColorType() == pathology::RGB));
+    float rate = getJPEGQuality();
+    auto startJpeg2000Encode = std::chrono::steady_clock::now();
+    _jpeg2000Codec->encode((char*)data, size, _tileSize, rate, nrComponents, getDataType(), getColorType());
+    auto endJpeg2000Encode = std::chrono::steady_clock::now();
+    _jpeg2kCompressionTime += std::chrono::duration<double, milli>(endJpeg2000Encode - startJpeg2000Encode).count();
+    auto startTileWrite = std::chrono::steady_clock::now();
     TIFFWriteRawTile(_tiff, pos, data, size);
+    auto endTileWrite = std::chrono::steady_clock::now();
+    _totalBaseWritingTime += std::chrono::duration<double, milli>(endTileWrite - startTileWrite).count();
   }
   else {
+    auto startTileWrite = std::chrono::steady_clock::now();
     if (_dType == Float) {
       TIFFWriteEncodedTile(_tiff, pos, data, npixels * sizeof(float));
     }
@@ -273,6 +299,8 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
     else {
       TIFFWriteEncodedTile(_tiff, pos, data, npixels * sizeof(unsigned char));
     }
+    auto endTileWrite = std::chrono::steady_clock::now();
+    _totalBaseWritingTime += std::chrono::duration<double, milli>(endTileWrite - startTileWrite).count();
   }
   if (_monitor) {
     ++(*_monitor);
@@ -289,6 +317,7 @@ int MultiResolutionImageWriter::finishImage() {
   delete[] _max_vals;
   _min_vals = NULL;
   _max_vals = NULL;
+  auto startPyramidTime = std::chrono::steady_clock::now();
   if (getDataType() == UInt32) {
     writePyramidToDisk<unsigned int>();
     incorporatePyramid<unsigned int>();
@@ -305,6 +334,8 @@ int MultiResolutionImageWriter::finishImage() {
     writePyramidToDisk<float>();
     incorporatePyramid<float>();
   }
+  auto endPyramidTime = std::chrono::steady_clock::now();
+  _totalPyramidTime += std::chrono::duration<double, milli>(endPyramidTime - startPyramidTime).count();
   for (std::vector<std::string>::const_iterator it = _levelFiles.begin(); it != _levelFiles.end(); ++it) {
     for (int i = 0; i < 5; ++i) {
       if (remove(it->c_str()) == 0) {
@@ -317,6 +348,15 @@ int MultiResolutionImageWriter::finishImage() {
   _levelFiles.clear();
   _fileName = "";
   _pos = 0;
+  std::cout << "Total time was " << _totalReadingTime + _totalBaseWritingTime + _totalPyramidTime + _jpeg2kCompressionTime << std::endl;
+  std::cout << "Total reading time was " << _totalReadingTime << std::endl;
+  std::cout << "Total base writing time was " << _totalBaseWritingTime << std::endl;
+  std::cout << "Total pyramid downsampling time was " << _totalDownsamplingtime << std::endl;
+  std::cout << "Total pyramid writing time was " << _totalPyramidTime << std::endl;
+  std::cout << "Total time determining min/max was " << _totalMinMaxTime<< std::endl;
+  if (_codec == pathology::Compression::JPEG2000) {
+    std::cout << "Total JPEG2000 encoding time was " << _jpeg2kCompressionTime << std::endl;
+  }
   return 0;
 }
 
@@ -401,13 +441,11 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
       T* outTile = (T*) _TIFFmalloc(npixels * sizeof(T));
       bool tile1Valid = false, tile2Valid = false, tile3Valid = false, tile4Valid = false;
       unsigned int size =  npixels * sizeof(T);
-      JPEG2000Codec cod;
-      if (level == 1 && (getCompression() == JPEG2000_LOSSY || getCompression() == JPEG2000_LOSSLESS)) {
+      if (level == 1 && (getCompression() == JPEG2000)) {
         int tileNr = TIFFComputeTile(prevLevelTiff, xpos, ypos, 0, 0);
         unsigned int outTileSize = _tileSize*_tileSize*nrsamples*(nrbits/8);
         int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile1, outTileSize);
         if (rawSize > 0) {
-          cod.decode((char*)tile1, rawSize, outTileSize);
           tile1Valid = true;
         }
         else {
@@ -419,7 +457,6 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos+_tileSize, ypos, 0, 0);
           int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile2, outTileSize);
           if (rawSize > 0) {
-            cod.decode((char*)tile2, rawSize, outTileSize);
             tile2Valid = true;
           }
           else {
@@ -432,7 +469,6 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos, ypos+_tileSize, 0, 0);
           int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile3, outTileSize);
           if (rawSize > 0) {
-            cod.decode((char*)tile3, rawSize, outTileSize);
             tile3Valid = true;
           }
           else {
@@ -445,7 +481,6 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
           tileNr = TIFFComputeTile(prevLevelTiff, xpos+_tileSize, ypos+_tileSize, 0, 0);
           int rawSize = TIFFReadRawTile(prevLevelTiff, tileNr, tile4, outTileSize);
           if (rawSize > 0) {
-            cod.decode((char*)tile4, rawSize, outTileSize);
             tile4Valid = true;
           }
           else {
@@ -630,7 +665,7 @@ void MultiResolutionImageWriter::setPyramidTags(TIFF* levelTiff, const unsigned 
   } else if (_codec == RAW) {
     TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
   }
-  else if (_codec == JPEG2000_LOSSLESS || _codec == JPEG2000_LOSSY) {
+  else if (_codec == JPEG2000) {
     TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, 33005);
   }
 
@@ -649,7 +684,8 @@ void MultiResolutionImageWriter::setTempPyramidTags(TIFF* levelTiff, const unsig
   TIFFSetField(levelTiff, TIFFTAG_IMAGELENGTH, hight); 
 }
 
-template <typename T> T* MultiResolutionImageWriter::downscaleTile(T* inTile, unsigned int tileSize, unsigned int nrSamples) {  
+template <typename T> T* MultiResolutionImageWriter::downscaleTile(T* inTile, unsigned int tileSize, unsigned int nrSamples) {
+  auto startDownscaleTime = std::chrono::steady_clock::now();
   unsigned int dsSize = tileSize/2;
   unsigned int npixels = dsSize*dsSize*nrSamples;
   T* dsTile = (T*) _TIFFmalloc(dsSize*dsSize * nrSamples * sizeof(T));
@@ -667,17 +703,18 @@ template <typename T> T* MultiResolutionImageWriter::downscaleTile(T* inTile, un
       }
     }
   }
+  auto endDownscaleTime = std::chrono::steady_clock::now();
+  _totalDownsamplingtime += std::chrono::duration<double, milli>(endDownscaleTime - startDownscaleTime).count();
   return dsTile;
 }
 
 template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* levelTiff, unsigned int levelwidth, unsigned int levelheight, unsigned int nrsamples) {
 	unsigned int npixels = _tileSize * _tileSize * nrsamples;
 	T* raster = (T*) _TIFFmalloc(npixels * sizeof (T));
-	if (getCompression() == JPEG2000_LOSSLESS || getCompression() == JPEG2000_LOSSY) {
-	  JPEG2000Codec cod = JPEG2000Codec();
+	if (getCompression() == JPEG2000) {
 	  int depth = 8;
 	  unsigned int size = npixels * sizeof(unsigned char);
-	  if (getDataType() == UInt32 || getDataType() == Float) {
+	  if (getDataType() == UInt32 && getColorType() != pathology::ColorType::ARGB) {
 		  depth = 32;
 		  size = npixels * sizeof(T);
 	  }
@@ -691,14 +728,10 @@ template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* l
 		  nrComponents = _numberOfIndexedColors;
 	  }
 
-	  float rate = 1.0;
-	  if (getCompression() == JPEG2000_LOSSY) {
-		  rate = getJPEGQuality()/100.;
-	  }
+	  float rate = getJPEGQuality();
 	  for (unsigned int i = 0; i < TIFFNumberOfTiles(levelTiff); ++i) {
       if (TIFFReadEncodedTile(levelTiff, i, raster, npixels * sizeof(T)) > 0) {
         unsigned int size = npixels * sizeof(T);
-        cod.encode((char*)raster, size, _tileSize, depth, nrComponents, rate, (getColorType() == pathology::ARGB || getColorType() == pathology::RGB));
         TIFFWriteRawTile(_tiff, i, raster, size);
       }
 	  }
