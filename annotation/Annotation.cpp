@@ -16,6 +16,22 @@ std::string Annotation::getTypeAsString() const {
   return _typeStrings[_type];
 }
 
+bool Annotation::isClockwise() const {
+  if (!_coordinates.empty()) {
+    std::vector<Point> coords = _coordinates;
+    coords.push_back(coords[0]);
+    double cwise = 0;
+    for (unsigned int pt = 0; pt < coords.size() - 1; ++pt) {
+      double toAdd = (coords[pt + 1].getX() - coords[pt].getX()) * ((coords[pt + 1].getY() + coords[pt].getY()));
+      cwise += toAdd;
+    }
+    return cwise < 0;
+  }
+  else {
+    return false;
+  }
+}
+
 void Annotation::setTypeFromString(const std::string& type) {
   for (unsigned int i = 0; i < 7; ++i) {
     if (type == std::string(_typeStrings[i])) {
