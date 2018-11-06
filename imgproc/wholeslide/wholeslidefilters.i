@@ -54,7 +54,7 @@ namespace std {
 #endif
 
 %immutable ASAP_VERSION_STRING;
-%include "config/ASAPMacros.h"
+%include "../../config/ASAPMacros.h"
 
 %include "DistanceTransformWholeSlideFilter.h"
 %include "ConnectedComponentsWholeSlideFilter.h"

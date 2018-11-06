@@ -10,14 +10,14 @@
  *
  */
 
-#include "nucleisegmentation_export.h"
+#include "FRST_export.h"
 #include <vector>
 
 namespace cv {
   class Mat;
 }
 
-class NUCLEISEGMENTATION_EXPORT FRST {
+class FRST_EXPORT FRST {
 
 public:
   FRST();

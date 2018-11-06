@@ -2,9 +2,10 @@
 #include "AnnotationList.h"
 #include "Annotation.h"
 #include "AnnotationGroup.h"
-#include "MultiResolutionImageWriter.h"
+#include "multiresolutionimageinterface/MultiResolutionImageWriter.h"
 #include "core/Box.h"
 #include "core/ProgressMonitor.h"
+#include "core/PathologyEnums.h"
 
 void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
   _monitor = monitor;

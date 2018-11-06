@@ -1,2 +1,0 @@
-PROJECT(PathologyIO)
-ADD_SUBDIRECTORY(multiresolutionimageinterface)

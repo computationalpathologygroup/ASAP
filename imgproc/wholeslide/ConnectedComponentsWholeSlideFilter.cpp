@@ -1,6 +1,6 @@
 #include "ConnectedComponentsWholeSlideFilter.h"
-#include "MultiResolutionImage.h"
-#include "MultiResolutionImageWriter.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImageWriter.h"
 #include "core/PathologyEnums.h"
 #include <set>
 #include <iostream>

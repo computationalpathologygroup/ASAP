@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "core_export.h"
-#include "core/PathologyEnums.h"
+#include "PathologyEnums.h"
 
 class CORE_EXPORT ImageSource {
 

@@ -1,30 +1,21 @@
-PROJECT(NUCLEISEGMENTATION)
-SET(NucleiSegmentation_SRCS FRST.h FRST.cpp)
+set(FRST_SRCS FRST.h FRST.cpp)
 
-ADD_LIBRARY(NucleiSegmentation SHARED ${NucleiSegmentation_SRCS})
-TARGET_INCLUDE_DIRECTORIES(
-  NucleiSegmentation
-  PRIVATE
-  ${DIAGPathology_SOURCE_DIR}  
-  ${OpenCV_INCLUDE_DIRS}
-  ${DIAGPathology_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-)
-TARGET_LINK_LIBRARIES(NucleiSegmentation PRIVATE ${OpenCV_LIBS})
-generate_export_header(NucleiSegmentation)
+add_library(FRST SHARED ${FRST_SRCS})
+target_include_directories(FRST PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/imgproc/FRST> PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(FRST PRIVATE ${OpenCV_LIBS})
+generate_export_header(FRST)
+set_target_properties(FRST PROPERTIES DEBUG_POSTFIX _d)
 
-SET_TARGET_PROPERTIES(NucleiSegmentation PROPERTIES DEBUG_POSTFIX _d)
+if(WIN32)  
+  SET_TARGET_PROPERTIES(FRST PROPERTIES FOLDER imgproc)    
+endif(WIN32)
 
-IF(WIN32)  
-  SET_TARGET_PROPERTIES(NucleiSegmentation PROPERTIES FOLDER pathology/diag/imgproc)    
-ENDIF(WIN32)
-
-INSTALL(TARGETS NucleiSegmentation
-  EXPORT asap-targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+install(TARGETS FRST
+        EXPORT asap-targets
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
 )
 
-INSTALL(FILES FRST.h DESTINATION include/imgproc/NucleiSegmentation)
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/nucleisegmentation_export.h DESTINATION include/imgproc/NucleiSegmentation)
+install(FILES FRST.h DESTINATION include/imgproc/FRST)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FRST_export.h DESTINATION include/imgproc/FRST)

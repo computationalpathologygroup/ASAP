@@ -4,7 +4,6 @@
 #include <vector>
 #include "MultiResolutionImage.h"
 #include "multiresolutionimageinterface_export.h"
-#include "core/PathologyEnums.h"
 
 namespace pugi {
   class xml_document;

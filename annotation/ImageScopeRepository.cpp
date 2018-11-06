@@ -2,8 +2,6 @@
 #include "Annotation.h"
 #include "AnnotationGroup.h"
 #include "AnnotationList.h"
-#include "MultiResolutionImageReader.h"
-#include "OpenSlideImage.h"
 #include "core/Point.h"
 #include "core/filetools.h"
 #include "core/stringconversion.h"
