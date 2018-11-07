@@ -1,7 +1,7 @@
 #ifndef PANTOOL_H
 #define PANTOOL_H
 
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 
 class PanTool : public  ToolPluginInterface {
   Q_OBJECT

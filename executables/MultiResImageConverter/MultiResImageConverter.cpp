@@ -2,11 +2,11 @@
 #include <string>
 #include <vector>
 
-#include "MultiResolutionImageReader.h"
-#include "MultiResolutionImage.h"
-#include "OpenSlideImage.h"
-#include "MultiResolutionImageWriter.h"
-#include "AperioSVSWriter.h"
+#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/OpenSlideImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImageWriter.h"
+#include "multiresolutionimageinterface/AperioSVSWriter.h"
 #include "core/filetools.h"
 #include "core/PathologyEnums.h"
 #include "core/CmdLineProgressMonitor.h"

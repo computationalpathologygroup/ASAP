@@ -1,7 +1,7 @@
 #ifndef ZOOMTOOL_H
 #define ZOOMTOOL_H
 
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 
 class ZoomTool : public  ToolPluginInterface {
   Q_OBJECT

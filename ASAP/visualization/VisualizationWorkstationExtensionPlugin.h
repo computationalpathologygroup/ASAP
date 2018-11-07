@@ -2,7 +2,7 @@
 #define VISUALIZATIONWORKSTATIONEXTENSIONPLUGIN_H
 
 #include <memory>
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 
 class QCheckBox;
 class XmlRepository;

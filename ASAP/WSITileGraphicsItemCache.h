@@ -1,7 +1,7 @@
 #ifndef WSITileGraphicsItemCache_H
 #define WSITileGraphicsItemCache_H
 
-#include "io/multiresolutionimageinterface/TileCache.h"
+#include "multiresolutionimageinterface/TileCache.h"
 #include <QObject>
 
 class WSITileGraphicsItem;

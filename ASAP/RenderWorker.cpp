@@ -1,7 +1,7 @@
 #include "RenderWorker.h" 
 #include "RenderThread.h"
 #include "UtilityFunctions.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include <QImage>
 #include <QPixmap>
 #include <QPainter>

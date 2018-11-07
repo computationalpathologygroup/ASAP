@@ -1,12 +1,12 @@
 #include "MeasurementQtAnnotation.h"
-#include "Annotation.h"
+#include "annotation/Annotation.h"
 #include <QObject>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPainterPathStroker>
 #include <QStyleOptionGraphicsItem>
 #include "AnnotationWorkstationExtensionPlugin.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include <iostream>
 #include <cmath>
 

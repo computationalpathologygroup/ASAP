@@ -1,57 +1,45 @@
-PROJECT(Tests)
+# Add test which are always performed
+file(GLOB unittest_io_src ${CMAKE_CURRENT_SOURCE_DIR}/../../multiresolutionimageinterface/unittest/*.cpp)
+foreach(TESTFILE ${unittest_io_src})
+  get_filename_component(incldir ${TESTFILE} PATH)
+  include_directories(${incldir}/..)
+ENDFOREACH()
 
-  INCLUDE_DIRECTORIES(
-    .
-    ../../
-    ${UNITTEST_INCLUDE_DIR}
-	${DIAGPathology_BINARY_DIR}
-    ${MULTIRESOLUTIONIMAGEINTERFACE_BINARY_DIR}
-    ${CORE_BINARY_DIR}
-	${BASICFILTERS_BINARY_DIR}
-	${NUCLEISEGMENTATION_BINARY_DIR}
-  )
-
-  # Add test which are always performed
-  FILE(GLOB unittest_io_src ${Tests_SOURCE_DIR}/../../io/*/unittest/*.cpp)
-  FOREACH(TESTFILE ${unittest_io_src})
-    get_filename_component(incldir ${TESTFILE} PATH)
-    INCLUDE_DIRECTORIES(${incldir}/..)
-  ENDFOREACH()
-
-  SET(unittest_src
+set(unittest_src
     TestRunner.cpp 
     TestData.cpp
     TestData.h
     ${unittest_io_src}
-  )
+)
   
-  # Potentially add ImageProcessing tests
-  IF(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING)
-    FILE(GLOB unittest_imgproc_src ${Tests_SOURCE_DIR}/../../imgproc/*/unittest/*.cpp)
-    FOREACH(TESTFILE ${unittest_imgproc_src})
-      get_filename_component(incldir ${TESTFILE} PATH)
-      INCLUDE_DIRECTORIES(${incldir}/..)
-    ENDFOREACH()
+# Potentially add ImageProcessing tests
+if(BUILD_IMAGEPROCESSING)
+  file(GLOB unittest_imgproc_src ${CMAKE_CURRENT_SOURCE_DIR}/../../imgproc/*/unittest/*.cpp)
+  foreach(TESTFILE ${unittest_imgproc_src})
+    get_filename_component(incldir ${TESTFILE} PATH)
+    include_directories(${incldir}/..)
+  endforeach()
 
-    LIST(APPEND unittest_src ${unittest_imgproc_src})
-  ENDIF()
+  list(APPEND unittest_src ${unittest_imgproc_src})
+endif()
 
-  ADD_EXECUTABLE(patholTestRunner ${unittest_src})
-  TARGET_LINK_LIBRARIES(patholTestRunner PRIVATE optimized ${UNITTEST_LIBRARY} debug ${UNITTEST_LIBRARY_DEBUG} multiresolutionimageinterface)
-  IF(BUILD_DIAG_PATHOLOGY_IMAGEPROCESSING)
-    TARGET_LINK_LIBRARIES(patholTestRunner PRIVATE basicfilters NucleiSegmentation ${OpenCV_LIBS})
-  ENDIF()
+add_executable(testRunner ${unittest_src})
+target_include_directories(testRunner PRIVATE ${UNITTEST_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(testRunner PRIVATE optimized ${UNITTEST_LIBRARY} debug ${UNITTEST_LIBRARY_DEBUG} multiresolutionimageinterface)
+if(BUILD_IMAGEPROCESSING)
+  target_link_libraries(testRunner PRIVATE basicfilters FRST ${OpenCV_LIBS})
+endif()
 
-  # set target properties
-  SET_TARGET_PROPERTIES(patholTestRunner PROPERTIES DEBUG_POSTFIX _d)
+# set target properties
+set_target_properties(testRunner PROPERTIES DEBUG_POSTFIX _d)
 
-  # set install targets
-  INSTALL(TARGETS patholTestRunner
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-  )
+# set install targets
+install(TARGETS testRunner
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+)
 
-IF(WIN32)
-  SET_TARGET_PROPERTIES(patholTestRunner PROPERTIES FOLDER pathology/diag/executables)   
-ENDIF(WIN32)
+if(WIN32)
+  set_target_properties(testRunner PROPERTIES FOLDER executables)   
+endif(WIN32)

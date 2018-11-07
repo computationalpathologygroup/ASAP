@@ -1,7 +1,7 @@
 #ifndef FILTERWORKSTATIONEXTENSIONPLUGIN_H
 #define FILTERWORKSTATIONEXTENSIONPLUGIN_H
 
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 
 class FilterDockWidget;
 class QGraphicsItem;

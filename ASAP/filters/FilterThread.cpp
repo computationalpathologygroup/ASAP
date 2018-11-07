@@ -10,7 +10,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
 #include "core/PathologyEnums.h"
 #include "core/Patch.h"

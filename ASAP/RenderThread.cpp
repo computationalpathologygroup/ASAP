@@ -3,7 +3,7 @@
 
 #include <limits>
 
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
 #include "WSITileGraphicsItem.h"
 

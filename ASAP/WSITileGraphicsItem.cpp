@@ -7,7 +7,7 @@
 #include <QTransform>
 #include "WSITileGraphicsItem.h"
 #include "RenderThread.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "WSITileGraphicsItemCache.h"
 #include "TileManager.h"
 #include <QElapsedTimer>

@@ -1,7 +1,7 @@
 #include "AnnotationTool.h"
 #include "QtAnnotation.h"
 #include "AnnotationWorkstationExtensionPlugin.h"
-#include "Annotation.h"
+#include "annotation/Annotation.h"
 #include "../PathologyViewer.h"
 #include <math.h>
 #include <numeric>

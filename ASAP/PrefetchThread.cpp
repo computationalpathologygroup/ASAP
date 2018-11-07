@@ -4,7 +4,7 @@
 #include <QElapsedTimer>
 #include <QDebug>
 
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 
 PrefetchThread::PrefetchThread(QObject *parent) :
   QThread(parent),

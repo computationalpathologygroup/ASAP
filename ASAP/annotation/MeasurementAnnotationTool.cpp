@@ -6,13 +6,13 @@
 #include <QGraphicsLineItem>
 #include <QGraphicsItem>
 #include "PolyQtAnnotation.h"
-#include "Annotation.h"
+#include "annotation/Annotation.h"
 #include "../PathologyViewer.h"
 #include <math.h>
 #include <numeric>
 #include <iostream>
 #include <QTimeLine>
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 
 MeasurementAnnotationTool::QGraphicsTextItemWithBackground::QGraphicsTextItemWithBackground(const QString &text) :
 QGraphicsTextItem(text) { }

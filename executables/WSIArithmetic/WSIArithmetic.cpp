@@ -2,9 +2,9 @@
 #include <vector>
 #include <iostream>
 
-#include "MultiResolutionImageReader.h"
-#include "MultiResolutionImage.h"
-#include "ArithmeticWholeSlideFilter.h"
+#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "imgproc/wholeslide/ArithmeticWholeSlideFilter.h"
 #include "core/filetools.h"
 #include "core/CmdLineProgressMonitor.h"
 #include "config/ASAPMacros.h"

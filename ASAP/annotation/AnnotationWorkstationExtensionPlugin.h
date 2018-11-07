@@ -1,7 +1,7 @@
 #ifndef ANNOTATIONWORKSTATIONEXTENSIONPLUGIN_H
 #define ANNOTATIONWORKSTATIONEXTENSIONPLUGIN_H
 
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 #include "annotationplugin_export.h"
 #include <memory>
 #include <QString>

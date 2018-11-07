@@ -1,11 +1,3 @@
-PROJECT(BasicTools)
-
-INCLUDE_DIRECTORIES(
-../
-../../
-${DIAGPathology_BINARY_DIR}
-)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(ZoomTool_SOURCE 
@@ -18,27 +10,24 @@ set(PanTool_SOURCE
   PanTool.cpp
 )
 
-find_package(Qt5 COMPONENTS Core Widgets Gui)  
-qt5_add_resources(TOOL_RESOURCES ${BasicTools_SOURCE_DIR}/resources/basictools_resources.qrc)
-ADD_LIBRARY(ZoomToolPlugin SHARED ${ZoomTool_SOURCE} ${TOOL_RESOURCES})
-QT5_USE_MODULES(ZoomToolPlugin Core Widgets)
-ADD_LIBRARY(PanToolPlugin SHARED ${PanTool_SOURCE} ${TOOL_RESOURCES})
-QT5_USE_MODULES(PanToolPlugin Core Widgets)  
+qt5_add_resources(TOOL_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/basictools_resources.qrc)
+add_library(ZoomToolPlugin SHARED ${ZoomTool_SOURCE} ${TOOL_RESOURCES})
+add_library(PanToolPlugin SHARED ${PanTool_SOURCE} ${TOOL_RESOURCES})
 
-TARGET_LINK_LIBRARIES(PanToolPlugin ASAPLib)
-TARGET_LINK_LIBRARIES(ZoomToolPlugin ASAPLib)
-SET_TARGET_PROPERTIES(PanToolPlugin PROPERTIES DEBUG_POSTFIX _d)
-SET_TARGET_PROPERTIES(ZoomToolPlugin PROPERTIES DEBUG_POSTFIX _d)
+target_link_libraries(PanToolPlugin PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
+target_link_libraries(ZoomToolPlugin PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
+set_target_properties(PanToolPlugin PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(ZoomToolPlugin PROPERTIES DEBUG_POSTFIX _d)
 
-INSTALL(TARGETS PanToolPlugin ZoomToolPlugin
-  RUNTIME DESTINATION bin/plugins/tools
-  LIBRARY DESTINATION bin/plugins/tools
-  ARCHIVE DESTINATION lib/plugins/tools
+install(TARGETS PanToolPlugin ZoomToolPlugin
+        RUNTIME DESTINATION bin/plugins/tools
+        LIBRARY DESTINATION bin/plugins/tools
+        ARCHIVE DESTINATION lib/plugins/tools
 )
 
-INSTALL(FILES PanTool.h ZoomTool.h DESTINATION include/ASAP/plugins/tools)
+install(FILES PanTool.h ZoomTool.h DESTINATION include/ASAP/plugins/tools)
 
 IF(WIN32)
-  SET_TARGET_PROPERTIES(PanToolPlugin PROPERTIES FOLDER pathology/diag/ASAP/plugins/tools)   
-  SET_TARGET_PROPERTIES(ZoomToolPlugin PROPERTIES FOLDER pathology/diag/ASAP/plugins/tools)   
+  set_target_properties(PanToolPlugin PROPERTIES FOLDER ASAP/plugins/tools)   
+  set_target_properties(ZoomToolPlugin PROPERTIES FOLDER ASAP/plugins/tools)   
 ENDIF(WIN32)
