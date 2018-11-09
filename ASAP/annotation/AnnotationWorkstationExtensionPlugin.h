@@ -22,7 +22,7 @@ class QLabel;
 class ANNOTATIONPLUGIN_EXPORT AnnotationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.AnnotationWorkstationExtensionPlugin/1.0")
+    Q_PLUGIN_METADATA(IID "ASAP.AnnotationWorkstationExtensionPlugin/1.0")
     Q_INTERFACES(WorkstationExtensionPluginInterface)
 
 public :

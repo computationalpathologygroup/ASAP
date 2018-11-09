@@ -5,7 +5,7 @@
 
 class ZoomTool : public  ToolPluginInterface {
   Q_OBJECT
-  Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.ZoomTool/1.0")
+  Q_PLUGIN_METADATA(IID "ASAP.ZoomTool/1.0")
   Q_INTERFACES(ToolPluginInterface)
 
 public:

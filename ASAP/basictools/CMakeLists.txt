@@ -1,4 +1,5 @@
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../../../lib")
 
 set(ZoomTool_SOURCE 
   ZoomTool.h

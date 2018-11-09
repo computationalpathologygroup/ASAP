@@ -1,7 +1,7 @@
 #ifndef PATHOLOGYWORKSTATION_H
 #define PATHOLOGYWORKSTATION_H
 
-#include "ASAPLib_export.h"
+#include "asaplib_export.h"
 #include <QMainWindow>
 #include <QDir>
 #include <QStringList>

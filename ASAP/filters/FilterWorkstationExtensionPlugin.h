@@ -11,7 +11,7 @@ class MultiResolutionImage;
 class FilterWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.FilterWorkstationExtensionPlugin/1.0")
+    Q_PLUGIN_METADATA(IID "ASAP.FilterWorkstationExtensionPlugin/1.0")
     Q_INTERFACES(WorkstationExtensionPluginInterface)
 
 private :

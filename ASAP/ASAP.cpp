@@ -42,7 +42,7 @@
 #ifdef WIN32
 const char* ASAP::sharedLibraryExtensions = ".dll";
 #else
-const char* PathologyWorkstation::sharedLibraryExtensions = ".so";
+const char* ASAP::sharedLibraryExtensions = ".so";
 #endif
 
 using namespace std;
@@ -128,10 +128,10 @@ void ASAP::loadPlugins() {
       QDockWidget* lastDockWidget = NULL;
       QDockWidget* firstDockWidget = NULL;
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
-        if (fileName.toLower().endsWith(sharedLibraryExtensions)) {
-          QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
-          QObject *plugin = loader.instance();
-          if (plugin) {
+        if (fileName.toLower().endsWith(sharedLibraryExtensions)) {        
+          QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));       
+          QObject *plugin = loader.instance();    
+          if (plugin) {         
             std::unique_ptr<WorkstationExtensionPluginInterface> extension(qobject_cast<WorkstationExtensionPluginInterface*>(plugin));
             if (extension) {
               _extensionPluginFileNames.push_back(fileName.toStdString());

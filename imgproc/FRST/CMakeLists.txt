@@ -18,4 +18,4 @@ install(TARGETS FRST
 )
 
 install(FILES FRST.h DESTINATION include/imgproc/FRST)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FRST_export.h DESTINATION include/imgproc/FRST)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/frst_export.h DESTINATION include/imgproc/FRST)

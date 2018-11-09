@@ -10,7 +10,7 @@
  *
  */
 
-#include "FRST_export.h"
+#include "frst_export.h"
 #include <vector>
 
 namespace cv {

@@ -11,7 +11,7 @@ class QDialog;
 class ColorDeconvolutionFilterPlugin : public ImageFilterPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.ColorDeconvolutionFilter/1.0")
+    Q_PLUGIN_METADATA(IID "ASAP.ColorDeconvolutionFilter/1.0")
     Q_INTERFACES(ImageFilterPluginInterface)
 
 public :

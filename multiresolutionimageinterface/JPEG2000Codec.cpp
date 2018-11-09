@@ -3,6 +3,7 @@
 #include "openjpeg.h"
 #include "core/PathologyEnums.h"
 #include <string>
+#include <cstring>
 #include <vector>
 #include <sstream>
 

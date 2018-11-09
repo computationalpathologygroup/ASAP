@@ -1,4 +1,6 @@
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../../../lib")
+
 set(FilterWorkstationExtensionPlugin_SOURCE
     FilterWorkstationExtensionPlugin.cpp
     FilterWorkstationExtensionPlugin.h

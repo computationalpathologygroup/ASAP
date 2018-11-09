@@ -1,7 +1,7 @@
 #ifndef QTPROGRESSMONITOR_H
 #define QTPROGRESSMONITOR_H
 
-#include "ASAPLib_export.h"
+#include "asaplib_export.h"
 #include "core/ProgressMonitor.h"
 #include <QObject>
 

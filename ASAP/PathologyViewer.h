@@ -1,6 +1,6 @@
 #ifndef PATHOLOGYVIEWER_H
 #define PATHOLOGYVIEWER_H
-#include "ASAPLib_export.h"
+#include "asaplib_export.h"
 #include <QGraphicsView>
 #include <vector>
 #include <memory>
