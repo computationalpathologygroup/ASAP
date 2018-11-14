@@ -176,7 +176,9 @@ void JPEG2000Codec::decode(unsigned char* buf, const unsigned int& inSize, const
 
   //Setup the decoder decoding parameters using user parameters.
   opj_setup_decoder(decoder, &decodeParameters);
+#if OPJ_VERSION_MAJOR >= 2 && OPJ_VERSION_MINOR >= 3
   opj_codec_set_threads(decoder, 4);
+#endif
 
   // Read the main header of the codestream, if necessary the JP2 boxes, and create decompImage.
   OPJ_BOOL headerSucces = opj_read_header(l_stream, decoder, &decompImage);
