@@ -28,7 +28,10 @@ namespace ASAP::Worklist::GUI
 			image_model->setItem(item, 0, standard_item);
 		}
 
-		// Fills the placeholders		
+		// Fills the placeholders
+		std::vector<size_t> valid;
+		std::vector<size_t> invalid;
+
 		QString total_size(std::to_string(image_items.Size()).data());
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
@@ -43,14 +46,36 @@ namespace ASAP::Worklist::GUI
 			{
 				std::vector<const std::string*> record(image_items.At(item, { "location" }));
 				image_model->item(item, 0)->setIcon(CreateIcon_(*record[0], size));
+				valid.push_back(item);
 			}
 			catch (const std::exception& e)
 			{
 				image_model->item(item, 0)->setIcon(invalid_icon);
+				invalid.push_back(item);
 			}
 
 			// Signals the model that the item has had a certain amount of icon changes.
 			RequiresItemRefresh();
+		}
+
+		// Reorders the list.
+		std::vector<QStandardItem*> items;
+		for (size_t item = 0; item < image_items.Size(); ++item)
+		{
+			items.push_back(image_model->takeItem(item));
+		}
+
+		size_t current_item = 0;
+		for (size_t item = 0; item < valid.size(); ++item)
+		{
+				image_model->setItem(current_item, 0, items[valid[item]]);
+				++current_item;
+		}
+
+		for (size_t item = 0; item < invalid.size(); ++item)
+		{
+			image_model->setItem(current_item, 0, items[invalid[item]]);
+			++current_item;
 		}
 
 		RequiresItemRefresh();
@@ -116,18 +141,7 @@ namespace ASAP::Worklist::GUI
 
 	QIcon IconCreator::CreateInvalidIcon_(const size_t size)
 	{
-		size_t reduced_size = (size / 10) - 1;
-
-		QImage image(reduced_size, reduced_size, QImage::Format::Format_BGR30);
-		image.fill(Qt::white);
-		for (size_t p = 0; p < reduced_size; ++p)
-		{
-			image.setPixel(p, p, Qt::black);
-		}
-		for (size_t p = 0; p < reduced_size; ++p)
-		{
-			image.setPixel((reduced_size - 1) - p, p, Qt::black);
-		}
-		return QIcon(QPixmap::fromImage(image).scaled(size, size, Qt::AspectRatioMode::KeepAspectRatio));
+		QPixmap invalid_icon("Resources/unavailable.png");
+		return QIcon(invalid_icon.scaled(size, size, Qt::AspectRatioMode::KeepAspectRatio));
 	}
 }

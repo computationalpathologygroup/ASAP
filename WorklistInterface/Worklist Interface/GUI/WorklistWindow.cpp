@@ -58,7 +58,7 @@ namespace ASAP::Worklist::GUI
 			try
 			{
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
-				m_ui_->statusBar->showMessage("Loading source: " + QString(source_path.data()));
+				m_ui_->status_bar->showMessage("Loading source: " + QString(source_path.data()));
 				m_data_acquisition_ = Data::LoadDataSource(source_path, additional_params);
 
 				if (!CheckSchema_(m_data_acquisition_.get()))
@@ -83,11 +83,11 @@ namespace ASAP::Worklist::GUI
 
 				UpdatePreviousSources_();
 				UpdateSourceViews_();
-				m_ui_->statusBar->showMessage("Succesfully loaded source: " + QString(source_path.data()));
+				m_ui_->status_bar->showMessage("Succesfully loaded source: " + QString(source_path.data()));
 			}
 			catch (const std::exception& e)
 			{
-				m_ui_->statusBar->showMessage("Unable to load source: " + QString(source_path.data()));
+				m_ui_->status_bar->showMessage("Unable to load source: " + QString(source_path.data()));
 				QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
 			}
 		}
@@ -473,7 +473,7 @@ namespace ASAP::Worklist::GUI
 
 	void WorklistWindow::UpdateStatusBar(const QString& message)
 	{
-		m_ui_->statusBar->showMessage(message);
+		m_ui_->status_bar->showMessage(message);
 	}
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
@@ -499,8 +499,8 @@ namespace ASAP::Worklist::GUI
 		QStandardItem* item(m_worklist_model_->itemFromIndex(index));
 		int worklist_id = item->data().toInt();
 
-		QStandardItemModel* patient_model = m_patients_model_;
-		QTableView* patient_view = m_ui_->view_patients;
+		QStandardItemModel* patient_model	= m_patients_model_;
+		QTableView* patient_view			= m_ui_->view_patients;
 		m_data_acquisition_->GetPatientRecords(worklist_id, [this, patient_model, patient_view](DataTable table, int error)
 		{
 			if (error == 0)
@@ -552,10 +552,10 @@ namespace ASAP::Worklist::GUI
 
 		if (m_workstation_)
 		{
-			m_ui_->statusBar->showMessage("Loading image: " + image_handle);
+			m_ui_->status_bar->showMessage("Loading image: " + image_handle);
 			m_workstation_->openFile(image_handle);
 			RequiresTabSwitch(m_workstation_tab_id_);
-			m_ui_->statusBar->showMessage("Finished loading image: " + image_handle);
+			m_ui_->status_bar->showMessage("Finished loading image: " + image_handle);
 		}
 	}
 
