@@ -1,6 +1,6 @@
 #include "OpenSlideImage.h"
 #include <boost/thread.hpp>
-#include <openslide.h>
+#include "openslide.h" 
 #include <sstream>
 
 using namespace pathology;

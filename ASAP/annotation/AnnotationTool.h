@@ -1,7 +1,7 @@
 #ifndef ANNOTATIONTOOL_H
 #define ANNOTATIONTOOL_H
 
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 #include "core/Point.h"
 #include "annotationplugin_export.h"
 

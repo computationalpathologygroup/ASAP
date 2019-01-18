@@ -51,6 +51,8 @@ public:
   float getArea() const;
   unsigned int getNumberOfPoints() const;
 
+  bool isClockwise() const;
+
 private:
   Type _type;
 	std::vector<Point> _coordinates;

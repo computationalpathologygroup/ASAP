@@ -1,6 +1,6 @@
 #ifndef PATHOLOGYVIEWER_H
 #define PATHOLOGYVIEWER_H
-#include "ASAP_export.h"
+#include "asaplib_export.h"
 #include <QGraphicsView>
 #include <vector>
 #include <memory>
@@ -15,7 +15,7 @@ class TileManager;
 class ScaleBar;
 class QSettings;
 
-class ASAP_EXPORT PathologyViewer : public QGraphicsView
+class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 {
     Q_OBJECT
     

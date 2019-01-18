@@ -1,7 +1,9 @@
 #include "JPEG2000Codec.h"
 #include "opj_config.h"
 #include "openjpeg.h"
+#include "core/PathologyEnums.h"
 #include <string>
+#include <cstring>
 #include <vector>
 #include <sstream>
 
@@ -174,7 +176,9 @@ void JPEG2000Codec::decode(unsigned char* buf, const unsigned int& inSize, const
 
   //Setup the decoder decoding parameters using user parameters.
   opj_setup_decoder(decoder, &decodeParameters);
+#if OPJ_VERSION_MAJOR >= 2 && OPJ_VERSION_MINOR >= 3
   opj_codec_set_threads(decoder, 4);
+#endif
 
   // Read the main header of the codestream, if necessary the JP2 boxes, and create decompImage.
   OPJ_BOOL headerSucces = opj_read_header(l_stream, decoder, &decompImage);
@@ -191,12 +195,12 @@ void JPEG2000Codec::decode(unsigned char* buf, const unsigned int& inSize, const
   int stream_len = (decompImage->comps[0].w * decompImage->comps[0].h);
 
   OPJ_INT32 ** compPointers = new OPJ_INT32*[decompImage->numcomps];
-  for (int cmp = 0; cmp < decompImage->numcomps; cmp++) {
+  for (unsigned int cmp = 0; cmp < decompImage->numcomps; cmp++) {
     compPointers[cmp] = decompImage->comps[cmp].data;
   }
   std::fill(buf, buf + outSize, 0);
   for (int index = 0; index < stream_len; index++) {
-    for (int cmp = 0; cmp < decompImage->numcomps; cmp++) {
+    for (unsigned int cmp = 0; cmp < decompImage->numcomps; cmp++) {
       for (int byteCnt = 0; byteCnt < bytes_jpc; byteCnt++)
       {
         *(buf)++ |= (unsigned char)((*compPointers[cmp] >> (8 * byteCnt)) & 0xFF);
@@ -238,7 +242,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
 
   //Set the image components parameters.
   opj_image_cmptparm_t*componentParameters = new opj_image_cmptparm_t[nrComponents];
-  for (int cnt = 0; cnt < nrComponents; cnt++)
+  for (unsigned int cnt = 0; cnt < nrComponents; cnt++)
   {
     componentParameters[cnt].dx = encodeParameters.subsampling_dx;
     componentParameters[cnt].dy = encodeParameters.subsampling_dy;
@@ -284,7 +288,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
  
   //(Re)set the buffer pointerss.
   OPJ_INT32 **componentBuffer_ptr = new OPJ_INT32*[encodedImage->numcomps];
-  for (int cnt = 0; cnt < encodedImage->numcomps; cnt++) {
+  for (unsigned int cnt = 0; cnt < encodedImage->numcomps; cnt++) {
     componentBuffer_ptr[cnt] = (OPJ_INT32*)(encodedImage->comps[cnt].data);
   }
 
@@ -294,8 +298,8 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
   //Set the color stuff.
   unsigned char* movingDataPointer = (unsigned char*)data;
   for (int index = 0; index < int(size / (encodedImage->numcomps * bpc)); index++) {
-    for (int cmp = 0; cmp < nrComponents; cmp++) {
-      for (int byteCnt = 0; byteCnt < bpc; byteCnt++)
+    for (unsigned int cmp = 0; cmp < nrComponents; cmp++) {
+      for (unsigned int byteCnt = 0; byteCnt < bpc; byteCnt++)
       {
         *componentBuffer_ptr[cmp] |= (((OPJ_INT32)*movingDataPointer & 0xFF) << (8 * byteCnt));
         movingDataPointer++;
@@ -316,7 +320,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
   opj_destroy_codec(encoder);
   
   // Change to encoded size 
-  size = encodingBuffer.offset + 1;
+  size = static_cast<unsigned int>(encodingBuffer.offset + 1);
 
   unsigned char * enc_bytes_ptr = encodingBuffer.data; // Pointer to start of encoded data
   movingDataPointer = (unsigned char*)data;

@@ -2,9 +2,10 @@
 #include "AnnotationList.h"
 #include "Annotation.h"
 #include "AnnotationGroup.h"
-#include "MultiResolutionImageWriter.h"
+#include "multiresolutionimageinterface/MultiResolutionImageWriter.h"
 #include "core/Box.h"
 #include "core/ProgressMonitor.h"
+#include "core/PathologyEnums.h"
 
 void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
   _monitor = monitor;
@@ -13,6 +14,13 @@ void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
 void AnnotationToMask::convert(const std::shared_ptr<AnnotationList>& annotationList, const std::string& maskFile, const std::vector<unsigned long long>& dimensions, const std::vector<double>& spacing, const std::map<std::string, int> nameToLabel, const std::vector<std::string> nameOrder) const {
   bool hasGroups = !annotationList->getGroups().empty();
   std::vector<std::shared_ptr<Annotation> > annotations = annotationList->getAnnotations();
+  for (auto annotation = annotations.begin(); annotation != annotations.end(); ++annotation) {
+    if (!(*annotation)->isClockwise()) {
+      std::vector<Point> coords = (*annotation)->getCoordinates();
+      std::reverse(coords.begin(), coords.end());
+      (*annotation)->setCoordinates(coords);
+    }
+  }
   if (!nameOrder.empty() && !nameToLabel.empty()) {
     std::vector<std::shared_ptr<Annotation> > unorderedAnnotations = annotations;
     annotations.clear();

@@ -12,8 +12,8 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QFileDialog>
-#include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "core/filetools.h"
 #include "core/PathologyEnums.h"
 #include "annotation/XmlRepository.h"

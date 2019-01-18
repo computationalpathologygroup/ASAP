@@ -13,6 +13,7 @@ extern "C" {
 
 #include "JPEG2000Codec.h"
 #include "core/ProgressMonitor.h"
+#include "core/PathologyEnums.h"
 
 using namespace std;
 using namespace pathology;

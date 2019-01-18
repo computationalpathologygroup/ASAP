@@ -13,9 +13,9 @@
 #include <QDoubleSpinBox>
 #include <QApplication>
 #include "PolyQtAnnotation.h"
-#include "Annotation.h"
+#include "annotation/Annotation.h"
 #include "../PathologyViewer.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include <cmath>
 
 RectangleAnnotationTool::QGraphicsTextItemWithBackground::QGraphicsTextItemWithBackground(const QString &text) :

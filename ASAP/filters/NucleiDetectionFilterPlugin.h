@@ -11,7 +11,7 @@ class QDialog;
 class NucleiDetectionFilterPlugin : public ImageFilterPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.NucleiDetectionPlugin/1.0")
+    Q_PLUGIN_METADATA(IID "ASAP.NucleiDetectionPlugin/1.0")
     Q_INTERFACES(ImageFilterPluginInterface)
 
 public :

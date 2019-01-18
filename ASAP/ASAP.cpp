@@ -29,25 +29,25 @@
 #include <QtUiTools>
 #include <QTreeWidget>
 
-#include "pathologyworkstation.h"
+#include "ASAP.h"
 #include "PathologyViewer.h"
 #include "interfaces/interfaces.h"
 #include "WSITileGraphicsItemCache.h"
 #include "config/ASAPMacros.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImageReader.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImageFactory.h"
-#include "io/multiresolutionimageinterface/OpenSlideImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
+#include "multiresolutionimageinterface/OpenSlideImage.h"
 
 #ifdef WIN32
-const char* PathologyWorkstation::sharedLibraryExtensions = ".dll";
+const char* ASAP::sharedLibraryExtensions = ".dll";
 #else
-const char* PathologyWorkstation::sharedLibraryExtensions = ".so";
+const char* ASAP::sharedLibraryExtensions = ".so";
 #endif
 
 using namespace std;
 
-PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
+ASAP::ASAP(QWidget *parent) :
     QMainWindow(parent),
     _cacheMaxByteSize(1000*512*512*3),
     _settings(NULL)
@@ -79,7 +79,7 @@ PathologyWorkstation::PathologyWorkstation(QWidget *parent) :
   }
 }
 
-void PathologyWorkstation::writeSettings()
+void ASAP::writeSettings()
 {
   _settings->beginGroup("ASAP");
   _settings->setValue("size", size());
@@ -87,7 +87,7 @@ void PathologyWorkstation::writeSettings()
   _settings->endGroup();
 }
 
-void PathologyWorkstation::readSettings()
+void ASAP::readSettings()
 {
   _settings->beginGroup("ASAP");
   resize(_settings->value("size", QSize(1037, 786)).toSize());
@@ -97,7 +97,7 @@ void PathologyWorkstation::readSettings()
   _settings->endGroup();
 }
 
-void PathologyWorkstation::loadPlugins() {
+void ASAP::loadPlugins() {
   PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
@@ -128,10 +128,10 @@ void PathologyWorkstation::loadPlugins() {
       QDockWidget* lastDockWidget = NULL;
       QDockWidget* firstDockWidget = NULL;
       foreach(QString fileName, _pluginsDir.entryList(QDir::Files)) {
-        if (fileName.toLower().endsWith(sharedLibraryExtensions)) {
-          QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));
-          QObject *plugin = loader.instance();
-          if (plugin) {
+        if (fileName.toLower().endsWith(sharedLibraryExtensions)) {        
+          QPluginLoader loader(_pluginsDir.absoluteFilePath(fileName));       
+          QObject *plugin = loader.instance();    
+          if (plugin) {         
             std::unique_ptr<WorkstationExtensionPluginInterface> extension(qobject_cast<WorkstationExtensionPluginInterface*>(plugin));
             if (extension) {
               _extensionPluginFileNames.push_back(fileName.toStdString());
@@ -189,17 +189,17 @@ void PathologyWorkstation::loadPlugins() {
   }
 }
 
-void PathologyWorkstation::closeEvent(QCloseEvent *event) {
+void ASAP::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-PathologyWorkstation::~PathologyWorkstation()
+ASAP::~ASAP()
 {
   on_actionClose_triggered();
   writeSettings();
 }
 
-void PathologyWorkstation::on_actionAbout_triggered() {
+void ASAP::on_actionAbout_triggered() {
   QUiLoader loader;
   QFile file(":/ASAP_ui/aboutdialog.ui");
   file.open(QFile::ReadOnly);
@@ -229,7 +229,7 @@ void PathologyWorkstation::on_actionAbout_triggered() {
   file.close();
 }
 
-void PathologyWorkstation::on_actionClose_triggered()
+void ASAP::on_actionClose_triggered()
 {
     for (std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> >::iterator it = _extensions.begin(); it != _extensions.end(); ++it) {
       if (!(*it)->canClose()) {
@@ -247,7 +247,7 @@ void PathologyWorkstation::on_actionClose_triggered()
     }
 }
 
-void PathologyWorkstation::openFile(const QString& fileName, const QString& factoryName) {
+void ASAP::openFile(const QString& fileName, const QString& factoryName) {
   statusBar->clearMessage();
   if (!fileName.isEmpty()) {
     if (_img) {
@@ -276,7 +276,7 @@ void PathologyWorkstation::openFile(const QString& fileName, const QString& fact
   }
 }
 
-void PathologyWorkstation::on_actionOpen_triggered()
+void ASAP::on_actionOpen_triggered()
 { 
   QString filterList;
   std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
@@ -302,21 +302,21 @@ void PathologyWorkstation::on_actionOpen_triggered()
   openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
 }
 
-void PathologyWorkstation::setCacheSize(const unsigned long long& cacheMaxByteSize) {
+void ASAP::setCacheSize(const unsigned long long& cacheMaxByteSize) {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
     view->setCacheSize(_cacheMaxByteSize);
   }
 }
     
-unsigned long long PathologyWorkstation::getCacheSize() const {
+unsigned long long ASAP::getCacheSize() const {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
     return view->getCacheSize();
   }
 }
 
-void PathologyWorkstation::setupUi()
+void ASAP::setupUi()
 {
   if (this->objectName().isEmpty()) {
       this->setObjectName(QStringLiteral("ASAP"));
@@ -381,7 +381,7 @@ void PathologyWorkstation::setupUi()
   this->setCentralWidget(centralWidget);
 }
 
-void PathologyWorkstation::retranslateUi()
+void ASAP::retranslateUi()
 {
   this->setWindowTitle(QApplication::translate("PathologyWorkstation", "ASAP", 0));
   actionOpen->setText(QApplication::translate("PathologyWorkstation", "Open", 0));

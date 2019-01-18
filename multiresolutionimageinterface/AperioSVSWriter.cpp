@@ -1,6 +1,7 @@
 #include "AperioSVSWriter.h"
 #include "JPEG2000Codec.h"
 #include <sstream>
+#include "core/PathologyEnums.h"
 
 extern "C" {
 #include "tiffio.h"

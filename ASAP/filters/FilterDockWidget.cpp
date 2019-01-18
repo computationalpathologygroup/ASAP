@@ -9,8 +9,8 @@
 #include <QtUiTools>
 
 #include "interfaces/interfaces.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
-#include "pathologyworkstation.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "ASAP.h"
 #include "QtProgressMonitor.h"
 
 FilterDockWidget::FilterDockWidget(QWidget *parent, Qt::WindowFlags flags) : 

@@ -2,7 +2,7 @@
 #include "FilterDockWidget.h"
 #include "FilterThread.h"
 #include "../PathologyViewer.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 
 #include <QDockWidget>
 #include <QDir>

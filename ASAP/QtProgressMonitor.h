@@ -1,11 +1,11 @@
 #ifndef QTPROGRESSMONITOR_H
 #define QTPROGRESSMONITOR_H
 
-#include "ASAP_export.h"
+#include "asaplib_export.h"
 #include "core/ProgressMonitor.h"
 #include <QObject>
 
-class ASAP_EXPORT QtProgressMonitor : public QObject, public ProgressMonitor {
+class ASAPLIB_EXPORT QtProgressMonitor : public QObject, public ProgressMonitor {
   Q_OBJECT
 
 public :

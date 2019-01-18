@@ -1,5 +1,5 @@
 #include "PointSetQtAnnotation.h"
-#include "Annotation.h"
+#include "annotation/Annotation.h"
 #include <QPainter>
 #include <QPainterPath>
 #include <QPainterPathStroker>

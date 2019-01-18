@@ -1,5 +1,5 @@
 #include "NucleiDetectionWholeSlideFilter.h"
-#include "MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "core/PathologyEnums.h"
 #include "imgproc/opencv/NucleiDetectionFilter.h"
 #include "annotation/Annotation.h"

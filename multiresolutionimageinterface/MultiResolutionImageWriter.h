@@ -2,7 +2,6 @@
 #ifndef _MultiResolutionImageWriter
 #define _MultiResolutionImageWriter
 #include "multiresolutionimageinterface_export.h"
-#include "core/PathologyEnums.h"
 #include <string>
 #include <vector>
 
@@ -12,6 +11,13 @@ typedef struct tiff TIFF;
 class MultiResolutionImage;
 class ProgressMonitor;
 class JPEG2000Codec;
+
+namespace pathology {
+  enum Compression : int;
+  enum Interpolation: int;
+  enum ColorType : int;
+  enum DataType : int;
+}
 
 //! This class can be used to write images to disk in a multi-resolution pyramid fashion.
 //! It supports writing the image in parts, to facilitate processing pipelines or in one go,

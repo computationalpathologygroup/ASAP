@@ -1,30 +1,20 @@
-PROJECT(OPENCVFILTERS)
-
-SET(OPENCVFILTERS_SRCS 
-  DIAGPathologyOpenCVBridge.h
-  NucleiDetectionFilter.h
-  NucleiDetectionFilter.cpp
+set(OPENCVFILTERS_SRCS 
+    DIAGPathologyOpenCVBridge.h
+    NucleiDetectionFilter.h
+    NucleiDetectionFilter.cpp
 )
 
-ADD_LIBRARY(opencvfilters SHARED ${OPENCVFILTERS_SRCS})
-TARGET_INCLUDE_DIRECTORIES(
-  opencvfilters
-  PRIVATE
-  ${DIAGPathology_SOURCE_DIR}
-  ${DIAGPathology_BINARY_DIR}
-)
+add_library(opencvfilters SHARED ${OPENCVFILTERS_SRCS})
+target_include_directories(opencvfilters PUBLIC ${OpenCV_INCLUDE_DIRS} $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include>)
+target_link_libraries(opencvfilters PUBLIC core ${OpenCV_LIBS})
 
-TARGET_LINK_LIBRARIES(opencvfilters PRIVATE core ${OpenCV_LIBS})
+if(WIN32)  
+  set_target_properties(opencvfilters PROPERTIES FOLDER imgproc)
+endif(WIN32)
 
-IF(WIN32)  
-  SET_TARGET_PROPERTIES(opencvfilters PROPERTIES FOLDER pathology/diag/imgproc)
-ENDIF(WIN32)
-
-
-INSTALL(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/imgproc/opencvfilters)
-
-INSTALL(TARGETS opencvfilters
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+install(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/imgproc/opencvfilters)
+install(TARGETS opencvfilters
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
 )

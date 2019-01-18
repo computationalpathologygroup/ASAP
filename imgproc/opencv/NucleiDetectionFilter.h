@@ -1,6 +1,6 @@
 #include "DIAGPathologyOpenCVBridge.h"
 #include "imgproc/basicfilters/FilterBase.h"
-#include "imgproc/NucleiSegmentation/FRST.h"
+#include "imgproc/FRST/FRST.h"
 #include "imgproc/basicfilters/ColorDeconvolutionFilter.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "core/Point.h"

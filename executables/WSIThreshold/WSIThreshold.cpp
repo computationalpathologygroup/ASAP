@@ -1,9 +1,9 @@
 #include <string>
 #include <vector>
 
-#include "MultiResolutionImageReader.h"
-#include "MultiResolutionImage.h"
-#include "ThresholdWholeSlideFilter.h"
+#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "imgproc/wholeslide/ThresholdWholeSlideFilter.h"
 #include "core/filetools.h"
 #include "core/CmdLineProgressMonitor.h"
 #include "config/ASAPMacros.h"

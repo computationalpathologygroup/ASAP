@@ -1,6 +1,6 @@
 #include "QtAnnotation.h"
-#include "Annotation.h"
-#include "AnnotationGroup.h"
+#include "annotation/Annotation.h"
+#include "annotation/AnnotationGroup.h"
 
 using namespace std;
 

@@ -1,7 +1,7 @@
 #ifndef PATHOLOGYWORKSTATION_H
 #define PATHOLOGYWORKSTATION_H
 
-#include "ASAP_export.h"
+#include "asaplib_export.h"
 #include <QMainWindow>
 #include <QDir>
 #include <QStringList>
@@ -28,13 +28,13 @@ Viewer is the owner of RenderThread, TileManager, ScaleBar, MiniMap, RenderWorke
 
 */
 
-class ASAP_EXPORT PathologyWorkstation : public QMainWindow
+class ASAPLIB_EXPORT ASAP : public QMainWindow
 {
   Q_OBJECT
 
 public:
-  explicit PathologyWorkstation(QWidget* parent = 0);
-  ~PathologyWorkstation();
+  explicit ASAP(QWidget* parent = 0);
+  ~ASAP();
 
   void setCacheSize(const unsigned long long& cacheMaxByteSize);
 

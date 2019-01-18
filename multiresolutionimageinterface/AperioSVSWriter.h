@@ -2,7 +2,6 @@
 #ifndef _AperioSVSWriter
 #define _AperioSVSWriter
 #include "multiresolutionimageinterface_export.h"
-#include "core/PathologyEnums.h"
 #include "MultiResolutionImageWriter.h"
 #include <string>
 #include <vector>

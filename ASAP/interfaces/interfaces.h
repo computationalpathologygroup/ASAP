@@ -125,8 +125,8 @@ public slots:
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<ImageFilterPluginInterface>)
-Q_DECLARE_INTERFACE(ImageFilterPluginInterface, "Diag.PathologyWorkstation.ImageFilterPluginInterface/1.0")
-Q_DECLARE_INTERFACE(ToolPluginInterface, "Diag.PathologyWorkstation.ToolPluginInterface/1.0")
-Q_DECLARE_INTERFACE(WorkstationExtensionPluginInterface, "Diag.PathologyWorkstation.WorkstationExtensionPluginInterface/1.0")
+Q_DECLARE_INTERFACE(ImageFilterPluginInterface, "ASAP.ImageFilterPluginInterface/1.0")
+Q_DECLARE_INTERFACE(ToolPluginInterface, "ASAP.ToolPluginInterface/1.0")
+Q_DECLARE_INTERFACE(WorkstationExtensionPluginInterface, "ASAP.WorkstationExtensionPluginInterface/1.0")
 
 #endif

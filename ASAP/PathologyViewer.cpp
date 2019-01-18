@@ -20,7 +20,7 @@
 #include "ScaleBar.h"
 #include "RenderThread.h"
 #include "PrefetchThread.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
 #include "core/PathologyEnums.h"
 #include "WSITileGraphicsItem.h"

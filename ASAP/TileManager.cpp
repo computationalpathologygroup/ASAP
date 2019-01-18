@@ -1,6 +1,6 @@
 #include <sstream>
 #include "TileManager.h"
-#include "io/multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "RenderThread.h"
 #include "WSITileGraphicsItem.h"
 #include "WSITileGraphicsItemCache.h"

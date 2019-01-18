@@ -1,8 +1,11 @@
 #ifndef _JPEG2000Codec
 #define _JPEG2000Codec
 #include "jpeg2kcodec_export.h"
-#include "core/PathologyEnums.h"
 
+namespace pathology {
+  enum DataType : int;
+  enum ColorType : int;
+}
 
 class JPEG2KCODEC_EXPORT JPEG2000Codec
 {  

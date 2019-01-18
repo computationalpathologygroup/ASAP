@@ -1,5 +1,5 @@
 #include "DotQtAnnotation.h"
-#include "Annotation.h"
+#include "annotation/Annotation.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 

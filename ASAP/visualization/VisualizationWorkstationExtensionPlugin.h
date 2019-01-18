@@ -2,7 +2,7 @@
 #define VISUALIZATIONWORKSTATIONEXTENSIONPLUGIN_H
 
 #include <memory>
-#include "../interfaces/interfaces.h"
+#include "interfaces/interfaces.h"
 
 class QCheckBox;
 class XmlRepository;
@@ -12,7 +12,7 @@ class AnnotationList;
 class VisualizationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "Diag.PathologyWorkstation.VisualizationWorkstationExtensionPlugin/1.0")
+    Q_PLUGIN_METADATA(IID "ASAP.VisualizationWorkstationExtensionPlugin/1.0")
     Q_INTERFACES(WorkstationExtensionPluginInterface)
 
 private :

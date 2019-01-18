@@ -386,7 +386,7 @@ namespace
 	  TEST(ReadingVSI)
 	  {
 		  MultiResolutionImageReader test;
-		  MultiResolutionImage* img = test.open(g_dataPath + "\\images\\T13-02239-II.vsi");
+		  MultiResolutionImage* img = test.open(g_dataPath + "/images/TestImage.vsi");
   		CHECK(img);
       CHECK(img->valid());
       delete img;
@@ -394,7 +394,7 @@ namespace
 	  TEST(getRawRegionFromVSI)
 	  {
 		  MultiResolutionImageReader test;
-		  MultiResolutionImage* img = test.open(g_dataPath + "\\images\\T13-02239-II.vsi");
+		  MultiResolutionImage* img = test.open(g_dataPath + "/images/TestImage.vsi");
       unsigned char* testData = new unsigned char[512*512*3];
       img->getRawRegion(3608,9752,512,512,0,testData);
       MultiResolutionImageWriter testWrite;
@@ -413,8 +413,8 @@ namespace
     TEST(ReadLosslessJPEG) 
     {
       MultiResolutionImageReader test;
-      if (core::fileExists("D:\\Experiments\\Papers\\PatholMRI\\Pathologie\\Biopten\\Original\\VSI\\T13-05194-I.vsi")) {
-        MultiResolutionImage* img = test.open("D:\\Experiments\\Papers\\PatholMRI\\Pathologie\\Biopten\\Original\\VSI\\T13-05194-I.vsi");
+      if (core::fileExists(g_dataPath + "/images/T13-05194-I.vsi")) {
+        MultiResolutionImage* img = test.open(g_dataPath + "/images/TestImageLossless.vsi");
         MultiResolutionImageWriter testWrite;
         testWrite.openFile(g_dataPath + "/images/VSIImageReadLosslessTest.tif");
         testWrite.setTileSize(512);
@@ -522,42 +522,4 @@ namespace
 
     }
   }
-
-  /*
-  SUITE(MRXSSupport)
-  {
-
-	  TEST(ReadingMRXS)
-	  {
-		  MultiResolutionImageReader test;
-		  test.open("E:\\Temp\\T10-00014-I1-1_2.0.mrxs");
-      test.close();
-	  }
-
-	  TEST(getRawRegionFromMRXS)
-	  {
-		  MultiResolutionImageReader test;
-		  test.open("E:\\Temp\\T10-00014-I1-1_2.0.mrxs");
-      unsigned char* testData = new unsigned char[512*512*4];
-      unsigned char* outData = new unsigned char[512*512*3];
-      test.getRawRegion(40000,70000,512,512,0,testData);
-      for (int i = 0, j = 0; i < 512*512*4; i+=4, j+=3) {
-        outData[j] = testData[i];
-        outData[j+1] = testData[i+1];
-        outData[j+2] = testData[i+2];
-      }
-      MultiResolutionImageWriter testWrite;
-      testWrite.openFile(g_dataPath + "/images/MRXSTest.tif");
-      testWrite.setTileSize(512);
-      testWrite.setAperioCompatibility(true);
-      testWrite.setCompression(MultiResolutionImageWriter::LZW);
-      testWrite.setDataType(MultiResolutionImageWriter::UChar);
-      testWrite.setColorType(MultiResolutionImageWriter::RGB);
-      testWrite.writeImageInformation(512,512);
-      testWrite.writeBaseImagePart((void*)outData);
-      testWrite.finishImage();
-      delete[] testData;
-      delete[] outData;
-	  }
-  }*/
 }
