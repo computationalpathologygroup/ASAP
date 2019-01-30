@@ -86,7 +86,7 @@
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -126,6 +126,7 @@
     <ClCompile Include="GUI\ExternalSourceDialog.cpp" />
     <ClCompile Include="GUI\IconCreator.cpp" />
     <ClCompile Include="GUI\WorklistWindow.cpp" />
+    <ClCompile Include="IO\HTTP_Connection.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Serialization\INI.cpp" />
     <ClCompile Include="Serialization\JSON.cpp" />
@@ -176,6 +177,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP\include</IncludePath>
     </QtMoc>
+    <ClInclude Include="IO\HTTP_Connection.h" />
     <ClInclude Include="Serialization\INI.h" />
     <ClInclude Include="Serialization\JSON.h" />
     <ClInclude Include="Serialization\Misc.h" />

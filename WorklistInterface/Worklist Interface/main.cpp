@@ -2,7 +2,7 @@
 #include "GUI/CompositeWindow.h"
 #include <QtWidgets/QApplication>
 
-#include "../../ASAP/pathologyworkstation.h"
+#include "ASAP/ASAP_Window.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
 	main_window.show();
 
 	// Creates the worklist and viewer tabs
-	ASAP::Worklist::GUI::WorklistWindow worklist;	
-	PathologyWorkstation workstation;
+	ASAP::Worklist::GUI::WorklistWindow worklist;
+	ASAP_Window workstation;
 
 	// Creates the worklist shortcuts.
 	std::vector<ASAP::Worklist::GUI::ShortcutAction> worklist_shortcuts;

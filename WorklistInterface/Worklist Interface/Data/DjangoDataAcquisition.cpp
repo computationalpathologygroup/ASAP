@@ -11,7 +11,7 @@
 namespace ASAP::Worklist::Data
 {
 	// Placeholder function for acquiring a Django REST Framework authentication token
-	std::wstring GetAuthenticationToken(web::http::client::http_client& client, std::wstring token_path, std::wstring username, std::wstring password)
+	/*std::wstring GetAuthenticationToken(web::http::client::http_client& client, std::wstring token_path, std::wstring username, std::wstring password)
 	{
 		web::http::http_request request(web::http::methods::POST);
 		request.set_body(std::wstring(L"{ \"username\": \"") + username + std::wstring(L"\", \"password\": \"") + password + std::wstring(L"\" }", L"application/json"));
@@ -26,19 +26,11 @@ namespace ASAP::Worklist::Data
 			token = token.substr(separator, token.find_first_of(L'"', separator + 3) - separator);
 		}).wait();
 		return token;
-	}
+	}*/
 
-	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_client_(web::uri(uri_info.base_url.c_str())), m_rest_uri_(uri_info), m_tables_(5)
+	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_connection_(uri_info.base_url), m_rest_uri_(uri_info), m_tables_(5)
 	{
 		InitializeTables_();
-	}
-
-	DjangoDataAcquisition::~DjangoDataAcquisition(void)
-	{
-		for (auto task : m_active_tasks_)
-		{
-			CancelTask(task.first);
-		}
 	}
 
 	WorklistDataAcquisitionInterface::SourceType DjangoDataAcquisition::GetSourceType(void)
@@ -57,7 +49,7 @@ namespace ASAP::Worklist::Data
 		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition + L"/");
 
 		DataTable* table(&m_tables_[TableEntry::WORKLIST]);
-		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
@@ -76,13 +68,13 @@ namespace ASAP::Worklist::Data
 
 		DataTable* relation_table(&m_tables_[TableEntry::WORKLIST_PATIENT_RELATION]);
 		DataTable* patient_table(&m_tables_[TableEntry::PATIENT]);
-		web::http::client::http_client* client(&m_client_);
+		IO::HTTP_Connection* connection(&m_connection_);
 		std::wstring* patient_addition(&m_rest_uri_.patient_addition);
 
 		relation_table->Clear();
 		patient_table->Clear();
 
-		return ProcessRequest_(relations_request, [relation_table, patient_table, client, patient_addition, receiver](web::http::http_response& response)
+		return m_connection_.QueueRequest(relations_request, [relation_table, patient_table, connection, patient_addition, receiver](web::http::http_response& response)
 		{
 			Serialization::JSON::ParseJsonResponseToRecords(response, *relation_table);
 
@@ -103,7 +95,7 @@ namespace ASAP::Worklist::Data
 			{
 				web::http::http_request patient_request(web::http::methods::GET);
 				patient_request.set_request_uri(L"/" + *patient_addition + L"/?ids=" + ids);
-				client->request(patient_request).then([patient_table](web::http::http_response& response)
+				connection->SendRequest(patient_request).then([patient_table](web::http::http_response& response)
 				{
 					Serialization::JSON::ParseJsonResponseToRecords(response, *patient_table);
 				}).wait();
@@ -123,7 +115,7 @@ namespace ASAP::Worklist::Data
 
 		DataTable* table(&m_tables_[TableEntry::STUDY]);
 		table->Clear();
-		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
@@ -141,7 +133,7 @@ namespace ASAP::Worklist::Data
 
 		DataTable* table(&m_tables_[TableEntry::IMAGE]);
 		table->Clear();
-		return ProcessRequest_(request, [receiver, table](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, table](web::http::http_response& response)
 		{
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
@@ -169,19 +161,6 @@ namespace ASAP::Worklist::Data
 		return m_tables_[TableEntry::IMAGE].GetColumnNames(selection);
 	}
 
-	void DjangoDataAcquisition::CancelTask(const size_t task_id)
-	{
-		auto task = m_active_tasks_.find(task_id);
-		if (task != m_active_tasks_.end())
-		{
-			if (!task->second.task.is_done())
-			{
-				task->second.token.cancel();
-			}
-			m_active_tasks_.erase(task_id);
-		}
-	}
-
 	void DjangoDataAcquisition::InitializeTables_(void)
 	{
 		std::vector<std::wstring> table_url_addition
@@ -198,30 +177,10 @@ namespace ASAP::Worklist::Data
 			request.set_request_uri(L"/" + table_url_addition[table] + L"/");
 
 			DataTable* datatable(&m_tables_[table]);
-			m_client_.request(request).then([datatable](web::http::http_response& response)
+			m_connection_.SendRequest(request).then([datatable](web::http::http_response& response)
 			{
 				Serialization::JSON::ParseJsonResponseToTableSchema(response, *datatable);
 			}).wait();
 		}
-	}
-
-	size_t DjangoDataAcquisition::ProcessRequest_(const web::http::http_request& request, std::function<void(web::http::http_response&)> observer)
-	{
-		size_t token_id = m_token_counter_;
-		m_active_tasks_.insert({ m_token_counter_, TokenTaskPair() });
-		auto inserted_pair(m_active_tasks_.find(token_id));
-		++m_token_counter_;
-
-		// Catches the response so the attached token can be removed.
-		inserted_pair->second.task = std::move(m_client_.request(request, inserted_pair->second.token.get_token()).then([observer, token_id, this](web::http::http_response& response)
-		{
-			// Passes the response to the observer
-			observer(response);
-
-			// Remove token
-			this->CancelTask(token_id);		
-		}));
-
-		return token_id;
 	}
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PathologyWorkstation</class>
- <widget class="QMainWindow" name="PathologyWorkstation">
+ <class>ASAP_Window</class>
+ <widget class="QMainWindow" name="ASAP_Window">
   <property name="geometry">
    <rect>
     <x>0</x>
