@@ -1,5 +1,5 @@
-#ifndef __ASAP_IO_HTTPCONNECTION__
-#define __ASAP_IO_HTTPCONNECTION__
+#ifndef __ASAP_NETWORKING_HTTPCONNECTION__
+#define __ASAP_NETWORKING_HTTPCONNECTION__
 
 #include <functional>
 #include <mutex>
@@ -7,7 +7,7 @@
 
 #include <cpprest/http_client.h>
 
-namespace ASAP::Worklist::IO
+namespace ASAP::Worklist::Networking
 {
 	/// <summary>
 	/// Represents a connection towards a specified URI.
@@ -17,9 +17,6 @@ namespace ASAP::Worklist::IO
 		public:
 			HTTP_Connection(const std::wstring base_uri);
 			~HTTP_Connection(void);
-
-			std::wstring GetBaseURI(void);
-			void SetBaseURI(const std::wstring uri);
 
 			void CancelAllTasks(void);
 			void CancelTask(const size_t task_id);
@@ -33,6 +30,11 @@ namespace ASAP::Worklist::IO
 			/// Sends the request through the internal client and returns the async task handling the request.
 			/// </summary>
 			pplx::task<web::http::http_response> SendRequest(const web::http::http_request& request);
+		
+		protected:
+			std::mutex									m_access_mutex$;
+
+			void CancelAllTasks$(void);
 
 		private:
 			struct TokenTaskPair
@@ -41,12 +43,9 @@ namespace ASAP::Worklist::IO
 				concurrency::cancellation_token_source	token;
 			};
 
-			std::mutex									m_access_mutex_;
 			web::http::client::http_client				m_client_;
 			size_t										m_token_counter_;
 			std::unordered_map<size_t, TokenTaskPair>	m_active_tasks_;
-
-			void CancelAllTasks_(void);
 	};
 }
-#endif // __ASAP_IO_HTTPCONNECTION__
+#endif // __ASAP_NETWORKING_HTTPCONNECTION__
