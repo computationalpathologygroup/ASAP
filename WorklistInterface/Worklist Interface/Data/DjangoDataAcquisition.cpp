@@ -68,7 +68,7 @@ namespace ASAP::Worklist::Data
 
 		DataTable* relation_table(&m_tables_[TableEntry::WORKLIST_PATIENT_RELATION]);
 		DataTable* patient_table(&m_tables_[TableEntry::PATIENT]);
-		IO::HTTP_Connection* connection(&m_connection_);
+		Networking::HTTP_Connection* connection(&m_connection_);
 		std::wstring* patient_addition(&m_rest_uri_.patient_addition);
 
 		relation_table->Clear();

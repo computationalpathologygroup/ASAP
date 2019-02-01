@@ -36,7 +36,7 @@ namespace ASAP::Worklist::GUI
 		StoreSettings_();
 	}
 
-	void WorklistWindow::AttachWorkstation(PathologyWorkstation& workstation, const int tab_id)
+	void WorklistWindow::AttachWorkstation(ASAP_Window& workstation, const int tab_id)
 	{
 		m_workstation_			= &workstation;
 		m_workstation_tab_id_	= tab_id;

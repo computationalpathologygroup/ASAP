@@ -11,7 +11,7 @@
 #include "Data/WorklistDataAcquisitionInterface.h"
 
 
-#include "../../ASAP/pathologyworkstation.h"
+#include "ASAP/ASAP_Window.h"
 
 namespace ASAP::Worklist::GUI
 {
@@ -29,7 +29,7 @@ namespace ASAP::Worklist::GUI
 			explicit WorklistWindow(QWidget* parent = 0);
 			~WorklistWindow(void);
 
-			void AttachWorkstation(PathologyWorkstation& workstation, const int tab_id);
+			void AttachWorkstation(ASAP_Window& workstation, const int tab_id);
 			WorklistWindowSettings GetStandardSettings(void);
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
@@ -52,7 +52,7 @@ namespace ASAP::Worklist::GUI
 			std::mutex												m_image_loading_access_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_switch_access_;
 			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
-			PathologyWorkstation*									m_workstation_; // Todo: Clean up or perhaps combine in struct
+			ASAP_Window*											m_workstation_; // Todo: Clean up or perhaps combine in struct
 			int														m_workstation_tab_id_;
 
 			QStandardItemModel* m_images_model_;

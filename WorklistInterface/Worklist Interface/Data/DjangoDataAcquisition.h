@@ -8,7 +8,7 @@
 
 #include "DataTable.h"
 #include "WorklistDataAcquisitionInterface.h"
-#include "../IO/HTTP_Connection.h"
+#include "../Networking/HTTP_Connection.h"
 
 namespace ASAP::Worklist::Data
 {
@@ -43,9 +43,9 @@ namespace ASAP::Worklist::Data
 		private:
 			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE, WORKLIST_PATIENT_RELATION };
 
-			IO::HTTP_Connection		m_connection_;
-			DjangoRestURI			m_rest_uri_;
-			std::vector<DataTable>	m_tables_;
+			Networking::HTTP_Connection		m_connection_;
+			DjangoRestURI					m_rest_uri_;
+			std::vector<DataTable>			m_tables_;
 
 			void InitializeTables_(void);
 	};
