@@ -4,8 +4,8 @@
 
 namespace ASAP::Worklist::Networking
 {
-	Django_Connection::Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type, const Credentials credentials)
-		: HTTP_Connection(base_uri), m_authentication_(authentication_type), m_credentials_(credentials), m_status_(UNAUTHENTICATED)
+	Django_Connection::Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type, const Credentials credentials, const web::http::client::http_client_config& config)
+		: HTTP_Connection(base_uri, config), m_authentication_(authentication_type), m_credentials_(credentials), m_status_(UNAUTHENTICATED)
 	{
 		SetupConnection_();
 	}
@@ -34,7 +34,7 @@ namespace ASAP::Worklist::Networking
 		m_access_mutex$.unlock();
 	}
 
-	Django_Connection::AUTHENTICATION_STATUS Django_Connection::GetAuthenticationStatus(void)
+	Django_Connection::AUTHENTICATION_STATUS Django_Connection::GetAuthenticationStatus(void) const
 	{
 		return m_status_;
 	}
@@ -82,15 +82,12 @@ namespace ASAP::Worklist::Networking
 			token_test.set_request_uri(L"api/v1/");
 
 			bool valid_token = false;
-			HTTP_Connection::SendRequest(token_test).then([](const web::http::http_response& response)
+			HTTP_Connection::SendRequest(token_test).then([&valid_token](const web::http::http_response& response)
 			{
+				valid_token = (response.status_code() == web::http::status_codes::OK);
 			}).wait();
 
-			if (valid_token)
-			{
-				m_status_ = AUTHENTICATION_STATUS::AUTHENTICATED;
-			}
-			else
+			if (!valid_token)
 			{
 				m_status_ = AUTHENTICATION_STATUS::INVALID_CREDENTIALS;
 			}
@@ -100,6 +97,10 @@ namespace ASAP::Worklist::Networking
 
 		}
 
-		m_status_ = AUTHENTICATED;
+		// Assumes all operations completed succesfully
+		if (m_status_ == UNAUTHENTICATED)
+		{
+			m_status_ = AUTHENTICATED;
+		}
 	}
 }

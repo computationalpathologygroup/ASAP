@@ -2,7 +2,7 @@
 
 namespace ASAP::Worklist::Networking
 {
-	HTTP_Connection::HTTP_Connection(const std::wstring base_uri) : m_client_(base_uri)
+	HTTP_Connection::HTTP_Connection(const std::wstring base_uri, const web::http::client::http_client_config& config) : m_client_(base_uri, config)
 	{
 	}
 

@@ -22,13 +22,13 @@ namespace ASAP::Worklist::Networking
 			enum AUTHENTICATION_TYPE	{ NONE, SESSION, TOKEN };
 			enum AUTHENTICATION_STATUS	{ AUTHENTICATED, UNAUTHENTICATED, INVALID_CREDENTIALS };
 
-			Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type = AUTHENTICATION_TYPE::NONE, const Credentials credentials = Credentials());
+			Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type = AUTHENTICATION_TYPE::NONE, const Credentials credentials = Credentials(), const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
-			Credentials CreateCredentials(const std::wstring token);
-			Credentials CreateCredentials(const std::wstring username, const std::wstring password);
+			Credentials static CreateCredentials(const std::wstring token);
+			Credentials static CreateCredentials(const std::wstring username, const std::wstring password);
 			void SetCredentials(const Credentials credentials);
 
-			AUTHENTICATION_STATUS GetAuthenticationStatus(void);
+			AUTHENTICATION_STATUS GetAuthenticationStatus(void) const;
 
 			/// <summary>
 			/// Allows the connection to handle the request, and returns the information to the passed observer function.

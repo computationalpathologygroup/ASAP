@@ -15,7 +15,7 @@ namespace ASAP::Worklist::Networking
 	class HTTP_Connection
 	{
 		public:
-			HTTP_Connection(const std::wstring base_uri);
+			HTTP_Connection(const std::wstring base_uri, const web::http::client::http_client_config& config = web::http::client::http_client_config());
 			~HTTP_Connection(void);
 
 			void CancelAllTasks(void);
