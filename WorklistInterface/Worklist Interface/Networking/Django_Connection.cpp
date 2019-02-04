@@ -59,7 +59,7 @@ namespace ASAP::Worklist::Networking
 	{
 		if (m_authentication_ == TOKEN)
 		{
-			request.headers().add(L"Authorization", m_credentials_.find("token")->second);
+			request.headers().add(L"Authorization", std::wstring(L"Token ").append(m_credentials_.find("token")->second));
 		}
 		else if (m_authentication_ == SESSION)
 		{
