@@ -9,13 +9,13 @@
 
 namespace ASAP::Worklist::Networking
 {
+	enum DOWNLOAD_STATUS { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
+
 	struct FileDownloadResults
 	{
 		boost::filesystem::path filepath;
 		DOWNLOAD_STATUS			status;
 	};
-
-	enum DOWNLOAD_STATUS { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
 
 	/// <summary>
 	/// Downloads a file that may be tied to a HTTP response.

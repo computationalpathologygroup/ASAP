@@ -15,7 +15,7 @@ namespace ASAP::Worklist::Networking
 		// Fails if the response wasn't a HTTP 200 message, or lacks the content disposition header.
 		web::http::http_headers headers(response.headers());
 		auto content_disposition = headers.find(L"Content-Disposition");
-		if (response.status_code == web::http::status_codes::OK && content_disposition != headers.end())
+		if (response.status_code() == web::http::status_codes::OK && content_disposition != headers.end())
 		{
 			// Fails if the content disposition doesn't list a filename.
 			std::wstring disposition(content_disposition->second);
@@ -24,23 +24,27 @@ namespace ASAP::Worklist::Networking
 			{
 				// Appends the filename to the output directory.
 				boost::filesystem::path output_file(output_directory);
-				output_file.append(boost::filesystem::path(disposition.substr(disposition.find_last_of('=')).c_str()));
+				output_file.append(disposition.substr(disposition.find_last_of('=') + 1));
 
 				// Fails if the file can't be created and opened.
-				std::shared_ptr<concurrency::streams::ostream> filestream(std::make_shared<concurrency::streams::ostream>());
-				concurrency::streams::fstream::open_ostream(output_file.wstring());
-				if (filestream->is_open())
+				concurrency::streams::ostream stream;
+				concurrency::streams::fstream::open_ostream(output_file.wstring()).then([&stream](concurrency::streams::ostream open_stream)
+				{
+					stream = open_stream;
+				}).wait();
+
+				if (stream.is_open())
 				{
 					try
 					{
-						response.body().read_to_end(filestream->streambuf()).wait();
-						filestream->close();
+						response.body().read_to_end(stream.streambuf()).wait();
+						stream.close().wait();
 						return { boost::filesystem::absolute(output_file), DOWNLOAD_STATUS::SUCCESS };
 					}
 					// TODO: Replace with specific error catching
 					catch (const std::exception& e)
 					{
-						filestream->close();
+						stream.close().wait();
 						if (boost::filesystem::exists(output_file))
 						{
 							boost::filesystem::remove(output_file);
