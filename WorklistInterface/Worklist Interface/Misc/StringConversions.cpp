@@ -4,12 +4,6 @@ namespace ASAP::Worklist::Misc
 {
 	// ##### String to WideString ##### //
 
-	std::wstring StringToWideString(const std::string string)
-	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-		return converter.from_bytes(string);
-	}
-
 	std::wstring StringToWideString(const std::string& string)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
@@ -29,12 +23,6 @@ namespace ASAP::Worklist::Misc
 	}
 
 	// ##### WideString to String ##### //
-
-	std::string WideStringToString(const std::wstring string)
-	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-		return converter.to_bytes(string);
-	}
 
 	std::string WideStringToString(const std::wstring& string)
 	{
