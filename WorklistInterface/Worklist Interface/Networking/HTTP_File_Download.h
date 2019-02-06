@@ -3,13 +3,19 @@
 
 #include <string> 
 
-
+#include <boost/filesystem.hpp>
 #include <cpprest/filestream.h>
 #include <cpprest/http_client.h>
 
 namespace ASAP::Worklist::Networking
 {
-	enum DOWNLOAD_STATUS { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHEMENT, SUCCESS };
+	struct FileDownloadResults
+	{
+		boost::filesystem::path filepath;
+		DOWNLOAD_STATUS			status;
+	};
+
+	enum DOWNLOAD_STATUS { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
 
 	/// <summary>
 	/// 
@@ -17,6 +23,6 @@ namespace ASAP::Worklist::Networking
 	/// <param name="response"></param>
 	/// <param name="directory"></param>
 	/// <return></return>
-	DOWNLOAD_STATUS HTTP_File_Download(const web::http::http_response& response, const std::string directory);
+	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory);
 }
 #endif // __ASAP_NETWORKING_HTTPFILEDOWNLOAD__
