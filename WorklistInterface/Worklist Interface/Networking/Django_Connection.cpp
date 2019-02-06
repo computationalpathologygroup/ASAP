@@ -44,7 +44,9 @@ namespace ASAP::Worklist::Networking
 	/// </summary>
 	size_t Django_Connection::QueueRequest(const web::http::http_request& request, std::function<void(web::http::http_response&)> observer)
 	{
-		return HTTP_Connection::QueueRequest(request, observer);
+		web::http::http_request authenticated_request(request);
+		ModifyRequest_(authenticated_request);
+		return HTTP_Connection::QueueRequest(authenticated_request, observer);
 	}
 
 	/// <summary>
@@ -52,7 +54,9 @@ namespace ASAP::Worklist::Networking
 	/// </summary>
 	pplx::task<web::http::http_response> Django_Connection::SendRequest(const web::http::http_request& request)
 	{
-		return HTTP_Connection::SendRequest(request);
+		web::http::http_request authenticated_request(request);
+		ModifyRequest_(authenticated_request);
+		return HTTP_Connection::SendRequest(authenticated_request);
 	}
 
 	void Django_Connection::ModifyRequest_(web::http::http_request& request)

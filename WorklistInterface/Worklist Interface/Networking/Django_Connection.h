@@ -20,7 +20,7 @@ namespace ASAP::Worklist::Networking
 		public:
 			typedef std::unordered_map<std::string, std::wstring> Credentials;
 			enum AUTHENTICATION_TYPE	{ NONE, SESSION, TOKEN };
-			enum AUTHENTICATION_STATUS	{ AUTHENTICATED, UNAUTHENTICATED, INVALID_CREDENTIALS };
+			enum AUTHENTICATION_STATUS	{ AUTHENTICATED, UNAUTHENTICATED, CONNECTION_ERROR, INVALID_CREDENTIALS };
 
 			Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type = AUTHENTICATION_TYPE::NONE, const Credentials credentials = Credentials(), const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
