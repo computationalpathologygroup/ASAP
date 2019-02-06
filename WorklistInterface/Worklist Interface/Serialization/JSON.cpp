@@ -74,6 +74,14 @@ namespace ASAP::Worklist::Serialization::JSON
 		return error_code;
 	}
 
+	DataTable ParseJsonResponseToTable(const web::http::http_response& response)
+	{
+		DataTable table;
+		ParseJsonResponseToTableSchema(response, table);
+		ParseJsonResponseToRecords(response, table);
+		return table;
+	}
+
 	int ParseJsonResponseToTableSchema(const web::http::http_response& response, DataTable& table)
 	{
 		int error_code = 0;
