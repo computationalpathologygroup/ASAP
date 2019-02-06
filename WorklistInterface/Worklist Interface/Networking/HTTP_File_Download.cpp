@@ -35,7 +35,7 @@ namespace ASAP::Worklist::Networking
 					{
 						response.body().read_to_end(filestream->streambuf()).wait();
 						filestream->close();
-						return { boost::filesystem::path(), DOWNLOAD_STATUS::SUCCESS };
+						return { boost::filesystem::absolute(output_file), DOWNLOAD_STATUS::SUCCESS };
 					}
 					// TODO: Replace with specific error catching
 					catch (const std::exception& e)
