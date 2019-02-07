@@ -24,5 +24,12 @@ namespace ASAP::Worklist::Networking
 	/// <param name="output_directory">The directory to write the image to.</param>
 	/// <return>A struct containing the absolute path to the downloaded file (empty on failure) and the state of the download.</return>
 	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory);
+
+	namespace
+	{
+		bool FileHasCorrectSize(const boost::filesystem::path& filepath, size_t size);
+		bool FileIsUnique(const boost::filesystem::path& filepath, size_t size);
+		void FixFilepath(boost::filesystem::path& filepath);
+	}
 }
 #endif // __ASAP_NETWORKING_HTTPFILEDOWNLOAD__
