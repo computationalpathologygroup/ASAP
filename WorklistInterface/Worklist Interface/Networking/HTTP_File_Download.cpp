@@ -4,7 +4,7 @@
 
 namespace ASAP::Worklist::Networking
 {
-	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory)
+	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::function<void(float)> observer)
 	{
 		// Fails if the path doesn't point towards a directory.
 		if (!boost::filesystem::is_directory(output_directory))
@@ -44,8 +44,13 @@ namespace ASAP::Worklist::Networking
 
 					if (stream.is_open())
 					{
+						// Starts monitoring thread.
+						std::thread thread(StartMonitorThread(length, stream, observer));
 						response.body().read_to_end(stream.streambuf()).wait();
 						stream.close().wait();
+						
+						// Joins monitoring thread.
+						thread.join();
 
 						if (FileHasCorrectSize(output_file, length))
 						{
@@ -87,7 +92,7 @@ namespace ASAP::Worklist::Networking
 				std::string filename = filepath.leaf().string();
 
 				size_t version = 0;
-				if (filename.find('('))
+				if (filename.find('(') != std::string::npos)
 				{
 					size_t value_start	= filename.find_last_of('(') + 1;
 					size_t value_end	= filename.find_last_of(')');
@@ -99,6 +104,33 @@ namespace ASAP::Worklist::Networking
 				
 				filepath.remove_leaf() /= new_filename;
 			}
+		}
+
+		std::thread StartMonitorThread(const size_t length, concurrency::streams::ostream& stream, std::function<void(float)>& observer)
+		{
+			return std::thread([length, &stream, observer](void)
+			{
+				// If there is no observer, we don't need to report progress.
+				if (observer)
+				{
+					// Keeps checking progress until the stream is closed, or the download has completed.
+					try
+					{
+						size_t percentile	= (length / 100);
+						size_t progress		= stream.tell();
+						while (progress < length)
+						{
+							observer(static_cast<float>(progress / percentile));
+							std::this_thread::sleep_for(std::chrono::seconds(1));
+							progress = stream.tell();
+						}
+					}
+					catch (...)
+					{
+						// No need to handle this. If triggered, the stream has closed, and we no longer need to provide progress.
+					}
+				}
+			});
 		}
 	}
 }
