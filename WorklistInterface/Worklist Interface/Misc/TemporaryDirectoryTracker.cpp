@@ -65,7 +65,16 @@ namespace ASAP::Worklist::Misc
 	{
 		while (m_continue_)
 		{
+			if (GetDirectorySizeInMb() <= m_configuration_.max_size_in_mb)
+			{
+				std::vector<boost::filesystem::path> filepaths(GetFilepaths());
 
+				for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(m_directory_), {}))
+				{
+					filepaths.push_back(entry.path());
+				}
+			}
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
 	}
 }
