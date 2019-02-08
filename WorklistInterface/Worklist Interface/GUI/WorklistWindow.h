@@ -11,6 +11,7 @@
 #include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
 #include "Data/WorklistDataAcquisitionInterface.h"
+#include "Misc/TemporaryDirectoryTracker.h"
 #include "ASAP/ASAP_Window.h"
 
 namespace ASAP::GUI
@@ -51,6 +52,7 @@ namespace ASAP::GUI
 			bool													m_stop_loading_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_loading_access_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_switch_access_;
+			Misc::TemporaryDirectoryTracker							m_storage_directory_;
 			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
 			ASAP_Window*											m_workstation_; // Todo: Clean up or perhaps combine in struct
 			int														m_workstation_tab_id_;

@@ -22,7 +22,8 @@ namespace ASAP::GUI
 		m_images_model_(new QStandardItemModel(0, 0)),
 		m_patients_model_(new QStandardItemModel(0, 0)),
 		m_studies_model_(new QStandardItemModel(0, 0)),
-		m_worklist_model_(new QStandardItemModel(0, 0))
+		m_worklist_model_(new QStandardItemModel(0, 0)),
+		m_storage_directory_(boost::filesystem::path("/temp/"), Misc::TemporaryDirectoryTracker::GetStandardConfiguration())
 	{
 		m_ui_->setupUi(this);
 		SetSlots_();
