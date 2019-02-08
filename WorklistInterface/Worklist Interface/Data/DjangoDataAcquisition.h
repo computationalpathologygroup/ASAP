@@ -10,7 +10,7 @@
 #include "WorklistDataAcquisitionInterface.h"
 #include "../Networking/HTTP_Connection.h"
 
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	struct DjangoRestURI
 	{

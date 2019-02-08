@@ -1,7 +1,9 @@
-#pragma once
+#ifndef __ASAP_GUI_EXTERNALSOURCEDIALOG__ 
+#define __ASAP_GUI_EXTERNALSOURCEDIALOG__
+
 #include <QDialog>
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	class ExternalSourceDialog : public QDialog
 	{
@@ -13,3 +15,4 @@ namespace ASAP::Worklist::GUI
 			void AcquiredLoginDetails(const QString& location, const QString& username, const QString& password);
 	};
 }
+#endif // __ASAP_GUI_EXTERNALSOURCEDIALOG__

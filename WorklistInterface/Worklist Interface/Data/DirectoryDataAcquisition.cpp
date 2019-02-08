@@ -5,7 +5,7 @@
 
 #include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	DirectoryDataAcquisition::DirectoryDataAcquisition(const std::string directory_path) : m_images_(GetImageFilelist_(directory_path))
 	{

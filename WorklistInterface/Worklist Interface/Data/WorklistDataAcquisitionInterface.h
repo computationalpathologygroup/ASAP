@@ -1,9 +1,9 @@
- #ifndef __WORKLIST_DATA_ACQUISITION_INTERFACE_H__
-#define __WORKLIST_DATA_ACQUISITION_INTERFACE_H__
+#ifndef __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
+#define __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
 
 #include "datatable.h"
 #include <functional>
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	/// <summary>
 	/// Provides a basic interface that all Worklist GUI operations are based upon. Because it assumes
@@ -94,4 +94,4 @@ namespace ASAP::Worklist::Data
 			void CancelTask(size_t id);
 	};
 }
-#endif // __WORKLIST_DATA_ACQUISITION_INTERFACE_H__
+#endif // __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__

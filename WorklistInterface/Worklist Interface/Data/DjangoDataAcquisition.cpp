@@ -8,7 +8,7 @@
 
 #include "../Serialization/JSON.h"
 
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	// Placeholder function for acquiring a Django REST Framework authentication token
 	/*std::wstring GetAuthenticationToken(web::http::client::http_client& client, std::wstring token_path, std::wstring username, std::wstring password)

@@ -1,6 +1,6 @@
 #include "ExternalSourceDialog.h"
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	ExternalSourceDialog::ExternalSourceDialog(void)
 	{

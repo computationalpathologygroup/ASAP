@@ -1,7 +1,8 @@
-#pragma once
+#ifndef __ASAP_GUI_COMPOSITECHILD__
+#define __ASAP_GUI_COMPOSITECHILD__
 #include <QMainWindow>
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	/// <summary>
 	/// Provides an interface that interacts with the CompositeWindow class,
@@ -18,3 +19,4 @@ namespace ASAP::Worklist::GUI
 			void RequiresTabSwitch(int tab_id);
 	};
 }
+#endif // __ASAP_GUI_COMPOSITECHILD__

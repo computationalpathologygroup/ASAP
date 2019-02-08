@@ -1,5 +1,5 @@
- #ifndef __SOURCE_LOADING_H__
-#define __SOURCE_LOADING_H__
+ #ifndef __ASAP_DATA_SOURCELOADING__
+#define __ASAP_DATA_SOURCELOADING__
 
 #include <memory>
 #include <string>
@@ -7,8 +7,8 @@
 
 #include "WorklistDataAcquisitionInterface.h"
 
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	std::unique_ptr<WorklistDataAcquisitionInterface> LoadDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
 }
-#endif // __SOURCE_LOADING_H__
+#endif // __ASAP_DATA_SOURCELOADING__

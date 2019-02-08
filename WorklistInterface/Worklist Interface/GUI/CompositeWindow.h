@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __ASAP_GUI_COMPOSITEWINDOW__
+#define __ASAP_GUI_COMPOSITEWINDOW__
 
 #include <functional>
 #include <memory>
@@ -8,7 +9,7 @@
 #include "CompositeChild.h"
 #include "ui_CompositeWindowLayout.h"
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	/// <summary>
 	/// Holds a shortcut bound to an action.
@@ -50,3 +51,4 @@ namespace ASAP::Worklist::GUI
 			void OnTabRequest_(int tab_id);
 	};
 }
+#endif // __ASAP_GUI_COMPOSITEWINDOW__

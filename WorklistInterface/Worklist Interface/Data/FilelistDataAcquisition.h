@@ -1,11 +1,11 @@
-#ifndef __FILELIST_DATA_AQUISITION_H__
-#define __FILELIST_DATA_AQUISITION_H__
+#ifndef __ASAP_DATA_FILELISTDATAACQUISITION__
+#define __ASAP_DATA_FILELISTDATAACQUISITION__
 
 #include <string>
 
 #include "WorklistDataAcquisitionInterface.h"
 
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	class FilelistDataAcquisition : public WorklistDataAcquisitionInterface
 	{
@@ -30,4 +30,4 @@ namespace ASAP::Worklist::Data
 			DataTable GetImageFilelist_(const std::string filepath);
 	};
 }
-#endif // __FILELIST_DATA_AQUISITION_H__
+#endif // __ASAP_DATA_FILELISTDATAACQUISITION__

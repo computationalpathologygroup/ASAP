@@ -1,6 +1,6 @@
 #include "CompositeChild.h"
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	CompositeChild::CompositeChild(QWidget* parent) : QMainWindow(parent)
 	{

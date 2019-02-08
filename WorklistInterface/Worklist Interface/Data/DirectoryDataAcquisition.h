@@ -1,9 +1,9 @@
-#ifndef __DIRECTORY_DATA_AQUISITION_H__
-#define __DIRECTORY_DATA_AQUISITION_H__
+#ifndef __ASAP_DATA_DIRECTORYDATAACQUISITION__ 
+#define __ASAP_DATA_DIRECTORYDATAACQUISITION__
 
 #include "WorklistDataAcquisitionInterface.h"
 
-namespace ASAP::Worklist::Data
+namespace ASAP::Data
 {
 	class DirectoryDataAcquisition : public WorklistDataAcquisitionInterface
 	{
@@ -28,4 +28,4 @@ namespace ASAP::Worklist::Data
 			DataTable GetImageFilelist_(const std::string directory_path);
 	};
 }
-#endif // __DIRECTORY_DATA_AQUISITION_H__
+#endif // __ASAP_DATA_DIRECTORYDATAACQUISITION__
