@@ -1,6 +1,6 @@
-#include "Misc.h"
+#include "StringManipulation.h"
 
-namespace ASAP::Worklist::Serialization::Misc
+namespace ASAP::Misc
 {
 	std::vector<std::string> Split(const std::string& string, const char delimiter, const char encapsulation)
 	{

@@ -1,6 +1,6 @@
 #include "StringConversions.h"
 
-namespace ASAP::Worklist::Misc
+namespace ASAP::Misc
 {
 	// ##### String to WideString ##### //
 

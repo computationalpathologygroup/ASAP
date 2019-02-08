@@ -2,7 +2,7 @@
 
 #include "../Misc/StringConversions.h"
 
-namespace ASAP::Worklist::Networking
+namespace ASAP::Networking
 {
 	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::function<void(float)> observer)
 	{

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __ASAP_GUI_WORKLISTDATAACQUISITIONINTERFACE__
+#define __ASAP_GUI_WORKLISTDATAACQUISITIONINTERFACE__
+
 #include <deque>
 #include <memory>
 #include <mutex>
@@ -9,11 +11,9 @@
 #include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
 #include "Data/WorklistDataAcquisitionInterface.h"
-
-
 #include "ASAP/ASAP_Window.h"
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	struct WorklistWindowSettings
 	{
@@ -33,10 +33,10 @@ namespace ASAP::Worklist::GUI
 			WorklistWindowSettings GetStandardSettings(void);
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
-			void SetWorklistItems(const DataTable& items, QStandardItemModel* model);
-			void SetPatientsItems(const DataTable& items, QStandardItemModel* model);
-			void SetStudyItems(const DataTable& items, QStandardItemModel* model);
-			void SetImageItems(const DataTable& items, QStandardItemModel* model);
+			void SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model);
+			void SetPatientsItems(const Data::DataTable& items, QStandardItemModel* model);
+			void SetStudyItems(const Data::DataTable& items, QStandardItemModel* model);
+			void SetImageItems(const Data::DataTable& items, QStandardItemModel* model);
 
 		public slots:
 			void MoveImageSelectionLeft(void);
@@ -86,3 +86,4 @@ namespace ASAP::Worklist::GUI
 			void OnSelectExternalSource_(bool checked);
 	};
 }
+#endif // __ASAP_GUI_WORKLISTDATAACQUISITIONINTERFACE__

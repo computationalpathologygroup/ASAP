@@ -7,13 +7,13 @@
 #include "multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	IconCreator::IconCreator(void)
 	{
 	}
 
-	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading)
+	void IconCreator::InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading)
 	{
 		QIcon placeholder_icon(CreateBlankIcon_(size));
 		QIcon invalid_icon(CreateInvalidIcon_(size));

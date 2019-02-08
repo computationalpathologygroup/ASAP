@@ -9,7 +9,7 @@
 #include <cpprest/filestream.h>
 #include <cpprest/http_client.h>
 
-namespace ASAP::Worklist::Networking
+namespace ASAP::Networking
 {
 	enum DOWNLOAD_STATUS { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
 

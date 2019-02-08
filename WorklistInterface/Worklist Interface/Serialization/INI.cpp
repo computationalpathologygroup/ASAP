@@ -4,7 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace ASAP::Worklist::Serialization::INI
+namespace ASAP::Serialization::INI
 {
 	std::unordered_map<std::string, std::string> ParseINI(const std::string filepath)
 	{

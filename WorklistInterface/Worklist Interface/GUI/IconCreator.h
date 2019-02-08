@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __ASAP_GUI_ICONCREATOR__
+#define __ASAP_GUI_ICONCREATOR__
+
 #include <mutex>
 #include <string>
 #include <vector>
@@ -10,7 +12,7 @@
 
 #include <Data/DataTable.h>
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	/// <summary>
 	/// Creates thumbnail icons based on WSIs readable by the multiresolution reader.
@@ -22,7 +24,7 @@ namespace ASAP::Worklist::GUI
 		public:
 			IconCreator(void);
 	
-			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading);
+			void InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
 		
 		private:
@@ -34,3 +36,4 @@ namespace ASAP::Worklist::GUI
 			void RequiresItemRefresh(void);
 	};
 }
+#endif // __ASAP_GUI_ICONCREATOR__

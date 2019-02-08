@@ -7,7 +7,7 @@
 
 #include <cpprest/http_client.h>
 
-namespace ASAP::Worklist::Networking
+namespace ASAP::Networking
 {
 	/// <summary>
 	/// Represents a connection towards a specified URI.

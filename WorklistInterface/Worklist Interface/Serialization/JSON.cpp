@@ -2,7 +2,7 @@
 
 #include <codecvt>
 
-namespace ASAP::Worklist::Serialization::JSON
+namespace ASAP::Serialization::JSON
 {
 	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json)
 	{
@@ -22,7 +22,7 @@ namespace ASAP::Worklist::Serialization::JSON
 		throw std::runtime_error("Tag not found.");
 	}
 
-	int ParseJsonResponseToRecords(const web::http::http_response& response, DataTable& table)
+	int ParseJsonResponseToRecords(const web::http::http_response& response, Data::DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
@@ -74,15 +74,7 @@ namespace ASAP::Worklist::Serialization::JSON
 		return error_code;
 	}
 
-	DataTable ParseJsonResponseToTable(const web::http::http_response& response)
-	{
-		DataTable table;
-		ParseJsonResponseToTableSchema(response, table);
-		ParseJsonResponseToRecords(response, table);
-		return table;
-	}
-
-	int ParseJsonResponseToTableSchema(const web::http::http_response& response, DataTable& table)
+	int ParseJsonResponseToTableSchema(const web::http::http_response& response, Data::DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previous_task)
@@ -101,7 +93,7 @@ namespace ASAP::Worklist::Serialization::JSON
 						columns.push_back(converter.to_bytes(it->first));
 					}
 
-					table = DataTable(columns);
+					table = Data::DataTable(columns);
 				}
 				catch (const std::exception& e)
 				{

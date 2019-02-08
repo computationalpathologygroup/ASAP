@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace ASAP::Worklist::Networking
+namespace ASAP::Networking
 {
 	Django_Connection::Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type, const Credentials credentials, const web::http::client::http_client_config& config)
 		: HTTP_Connection(base_uri, config), m_authentication_(authentication_type), m_credentials_(credentials), m_status_(UNAUTHENTICATED)

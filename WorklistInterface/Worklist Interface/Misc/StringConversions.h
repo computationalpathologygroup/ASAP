@@ -6,7 +6,7 @@
 #include <string> 
 #include <vector>
 
-namespace ASAP::Worklist::Misc
+namespace ASAP::Misc
 {
 	/// <summary>
 	/// Converts a string into a wstring.

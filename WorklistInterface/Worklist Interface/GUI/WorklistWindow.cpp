@@ -10,10 +10,10 @@
 
 #include "IconCreator.h"
 #include "Serialization/INI.h"
-#include "Serialization/Misc.h"
+#include "Misc/StringManipulation.h"
 #include "Data/SourceLoading.h"
 
-namespace ASAP::Worklist::GUI
+namespace ASAP::GUI
 {
 	WorklistWindow::WorklistWindow(QWidget* parent) :
 		CompositeChild(parent),
@@ -93,7 +93,7 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model)
 	{
 		std::unordered_map<std::string, QStandardItem*> inserted_items;
 		model->removeRows(0, model->rowCount());
@@ -120,13 +120,13 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::SetPatientsItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetPatientsItems(const Data::DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
+			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
 			size_t record_id = std::stoi(*items.At(item, { "id" })[0]);
 
 			for (size_t field = 0; field < record.size(); ++field)
@@ -138,13 +138,13 @@ namespace ASAP::Worklist::GUI
 		}
 	}
 
-	void WorklistWindow::SetStudyItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetStudyItems(const Data::DataTable& items, QStandardItemModel* model)
 	{
 		model->removeRows(0, model->rowCount());
 		model->setRowCount(items.Size());
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
+			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
 			size_t record_id = std::stoi(*items.At(item, { "id" })[0]);
 
 			for (size_t field = 0; field < record.size(); ++field)
@@ -157,7 +157,7 @@ namespace ASAP::Worklist::GUI
 	}
 
 	// Todo: Loading and halting might be a bit too messy in terms of tasks and code calling, refactor
-	void WorklistWindow::SetImageItems(const DataTable& items, QStandardItemModel* model)
+	void WorklistWindow::SetImageItems(const Data::DataTable& items, QStandardItemModel* model)
 	{
 		m_stop_loading_ = false;
 
@@ -227,7 +227,7 @@ namespace ASAP::Worklist::GUI
 			auto previous_sources_value(values.find("previous_sources"));
 			if (previous_sources_value != values.end() && !previous_sources_value->second.empty())
 			{
-				std::vector<std::string> split_sources(Serialization::Misc::Split(previous_sources_value->second));
+				std::vector<std::string> split_sources(Misc::Split(previous_sources_value->second));
 				for (const std::string& source : split_sources)
 				{
 					m_settings_.previous_sources.push_back(source);
@@ -293,10 +293,10 @@ namespace ASAP::Worklist::GUI
 	void WorklistWindow::UpdateSourceViews_(void)
 	{
 		// Clears all previous source information.
-		SetWorklistItems(DataTable(), m_worklist_model_);
-		SetPatientsItems(DataTable(), m_patients_model_);
-		SetStudyItems(DataTable(), m_studies_model_);
-		SetImageItems(DataTable(), m_images_model_);
+		SetWorklistItems(Data::DataTable(), m_worklist_model_);
+		SetPatientsItems(Data::DataTable(), m_patients_model_);
+		SetStudyItems(Data::DataTable(), m_studies_model_);
+		SetImageItems(Data::DataTable(), m_images_model_);
 
 		// Resets the view to the Filelist standard.
 		Data::WorklistDataAcquisitionInterface::SourceType type = Data::WorklistDataAcquisitionInterface::SourceType::FILELIST;
@@ -309,7 +309,7 @@ namespace ASAP::Worklist::GUI
 			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FILELIST)
 			{
 				QStandardItemModel* image_model = m_images_model_;
-				m_data_acquisition_->GetImageRecords(0, [this, image_model](DataTable& table, int error)
+				m_data_acquisition_->GetImageRecords(0, [this, image_model](Data::DataTable& table, int error)
 				{
 					if (error == 0)
 					{
@@ -319,11 +319,11 @@ namespace ASAP::Worklist::GUI
 			}
 			else if (type == Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST)
 			{
-				SetHeaders_(m_data_acquisition_->GetPatientHeaders(DataTable::FIELD_SELECTION::VISIBLE), m_patients_model_, m_ui_->view_patients);
-				SetHeaders_(m_data_acquisition_->GetStudyHeaders(DataTable::FIELD_SELECTION::VISIBLE), m_studies_model_, m_ui_->view_studies);
+				SetHeaders_(m_data_acquisition_->GetPatientHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_patients_model_, m_ui_->view_patients);
+				SetHeaders_(m_data_acquisition_->GetStudyHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_studies_model_, m_ui_->view_studies);
 
 				QStandardItemModel* worklist_model = m_worklist_model_;
-				m_data_acquisition_->GetWorklistRecords([this, worklist_model](DataTable& table, int error)
+				m_data_acquisition_->GetWorklistRecords([this, worklist_model](Data::DataTable& table, int error)
 				{
 					if (error == 0)
 					{
@@ -501,7 +501,7 @@ namespace ASAP::Worklist::GUI
 
 		QStandardItemModel* patient_model	= m_patients_model_;
 		QTableView* patient_view			= m_ui_->view_patients;
-		m_data_acquisition_->GetPatientRecords(worklist_id, [this, patient_model, patient_view](DataTable table, int error)
+		m_data_acquisition_->GetPatientRecords(worklist_id, [this, patient_model, patient_view](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
@@ -518,7 +518,7 @@ namespace ASAP::Worklist::GUI
 
 		QStandardItemModel* study_model = m_studies_model_;
 		QTableView* study_view = m_ui_->view_studies;
-		m_data_acquisition_->GetStudyRecords(patient_id, [this, study_model, study_view](DataTable table, int error)
+		m_data_acquisition_->GetStudyRecords(patient_id, [this, study_model, study_view](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
@@ -535,7 +535,7 @@ namespace ASAP::Worklist::GUI
 
 		QStandardItemModel* image_model = m_images_model_;
 		QListView* image_view = m_ui_->view_images;
-		m_data_acquisition_->GetImageRecords(study_id, [this, image_model, image_view](DataTable table, int error)
+		m_data_acquisition_->GetImageRecords(study_id, [this, image_model, image_view](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
