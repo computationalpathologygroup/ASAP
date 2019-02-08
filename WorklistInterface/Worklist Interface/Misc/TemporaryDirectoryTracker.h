@@ -31,7 +31,7 @@ namespace ASAP::Misc
 			TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration);
 			~TemporaryDirectoryTracker(void);
 
-			TemporaryDirectoryConfiguration GetStandardConfiguration(void) const;
+			static TemporaryDirectoryConfiguration GetStandardConfiguration(void);
 
 			boost::filesystem::path GetAbsolutePath(void) const;
 			std::vector<boost::filesystem::path> GetFilepaths(void) const;
