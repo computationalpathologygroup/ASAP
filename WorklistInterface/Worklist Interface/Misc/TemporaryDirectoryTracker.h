@@ -39,6 +39,7 @@ namespace ASAP::Worklist::Misc
 
 		private:
 			TemporaryDirectoryConfiguration m_configuration_;
+			bool							m_continue_;
 			boost::filesystem::path			m_directory_;
 			std::thread						m_update_thread_;
 
