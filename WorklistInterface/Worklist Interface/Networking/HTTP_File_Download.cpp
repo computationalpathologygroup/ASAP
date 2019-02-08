@@ -91,16 +91,26 @@ namespace ASAP::Worklist::Networking
 			{
 				std::string filename = filepath.leaf().string();
 
-				size_t version = 0;
-				if (filename.find('(') != std::string::npos)
+				size_t version			= 1;
+				size_t version_location = filename.find('(');
+				if (version_location != std::string::npos)
 				{
 					size_t value_start	= filename.find_last_of('(') + 1;
 					size_t value_end	= filename.find_last_of(')');
-					version = std::stoi(filename.substr(value_start, value_end - value_start));
+					version = std::stoi(filename.substr(value_start, value_end - value_start)) + 1;
 				}
 
 				size_t dot_location = filename.find_first_of('.');
-				std::string new_filename = filename.substr(0, dot_location) + "(" + std::to_string(version) + ")" + filename.substr(dot_location);
+				std::string new_filename;
+				if (version_location != std::string::npos || dot_location != std::string::npos)
+				{
+					size_t split_location	= version_location != std::string::npos ? version_location : dot_location;
+					new_filename			= filename.substr(0, split_location) + "(" + std::to_string(version) + ")" + filename.substr(filename.find_first_of('.'));
+				}
+				else
+				{
+					new_filename = filename + "(" + std::to_string(version) + ")";
+				}
 				
 				filepath.remove_leaf() /= new_filename;
 			}
