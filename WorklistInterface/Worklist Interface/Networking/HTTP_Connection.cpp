@@ -1,9 +1,25 @@
 #include "HTTP_Connection.h"
 
+#include <stdexcept>
+
+#include "../Misc/StringConversions.h"
+
 namespace ASAP::Networking
 {
 	HTTP_Connection::HTTP_Connection(const std::wstring base_uri, const web::http::client::http_client_config& config) : m_client_(base_uri, config)
 	{
+		// If the response can be succesfully recovered, assume the URL is correct.
+		try
+		{
+			web::http::http_request request(web::http::methods::GET);
+			m_client_.request(request).then([](web::http::http_response& response)
+			{
+			}).wait();
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error("Unable to connect to: " + Misc::WideStringToString(base_uri));
+		}
 	}
 
 	HTTP_Connection::~HTTP_Connection(void)
