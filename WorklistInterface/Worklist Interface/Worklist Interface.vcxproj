@@ -65,7 +65,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;D:\Libraries\cpprestsdk-master\Build\Binaries\Debug\cpprest141_2_10d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;D:\Libraries\cpprestsdk-master\Build\Binaries\Debug\cpprest141_2_10d.lib;D:\Libraries\Boost-1-65-1\boost_1_65_1\lib\libboost_filesystem-vc141-mt-1_65_1.lib;D:\Libraries\Boost-1-65-1\boost_1_65_1\lib\libboost_system-vc141-mt-1_65_1.lib;D:\Build\ASAP\io\multiresolutionimageinterface\Release/multiresolutionimageinterface.lib;D:\Build\ASAP\core\Release\core.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
@@ -117,7 +117,7 @@
   <ItemGroup>
     <ClCompile Include="Data\DataTable.cpp" />
     <ClCompile Include="Data\DirectoryDataAcquisition.cpp" />
-    <ClCompile Include="Data\DjangoDataAcquisition.cpp" />
+    <ClCompile Include="Data\GrandChallengeDataAcquisition.cpp" />
     <ClCompile Include="Data\FilelistDataAcquisition.cpp" />
     <ClCompile Include="Data\SourceLoading.cpp" />
     <ClCompile Include="Data\WorklistDataAcquisitionInterface.cpp" />
@@ -126,11 +126,15 @@
     <ClCompile Include="GUI\ExternalSourceDialog.cpp" />
     <ClCompile Include="GUI\IconCreator.cpp" />
     <ClCompile Include="GUI\WorklistWindow.cpp" />
-    <ClCompile Include="IO\HTTP_Connection.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Misc\StringConversions.cpp" />
+    <ClCompile Include="Misc\StringManipulation.cpp" />
+    <ClCompile Include="Misc\TemporaryDirectoryTracker.cpp" />
+    <ClCompile Include="Networking\Django_Connection.cpp" />
+    <ClCompile Include="Networking\HTTP_Connection.cpp" />
+    <ClCompile Include="Networking\HTTP_File_Download.cpp" />
     <ClCompile Include="Serialization\INI.cpp" />
     <ClCompile Include="Serialization\JSON.cpp" />
-    <ClCompile Include="Serialization\Misc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="CompositeWindowLayout.ui" />
@@ -177,12 +181,16 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;D:\Libraries\cpprestsdk-master\Release\include;D:\Libraries\Boost-1-65-1\boost_1_65_1;D:\ASAP\include</IncludePath>
     </QtMoc>
-    <ClInclude Include="IO\HTTP_Connection.h" />
+    <ClInclude Include="Misc\StringConversions.h" />
+    <ClInclude Include="Misc\StringManipulation.h" />
+    <ClInclude Include="Misc\TemporaryDirectoryTracker.h" />
+    <ClInclude Include="Networking\Django_Connection.h" />
+    <ClInclude Include="Networking\HTTP_Connection.h" />
+    <ClInclude Include="Networking\HTTP_File_Download.h" />
     <ClInclude Include="Serialization\INI.h" />
     <ClInclude Include="Serialization\JSON.h" />
-    <ClInclude Include="Serialization\Misc.h" />
     <ClInclude Include="Data\DataTable.h" />
-    <ClInclude Include="Data\DjangoDataAcquisition.h" />
+    <ClInclude Include="Data\GrandChallengeDataAcquisition.h" />
     <ClInclude Include="Data\WorklistDataAcquisitionInterface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
