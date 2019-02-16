@@ -5,7 +5,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "DjangoDataAcquisition.h"
+#include "GrandChallengeDataAcquisition.h"
 #include "DirectoryDataAcquisition.h"
 #include "FilelistDataAcquisition.h"
 
