@@ -1,8 +1,12 @@
 #ifndef __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
 #define __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
 
-#include "datatable.h"
 #include <functional>
+
+#include <boost/filesystem.hpp>
+
+#include "datatable.h"
+
 namespace ASAP::Data
 {
 	/// <summary>
@@ -61,6 +65,10 @@ namespace ASAP::Data
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
 			virtual size_t GetImageRecords(const size_t study_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
+
+		//	virtual size_t GetImageFile(const size_t image_index, const std::function<void(const boost::filesystem::path&)> receiver) = 0;
+
+		//	virtual size_t UpdateWorklistRecords(const DataTable& records) = 0;
 
 			/// <summary>
 			/// Returns the headers for the Worklist table.
