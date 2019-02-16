@@ -8,13 +8,11 @@ namespace ASAP::Networking
 {
 	HTTP_Connection::HTTP_Connection(const std::wstring base_uri, const web::http::client::http_client_config& config) : m_client_(base_uri, config)
 	{
-		// If the response can be succesfully recovered, assume the URL is correct.
+		// If the task throws an exception, assume the URL is incorrect
 		try
 		{
 			web::http::http_request request(web::http::methods::GET);
-			m_client_.request(request).then([](web::http::http_response& response)
-			{
-			}).wait();
+			m_client_.request(request).wait();
 		}
 		catch (const std::exception& e)
 		{
