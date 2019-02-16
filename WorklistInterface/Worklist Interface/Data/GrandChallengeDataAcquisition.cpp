@@ -1,4 +1,4 @@
-#include "DjangoDataAcquisition.h"
+#include "GrandChallengeDataAcquisition.h"
 
 #include <codecvt>
 #include <stdexcept>
