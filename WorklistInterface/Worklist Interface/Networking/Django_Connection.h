@@ -24,8 +24,8 @@ namespace ASAP::Networking
 
 			Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type = AUTHENTICATION_TYPE::NONE, const Credentials credentials = Credentials(), const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
-			Credentials static CreateCredentials(const std::wstring token);
-			Credentials static CreateCredentials(const std::wstring username, const std::wstring password);
+			Credentials static CreateCredentials(const std::wstring token, const std::wstring validation_path);
+			Credentials static CreateCredentials(const std::wstring username, const std::wstring password, const std::wstring csrf_path, const std::wstring auth_path);
 			void SetCredentials(const Credentials credentials);
 
 			AUTHENTICATION_STATUS GetAuthenticationStatus(void) const;
@@ -45,8 +45,10 @@ namespace ASAP::Networking
 			Credentials				m_credentials_;
 			AUTHENTICATION_STATUS	m_status_;
 
+			bool ExtractToken_(web::http::http_response& response);
 			void ModifyRequest_(web::http::http_request& request);
 			void SetupConnection_(void);
+			void ValidateCredentials_(Credentials& credentials);
 	};
 }
 #endif // __ASAP_NETWORKING_DJANGOCONNECTION__
