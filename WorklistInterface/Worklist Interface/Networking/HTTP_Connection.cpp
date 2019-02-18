@@ -14,7 +14,7 @@ namespace ASAP::Networking
 			web::http::http_request request(web::http::methods::GET);
 			m_client_.request(request).wait();
 		}
-		catch (const std::exception& e)
+		catch (...)
 		{
 			throw std::runtime_error("Unable to connect to: " + Misc::WideStringToString(base_uri));
 		}
@@ -56,7 +56,7 @@ namespace ASAP::Networking
 		++m_token_counter_;
 
 		// Catches the response so the attached token can be removed.
-		inserted_pair->second.task = std::move(m_client_.request(request, inserted_pair->second.token.get_token()).then([observer, token_id, this](web::http::http_response& response)
+		inserted_pair->second.task = std::move(m_client_.request(request, inserted_pair->second.token.get_token()).then([observer, token_id, this](web::http::http_response response)
 		{
 			// Passes the response to the observer
 			observer(response);
