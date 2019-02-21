@@ -9,7 +9,7 @@ namespace ASAP::Data
 		return std::vector<std::string>();
 	}
 
-	void WorklistDataAcquisitionInterface::CancelTask(const size_t id)
+	void WorklistDataAcquisitionInterface::CancelTask(const uint64_t id)
 	{
 		// Must be overridden incase the adapting class deals with asynchronous tasks. 
 	}

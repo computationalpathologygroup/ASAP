@@ -18,22 +18,32 @@ namespace ASAP::Data
 		return WorklistDataAcquisitionInterface::SourceType::FILELIST;
 	}
 
+	size_t FilelistDataAcquisition::AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer)
+	{
+		return 0;
+	}
+
+	size_t FilelistDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer)
+	{
+		return 0;
+	}
+
 	size_t FilelistDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
 		return 0;
 	}
 
-	size_t FilelistDataAcquisition::GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t FilelistDataAcquisition::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		return 0;
 	}
 
-	size_t FilelistDataAcquisition::GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t FilelistDataAcquisition::GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		return 0;
 	}
 
-	size_t FilelistDataAcquisition::GetImageRecords(const size_t study_index, const std::function<void(DataTable&, int)>& receiver)
+	size_t FilelistDataAcquisition::GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
 		receiver(m_images_, 0);
 		return 0;
@@ -57,6 +67,18 @@ namespace ASAP::Data
 	std::set<std::string> FilelistDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return std::set<std::string>();
+	}
+
+	size_t FilelistDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver)
+	{
+		receiver(boost::filesystem::path(*m_images_.At(std::stoi(image_index), { "location" })[0]));
+		return 0;
+	}
+
+	size_t FilelistDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver)
+	{
+		receiver(boost::filesystem::path(*m_images_.At(std::stoi(image_index), { "location" })[0]));
+		return 0;
 	}
 
 	DataTable FilelistDataAcquisition::GetImageFilelist_(const std::string filepath)

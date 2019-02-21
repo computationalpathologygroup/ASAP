@@ -10,10 +10,13 @@
 namespace ASAP::Data
 {
 	/// <summary>
-	/// Provides a basic interface that all Worklist GUI operations are based upon. Because it assumes
+	/// Provides a basic interface that all Worklist GUI operations are based upon. Because t assumes
 	/// a asynchronous environment, the acquirement of actual DataTables is done through lambda
 	/// functions, while the called method itself only returns a task or token id that can be used to
 	/// cancel the methods execution.
+	///
+	/// The DataTable indices are used to reference records for specifics tables, which requires
+	/// implementations to translate these to potential id's.
 	///
 	/// If a source isn't required to deal with asynchronous actions, it can simply ignore the
 	/// implementation of the CancelTask method.
@@ -39,6 +42,24 @@ namespace ASAP::Data
 			virtual SourceType GetSourceType(void) = 0;
 
 			/// <summary>
+			/// Adds a new worklist.
+			/// </summary>
+			/// <param name="title">The title for the new worklist. Must be unique.</param>
+			/// <param name="observer">A lamba that accepts a boolean which details whether or not the task was succesful.</param>
+			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
+			virtual size_t AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer) = 0;
+
+			/// <summary>
+			/// Updates a worklist with a new name or list of images.
+			/// </summary>
+			/// <param name="worklist_index">A string containing the id of the worklist to update.</param>
+			/// <param name="title">The (new) title for the worklist. Must be unique.</param>
+			/// <param name="images">A vector containing the ids of the images the worklist should list.</param>
+			/// <param name="observer">A lamba that accepts a boolean which details whether or not the task was succesful.</param>
+			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
+			virtual size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer) = 0;
+
+			/// <summary>
 			/// Acquires the worklist records in a asynchronous manner, offering them to the receiver lambda.
 			/// </summary>
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
@@ -50,25 +71,36 @@ namespace ASAP::Data
 			/// <param name="worklist_index">The id from the selected worklist.</param>
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
+			virtual size_t GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
 			/// <summary>
 			/// Acquires the study records in a asynchronous manner, offering them to the receiver lambda.
 			/// </summary>
 			/// <param name="patient_index">The id from the selected patient.</param>
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
+			virtual size_t GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
 			/// <summary>
 			/// Acquires the image records in a asynchronous manner, offering them to the receiver lambda.
 			/// </summary>
 			/// <param name="study_index">The id from the selected study.</param>
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetImageRecords(const size_t study_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
+			virtual size_t GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
 
-		//	virtual size_t GetImageFile(const size_t image_index, const std::function<void(const boost::filesystem::path&)> receiver) = 0;
-
-		//	virtual size_t UpdateWorklistRecords(const DataTable& records) = 0;
+			/// <summary>
+			/// Offers a thumbnail image, or an image that can be utilized to generate one through a filepath.
+			/// </summary>
+			/// <param name="image_index">The id of the image to acquire the thumbnail for.</param>
+			/// <param name="receiver">A lamba that accepts a filepath pointing towards the thumbnail.</param>
+			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
+			virtual size_t GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver) = 0;
+			/// <summary>
+			/// Offers an image through a filepath.
+			/// </summary>
+			/// <param name="image_index">The id of the image to acquire.</param>
+			/// <param name="receiver">A lamba that accepts a filepath pointing towards the image.</param>
+			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
+			virtual size_t GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver) = 0;
 
 			/// <summary>
 			/// Returns the headers for the Worklist table.
@@ -99,7 +131,7 @@ namespace ASAP::Data
 			/// Cancels the asynchronous task if it hasn't finished yet.
 			/// </summary>
 			/// <param name="id">The id of the task to cancel.</param>
-			void CancelTask(size_t id);
+			void CancelTask(uint64_t id);
 	};
 }
 #endif // __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__

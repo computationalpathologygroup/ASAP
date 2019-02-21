@@ -11,12 +11,12 @@
 
 namespace ASAP::Networking
 {
-	enum DOWNLOAD_STATUS { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
+	enum DownloadStatus { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
 
 	struct FileDownloadResults
 	{
 		boost::filesystem::path filepath;
-		DOWNLOAD_STATUS			status;
+		DownloadStatus			status;
 	};
 
 	/// <summary>
