@@ -66,6 +66,12 @@ namespace ASAP::Data
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
 			virtual size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver) = 0;
 			/// <summary>
+			/// Acquires all available patient records and offers these to the lambda.
+			/// </summary>
+			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
+			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
+			virtual size_t GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver) = 0;
+			/// <summary>
 			/// Acquires the patient records in a asynchronous manner, offering them to the receiver lambda.
 			/// </summary>
 			/// <param name="worklist_index">The id from the selected worklist.</param>

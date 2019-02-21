@@ -31,6 +31,11 @@ namespace ASAP::Data
 		return 0;
 	}
 
+	size_t DirectoryDataAcquisition::GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver)
+	{
+		return 0;
+	}
+
 	size_t DirectoryDataAcquisition::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		return 0;
