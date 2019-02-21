@@ -9,7 +9,7 @@ namespace ASAP::Networking
 		// Fails if the path doesn't point towards a directory.
 		if (!boost::filesystem::is_directory(output_directory))
 		{
-			return { boost::filesystem::path(), DOWNLOAD_STATUS::FILE_CREATION_FAILURE };
+			return { boost::filesystem::path(), DownloadStatus::FILE_CREATION_FAILURE };
 		}
 
 		// Fails if the response wasn't a HTTP 200 message, or lacks the content disposition header.
@@ -54,19 +54,19 @@ namespace ASAP::Networking
 
 						if (FileHasCorrectSize(output_file, length))
 						{
-							return { boost::filesystem::absolute(output_file), DOWNLOAD_STATUS::SUCCESS };
+							return { boost::filesystem::absolute(output_file), DownloadStatus::SUCCESS };
 						}
-						return { boost::filesystem::path(), DOWNLOAD_STATUS::DOWNLOAD_FAILURE };
+						return { boost::filesystem::path(), DownloadStatus::DOWNLOAD_FAILURE };
 					}
-					return { boost::filesystem::path(), DOWNLOAD_STATUS::FILE_CREATION_FAILURE };
+					return { boost::filesystem::path(), DownloadStatus::FILE_CREATION_FAILURE };
 				}
 				// File has already been downloaded.
 				{
-					return { boost::filesystem::absolute(output_file), DOWNLOAD_STATUS::SUCCESS };
+					return { boost::filesystem::absolute(output_file), DownloadStatus::SUCCESS };
 				}
 			}
 		}
-		return { boost::filesystem::path(), DOWNLOAD_STATUS::NO_ATTACHMENT };
+		return { boost::filesystem::path(), DownloadStatus::NO_ATTACHMENT };
 	}
 
 	namespace

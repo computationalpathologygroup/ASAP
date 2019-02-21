@@ -5,7 +5,7 @@
 
 namespace ASAP::Networking
 {
-	Django_Connection::Django_Connection(const std::wstring base_uri, const AUTHENTICATION_TYPE authentication_type, const Credentials credentials, const web::http::client::http_client_config& config)
+	Django_Connection::Django_Connection(const std::wstring base_uri, const AuthenticationType authentication_type, const Credentials credentials, const web::http::client::http_client_config& config)
 		: HTTP_Connection(base_uri, config), m_authentication_(authentication_type), m_credentials_(credentials), m_status_(UNAUTHENTICATED)
 	{
 		SetupConnection_();
@@ -38,7 +38,7 @@ namespace ASAP::Networking
 		m_access_mutex$.unlock();
 	}
 
-	Django_Connection::AUTHENTICATION_STATUS Django_Connection::GetAuthenticationStatus(void) const
+	Django_Connection::AuthenticationStatus Django_Connection::GetAuthenticationStatus(void) const
 	{
 		return m_status_;
 	}
@@ -95,12 +95,12 @@ namespace ASAP::Networking
 				ModifyRequest_(token_test);
 				token_test.set_request_uri(m_credentials_["validation"]);
 
-				AUTHENTICATION_STATUS* status_ptr(&m_status_);
+				AuthenticationStatus* status_ptr(&m_status_);
 				HTTP_Connection::SendRequest(token_test).then([status_ptr](const web::http::http_response& response)
 				{
 					if (response.status_code() != web::http::status_codes::OK)
 					{
-						*status_ptr = AUTHENTICATION_STATUS::INVALID_CREDENTIALS;
+						*status_ptr = AuthenticationStatus::INVALID_CREDENTIALS;
 					}
 				}).wait();
 			}
@@ -150,7 +150,7 @@ namespace ASAP::Networking
 		}
 		catch (const std::exception& e)
 		{
-			m_status_ = AUTHENTICATION_STATUS::INVALID_CREDENTIALS;
+			m_status_ = AuthenticationStatus::INVALID_CREDENTIALS;
 		}
 
 		// Assumes all operations completed succesfully
