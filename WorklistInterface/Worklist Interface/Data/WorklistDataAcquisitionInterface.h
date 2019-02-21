@@ -137,7 +137,7 @@ namespace ASAP::Data
 			/// Cancels the asynchronous task if it hasn't finished yet.
 			/// </summary>
 			/// <param name="id">The id of the task to cancel.</param>
-			void CancelTask(uint64_t id);
+			void CancelTask(size_t id);
 	};
 }
 #endif // __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__

@@ -498,7 +498,7 @@ namespace ASAP::GUI
 	void WorklistWindow::OnWorklistSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_worklist_model_->itemFromIndex(index));
-		int worklist_id = item->data().toInt();
+		std::string worklist_id(item->data().toString().toUtf8().constData());
 
 		QStandardItemModel* patient_model	= m_patients_model_;
 		QTableView* patient_view			= m_ui_->view_patients;
@@ -515,7 +515,7 @@ namespace ASAP::GUI
 	void WorklistWindow::OnPatientSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_patients_model_->itemFromIndex(index));
-		int patient_id = item->data().toInt();
+		std::string patient_id(item->data().toString().toUtf8().constData());
 
 		QStandardItemModel* study_model = m_studies_model_;
 		QTableView* study_view = m_ui_->view_studies;
@@ -532,7 +532,7 @@ namespace ASAP::GUI
 	void WorklistWindow::OnStudySelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_studies_model_->itemFromIndex(index));
-		int study_id = item->data().toInt();
+		std::string study_id(item->data().toString().toUtf8().constData());
 
 		QStandardItemModel* image_model = m_images_model_;
 		QListView* image_view = m_ui_->view_images;

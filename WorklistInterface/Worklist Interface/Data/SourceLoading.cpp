@@ -8,6 +8,10 @@
 #include "GrandChallengeDataAcquisition.h"
 #include "DirectoryDataAcquisition.h"
 #include "FilelistDataAcquisition.h"
+#include "../Misc/StringConversions.h"
+
+using namespace ASAP::Misc;
+using namespace ASAP::Networking;
 
 namespace ASAP::Data
 {
@@ -22,22 +26,20 @@ namespace ASAP::Data
 			{
 				pointer = nullptr;
 			}
-			else if (boost::filesystem::is_regular_file(potential_system_path))
+			else if (boost::filesystem::is_regular_file(potential_system_path) && CheckParameters(additional_params, FilelistDataAcquisition::GetRequiredParameterFields()))
 			{
 				// Create File Acquisition
 				pointer = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::FilelistDataAcquisition(source_path));
 			}
-			else if (boost::filesystem::is_directory(potential_system_path))
+			else if (boost::filesystem::is_directory(potential_system_path) && CheckParameters(additional_params, DirectoryDataAcquisition::GetRequiredParameterFields()))
 			{
 				pointer = std::unique_ptr<Data::DirectoryDataAcquisition>(new Data::DirectoryDataAcquisition(source_path));
 			}
-			else
+			else if (CheckParameters(additional_params, GrandChallengeDataAcquisition::GetRequiredParameterFields()))
 			{
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				Data::DjangoRestURI uri_info = Data::DjangoDataAcquisition::GetStandardURI();
-				uri_info.base_url = converter.from_bytes(source_path);
-
-				pointer = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::DjangoDataAcquisition(uri_info));
+				Data::GrandChallengeURLInfo uri_info = Data::GrandChallengeDataAcquisition::GetStandardURI(Misc::StringToWideString(source_path));
+				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(StringToWideString(additional_params.find("token")->second), L"api/v1/"));
+				pointer = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::GrandChallengeDataAcquisition(uri_info, credentials));
 			}
 
 			return pointer;
@@ -45,6 +47,22 @@ namespace ASAP::Data
 		catch (const std::exception& e)
 		{
 			throw std::runtime_error("Unable to open source: " + source_path);
+		}
+	}
+
+	namespace
+	{
+		bool CheckParameters(const std::unordered_map<std::string, std::string> additional_params, const std::vector<std::string> required_params)
+		{
+			for (const std::string& param : required_params)
+			{
+				auto it = additional_params.find(param);
+				if (it == additional_params.end())
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }

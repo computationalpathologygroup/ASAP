@@ -10,56 +10,56 @@
 
 namespace ASAP::Data
 {
-	// Placeholder function for acquiring a Django REST Framework authentication token
-	/*std::wstring GetAuthenticationToken(web::http::client::http_client& client, std::wstring token_path, std::wstring username, std::wstring password)
-	{
-		web::http::http_request request(web::http::methods::POST);
-		request.set_body(std::wstring(L"{ \"username\": \"") + username + std::wstring(L"\", \"password\": \"") + password + std::wstring(L"\" }", L"application/json"));
-		request.set_request_uri(L"auth/token/");
-		request.set_method(web::http::methods::POST);
-
-		std::wstring token;
-		client.request(request).then([&token](web::http::http_response response)
-		{
-			token				= response.extract_string().get();
-			size_t separator	= token.find(L"\":\"") + 3;
-			token = token.substr(separator, token.find_first_of(L'"', separator + 3) - separator);
-		}).wait();
-		return token;
-	}*/
-
-	DjangoDataAcquisition::DjangoDataAcquisition(const DjangoRestURI uri_info) : m_connection_(uri_info.base_url), m_rest_uri_(uri_info), m_tables_(5)
+	GrandChallengeDataAcquisition::GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, const Networking::Django_Connection::Credentials credentials)
+		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials), m_rest_uri_(uri_info), m_schemas_(5)
 	{
 		InitializeTables_();
 	}
 
-	WorklistDataAcquisitionInterface::SourceType DjangoDataAcquisition::GetSourceType(void)
+	WorklistDataAcquisitionInterface::SourceType GrandChallengeDataAcquisition::GetSourceType(void)
 	{
 		return WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST;
 	}
 
-	DjangoRestURI DjangoDataAcquisition::GetStandardURI(void)
+	GrandChallengeURLInfo GrandChallengeDataAcquisition::GetStandardURI(const std::wstring base_url)
 	{
-		return { L"", L"worklists", L"patients", L"studies", L"images", L"worklist_patient_relations" };
+		return { base_url, L"worklists/list/", L"worklists/set/", L"patients/patient/", L"studies/study/", L"api/cases/images", L"api/cases/images" };
 	}
 
-	size_t DjangoDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
+	size_t GrandChallengeDataAcquisition::AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer)
+	{
+		return 0;
+	}
+
+	size_t GrandChallengeDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer)
+	{
+		return 0;
+	}
+
+	size_t GrandChallengeDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
 		web::http::http_request request(web::http::methods::GET);
-		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition + L"/");
+		request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition + L"?token=");
 
-		DataTable* table(&m_tables_[TableEntry::WORKLIST]);
-		return m_connection_.QueueRequest(request, [receiver, table](web::http::http_response& response)
+		DataTable* worklist_schema		= &m_schemas_[TableEntry::WORKLIST_SET];
+		DataTable* worklist_set_schema	= &m_schemas_[TableEntry::WORKLIST_SET];
+		return m_connection_.QueueRequest(request, [receiver, worklist_schema, worklist_set_schema](web::http::http_response& response)
 		{
+			DataTable worklist_set(*worklist_set_schema);
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
-			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
-			receiver(*table, error_code);
+			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, worklist_set);
+			receiver(worklist_set, error_code);
 		});
 	}
 
-	size_t DjangoDataAcquisition::GetPatientRecords(const size_t worklist_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t GrandChallengeDataAcquisition::GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		return 0;
+	}
+
+	size_t GrandChallengeDataAcquisition::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
+	{
+		/*std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring index_wide_char = converter.from_bytes(std::to_string(worklist_index));
 		
 		// Acquires the many to many worklist <-> patient relations for the given index.
@@ -102,12 +102,14 @@ namespace ASAP::Data
 			}
 
 			receiver(*patient_table, 0);
-		});
+		});*/
+
+		return 0;
 	}
 
-	size_t DjangoDataAcquisition::GetStudyRecords(const size_t patient_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t GrandChallengeDataAcquisition::GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		/*std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring index_wide_char = converter.from_bytes(std::to_string(patient_index));
 
 		web::http::http_request request(web::http::methods::GET);
@@ -120,12 +122,13 @@ namespace ASAP::Data
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
-		});
+		});*/
+		return 0;
 	}
 
-	size_t DjangoDataAcquisition::GetImageRecords(const size_t study_index, const std::function<void(DataTable&, int)>& receiver)
+	size_t GrandChallengeDataAcquisition::GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		/*std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		std::wstring index_wide_char = converter.from_bytes(std::to_string(study_index));
 
 		web::http::http_request request(web::http::methods::GET);
@@ -138,45 +141,62 @@ namespace ASAP::Data
 			// Parses response into the data table, and then returns both the table and the error code to the receiver.
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, *table);
 			receiver(*table, error_code);
-		});
+		});*/
+		return 0;
 	}
 
-	std::set<std::string> DjangoDataAcquisition::GetWorklistHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeDataAcquisition::GetWorklistHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::WORKLIST].GetColumnNames(selection);
+		return m_schemas_[TableEntry::WORKLIST].GetColumnNames(selection);
 	}
 
-	std::set<std::string> DjangoDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::PATIENT].GetColumnNames(selection);
+		return m_schemas_[TableEntry::PATIENT].GetColumnNames(selection);
 	}
 
-	std::set<std::string> DjangoDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::STUDY].GetColumnNames(selection);
+		return m_schemas_[TableEntry::STUDY].GetColumnNames(selection);
 	}
 
-	std::set<std::string> DjangoDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_tables_[TableEntry::IMAGE].GetColumnNames(selection);
+		return m_schemas_[TableEntry::IMAGE].GetColumnNames(selection);
 	}
 
-	void DjangoDataAcquisition::InitializeTables_(void)
+	size_t GrandChallengeDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver)
+	{
+		return 0;
+	}
+
+	size_t GrandChallengeDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver)
+	{
+		return 0;
+	}
+
+	void GrandChallengeDataAcquisition::CancelTask(size_t id)
+	{
+		m_connection_.CancelTask(id);
+	}
+
+	void GrandChallengeDataAcquisition::InitializeTables_(void)
 	{
 		std::vector<std::wstring> table_url_addition
 		({
 			m_rest_uri_.worklist_addition,
+			m_rest_uri_.worklist_set_addition,
 			m_rest_uri_.patient_addition,
 			m_rest_uri_.study_addition,
 			m_rest_uri_.image_addition,
-			m_rest_uri_.worklist_patient_relation_addition
 		});
+
 		for (size_t table = 0; table < table_url_addition.size(); ++table)
 		{
 			web::http::http_request request(web::http::methods::OPTIONS);
 			request.set_request_uri(L"/" + table_url_addition[table] + L"/");
 
-			DataTable* datatable(&m_tables_[table]);
+			DataTable* datatable(&m_schemas_[table]);
 			m_connection_.SendRequest(request).then([datatable](web::http::http_response& response)
 			{
 				Serialization::JSON::ParseJsonResponseToTableSchema(response, *datatable);
