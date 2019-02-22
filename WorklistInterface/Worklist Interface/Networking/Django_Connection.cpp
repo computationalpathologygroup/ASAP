@@ -29,6 +29,11 @@ namespace ASAP::Networking
 		return credentials;
 	}
 
+	const Django_Connection::Credentials& Django_Connection::SetCredentials(void)
+	{
+		return m_credentials_;
+	}
+
 	void Django_Connection::SetCredentials(const Credentials credentials)
 	{
 		m_access_mutex$.lock();

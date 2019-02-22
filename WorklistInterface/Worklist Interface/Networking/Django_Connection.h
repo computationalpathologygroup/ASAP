@@ -26,6 +26,7 @@ namespace ASAP::Networking
 
 			Credentials static CreateCredentials(const std::wstring token, const std::wstring validation_path);
 			Credentials static CreateCredentials(const std::wstring username, const std::wstring password, const std::wstring csrf_path, const std::wstring auth_path);
+			const Credentials& Django_Connection::SetCredentials(void);
 			void SetCredentials(const Credentials credentials);
 
 			AuthenticationStatus GetAuthenticationStatus(void) const;
