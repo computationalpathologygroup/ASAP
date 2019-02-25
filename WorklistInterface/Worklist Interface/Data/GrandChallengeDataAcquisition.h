@@ -16,17 +16,15 @@ namespace ASAP::Data
 	{
 		std::wstring base_url;
 		std::wstring worklist_addition;
-		std::wstring worklist_set_addition;
 		std::wstring patient_addition;
 		std::wstring study_addition;
 		std::wstring image_addition;
-		std::wstring image_file_addition;
 	};
 
 	class GrandChallengeDataAcquisition : public WorklistDataAcquisitionInterface
 	{
 		public:
-			GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, const Networking::Django_Connection::Credentials credentials);
+			GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
 			static GrandChallengeURLInfo GetStandardURI(const std::wstring base_url);
 			WorklistDataAcquisitionInterface::SourceType GetSourceType(void);
@@ -38,10 +36,10 @@ namespace ASAP::Data
 			size_t GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver);
-			size_t GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver);
+			size_t GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver);
 
-			size_t GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver);
-			size_t GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver);
+			size_t GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer);
+			size_t GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer);
 
 			std::set<std::string> GetWorklistHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL);
 			std::set<std::string> GetPatientHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL);
@@ -51,7 +49,7 @@ namespace ASAP::Data
 			void CancelTask(size_t id);
 
 		private:
-			enum TableEntry { WORKLIST, WORKLIST_SET, PATIENT, STUDY, IMAGE, IMAGE_FILE };
+			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE };
 
 			Networking::Django_Connection	m_connection_;
 			GrandChallengeURLInfo			m_rest_uri_;
