@@ -46,7 +46,7 @@ namespace ASAP::Data
 		return 0;
 	}
 
-	size_t DirectoryDataAcquisition::GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
+	size_t DirectoryDataAcquisition::GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
 		receiver(m_images_, 0);
 		return 0;
@@ -72,13 +72,13 @@ namespace ASAP::Data
 		return std::set<std::string>();
 	}
 
-	size_t DirectoryDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver)
+	size_t DirectoryDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer)
 	{
 		receiver(boost::filesystem::path(*m_images_.At(std::stoi(image_index), { "location" })[0]));
 		return 0;
 	}
 
-	size_t DirectoryDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver)
+	size_t DirectoryDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer)
 	{
 		receiver(boost::filesystem::path(*m_images_.At(std::stoi(image_index), { "location" })[0]));
 		return 0;
