@@ -201,10 +201,7 @@ namespace ASAP::GUI
 						(patient_headers.find("id") != worklist_headers.end()) &&
 						(study_headers.find("id") != worklist_headers.end()) &&
 						(image_headers.find("id") != worklist_headers.end()) &&
-						(image_headers.find("location") != worklist_headers.end()) &&
 						(image_headers.find("title") != worklist_headers.end());
-
-				std::find(worklist_headers.begin(), worklist_headers.end(), "id");
 			}
 			return true;
 		}
@@ -310,7 +307,7 @@ namespace ASAP::GUI
 			if (type == Data::WorklistDataAcquisitionInterface::SourceType::FILELIST)
 			{
 				QStandardItemModel* image_model = m_images_model_;
-				m_data_acquisition_->GetImageRecords(0, [this, image_model](Data::DataTable& table, int error)
+				m_data_acquisition_->GetImageRecords(std::string(), std::string(), [this, image_model](Data::DataTable& table, int error)
 				{
 					if (error == 0)
 					{
@@ -531,12 +528,17 @@ namespace ASAP::GUI
 
 	void WorklistWindow::OnStudySelect_(QModelIndex index)
 	{
-		QStandardItem* item(m_studies_model_->itemFromIndex(index));
-		std::string study_id(item->data().toString().toUtf8().constData());
+		QModelIndexList selected_worklist(m_ui_->view_worklists->selectionModel()->selectedIndexes());
+
+		QStandardItem* study_item(m_studies_model_->itemFromIndex(index));
+		QStandardItem* worklist_item(m_worklist_model_->itemFromIndex(selected_worklist[0]));
+
+		std::string study_id(study_item->data().toString().toUtf8().constData());
+		std::string worklist_id(worklist_item->data().toString().toUtf8().constData());
 
 		QStandardItemModel* image_model = m_images_model_;
 		QListView* image_view = m_ui_->view_images;
-		m_data_acquisition_->GetImageRecords(study_id, [this, image_model, image_view](Data::DataTable table, int error)
+		m_data_acquisition_->GetImageRecords(worklist_id, study_id, [this, image_model, image_view](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
