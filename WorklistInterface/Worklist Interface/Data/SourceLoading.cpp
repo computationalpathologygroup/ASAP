@@ -15,7 +15,7 @@ using namespace ASAP::Networking;
 
 namespace ASAP::Data
 {
-	std::unique_ptr<WorklistDataAcquisitionInterface> LoadDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params)
+	std::unique_ptr<WorklistDataAcquisitionInterface> LoadDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params, Misc::TemporaryDirectoryTracker& temp_dir)
 	{
 		try
 		{
@@ -39,7 +39,7 @@ namespace ASAP::Data
 			{
 				Data::GrandChallengeURLInfo uri_info = Data::GrandChallengeDataAcquisition::GetStandardURI(Misc::StringToWideString(source_path));
 				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(StringToWideString(additional_params.find("token")->second), L"api/v1/"));
-				pointer = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::GrandChallengeDataAcquisition(uri_info, credentials));
+				pointer = std::unique_ptr<Data::WorklistDataAcquisitionInterface>(new Data::GrandChallengeDataAcquisition(uri_info, temp_dir, credentials));
 			}
 
 			return pointer;

@@ -11,8 +11,8 @@
 
 namespace ASAP::Data
 {
-	GrandChallengeDataAcquisition::GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config)
-		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4)
+	GrandChallengeDataAcquisition::GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, Misc::TemporaryDirectoryTracker& temp_dir, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config)
+		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4), m_temporary_directory_(temp_dir)
 	{
 		InitializeTables_();
 	}

@@ -26,7 +26,7 @@ namespace ASAP::Data
 	class GrandChallengeDataAcquisition : public WorklistDataAcquisitionInterface
 	{
 		public:
-			GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config = web::http::client::http_client_config());
+			GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, Misc::TemporaryDirectoryTracker& temp_dir, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
 			static GrandChallengeURLInfo GetStandardURI(const std::wstring base_url);
 			WorklistDataAcquisitionInterface::SourceType GetSourceType(void);
@@ -56,7 +56,7 @@ namespace ASAP::Data
 			Networking::Django_Connection		m_connection_;
 			GrandChallengeURLInfo				m_rest_uri_;
 			std::vector<DataTable>				m_schemas_;
-			Misc::TemporaryDirectoryTracker*	m_temporary_directory_;
+			Misc::TemporaryDirectoryTracker&	m_temporary_directory_;
 
 			void InitializeTables_(void);
 	};

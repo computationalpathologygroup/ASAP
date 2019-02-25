@@ -1,4 +1,4 @@
- #ifndef __ASAP_DATA_SOURCELOADING__
+#ifndef __ASAP_DATA_SOURCELOADING__
 #define __ASAP_DATA_SOURCELOADING__
 
 #include <memory>
@@ -9,7 +9,7 @@
 
 namespace ASAP::Data
 {
-	std::unique_ptr<WorklistDataAcquisitionInterface> LoadDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
+	std::unique_ptr<WorklistDataAcquisitionInterface> LoadDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params, Misc::TemporaryDirectoryTracker& temp_dir);
 
 	namespace
 	{
