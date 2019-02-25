@@ -24,11 +24,14 @@ namespace ASAP::Data
 
 	GrandChallengeURLInfo GrandChallengeDataAcquisition::GetStandardURI(const std::wstring base_url)
 	{
-		return { base_url, L"worklists/list/", L"patients/patient/", L"studies/study/", L"api/v1/cases/images/" };
+		return { base_url, L"worklists/list/", L"worklists/set/", L"patients/patient/", L"studies/study/", L"api/v1/cases/images/" };
 	}
 
 	size_t GrandChallengeDataAcquisition::AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer)
 	{
+		web::http::http_request request(web::http::methods::GET);
+
+
 		return 0;
 	}
 
@@ -39,16 +42,40 @@ namespace ASAP::Data
 
 	size_t GrandChallengeDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
-		web::http::http_request request(web::http::methods::GET);
-		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
+		web::http::http_request set_request(web::http::methods::GET);
+		set_request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition);
 
-		DataTable* worklist_schema		= &m_schemas_[TableEntry::WORKLIST];
-		return m_connection_.QueueRequest(request, [receiver, worklist_schema](web::http::http_response& response)
+		Networking::Django_Connection* connection = &m_connection_;
+		DataTable* worklist_schema					= &m_schemas_[TableEntry::WORKLIST];		
+		GrandChallengeURLInfo* info					= &m_rest_uri_;
+		return m_connection_.QueueRequest(set_request, [connection, receiver, worklist_schema, info](web::http::http_response& response)
 		{
-			// Parses the worklist sets into a data table.
-			DataTable worklists(*worklist_schema);
-			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, worklists);
-			receiver(worklists, error_code);
+			// If there is a set, acquire worklists.
+			web::json::value set_json(response.extract_json().get());
+			if (set_json.size() > 0)
+			{
+				web::http::http_request list_request(web::http::methods::GET);
+				list_request.set_request_uri(L"/" + info->worklist_addition);
+
+				web::http::http_response list_response(connection->SendRequest(list_request).get());
+				DataTable worklists(*worklist_schema);
+				int error_code = Serialization::JSON::ParseJsonResponseToRecords(list_response, worklists);
+				receiver(worklists, error_code);
+			}
+			// If there's no set, only create one.
+			else
+			{
+			/*	std::wstringstream body;
+				body << L"{ "
+
+				web::http::http_request set_creation(web::http::methods::POST);
+				set_creation.set_request_uri(L"/" + info->worklist_set_addition + L"/");
+				set_creation.set_body()
+				
+				
+				
+				, info->worklist_set_addition, L"application/json");*/
+			}
 		});
 	}
 

@@ -9,6 +9,7 @@
 #include "DataTable.h"
 #include "WorklistDataAcquisitionInterface.h"
 #include "../Networking/Django_Connection.h"
+#include "../Misc/TemporaryDirectoryTracker.h"
 
 namespace ASAP::Data
 {
@@ -16,6 +17,7 @@ namespace ASAP::Data
 	{
 		std::wstring base_url;
 		std::wstring worklist_addition;
+		std::wstring worklist_set_addition;
 		std::wstring patient_addition;
 		std::wstring study_addition;
 		std::wstring image_addition;
@@ -51,9 +53,10 @@ namespace ASAP::Data
 		private:
 			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE };
 
-			Networking::Django_Connection	m_connection_;
-			GrandChallengeURLInfo			m_rest_uri_;
-			std::vector<DataTable>			m_schemas_;
+			Networking::Django_Connection		m_connection_;
+			GrandChallengeURLInfo				m_rest_uri_;
+			std::vector<DataTable>				m_schemas_;
+			Misc::TemporaryDirectoryTracker*	m_temporary_directory_;
 
 			void InitializeTables_(void);
 	};
