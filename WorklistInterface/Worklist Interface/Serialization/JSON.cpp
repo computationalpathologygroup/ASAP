@@ -1,6 +1,6 @@
 #include "JSON.h"
 
-#include <codecvt>
+#include "../Misc/StringConversions.h"
 
 namespace ASAP::Serialization::JSON
 {
@@ -32,8 +32,6 @@ namespace ASAP::Serialization::JSON
 				web::json::value json_response(previousTask.get());
 				if (json_response.size() > 0)
 				{
-					std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-
 					std::vector<std::string> values;
 					values.reserve(json_response[0].as_object().size());
 
@@ -42,7 +40,7 @@ namespace ASAP::Serialization::JSON
 						web::json::object object(json_response[o].as_object());
 						for (auto it = object.cbegin(); it != object.cend(); ++it)
 						{
-							values.push_back(converter.to_bytes(it->second.to_string()));
+							values.push_back(Misc::WideStringToString(it->second.to_string()));
 
 							if (values.back()[0] == '"' && values.back()[values.back().size() - 1] == '"')
 							{
@@ -86,11 +84,10 @@ namespace ASAP::Serialization::JSON
 				{
 					web::json::object post_actions(GetTagRecursive(L"POST", json_object));
 
-					std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 					std::vector<std::string> columns;
 					for (auto it = post_actions.cbegin(); it != post_actions.cend(); ++it)
 					{
-						columns.push_back(converter.to_bytes(it->first));
+						columns.push_back(Misc::WideStringToString(it->first));
 					}
 
 					table = Data::DataTable(columns);
