@@ -88,10 +88,11 @@ namespace ASAP::Data
 			/// <summary>
 			/// Acquires the image records in a asynchronous manner, offering them to the receiver lambda.
 			/// </summary>
+			/// <param name="worklist_index">The id from the overlaying worklist.</param>
 			/// <param name="study_index">The id from the selected study.</param>
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
+			virtual size_t GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver) = 0;
 
 			/// <summary>
 			/// Offers a thumbnail image, or an image that can be utilized to generate one through a filepath.

@@ -48,7 +48,7 @@ namespace ASAP::Data
 		return 0;
 	}
 
-	size_t FilelistDataAcquisition::GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
+	size_t FilelistDataAcquisition::GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
 		receiver(m_images_, 0);
 		return 0;

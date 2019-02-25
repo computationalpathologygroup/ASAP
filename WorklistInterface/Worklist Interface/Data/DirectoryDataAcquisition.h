@@ -19,7 +19,7 @@ namespace ASAP::Data
 			size_t GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver);
-			size_t GetImageRecords(const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver);
+			size_t GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver);
 
 			size_t GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver);
 			size_t GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver);
