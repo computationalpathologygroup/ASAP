@@ -28,7 +28,7 @@ namespace ASAP::Misc
 	class TemporaryDirectoryTracker
 	{
 		public:
-			TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration);
+			TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration = GetStandardConfiguration());
 			~TemporaryDirectoryTracker(void);
 
 			static TemporaryDirectoryConfiguration GetStandardConfiguration(void);
