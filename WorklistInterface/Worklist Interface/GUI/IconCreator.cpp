@@ -22,7 +22,7 @@ namespace ASAP::GUI
 		image_model->setRowCount(image_items.Size());
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(image_items.At(item, { "location", "title" }));
+			std::vector<const std::string*> record(image_items.At(item, { "id", "title" }));
 			QStandardItem* standard_item(new QStandardItem(placeholder_icon, QString(record[1]->data())));
 			standard_item->setData(QVariant(QString(record[0]->data())));
 			image_model->setItem(item, 0, standard_item);
