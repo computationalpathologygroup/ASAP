@@ -1,5 +1,6 @@
 #include "GrandChallengeDataAcquisition.h"
 
+#include <algorithm>
 #include <codecvt>
 #include <stdexcept>
 #include <locale>
@@ -7,6 +8,7 @@
 #include <cstdio>
 
 #include "../Misc/StringConversions.h"
+#include "../Networking/HTTP_File_Download.h"
 #include "../Serialization/JSON.h"
 
 namespace ASAP::Data
@@ -57,10 +59,16 @@ namespace ASAP::Data
 				web::http::http_request list_request(web::http::methods::GET);
 				list_request.set_request_uri(L"/" + info->worklist_addition);
 
-				web::http::http_response list_response(connection->SendRequest(list_request).get());
 				DataTable worklists(*worklist_schema);
-				int error_code = Serialization::JSON::ParseJsonResponseToRecords(list_response, worklists);
-				receiver(worklists, error_code);
+				try
+				{
+					web::http::http_response list_response(connection->SendRequest(list_request).get());
+					receiver(worklists, Serialization::JSON::ParseJsonResponseToRecords(list_response, worklists));
+				}
+				catch (...)
+				{
+					receiver(worklists, -1);
+				}
 			}
 			// If there's no set, only create one.
 			else
@@ -110,8 +118,6 @@ namespace ASAP::Data
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, patients);
 			receiver(patients, error_code);
 		});
-
-		return 0;
 	}
 
 	size_t GrandChallengeDataAcquisition::GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
@@ -123,67 +129,61 @@ namespace ASAP::Data
 		request.set_request_uri(url.str());
 
 		DataTable* study_schema = &m_schemas_[TableEntry::STUDY];
-		m_connection_.SendRequest(request).then([receiver, study_schema](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, study_schema](web::http::http_response& response)
 		{
 			// Parses the worklist sets into a data table.
 			DataTable studies(*study_schema);
 			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, studies);
 			receiver(studies, error_code);
-		}).wait();
-
-		return 0;
+		});
 	}
 
 	size_t GrandChallengeDataAcquisition::GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
 		std::wstringstream url;
-		url << L"/" << m_rest_uri_.image_addition << L"?study=" << Misc::StringToWideString(study_index);		
-		if (worklist_index.empty() == false)
+		url << L"/" << m_rest_uri_.image_addition;
+
+		// TODO: clean this up.
+		if (!worklist_index.empty() || !study_index.empty())
 		{
-			url << L",worklist=" << Misc::StringToWideString(worklist_index);
+			url << L"?";
+
+			if (!study_index.empty())
+			{
+				url << L"study=" << Misc::StringToWideString(study_index);
+			}
+			if (!worklist_index.empty())
+			{
+				if (!study_index.empty())
+				{
+					url << L"&";
+				}
+
+				url << L"worklist=" << Misc::StringToWideString(worklist_index);
+			}
 		}
 
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
-		
-		// TOO: Add this section as json method that can extract certain fields from a json array
-		DataTable* image_schema = &m_schemas_[TableEntry::IMAGE];
-		return m_connection_.QueueRequest(request, [image_schema, receiver](web::http::http_response& response)
+
+		return m_connection_.QueueRequest(request, [image_schema=&m_schemas_[TableEntry::IMAGE], receiver](web::http::http_response& response)
 		{
+		std::vector<std::vector<std::string>> image_records;				
+			int error_code = Serialization::JSON::ParseJsonFieldsToVector(response, { "pk", "name" }, image_records);
+
 			DataTable images(*image_schema);
-			int error_code;
-
-			try
+			if (error_code == 0)
 			{
-				web::json::value json_response = response.extract_json().get();;
-				try
+				for (const std::vector<std::string>& record : image_records)
 				{
-					for (size_t obj = 0; obj < json_response.size(); ++obj)
-					{
-						auto object = json_response[obj];
-						images.Insert(
-						{
-							Misc::WideStringToString(object.at(L"pk").serialize()),
-							Misc::WideStringToString(object.at(L"name").serialize())
-						});				
-					}
-				}
-				catch (const std::exception& e)
-				{
-					// Indicates a parsing error.
-					error_code = -1;
+					images.Insert(record);
 				}
 			}
-			catch (const web::http::http_exception& e)
-			{
-				error_code = e.error_code().value();
-			}
-
 			receiver(images, error_code);
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer)
+	size_t GrandChallengeDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
 		std::wstringstream url;
 		url << L"/" << m_rest_uri_.image_addition << L"/" << Misc::StringToWideString(image_index) << L"/";
@@ -194,22 +194,52 @@ namespace ASAP::Data
 		DataTable* image_schema = &m_schemas_[TableEntry::IMAGE];
 		return m_connection_.QueueRequest(request, [image_schema, receiver, observer](web::http::http_response& response)
 		{
-
+			receiver(boost::filesystem::path());
+			observer(100);
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer)
+	size_t GrandChallengeDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
+		std::string sanitized_index(image_index);
+		sanitized_index.erase(std::remove(sanitized_index.begin(), sanitized_index.end(), '"'), sanitized_index.end());
+
 		std::wstringstream url;
-		url << L"/" << m_rest_uri_.image_addition << L"/" << Misc::StringToWideString(image_index) << L"/";
+		url << L"/" << m_rest_uri_.image_addition << Misc::StringToWideString(sanitized_index) << L"/";
 
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 
-		DataTable* image_schema = &m_schemas_[TableEntry::IMAGE];
-		return m_connection_.QueueRequest(request, [image_schema, receiver, observer](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, observer, connection=&m_connection_, temp_dir=&m_temporary_directory_](web::http::http_response& response)
 		{
+			// Acquires the URL to the file.
+			Networking::FileDownloadResults results;
+			if (response.status_code() == web::http::status_codes::OK)
+			{
+				std::wstring file_uri = response.extract_json().get().at(L"files").as_array()[0].at(L"file").serialize();
+				file_uri.erase(std::remove(file_uri.begin(), file_uri.end(), L'"'), file_uri.end());
 
+				// Creates a request to acquire the file.
+				web::http::http_request image_file_request(web::http::methods::GET);
+				image_file_request.set_request_uri(file_uri);
+
+				// Acquire the response or return an empty path if it fails.
+				web::http::http_response image_file_response;
+				try
+				{
+					image_file_response = connection->SendRequest(image_file_request).get();
+				}
+				catch (...)
+				{
+					receiver(boost::filesystem::path());
+				}
+
+				// TODO: implement method to reveal errors to user.
+
+				// Download the image, link the status to the observer and return the results.
+				results = Networking::HTTP_File_Download(image_file_response, temp_dir->GetAbsolutePath(), observer);
+			}
+			receiver(results.filepath);
 		});
 	}
 

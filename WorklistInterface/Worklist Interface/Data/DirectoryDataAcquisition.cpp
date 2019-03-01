@@ -72,13 +72,13 @@ namespace ASAP::Data
 		return std::set<std::string>();
 	}
 
-	size_t DirectoryDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer)
+	size_t DirectoryDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
 		receiver(boost::filesystem::path(*m_images_.At(std::stoi(image_index), { "location" })[0]));
 		return 0;
 	}
 
-	size_t DirectoryDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(float)> observer)
+	size_t DirectoryDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
 		receiver(boost::filesystem::path(*m_images_.At(std::stoi(image_index), { "location" })[0]));
 		return 0;
