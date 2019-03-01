@@ -452,6 +452,16 @@ namespace ASAP::GUI
 			&QAction::triggered,
 			this,
 			&WorklistWindow::OnSelectExternalSource_);
+
+		connect(this,
+			&WorklistWindow::RequestStatusBarUpdate,
+			this,
+			&WorklistWindow::UpdateStatusBar);
+			
+		connect(this,
+			&WorklistWindow::RequestOpenImage,
+			this,
+			&WorklistWindow::OnOpenImage_);
 	}
 
 	void WorklistWindow::MoveImageSelectionLeft(void)
@@ -490,7 +500,9 @@ namespace ASAP::GUI
 
 	void WorklistWindow::UpdateStatusBar(const QString& message)
 	{
+		m_status_bar_access_.lock();
 		m_ui_->status_bar->showMessage(message);
+		m_status_bar_access_.unlock();
 	}
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
@@ -575,24 +587,17 @@ namespace ASAP::GUI
 		if (m_workstation_)
 		{
 			m_ui_->status_bar->showMessage("Loading image: 0%");
-			auto image_loading([this, bar=m_ui_->status_bar, bar_access=&m_status_bar_access_, workstation=m_workstation_, tab_id= m_workstation_tab_id_](const boost::filesystem::path& filepath)
+			auto image_loading([this](const boost::filesystem::path& filepath)
 			{
-				QString filepath_string(QString::fromStdString(filepath.string()));
-				bar_access->lock();
-				bar->showMessage("Finished loading image: " + filepath_string);
-				bar_access->unlock();
-				workstation->openFile(filepath_string);
-				this->RequiresTabSwitch(tab_id);
+				this->RequestOpenImage(QString::fromStdString(filepath.string()));
 			});
 
-			auto acquisition_tracking([bar=m_ui_->status_bar, bar_access=&m_status_bar_access_](const uint8_t progress)
+			auto acquisition_tracking([this, bar=m_ui_->status_bar](const uint8_t progress)
 			{
-				bar_access->lock();
 				if (bar->currentMessage().endsWith("%"));
 				{
-					bar->showMessage("Loading image: " + QString(std::to_string(progress).data()) + "%");
+					this->UpdateStatusBar("Loading image: " + QString(std::to_string(progress).data()) + "%");
 				}
-				bar_access->unlock();
 			});
 
 			m_data_acquisition_->GetImageFile(image_index, image_loading, acquisition_tracking);
@@ -637,5 +642,12 @@ namespace ASAP::GUI
 		params.insert({ "ignore_certificate", std::to_string(results.ignore_certificate) });
 
 		SetDataSource(std::string(results.location.toUtf8().constData()), params);
+	}
+
+	void WorklistWindow::OnOpenImage_(QString path)
+	{
+		this->UpdateStatusBar("Loaded file: " + path);
+		m_workstation_->openFile(path);
+		RequiresTabSwitch(m_workstation_tab_id_);
 	}
 }
