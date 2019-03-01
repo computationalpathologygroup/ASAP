@@ -1,6 +1,7 @@
 #include "WorklistWindow.h"
 
 #include <cctype>
+#include <sstream>
 #include <unordered_map>
 
 #include <boost/bind.hpp>
@@ -8,10 +9,12 @@
 #include <qmessagebox.h>
 #include <QtConcurrent\qtconcurrentrun.h>
 
+#include "ExternalSourceDialog.h"
 #include "IconCreator.h"
 #include "Serialization/INI.h"
 #include "Misc/StringManipulation.h"
 #include "Data/SourceLoading.h"
+
 
 namespace ASAP::GUI
 {
@@ -29,7 +32,9 @@ namespace ASAP::GUI
 		SetSlots_();
 		SetModels_();
 		LoadSettings_();
-		SetDataSource(m_settings_.source_location, std::unordered_map<std::string, std::string>());
+
+		std::pair<std::string, std::unordered_map<std::string, std::string>> source_information(DeserializeSource_(m_settings_.current_source));
+		SetDataSource(source_information.first, source_information.second);
 	}
 
 	WorklistWindow::~WorklistWindow(void)
@@ -49,9 +54,11 @@ namespace ASAP::GUI
 	}
 
 	// Todo: Refactor previous source storage into its own function. Decouple schema checks from UI
-	void WorklistWindow::SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params)
+	void WorklistWindow::SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> parameters)
 	{
-		if (!m_data_acquisition_ || source_path != m_settings_.source_location)
+		std::pair<std::string, std::unordered_map<std::string, std::string>> current_source = DeserializeSource_(m_settings_.current_source);
+
+		if (!m_data_acquisition_ || source_path != current_source.first)
 		{
 			// Halts any leftover thumbnail loading.
 			StopThumbnailLoading_();
@@ -60,7 +67,7 @@ namespace ASAP::GUI
 			{
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
 				m_ui_->status_bar->showMessage("Loading source: " + QString(source_path.data()));
-				m_data_acquisition_ = Data::LoadDataSource(source_path, additional_params);
+				m_data_acquisition_ = Data::LoadDataSource(source_path, parameters, m_storage_directory_);
 
 				if (!CheckSchema_(m_data_acquisition_.get()))
 				{
@@ -68,7 +75,7 @@ namespace ASAP::GUI
 					throw std::runtime_error("Selected source has schema errors. Unable to open.");
 				}
 
-				m_settings_.source_location = source_path;
+				m_settings_.current_source = SerializeSource_(source_path, parameters);
 
 				// Adds the new source to the previous sources.
 				auto already_added(std::find(m_settings_.previous_sources.begin(), m_settings_.previous_sources.end(), source_path));
@@ -96,28 +103,13 @@ namespace ASAP::GUI
 
 	void WorklistWindow::SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model)
 	{
-		std::unordered_map<std::string, QStandardItem*> inserted_items;
 		model->removeRows(0, model->rowCount());
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{"id", "title", "parent"}));
+			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{ "id", "title" }));
 			QStandardItem* model_item(new QStandardItem(QString(record[1]->data())));
-
-			model_item->setData(QVariant(std::stoi(*record[0])));
-			inserted_items.insert({ *record[0], model_item });
-
-			if (record[2]->empty())
-			{
-				model->setItem(m_worklist_model_->rowCount(), 0, model_item);
-			}
-			else
-			{
-				auto parent = inserted_items.find(*record[2]);
-				if (parent != inserted_items.end())
-				{
-					parent->second->appendRow(model_item);
-				}
-			}
+			model_item->setData(QVariant(record[0]->data()));
+			model->setItem(m_worklist_model_->rowCount(), 0, model_item);
 		}
 	}
 
@@ -128,12 +120,10 @@ namespace ASAP::GUI
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
-			size_t record_id = std::stoi(*items.At(item, { "id" })[0]);
-
 			for (size_t field = 0; field < record.size(); ++field)
 			{
 				QStandardItem* model_item = new QStandardItem(QString(record[field]->data()));
-				model_item->setData(QVariant(record_id));
+				model_item->setData(QVariant(items.At(item, { "id" })[0]->data()));
 				model->setItem(item, field, model_item);
 			}
 		}
@@ -146,12 +136,10 @@ namespace ASAP::GUI
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
-			size_t record_id = std::stoi(*items.At(item, { "id" })[0]);
-
 			for (size_t field = 0; field < record.size(); ++field)
 			{
 				QStandardItem* model_item = new QStandardItem(QString(record[field]->data()));
-				model_item->setData(QVariant(record_id));
+				model_item->setData(QVariant(items.At(item, { "id" })[0]->data()));
 				model->setItem(item, field, model_item);
 			}
 		}
@@ -197,7 +185,6 @@ namespace ASAP::GUI
 				std::set<std::string> image_headers(source->GetImageHeaders());
 
 				return	(worklist_headers.find("id") != worklist_headers.end()) &&
-						(worklist_headers.find("parent") != worklist_headers.end()) &&
 						(patient_headers.find("id") != worklist_headers.end()) &&
 						(study_headers.find("id") != worklist_headers.end()) &&
 						(image_headers.find("id") != worklist_headers.end()) &&
@@ -218,7 +205,7 @@ namespace ASAP::GUI
 			auto source_value(values.find("source"));
 			if (source_value != values.end())
 			{
-				m_settings_.source_location = source_value->second;
+				m_settings_.current_source = source_value->second;
 			}
 
 			// Acquires the five most recent sources.
@@ -245,13 +232,14 @@ namespace ASAP::GUI
 	void WorklistWindow::StoreSettings_(void)
 	{
 		std::unordered_map<std::string, std::string> values;
-		values.insert({ "source", m_settings_.source_location });
+		values.insert({ "source", m_settings_.current_source });
 		
 		std::string previous_sources;
 		for (const std::string& source : m_settings_.previous_sources)
 		{
 			previous_sources += "\"" + source + "\",";
 		}
+
 		// Removes the last comma and then inserts.
 		values.insert({ "previous_sources", previous_sources.substr(0, previous_sources.size() - 1)});
 
@@ -334,24 +322,55 @@ namespace ASAP::GUI
 		// Default is regarded as the FILELIST sourcetype
 		switch (type)
 		{
-		case Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST:
-			m_ui_->label_worklists->setVisible(true);
-			m_ui_->label_patients->setVisible(true);
-			m_ui_->label_studies->setVisible(true);
-			m_ui_->view_worklists->setVisible(true);
-			m_ui_->view_patients->setVisible(true);
-			m_ui_->view_studies->setVisible(true);
-			break;
-		default:
-			m_ui_->label_worklists->setVisible(false);
-			m_ui_->label_patients->setVisible(false);
-			m_ui_->label_studies->setVisible(false);
-			m_ui_->view_worklists->setVisible(false);
-			m_ui_->view_patients->setVisible(false);
-			m_ui_->view_studies->setVisible(false);
-			break;
+			case Data::WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST:
+				m_ui_->label_worklists->setVisible(true);
+				m_ui_->label_patients->setVisible(true);
+				m_ui_->label_studies->setVisible(true);
+				m_ui_->view_worklists->setVisible(true);
+				m_ui_->view_patients->setVisible(true);
+				m_ui_->view_studies->setVisible(true);
+				break;
+			default:
+				m_ui_->label_worklists->setVisible(false);
+				m_ui_->label_patients->setVisible(false);
+				m_ui_->label_studies->setVisible(false);
+				m_ui_->view_worklists->setVisible(false);
+				m_ui_->view_patients->setVisible(false);
+				m_ui_->view_studies->setVisible(false);
+				break;
 		}
 	}
+
+	std::string WorklistWindow::SerializeSource_(const std::string& location, const std::unordered_map<std::string, std::string>& parameters)
+	{
+		std::stringstream serialized_source;
+		serialized_source << location << "|";
+		for (const auto& entry : parameters)
+		{
+			serialized_source << entry.first << "=" << entry.second << "|";
+		}
+		return serialized_source.str();
+	}
+
+	std::pair<std::string, std::unordered_map<std::string, std::string>> WorklistWindow::DeserializeSource_(const std::string& source)
+	{
+		std::string location(source);
+		std::unordered_map<std::string, std::string> parameters;
+
+		std::vector<std::string> source_elements(Misc::Split(source, '|'));
+		if (source_elements.size() > 0)
+		{
+			location = source_elements[0];
+			for (size_t element = 1; element < source_elements.size(); ++element)
+			{
+				std::vector<std::string> key_value(Misc::Split(source_elements[element], '='));
+				parameters.insert({ key_value[0], key_value[1] });
+			}
+		}
+
+		return { location, parameters };
+	}
+
 
 	void WorklistWindow::SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
 	{
@@ -551,14 +570,32 @@ namespace ASAP::GUI
 	void WorklistWindow::OnImageSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_images_model_->itemFromIndex(index));
-		QString image_handle = item->data().toString();
+		std::string image_index(item->data().toString().toUtf8().constData());
 
 		if (m_workstation_)
 		{
-			m_ui_->status_bar->showMessage("Loading image: " + image_handle);
-			m_workstation_->openFile(image_handle);
-			RequiresTabSwitch(m_workstation_tab_id_);
-			m_ui_->status_bar->showMessage("Finished loading image: " + image_handle);
+			m_ui_->status_bar->showMessage("Loading image: 0%");
+			auto image_loading([this, bar=m_ui_->status_bar, bar_access=&m_status_bar_access_, workstation=m_workstation_, tab_id= m_workstation_tab_id_](const boost::filesystem::path& filepath)
+			{
+				QString filepath_string(QString::fromStdString(filepath.string()));
+				bar_access->lock();
+				bar->showMessage("Finished loading image: " + filepath_string);
+				bar_access->unlock();
+				workstation->openFile(filepath_string);
+				this->RequiresTabSwitch(tab_id);
+			});
+
+			auto acquisition_tracking([bar=m_ui_->status_bar, bar_access=&m_status_bar_access_](const uint8_t progress)
+			{
+				bar_access->lock();
+				if (bar->currentMessage().endsWith("%"));
+				{
+					bar->showMessage("Loading image: " + QString(std::to_string(progress).data()) + "%");
+				}
+				bar_access->unlock();
+			});
+
+			m_data_acquisition_->GetImageFile(image_index, image_loading, acquisition_tracking);
 		}
 	}
 
@@ -591,6 +628,14 @@ namespace ASAP::GUI
 
 	void WorklistWindow::OnSelectExternalSource_(bool checked)
 	{
+		ExternalSourceDialog* dialog = new ExternalSourceDialog(this);
+		dialog->exec();
+		ExternalSourceDialog::SourceDialogResults results(dialog->GetLoginDetails());
 
+		std::unordered_map<std::string, std::string> params;
+		params.insert({ "token", results.token.toUtf8().constData() });
+		params.insert({ "ignore_certificate", std::to_string(results.ignore_certificate) });
+
+		SetDataSource(std::string(results.location.toUtf8().constData()), params);
 	}
 }

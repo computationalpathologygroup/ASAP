@@ -18,22 +18,22 @@ namespace ASAP::GUI
 {
 	struct WorklistWindowSettings
 	{
-		std::string				source_location;
+		std::string				current_source;
 		std::deque<std::string>	previous_sources;
 	};
 
-	class WorklistWindow : public CompositeChild // public QMainWindow,
+	class WorklistWindow : public CompositeChild
 	{
 		Q_OBJECT
 
 		public:
-			explicit WorklistWindow(QWidget* parent = 0);
+			explicit WorklistWindow(QWidget* parent = nullptr);
 			~WorklistWindow(void);
 
 			void AttachWorkstation(ASAP_Window& workstation, const int tab_id);
 			WorklistWindowSettings GetStandardSettings(void);
 
-			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> additional_params);
+			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> parameters);
 			void SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model);
 			void SetPatientsItems(const Data::DataTable& items, QStandardItemModel* model);
 			void SetStudyItems(const Data::DataTable& items, QStandardItemModel* model);
@@ -52,6 +52,7 @@ namespace ASAP::GUI
 			bool													m_stop_loading_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_loading_access_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_switch_access_;
+			std::mutex												m_status_bar_access_;
 			Misc::TemporaryDirectoryTracker							m_storage_directory_;
 			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
 			ASAP_Window*											m_workstation_; // Todo: Clean up or perhaps combine in struct
@@ -68,6 +69,9 @@ namespace ASAP::GUI
 			void StopThumbnailLoading_(void);
 			void UpdatePreviousSources_(void);
 			void UpdateSourceViews_(void);
+
+			std::string SerializeSource_(const std::string& location, const std::unordered_map<std::string, std::string>& parameters);
+			std::pair<std::string, std::unordered_map<std::string, std::string>> DeserializeSource_(const std::string& source);
 
 			void SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);

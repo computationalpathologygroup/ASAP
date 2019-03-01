@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "WorklistDataAcquisitionInterface.h"
+#include "../Misc/TemporaryDirectoryTracker.h"
 
 namespace ASAP::Data
 {
