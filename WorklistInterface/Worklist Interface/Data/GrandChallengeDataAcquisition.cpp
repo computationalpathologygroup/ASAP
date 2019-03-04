@@ -105,7 +105,12 @@ namespace ASAP::Data
 	size_t GrandChallengeDataAcquisition::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		std::wstringstream url;
-		url << L"/" << m_rest_uri_.patient_addition << L"?worklist=" << Misc::StringToWideString(worklist_index);
+		url << L"/" << m_rest_uri_.patient_addition;
+		
+		if (!worklist_index.empty())
+		{
+			url << L"?worklist=" << Misc::StringToWideString(worklist_index);
+		}
 
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
