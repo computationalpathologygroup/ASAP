@@ -22,6 +22,41 @@ namespace ASAP::Serialization::JSON
 		throw std::runtime_error("Tag not found.");
 	}
 
+	int ParseJsonFieldsToVector(const web::http::http_response& response, const std::vector<std::string> fields, std::vector<std::vector<std::string>>& results)
+	{
+		std::vector<std::wstring> converted_fields(Misc::StringsToWideStrings(fields));
+
+		int error_code = 0;
+		try
+		{
+			web::json::value json_response = response.extract_json().get();;
+			try
+			{
+				for (size_t obj = 0; obj < json_response.size(); ++obj)
+				{
+					auto object = json_response[obj];
+					results.push_back(std::vector<std::string>());
+
+					for (const std::wstring& field : converted_fields)
+					{
+						results.back().push_back(Misc::WideStringToString(object.at(field).serialize()));
+					}
+				}
+			}
+			catch (const std::exception& e)
+			{
+				// Indicates a parsing error.
+				error_code = -1;
+			}
+		}
+		catch (const web::http::http_exception& e)
+		{
+			error_code = e.error_code().value();
+		}
+
+		return error_code;
+	}
+
 	int ParseJsonResponseToRecords(const web::http::http_response& response, Data::DataTable& table)
 	{
 		int error_code = 0;
