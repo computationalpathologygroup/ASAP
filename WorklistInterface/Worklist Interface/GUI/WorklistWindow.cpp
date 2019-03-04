@@ -103,7 +103,13 @@ namespace ASAP::GUI
 
 	void WorklistWindow::SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model)
 	{
-		model->removeRows(0, model->rowCount());
+		if (model->rowCount() == 0)
+		{
+			QStandardItem* model_item(new QStandardItem("All"));
+			model->setItem(m_worklist_model_->rowCount(), 0, model_item);
+		}
+
+		model->removeRows(1, model->rowCount());
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
 			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{ "id", "title" }));
@@ -331,6 +337,7 @@ namespace ASAP::GUI
 				m_ui_->view_worklists->setVisible(true);
 				m_ui_->view_patients->setVisible(true);
 				m_ui_->view_studies->setVisible(true);
+				m_ui_->button_create_worklist->setVisible(true);
 				break;
 			default:
 				m_ui_->label_worklists->setVisible(false);
@@ -339,6 +346,7 @@ namespace ASAP::GUI
 				m_ui_->view_worklists->setVisible(false);
 				m_ui_->view_patients->setVisible(false);
 				m_ui_->view_studies->setVisible(false);
+				m_ui_->button_create_worklist->setVisible(false);
 				break;
 		}
 	}
@@ -637,13 +645,17 @@ namespace ASAP::GUI
 	{
 		ExternalSourceDialog* dialog = new ExternalSourceDialog(this);
 		dialog->exec();
-		ExternalSourceDialog::SourceDialogResults results(dialog->GetLoginDetails());
 
-		std::unordered_map<std::string, std::string> params;
-		params.insert({ "token", results.token.toUtf8().constData() });
-		params.insert({ "ignore_certificate", std::to_string(results.ignore_certificate) });
+		if (dialog->HasValidCredentials())
+		{
+			ExternalSourceDialog::SourceDialogResults results(dialog->GetLoginDetails());
 
-		SetDataSource(std::string(results.location.toUtf8().constData()), params);
+			std::unordered_map<std::string, std::string> params;
+			params.insert({ "token", results.token.toUtf8().constData() });
+			params.insert({ "ignore_certificate", std::to_string(results.ignore_certificate) });
+
+			SetDataSource(std::string(results.location.toUtf8().constData()), params);
+		}
 	}
 
 	void WorklistWindow::OnOpenImage_(QString path)
