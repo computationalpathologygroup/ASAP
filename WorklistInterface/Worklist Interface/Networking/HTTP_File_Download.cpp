@@ -4,7 +4,7 @@
 
 namespace ASAP::Networking
 {
-	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::function<void(float)> observer)
+	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::function<void(uint8_t)> observer)
 	{
 		// Fails if the path doesn't point towards a directory.
 		if (!boost::filesystem::is_directory(output_directory))
@@ -45,7 +45,8 @@ namespace ASAP::Networking
 					if (stream.is_open())
 					{
 						// Starts monitoring thread.
-						std::thread thread(StartMonitorThread(length, stream, observer));
+						bool finished = false;
+						std::thread thread(StartMonitorThread(finished, length, stream, observer));
 						response.body().read_to_end(stream.streambuf()).wait();
 						stream.close().wait();
 						
@@ -116,9 +117,9 @@ namespace ASAP::Networking
 			}
 		}
 
-		std::thread StartMonitorThread(const size_t length, concurrency::streams::ostream& stream, std::function<void(float)>& observer)
+		std::thread StartMonitorThread(const bool& stop, const size_t length, concurrency::streams::ostream& stream, std::function<void(uint8_t)>& observer)
 		{
-			return std::thread([length, &stream, observer](void)
+			return std::thread([&stop, length, &stream, observer](void)
 			{
 				// If there is no observer, we don't need to report progress.
 				if (observer)
@@ -128,7 +129,7 @@ namespace ASAP::Networking
 					{
 						size_t percentile	= (length / 100);
 						size_t progress		= stream.tell();
-						while (progress < length)
+						while (!stop && progress < length)
 						{
 							observer(static_cast<float>(progress / percentile));
 							std::this_thread::sleep_for(std::chrono::seconds(1));
