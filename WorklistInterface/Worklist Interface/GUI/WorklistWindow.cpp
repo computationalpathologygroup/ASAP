@@ -78,7 +78,7 @@ namespace ASAP::GUI
 				m_settings_.current_source = SerializeSource_(source_path, parameters);
 
 				// Adds the new source to the previous sources.
-				auto already_added(std::find(m_settings_.previous_sources.begin(), m_settings_.previous_sources.end(), source_path));
+				auto already_added(std::find(m_settings_.previous_sources.begin(), m_settings_.previous_sources.end(), m_settings_.current_source));
 				if (already_added != m_settings_.previous_sources.end())
 				{
 					m_settings_.previous_sources.erase(already_added);
@@ -87,7 +87,7 @@ namespace ASAP::GUI
 				{
 					m_settings_.previous_sources.pop_back();
 				}
-				m_settings_.previous_sources.push_front(source_path);
+				m_settings_.previous_sources.push_front(m_settings_.current_source);
 
 				UpdatePreviousSources_();
 				UpdateSourceViews_();
@@ -263,15 +263,17 @@ namespace ASAP::GUI
 
 		for (const std::string& prev_source : m_settings_.previous_sources)
 		{
-			m_history_actions_.push_back(std::unique_ptr<QAction>(new QAction(QString(prev_source.data()), this)));
+			std::pair<std::string, std::unordered_map<std::string, std::string>> source_parameters(DeserializeSource_(prev_source));
+
+			m_history_actions_.push_back(std::unique_ptr<QAction>(new QAction(QString(source_parameters.first.data()), this)));
 			m_ui_->menu_history->addAction(m_history_actions_.back().get());
 
 			connect(m_history_actions_.back().get(),
 				&QAction::triggered,
 				this,
-				[action = m_history_actions_.back().get(), this](bool checked)
+				[action = m_history_actions_.back().get(), this, source_parameters](bool checked)
 				{
-					this->SetDataSource(std::string(action->text().toUtf8().constData()), std::unordered_map<std::string, std::string>());
+					this->SetDataSource(source_parameters.first, source_parameters.second);
 				});
 		}
 	}

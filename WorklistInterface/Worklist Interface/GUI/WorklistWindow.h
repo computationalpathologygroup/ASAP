@@ -22,6 +22,7 @@ namespace ASAP::GUI
 		std::deque<std::string>	previous_sources;
 	};
 
+	// TODO: Decouple source management from worklist window
 	class WorklistWindow : public CompositeChild
 	{
 		Q_OBJECT
