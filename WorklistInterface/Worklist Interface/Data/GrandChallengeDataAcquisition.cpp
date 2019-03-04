@@ -231,7 +231,6 @@ namespace ASAP::Data
 				}
 				catch (...)
 				{
-					receiver(boost::filesystem::path());
 				}
 
 				// TODO: implement method to reveal errors to user.
@@ -291,5 +290,25 @@ namespace ASAP::Data
 
 		// The image table supplies the OPTIONS request differently, hence why it'll be treated differently.
 		m_schemas_[TableEntry::IMAGE] = DataTable({ "id", "title" });
+
+		// Defines which fields the user should be able to see. Only required for Patient and Study records
+		// TODO: Clean this up
+		std::set<std::string> patient_headers(m_schemas_[TableEntry::PATIENT].GetColumnNames());
+		for (const std::string& header : patient_headers)
+		{
+			if (header != "name")
+			{
+				m_schemas_[TableEntry::PATIENT].SetColumnAsInvisible(header);
+			}
+		}
+
+		std::set<std::string> study_headers(m_schemas_[TableEntry::STUDY].GetColumnNames());
+		for (const std::string& header : study_headers)
+		{
+			if (header != "name")
+			{
+				m_schemas_[TableEntry::STUDY].SetColumnAsInvisible(header);
+			}
+		}
 	}
 }
