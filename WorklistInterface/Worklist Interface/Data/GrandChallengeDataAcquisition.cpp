@@ -47,10 +47,7 @@ namespace ASAP::Data
 		web::http::http_request set_request(web::http::methods::GET);
 		set_request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition);
 
-		Networking::Django_Connection* connection = &m_connection_;
-		DataTable* worklist_schema					= &m_schemas_[TableEntry::WORKLIST];		
-		GrandChallengeURLInfo* info					= &m_rest_uri_;
-		return m_connection_.QueueRequest(set_request, [connection, receiver, worklist_schema, info](web::http::http_response& response)
+		return m_connection_.QueueRequest(set_request, [connection=&m_connection_, receiver, worklist_schema=&m_schemas_[TableEntry::WORKLIST], info=&m_rest_uri_](web::http::http_response& response)
 		{
 			// If there is a set, acquire worklists.
 			web::json::value set_json(response.extract_json().get());
@@ -73,16 +70,17 @@ namespace ASAP::Data
 			// If there's no set, only create one.
 			else
 			{
-			/*	std::wstringstream body;
-				body << L"{ "
-
 				web::http::http_request set_creation(web::http::methods::POST);
-				set_creation.set_request_uri(L"/" + info->worklist_set_addition + L"/");
-				set_creation.set_body()
-				
-				
-				
-				, info->worklist_set_addition, L"application/json");*/
+				set_creation.set_request_uri(L"/" + info->worklist_set_addition);
+				set_creation.set_body(L"{ \"title\": \"user worklists\" }", L"application/json");
+
+				connection->QueueRequest(set_creation, [worklist_schema, receiver](web::http::http_response& response)
+				{
+					std::wstring r = response.to_string();
+
+					DataTable worklists(*worklist_schema);
+					receiver(worklists, 0);
+				});
 			}
 		});
 	}
