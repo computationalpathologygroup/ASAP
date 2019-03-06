@@ -16,22 +16,17 @@ namespace ASAP::Data
 		return WorklistDataAcquisitionInterface::SourceType::FILELIST;
 	}
 
-	size_t DirectoryDataAcquisition::AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer)
+	size_t DirectoryDataAcquisition::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
 	{
 		return 0;
 	}
 
-	size_t DirectoryDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer)
+	size_t DirectoryDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
 	{
 		return 0;
 	}
 
 	size_t DirectoryDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
-	{
-		return 0;
-	}
-
-	size_t DirectoryDataAcquisition::GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
 		return 0;
 	}

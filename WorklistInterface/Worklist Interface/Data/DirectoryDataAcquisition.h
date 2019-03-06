@@ -12,11 +12,10 @@ namespace ASAP::Data
 
 			WorklistDataAcquisitionInterface::SourceType GetSourceType(void);
 
-			size_t AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer);
-			size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer);
+			size_t AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer);
+			size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer);
 
 			size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver);
-			size_t GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver);

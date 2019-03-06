@@ -47,7 +47,7 @@ namespace ASAP::Data
 			/// <param name="title">The title for the new worklist. Must be unique.</param>
 			/// <param name="observer">A lamba that accepts a boolean which details whether or not the task was succesful.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer) = 0;
+			virtual size_t AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer) = 0;
 
 			/// <summary>
 			/// Updates a worklist with a new name or list of images.
@@ -57,7 +57,7 @@ namespace ASAP::Data
 			/// <param name="images">A vector containing the ids of the images the worklist should list.</param>
 			/// <param name="observer">A lamba that accepts a boolean which details whether or not the task was succesful.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer) = 0;
+			virtual size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer) = 0;
 
 			/// <summary>
 			/// Acquires the worklist records in a asynchronous manner, offering them to the receiver lambda.
@@ -65,12 +65,6 @@ namespace ASAP::Data
 			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
 			virtual size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver) = 0;
-			/// <summary>
-			/// Acquires all available patient records and offers these to the lambda.
-			/// </summary>
-			/// <param name="receiver">A lamba that accepts a DataTable, which holds the requested items and an integer that describes potential errors.</param>
-			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver) = 0;
 			/// <summary>
 			/// Acquires the patient records in a asynchronous manner, offering them to the receiver lambda.
 			/// </summary>
