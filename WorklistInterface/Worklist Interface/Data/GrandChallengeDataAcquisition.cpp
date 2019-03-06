@@ -17,6 +17,7 @@ namespace ASAP::Data
 		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4), m_temporary_directory_(temp_dir)
 	{
 		InitializeTables_();
+		AcquireWorklistSet_();
 	}
 
 	WorklistDataAcquisitionInterface::SourceType GrandChallengeDataAcquisition::GetSourceType(void)
@@ -29,74 +30,37 @@ namespace ASAP::Data
 		return { base_url, L"worklists/list/", L"worklists/set/", L"patients/patient/", L"studies/study/", L"api/v1/cases/images/" };
 	}
 
-	size_t GrandChallengeDataAcquisition::AddWorklistRecord(const std::string& title, std::function<void(const bool)>& observer)
+	size_t GrandChallengeDataAcquisition::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
 	{
-		web::http::http_request request(web::http::methods::GET);
+		std::wstringstream body;
+		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"set\":\"" << m_worklist_set_id_ << "\", \"images\": [] }";
 
+		web::http::http_request request(web::http::methods::POST);
+		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
+		request.set_body(body.str(), L"application/json");
 
-		return 0;
+		return m_connection_.QueueRequest(request, [observer](web::http::http_response& response)
+		{
+			observer(response.status_code() == web::http::status_codes::Created);
+		});
 	}
 
-	size_t GrandChallengeDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, std::function<void(const bool)>& observer)
+	size_t GrandChallengeDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
 	{
 		return 0;
 	}
 
 	size_t GrandChallengeDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
-		web::http::http_request set_request(web::http::methods::GET);
-		set_request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition);
-
-		return m_connection_.QueueRequest(set_request, [connection=&m_connection_, receiver, worklist_schema=&m_schemas_[TableEntry::WORKLIST], info=&m_rest_uri_](web::http::http_response& response)
-		{
-			// If there is a set, acquire worklists.
-			web::json::value set_json(response.extract_json().get());
-			if (set_json.size() > 0)
-			{
-				web::http::http_request list_request(web::http::methods::GET);
-				list_request.set_request_uri(L"/" + info->worklist_addition);
-
-				DataTable worklists(*worklist_schema);
-				try
-				{
-					web::http::http_response list_response(connection->SendRequest(list_request).get());
-					receiver(worklists, Serialization::JSON::ParseJsonResponseToRecords(list_response, worklists));
-				}
-				catch (...)
-				{
-					receiver(worklists, -1);
-				}
-			}
-			// If there's no set, only create one.
-			else
-			{
-				web::http::http_request set_creation(web::http::methods::POST);
-				set_creation.set_request_uri(L"/" + info->worklist_set_addition);
-				set_creation.set_body(L"{ \"title\": \"user worklists\" }", L"application/json");
-
-				connection->QueueRequest(set_creation, [worklist_schema, receiver](web::http::http_response& response)
-				{
-					std::wstring r = response.to_string();
-
-					DataTable worklists(*worklist_schema);
-					receiver(worklists, 0);
-				});
-			}
-		});
-	}
-
-	size_t GrandChallengeDataAcquisition::GetPatientRecords(const std::function<void(DataTable&, const int)>& receiver)
-	{
 		web::http::http_request request(web::http::methods::GET);
-		request.set_request_uri(L"/" + m_rest_uri_.patient_addition);
+		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
 
-		DataTable* patient_schema = &m_schemas_[TableEntry::PATIENT];
-		return m_connection_.QueueRequest(request, [receiver, patient_schema](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, worklist_schema=&m_schemas_[TableEntry::WORKLIST]](web::http::http_response& response)
 		{
 			// Parses the worklist sets into a data table.
-			DataTable patients(*patient_schema);
-			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, patients);
-			receiver(patients, error_code);
+			DataTable worklists(*worklist_schema);
+			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, worklists);
+			receiver(worklists, error_code);
 		});
 	}
 
@@ -113,8 +77,7 @@ namespace ASAP::Data
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 
-		DataTable* patient_schema = &m_schemas_[TableEntry::PATIENT];
-		return m_connection_.QueueRequest(request,[receiver, patient_schema](web::http::http_response& response)
+		return m_connection_.QueueRequest(request,[receiver, patient_schema=&m_schemas_[TableEntry::PATIENT]](web::http::http_response& response)
 		{
 			// Parses the worklist sets into a data table.
 			DataTable patients(*patient_schema);
@@ -131,8 +94,7 @@ namespace ASAP::Data
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 
-		DataTable* study_schema = &m_schemas_[TableEntry::STUDY];
-		return m_connection_.QueueRequest(request, [receiver, study_schema](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [receiver, study_schema=&m_schemas_[TableEntry::STUDY]](web::http::http_response& response)
 		{
 			// Parses the worklist sets into a data table.
 			DataTable studies(*study_schema);
@@ -188,18 +150,15 @@ namespace ASAP::Data
 
 	size_t GrandChallengeDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
-		std::wstringstream url;
+		/*std::wstringstream url;
 		url << L"/" << m_rest_uri_.image_addition << L"/" << Misc::StringToWideString(image_index) << L"/";
 
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
-
-		DataTable* image_schema = &m_schemas_[TableEntry::IMAGE];
-		return m_connection_.QueueRequest(request, [image_schema, receiver, observer](web::http::http_response& response)
-		{
-			receiver(boost::filesystem::path());
-			observer(100);
-		});
+		*/
+		receiver(boost::filesystem::path());
+		observer(100);
+		return 0;
 	}
 
 	size_t GrandChallengeDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
@@ -268,6 +227,36 @@ namespace ASAP::Data
 	void GrandChallengeDataAcquisition::CancelTask(size_t id)
 	{
 		m_connection_.CancelTask(id);
+	}
+
+	void GrandChallengeDataAcquisition::AcquireWorklistSet_(void)
+	{
+		web::http::http_request set_request(web::http::methods::GET);
+		set_request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition);
+
+		m_connection_.SendRequest(set_request).then([connection=&m_connection_, info=&m_rest_uri_, &set_id=m_worklist_set_id_](web::http::http_response& response)
+		{
+			// If there is a set, acquire worklists.
+			web::json::value set_json(response.extract_json().get());
+			if (set_json.size() == 0)
+			{
+				web::http::http_request set_creation(web::http::methods::POST);
+				set_creation.set_request_uri(L"/" + info->worklist_set_addition);
+				set_creation.set_body(L"{ \"title\": \"user worklists\" }", L"application/json");
+
+				connection->SendRequest(set_creation).then([&set_id](web::http::http_response& response)
+				{
+					web::json::value set_json = response.extract_json().get();
+					set_id = set_json.at(L"id").to_string();
+				}).wait();
+			}
+			else
+			{
+				set_id = set_json.as_array()[0].at(L"id").to_string();
+			}
+
+			set_id.erase(std::remove(set_id.begin(), set_id.end(), '"'), set_id.end());
+		}).wait();
 	}
 
 	void GrandChallengeDataAcquisition::InitializeTables_(void)

@@ -49,6 +49,7 @@ namespace ASAP::GUI
 		signals:
 			void RequestStatusBarUpdate(const QString& message);
 			void RequestOpenImage(const QString& filepath);
+			void RequestWorklistRefresh(void);
 
 		private:
 			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
@@ -96,7 +97,9 @@ namespace ASAP::GUI
 			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
 
+			void OnCreateWorklist_(void);
 			void OnOpenImage_(QString path);
+			void OnWorklistRefresh(void);
 	};
 }
 #endif // __ASAP_GUI_WORKLISTDATAACQUISITIONINTERFACE__

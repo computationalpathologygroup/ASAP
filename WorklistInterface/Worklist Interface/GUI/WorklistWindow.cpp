@@ -6,6 +6,7 @@
 
 #include <boost/bind.hpp>
 #include <qfiledialog.h>
+#include <qinputdialog.h>
 #include <qmessagebox.h>
 #include <QtConcurrent\qtconcurrentrun.h>
 
@@ -316,14 +317,7 @@ namespace ASAP::GUI
 				SetHeaders_(m_data_acquisition_->GetPatientHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_patients_model_, m_ui_->view_patients);
 				SetHeaders_(m_data_acquisition_->GetStudyHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_studies_model_, m_ui_->view_studies);
 
-				QStandardItemModel* worklist_model = m_worklist_model_;
-				m_data_acquisition_->GetWorklistRecords([this, worklist_model](Data::DataTable& table, int error)
-				{
-					if (error == 0)
-					{
-						this->SetWorklistItems(table, worklist_model);
-					}
-				});
+				this->RequestWorklistRefresh();
 			}
 		}
 
@@ -448,6 +442,11 @@ namespace ASAP::GUI
 			this,
 			SLOT(OnImageSelect_(QModelIndex)));
 
+		connect(m_ui_->button_create_worklist,
+			&QPushButton::clicked,
+			this,
+			&WorklistWindow::OnCreateWorklist_);
+
 		connect(m_ui_->action_open_file,
 			&QAction::triggered,
 			this,
@@ -472,6 +471,11 @@ namespace ASAP::GUI
 			&WorklistWindow::RequestOpenImage,
 			this,
 			&WorklistWindow::OnOpenImage_);
+
+		connect(this,
+			&WorklistWindow::RequestWorklistRefresh,
+			this,
+			&WorklistWindow::OnWorklistRefresh);		
 	}
 
 	void WorklistWindow::MoveImageSelectionLeft(void)
@@ -658,10 +662,37 @@ namespace ASAP::GUI
 		}
 	}
 
+	void WorklistWindow::OnCreateWorklist_(void)
+	{
+		bool succesful;
+		QString worklist = QInputDialog::getText(this, tr("Create New Worklist"), tr("Worklist title:"), QLineEdit::Normal, "", &succesful);
+		if (succesful && !worklist.isEmpty())
+		{
+			m_data_acquisition_->AddWorklistRecord(std::string(worklist.toUtf8().constData()), [this](const bool succesful)
+			{
+				if (succesful)
+				{
+					this->RequestWorklistRefresh();
+				}
+			});
+		}
+	}
+
 	void WorklistWindow::OnOpenImage_(QString path)
 	{
 		this->UpdateStatusBar("Loaded file: " + path);
 		m_workstation_->openFile(path);
 		RequiresTabSwitch(m_workstation_tab_id_);
+	}
+
+	void WorklistWindow::OnWorklistRefresh(void)
+	{
+		m_data_acquisition_->GetWorklistRecords([this, worklist_model = m_worklist_model_](Data::DataTable& table, int error)
+		{
+			if (error == 0)
+			{
+				this->SetWorklistItems(table, worklist_model);
+			}
+		});
 	}
 }
