@@ -73,7 +73,7 @@
        <set>QAbstractItemView::EditKeyPressed</set>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DropOnly</enum>
+       <enum>QAbstractItemView::NoDragDrop</enum>
       </property>
       <property name="rootIsDecorated">
        <bool>true</bool>
@@ -135,7 +135,7 @@
        <set>QAbstractItemView::EditKeyPressed</set>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DragOnly</enum>
+       <enum>QAbstractItemView::DragDrop</enum>
       </property>
       <property name="defaultDropAction">
        <enum>Qt::IgnoreAction</enum>

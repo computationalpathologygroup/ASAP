@@ -96,7 +96,7 @@ public:
         view_worklists->setMaximumSize(QSize(300, 16777215));
         view_worklists->setAcceptDrops(true);
         view_worklists->setEditTriggers(QAbstractItemView::EditKeyPressed);
-        view_worklists->setDragDropMode(QAbstractItemView::DropOnly);
+        view_worklists->setDragDropMode(QAbstractItemView::NoDragDrop);
         view_worklists->setRootIsDecorated(true);
         view_worklists->setHeaderHidden(true);
 
@@ -127,7 +127,7 @@ public:
         sizePolicy.setHeightForWidth(view_images->sizePolicy().hasHeightForWidth());
         view_images->setSizePolicy(sizePolicy);
         view_images->setEditTriggers(QAbstractItemView::EditKeyPressed);
-        view_images->setDragDropMode(QAbstractItemView::DragOnly);
+        view_images->setDragDropMode(QAbstractItemView::DragDrop);
         view_images->setDefaultDropAction(Qt::IgnoreAction);
         view_images->setIconSize(QSize(200, 200));
         view_images->setResizeMode(QListView::Adjust);
