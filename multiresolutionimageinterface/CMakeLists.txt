@@ -70,7 +70,7 @@ endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 add_library(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
 target_include_directories(multiresolutionimageinterface PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${PUGIXML_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${TIFF_INCLUDE_DIR})
 target_link_libraries(multiresolutionimageinterface PUBLIC core PRIVATE jpeg2kcodec libtiff Boost::disable_autolinking Boost::thread)
-target_compile_definitions(multiresolutionimageinterface PRIVATE HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT PUGIXML_HEADER_ONLY)
+target_compile_definitions(multiresolutionimageinterface PRIVATE PUGIXML_HEADER_ONLY)
 generate_export_header(multiresolutionimageinterface)
 set_target_properties(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
 
