@@ -1,21 +1,22 @@
-#ifndef __ASAP_DATA_FILELISTDATAACQUISITION__
-#define __ASAP_DATA_FILELISTDATAACQUISITION__
+#ifndef __ASAP_DATA_FILELISTSOURCE__
+#define __ASAP_DATA_FILELISTSOURCE__
 
 #include <string>
 
-#include "WorklistDataAcquisitionInterface.h"
+#include "WorklistSourceInterface.h"
 
 namespace ASAP::Data
 {
-	class FilelistDataAcquisition : public WorklistDataAcquisitionInterface
+	class FilelistSource : public WorklistSourceInterface
 	{
 		public:
-			FilelistDataAcquisition(const std::string filepath);
+			FilelistSource(const std::string filepath);
 
-			WorklistDataAcquisitionInterface::SourceType GetSourceType(void);
+			WorklistSourceInterface::SourceType GetSourceType(void);
 
 			size_t AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer);
 			size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer);
+			size_t DeleteWorklistRecord(const std::string& worklist_index, const std::function<void(const bool)>& observer);
 
 			size_t GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver);
 			size_t GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver);
@@ -36,4 +37,4 @@ namespace ASAP::Data
 			DataTable GetImageFilelist_(const std::string filepath);
 	};
 }
-#endif // __ASAP_DATA_FILELISTDATAACQUISITION__
+#endif // __ASAP_DATA_FILELISTSOURCE__

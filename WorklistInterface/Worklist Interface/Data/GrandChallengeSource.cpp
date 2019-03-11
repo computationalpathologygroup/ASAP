@@ -1,4 +1,4 @@
-#include "GrandChallengeDataAcquisition.h"
+#include "GrandChallengeSource.h"
 
 #include <algorithm>
 #include <codecvt>
@@ -13,24 +13,24 @@
 
 namespace ASAP::Data
 {
-	GrandChallengeDataAcquisition::GrandChallengeDataAcquisition(const GrandChallengeURLInfo uri_info, Misc::TemporaryDirectoryTracker& temp_dir, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config)
+	GrandChallengeSource::GrandChallengeSource(const GrandChallengeURLInfo uri_info, Misc::TemporaryDirectoryTracker& temp_dir, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config)
 		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4), m_temporary_directory_(temp_dir)
 	{
 		InitializeTables_();
 		AcquireWorklistSet_();
 	}
 
-	WorklistDataAcquisitionInterface::SourceType GrandChallengeDataAcquisition::GetSourceType(void)
+	WorklistSourceInterface::SourceType GrandChallengeSource::GetSourceType(void)
 	{
-		return WorklistDataAcquisitionInterface::SourceType::FULL_WORKLIST;
+		return WorklistSourceInterface::SourceType::FULL_WORKLIST;
 	}
 
-	GrandChallengeURLInfo GrandChallengeDataAcquisition::GetStandardURI(const std::wstring base_url)
+	GrandChallengeURLInfo GrandChallengeSource::GetStandardURI(const std::wstring base_url)
 	{
 		return { base_url, L"worklists/list/", L"worklists/set/", L"patients/patient/", L"studies/study/", L"api/v1/cases/images/" };
 	}
 
-	size_t GrandChallengeDataAcquisition::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
+	size_t GrandChallengeSource::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
 	{
 		std::wstringstream body;
 		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"set\":\"" << m_worklist_set_id_ << "\", \"images\": [] }";
@@ -45,12 +45,48 @@ namespace ASAP::Data
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
+	size_t GrandChallengeSource::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
 	{
-		return 0;
+		std::wstringstream body;
+		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"set\":\"" << m_worklist_set_id_ << "\", \"images\": [ ";
+
+		for (size_t i = 0; i < images.size(); ++i)
+		{
+			body << L"\"" << Misc::StringToWideString(images[i]) << L"\"";
+			if (i < images.size() - 1)
+			{
+					body << L",";
+			}
+		}
+
+		std::wstringstream url;
+		url << L"/" << m_rest_uri_.worklist_addition << Misc::StringToWideString(worklist_index) << L"/";
+
+		web::http::http_request request(web::http::methods::POST);
+		request.set_request_uri(url.str());
+		request.set_body(body.str(), L"application/json");
+
+		return m_connection_.QueueRequest(request, [observer](web::http::http_response& response)
+		{
+			observer(response.status_code() == web::http::status_codes::OK);
+		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
+	size_t GrandChallengeSource::DeleteWorklistRecord(const std::string& worklist_index, const std::function<void(const bool)>& observer)
+	{
+		std::wstringstream url;
+		url << L"/" << m_rest_uri_.worklist_addition << Misc::StringToWideString(worklist_index) << L"/";
+
+		web::http::http_request request(web::http::methods::DEL);
+		request.set_request_uri(url.str());
+
+		return m_connection_.QueueRequest(request, [observer](web::http::http_response& response)
+		{
+			observer(response.status_code() == web::http::status_codes::OK);
+		});
+	}
+
+	size_t GrandChallengeSource::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
@@ -64,7 +100,7 @@ namespace ASAP::Data
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t GrandChallengeSource::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		std::wstringstream url;
 		url << L"/" << m_rest_uri_.patient_addition;
@@ -86,7 +122,7 @@ namespace ASAP::Data
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t GrandChallengeSource::GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
 		std::wstringstream url;
 		url << L"/" << m_rest_uri_.study_addition << L"?patient=" << Misc::StringToWideString(patient_index);
@@ -103,7 +139,7 @@ namespace ASAP::Data
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
+	size_t GrandChallengeSource::GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, int)>& receiver)
 	{
 		std::wstringstream url;
 		url << L"/" << m_rest_uri_.image_addition;
@@ -148,7 +184,7 @@ namespace ASAP::Data
 		});
 	}
 
-	size_t GrandChallengeDataAcquisition::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
+	size_t GrandChallengeSource::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
 		/*std::wstringstream url;
 		url << L"/" << m_rest_uri_.image_addition << L"/" << Misc::StringToWideString(image_index) << L"/";
@@ -161,7 +197,7 @@ namespace ASAP::Data
 		return 0;
 	}
 
-	size_t GrandChallengeDataAcquisition::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
+	size_t GrandChallengeSource::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
 	{
 		std::string sanitized_index(image_index);
 		sanitized_index.erase(std::remove(sanitized_index.begin(), sanitized_index.end(), '"'), sanitized_index.end());
@@ -204,32 +240,32 @@ namespace ASAP::Data
 		});
 	}
 
-	std::set<std::string> GrandChallengeDataAcquisition::GetWorklistHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeSource::GetWorklistHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return m_schemas_[TableEntry::WORKLIST].GetColumnNames(selection);
 	}
 
-	std::set<std::string> GrandChallengeDataAcquisition::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeSource::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return m_schemas_[TableEntry::PATIENT].GetColumnNames(selection);
 	}
 
-	std::set<std::string> GrandChallengeDataAcquisition::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeSource::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return m_schemas_[TableEntry::STUDY].GetColumnNames(selection);
 	}
 
-	std::set<std::string> GrandChallengeDataAcquisition::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> GrandChallengeSource::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
 	{
 		return m_schemas_[TableEntry::IMAGE].GetColumnNames(selection);
 	}
 
-	void GrandChallengeDataAcquisition::CancelTask(size_t id)
+	void GrandChallengeSource::CancelTask(size_t id)
 	{
 		m_connection_.CancelTask(id);
 	}
 
-	void GrandChallengeDataAcquisition::AcquireWorklistSet_(void)
+	void GrandChallengeSource::AcquireWorklistSet_(void)
 	{
 		web::http::http_request set_request(web::http::methods::GET);
 		set_request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition);
@@ -259,7 +295,7 @@ namespace ASAP::Data
 		}).wait();
 	}
 
-	void GrandChallengeDataAcquisition::InitializeTables_(void)
+	void GrandChallengeSource::InitializeTables_(void)
 	{
 		std::vector<std::wstring> table_url_addition
 		({

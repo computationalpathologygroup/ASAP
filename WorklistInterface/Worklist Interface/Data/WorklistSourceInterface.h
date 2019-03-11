@@ -1,5 +1,5 @@
-#ifndef __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
-#define __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
+#ifndef __ASAP_DATA_WORKLISTSOURCEINTERFACE__
+#define __ASAP_DATA_WORKLISTSOURCEINTERFACE__
 
 #include <functional>
 
@@ -21,7 +21,7 @@ namespace ASAP::Data
 	/// If a source isn't required to deal with asynchronous actions, it can simply ignore the
 	/// implementation of the CancelTask method.
 	/// </summary>
-	class WorklistDataAcquisitionInterface
+	class WorklistSourceInterface
 	{
 		public:
 			/// <summary>
@@ -58,6 +58,8 @@ namespace ASAP::Data
 			/// <param name="observer">A lamba that accepts a boolean which details whether or not the task was succesful.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
 			virtual size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer) = 0;
+
+			virtual size_t DeleteWorklistRecord(const std::string& worklist_index, const std::function<void(const bool)>& observer) = 0;
 
 			/// <summary>
 			/// Acquires the worklist records in a asynchronous manner, offering them to the receiver lambda.
@@ -135,4 +137,4 @@ namespace ASAP::Data
 			void CancelTask(size_t id);
 	};
 }
-#endif // __ASAP_DATA_WORKLISTDATAACQUISITIONINTERFACE__
+#endif // __ASAP_DATA_WORKLISTSOURCEINTERFACE__
