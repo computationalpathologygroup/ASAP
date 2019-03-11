@@ -10,18 +10,12 @@
 
 #include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
-#include "Data/WorklistDataAcquisitionInterface.h"
+#include "Data/SourceProxy.h"
 #include "Misc/TemporaryDirectoryTracker.h"
 #include "ASAP/ASAP_Window.h"
 
 namespace ASAP::GUI
 {
-	struct WorklistWindowSettings
-	{
-		std::string				current_source;
-		std::deque<std::string>	previous_sources;
-	};
-
 	// TODO: Decouple source management from worklist window
 	class WorklistWindow : public CompositeChild
 	{
@@ -32,9 +26,9 @@ namespace ASAP::GUI
 			~WorklistWindow(void);
 
 			void AttachWorkstation(ASAP_Window& workstation, const int tab_id);
-			WorklistWindowSettings GetStandardSettings(void);
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> parameters);
+			void SetDataSource(const std::string& source);
 			void SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model);
 			void SetPatientsItems(const Data::DataTable& items, QStandardItemModel* model);
 			void SetStudyItems(const Data::DataTable& items, QStandardItemModel* model);
@@ -52,9 +46,8 @@ namespace ASAP::GUI
 			void RequestWorklistRefresh(void);
 
 		private:
-			std::unique_ptr<Data::WorklistDataAcquisitionInterface>	m_data_acquisition_;
+			Data::SourceProxy										m_source_;
 			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
-			WorklistWindowSettings									m_settings_;
 			bool													m_stop_loading_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_loading_access_; // Todo: Refactor into something cleaner
 			std::mutex												m_image_switch_access_;
@@ -69,15 +62,12 @@ namespace ASAP::GUI
 			QStandardItemModel* m_studies_model_;
 			QStandardItemModel* m_worklist_model_;
 
-			bool CheckSchema_(Data::WorklistDataAcquisitionInterface* source);
+			bool CheckSchema_(void);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
 			void StopThumbnailLoading_(void);
 			void UpdatePreviousSources_(void);
 			void UpdateSourceViews_(void);
-
-			std::string SerializeSource_(const std::string& location, const std::unordered_map<std::string, std::string>& parameters);
-			std::pair<std::string, std::unordered_map<std::string, std::string>> DeserializeSource_(const std::string& source);
 
 			void SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);
