@@ -232,10 +232,11 @@ void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, const unsigned int
   }
 }
 
-void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
+void PathologyViewer::initialize(ASAP::Documents::Document& document) {
   close();
   setEnabled(true);
-  _img = img;
+  m_active_document_ = &document;
+  _img = document.GetImage();
   unsigned int tileSize = 512;
   unsigned int lastLevel = _img->getNumberOfLevels() - 1;
   for (int i = lastLevel; i >= 0; --i) {
@@ -248,7 +249,7 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
   _cache = new WSITileGraphicsItemCache();
   _cache->setMaxCacheSize(_cacheSize);
   _renderthread = new RenderThread(this);
-  _renderthread->setBackgroundImage(img);
+  _renderthread->setBackgroundImage(_img);
   _manager = new TileManager(_img, tileSize, lastLevel, _renderthread, _cache, scene());
   setMouseTracking(true);
   std::vector<RenderWorker*> workers = _renderthread->getWorkers();

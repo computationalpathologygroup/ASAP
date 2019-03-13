@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include "documents/Document.h"
+
 class MultiResolutionImage;
 class RenderThread;
 class PrefetchThread;
@@ -27,7 +29,7 @@ public:
     PathologyViewer(QWidget *parent = 0);
     ~PathologyViewer();
 
-    void initialize(std::shared_ptr<MultiResolutionImage> img);
+    void initialize(ASAP::Documents::Document& document);
     void close();
 
     float getZoomSensitivity() const;
@@ -91,7 +93,8 @@ private :
     // Interface to the multi-resolution image. Please note that PathologyViewer
     // should never modify _img (it is modified in the RenderThread due to calls
     // to readRegion), otherwise race conditions could occur.
-    std::shared_ptr<MultiResolutionImage> _img;
+	ASAP::Documents::Document* m_active_document_;
+	const MultiResolutionImage* _img;
     std::weak_ptr<MultiResolutionImage> _for_img;
 
     // Minimap

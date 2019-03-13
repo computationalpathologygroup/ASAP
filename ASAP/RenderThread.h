@@ -30,7 +30,7 @@ public:
 
   void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level);
   void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
-  void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
+  void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.0);
   
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
@@ -57,7 +57,7 @@ private :
   bool _abort;
   QMutex _jobListMutex;
   QWaitCondition _condition;
-  std::weak_ptr<MultiResolutionImage> _bck_img;
+  const MultiResolutionImage* _bck_img;
   std::weak_ptr<MultiResolutionImage> _for_img;
   std::list<RenderJob> _jobList;
   std::vector<RenderWorker*> _workers;
