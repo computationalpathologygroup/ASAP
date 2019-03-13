@@ -6,6 +6,9 @@
 #include <QDir>
 #include <QStringList>
 #include <memory>
+#include <unordered_map>
+
+#include "documents/Document.h"
 
 class MultiResolutionImage;
 class QHBoxLayout;
@@ -34,17 +37,17 @@ class ASAPLIB_EXPORT ASAP_Window : public QMainWindow
 
 public:
   explicit ASAP_Window(QWidget* parent = 0);
-  ~ASAP_Window();
+  ~ASAP_Window(void);
 
   void setCacheSize(const unsigned long long& cacheMaxByteSize);
 
-  unsigned long long getCacheSize() const;
+  unsigned long long getCacheSize(void) const;
 
   void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
 signals:
   void newImageLoaded(std::weak_ptr<MultiResolutionImage>, const std::string&);
-  void imageClosed();
+  void imageClosed(void);
 
 private slots:
   void on_actionClose_triggered();
@@ -53,16 +56,21 @@ private slots:
 
 private:
   static const char* sharedLibraryExtensions;
-  std::shared_ptr<MultiResolutionImage> _img;
   unsigned long long _cacheMaxByteSize;
   QSettings* _settings;
 
   void closeEvent(QCloseEvent *event);
   
+  // Documents
+  size_t m_document_id_count_;
+  std::unordered_map<size_t, ASAP::Documents::Document> m_documents_;
+
   // Plugins
   QDir _pluginsDir;
   std::vector<std::string> _extensionPluginFileNames;
   std::vector<std::string> _toolPluginFileNames;
+  std::vector<std::unique_ptr<WorkstationExtensionPluginInterface>> _extensions;
+
 
   // GUI object
   QAction *actionOpen;
@@ -80,14 +88,12 @@ private:
   QStatusBar *statusBar;
 
   // Initialize the GUI
-  void initializeDocks();
-  void setupUi();
-  void retranslateUi();
-  void loadPlugins();
-  void readSettings();
-  void writeSettings();
-
-  std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
+  void initializeDocks(void);
+  void setupUi(void);
+  void retranslateUi(void);
+  void loadPlugins(void);
+  void readSettings(void);
+  void writeSettings(void);
 };
 
 #endif // PATHOLOGYWORKSTATION_H

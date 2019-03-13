@@ -79,7 +79,13 @@ ASAP_Window::ASAP_Window(QWidget *parent) :
   }
 }
 
-void ASAP_Window::writeSettings()
+ASAP_Window::~ASAP_Window(void)
+{
+	on_actionClose_triggered();
+	writeSettings();
+}
+
+void ASAP_Window::writeSettings(void)
 {
   _settings->beginGroup("ASAP");
   _settings->setValue("size", size());
@@ -87,7 +93,7 @@ void ASAP_Window::writeSettings()
   _settings->endGroup();
 }
 
-void ASAP_Window::readSettings()
+void ASAP_Window::readSettings(void)
 {
   _settings->beginGroup("ASAP");
   resize(_settings->value("size", QSize(1037, 786)).toSize());
@@ -97,7 +103,7 @@ void ASAP_Window::readSettings()
   _settings->endGroup();
 }
 
-void ASAP_Window::loadPlugins() {
+void ASAP_Window::loadPlugins(void) {
   PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
@@ -193,13 +199,7 @@ void ASAP_Window::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-ASAP_Window::~ASAP_Window()
-{
-  on_actionClose_triggered();
-  writeSettings();
-}
-
-void ASAP_Window::on_actionAbout_triggered() {
+void ASAP_Window::on_actionAbout_triggered(void) {
   QUiLoader loader;
   QFile file(":/ASAP_ui/aboutdialog.ui");
   file.open(QFile::ReadOnly);
@@ -229,7 +229,7 @@ void ASAP_Window::on_actionAbout_triggered() {
   file.close();
 }
 
-void ASAP_Window::on_actionClose_triggered()
+void ASAP_Window::on_actionClose_triggered(void)
 {
     for (std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> >::iterator it = _extensions.begin(); it != _extensions.end(); ++it) {
       if (!(*it)->canClose()) {
@@ -239,44 +239,45 @@ void ASAP_Window::on_actionClose_triggered()
     emit imageClosed();
     _settings->setValue("currentFile", QString());
     this->setWindowTitle("ASAP");
-    if (_img) {
-		  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-		  view->close();
-		  _img.reset();
-		  statusBar->showMessage("Closed file!", 5);
-    }
+
+	if (!m_documents_.empty())
+	{
+		m_documents_.erase(m_documents_.begin());
+		PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
+		view->close();
+		statusBar->showMessage("Closed file!", 5);
+	}
 }
 
 void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) {
-  statusBar->clearMessage();
-  if (!fileName.isEmpty()) {
-    if (_img) {
-      on_actionClose_triggered();
-    }
-    std::string fn = fileName.toStdString();
-    _settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
-    _settings->setValue("currentFile", QFileInfo(fileName).fileName());
-    this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
-    MultiResolutionImageReader imgReader;
-    _img.reset(imgReader.open(fn, factoryName.toStdString()));
-    if (_img) {
-      if (_img->valid()) {
-        vector<unsigned long long> dimensions = _img->getLevelDimensions(_img->getNumberOfLevels() - 1);
-        PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-        view->initialize(_img);
-        emit newImageLoaded(_img, fn);
-      }
-      else {
-        statusBar->showMessage("Unsupported file type version");
-      }
-    }
-    else {
-      statusBar->showMessage("Invalid file type");
-    }
-  }
+	statusBar->clearMessage();
+	try
+	{
+		on_actionClose_triggered();
+
+		m_documents_.insert({ m_document_id_count_, ASAP::Documents::Document(fileName.toStdString(), factoryName.toStdString()) });
+		m_document_id_count_++;
+
+		
+		_settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
+		_settings->setValue("currentFile", QFileInfo(fileName).fileName());
+		this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
+		PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
+		view->initialize(m_documents_.begin()->second.GetImage());
+		emit newImageLoaded(m_documents_.begin()->second.GetImage(), fileName.toStdString());
+	}
+	catch (const std::runtime_error& e)
+	{
+		// Implies an error with the actual file. We can utilize this for user feedback.
+		statusBar->showMessage(e.what());
+	}
+	catch (const std::invalid_argument& e)
+	{
+		// Implies an invalid call with no filename or factory name, we can safely ignore this.
+	}
 }
 
-void ASAP_Window::on_actionOpen_triggered()
+void ASAP_Window::on_actionOpen_triggered(void)
 { 
   QString filterList;
   std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
@@ -309,14 +310,14 @@ void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
   }
 }
     
-unsigned long long ASAP_Window::getCacheSize() const {
+unsigned long long ASAP_Window::getCacheSize(void) const {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
     return view->getCacheSize();
   }
 }
 
-void ASAP_Window::setupUi()
+void ASAP_Window::setupUi(void)
 {
   if (this->objectName().isEmpty()) {
       this->setObjectName(QStringLiteral("ASAP"));
