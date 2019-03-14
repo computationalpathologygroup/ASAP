@@ -40,7 +40,7 @@ namespace ASAP::Documents
 			Document(const std::string& filepath, const std::string& factory = "default");
 
 			const std::string& GetFilepath(void);
-			const MultiResolutionImage* GetImage(void);
+			std::weak_ptr<MultiResolutionImage> GetImage(void);
 
 			PluginInformation* GetPluginInformation(const std::string& plugin);
 			bool HasPluginInformation(const std::string& plugin);
@@ -48,7 +48,7 @@ namespace ASAP::Documents
 
 		private:
 			std::string								m_filepath_;
-			std::unique_ptr<MultiResolutionImage>	m_image_;
+			std::shared_ptr<MultiResolutionImage>	m_image_;
 			std::unordered_map<std::string, std::unique_ptr<PluginInformation>> m_plugin_information_;
 	};
 }

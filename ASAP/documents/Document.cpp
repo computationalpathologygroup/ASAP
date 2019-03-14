@@ -41,9 +41,9 @@ namespace ASAP::Documents
 		return m_filepath_;
 	}
 
-	const MultiResolutionImage* Document::GetImage(void)
+	std::weak_ptr<MultiResolutionImage> Document::GetImage(void)
 	{
-		return m_image_.get();
+		return m_image_;
 	}
 
 	PluginInformation* Document::GetPluginInformation(const std::string& plugin)
