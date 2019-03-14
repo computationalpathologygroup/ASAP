@@ -26,7 +26,7 @@ public:
   void setWindowAndLevel(float window, float level);
   void setLUT(const std::string& LUTname);
 
-  void setBackgroundImage(const MultiResolutionImage* bck_img);
+  void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
   void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
@@ -37,7 +37,7 @@ protected :
 private :
 
   QMutex mutex;
-  const MultiResolutionImage* _bck_img;
+  std::weak_ptr<MultiResolutionImage> _bck_img;
   std::weak_ptr<MultiResolutionImage> _for_img;
   bool _abort;
   int _backgroundChannel;

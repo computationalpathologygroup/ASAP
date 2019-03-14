@@ -8,6 +8,8 @@
 #include <map>
 #include <memory>
 
+#include "documents/Document.h"
+
 class MultiResolutionImage;
 class RenderThread;
 class WSITileGraphicsItemCache;
@@ -19,13 +21,18 @@ class TileManager : public QObject {
   Q_OBJECT
 
 private:
-  std::vector<float> _levelDownsamples;
+  /*std::vector<float> _levelDownsamples;
   std::vector<std::vector<unsigned long long> > _levelDimensions;
   unsigned int _tileSize;
   QRect _lastFOV;
   unsigned int _lastLevel;
   unsigned int _lastRenderLevel;
-  std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;
+  std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;*/
+
+	ASAP::Documents::Document&	m_tiled_document_;
+	TileInformation				m_tile_information_;
+
+
   QPointer<RenderThread> _renderThread;
   QPointer<WSITileGraphicsItemCache> _cache;
   QPointer<QGraphicsScene> _scene;
@@ -43,7 +50,7 @@ signals:
 
 public:
   // make sure to set `item` to NULL in the constructor
-  TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
+  TileManager(ASAP::Documents::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
   ~TileManager();
 
   void loadAllTilesForLevel(unsigned int level);

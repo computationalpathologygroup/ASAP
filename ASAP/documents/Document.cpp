@@ -41,6 +41,16 @@ namespace ASAP::Documents
 		return m_filepath_;
 	}
 
+	MultiResolutionImage& Document::AccessImage(void)
+	{
+		return *m_image_;
+	}
+
+	TileInformation& Document::AccessTileInformation(void)
+	{
+		return m_tile_information_;
+	}
+
 	std::weak_ptr<MultiResolutionImage> Document::GetImage(void)
 	{
 		return m_image_;

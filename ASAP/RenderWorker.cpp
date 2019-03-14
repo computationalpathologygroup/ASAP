@@ -55,7 +55,7 @@ void RenderWorker::setLUT(const std::string& LUTname) {
   mutex.unlock();
 }
 
-void RenderWorker::setBackgroundImage(const MultiResolutionImage* bck_img) {
+void RenderWorker::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img) {
   mutex.lock();
   _bck_img = bck_img;
   mutex.unlock();

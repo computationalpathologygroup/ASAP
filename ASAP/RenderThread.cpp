@@ -99,7 +99,7 @@ void RenderThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_im
   }
 }
 
-void RenderThread::setBackgroundImage(const MultiResolutionImage* bck_img) {
+void RenderThread::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img) {
   QMutexLocker locker(&_jobListMutex);
   _bck_img = bck_img;
   for (unsigned int i = 0; i < _workers.size(); ++i) {

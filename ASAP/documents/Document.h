@@ -3,12 +3,13 @@
 
 #include "asaplib_export.h"
 
-#include <qrect.h>
-
+#include <map>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
+
+#include <qrect.h>
 
 #include <multiresolutionimageinterface/MultiResolutionImage.h>
 
@@ -17,13 +18,11 @@ class PluginInformation
 	
 };
 
-
-
-typedef std::unordered_map<uint32_t, std::unordered_map<int32_t, std::unordered_map<int32_t, uchar>>> CoverageMap;
+typedef std::map<uint32_t, std::map<int32_t, std::map<int32_t, uchar>>> CoverageMap;
 
 struct TileInformation
 {
-	const uint64_t						tile_size;
+	uint64_t							tile_size;
 	uint64_t							last_level;
 	uint64_t							last_render_level;
 	QRect								last_FOV;
@@ -40,6 +39,9 @@ namespace ASAP::Documents
 			Document(const std::string& filepath, const std::string& factory = "default");
 
 			const std::string& GetFilepath(void);
+			MultiResolutionImage& AccessImage(void);
+			TileInformation& AccessTileInformation(void);
+
 			std::weak_ptr<MultiResolutionImage> GetImage(void);
 
 			PluginInformation* GetPluginInformation(const std::string& plugin);
@@ -49,6 +51,7 @@ namespace ASAP::Documents
 		private:
 			std::string								m_filepath_;
 			std::shared_ptr<MultiResolutionImage>	m_image_;
+			TileInformation							m_tile_information_;
 			std::unordered_map<std::string, std::unique_ptr<PluginInformation>> m_plugin_information_;
 	};
 }

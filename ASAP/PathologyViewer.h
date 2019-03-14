@@ -73,7 +73,6 @@ public slots :
     void onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale);
 
 private :
-    
     // Functions for panning
     virtual void mouseMoveEvent(QMouseEvent *event);
     virtual void mousePressEvent(QMouseEvent *event);
@@ -94,7 +93,6 @@ private :
     // should never modify _img (it is modified in the RenderThread due to calls
     // to readRegion), otherwise race conditions could occur.
 	ASAP::Documents::Document* m_active_document_;
-	const MultiResolutionImage* _img;
     std::weak_ptr<MultiResolutionImage> _for_img;
 
     // Minimap

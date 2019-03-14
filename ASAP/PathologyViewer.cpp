@@ -108,8 +108,9 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
   float maxDownsample = 1. / this->_sceneScale;
   QGraphicsView::resizeEvent(event);
-  if (_img) {    
-    emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
+
+  if (m_active_document_) {
+    emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample(maxDownsample / this->transform().m11()));
     emit updateBBox(FOV);
   }
 }
@@ -123,7 +124,7 @@ void PathologyViewer::wheelEvent(QWheelEvent *event) {
 }
 
 void PathologyViewer::zoom(float numSteps) {
-  if (!_img) {
+  if (!m_active_document_) {
     return;
   }
   _numScheduledScalings += numSteps;
@@ -145,8 +146,8 @@ void PathologyViewer::scalingTime(qreal x)
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  float scaleX = static_cast<float>(_img->getDimensions()[0]) / FOVImage.width();
-  float scaleY = static_cast<float>(_img->getDimensions()[1]) / FOVImage.height();
+  float scaleX = static_cast<float>(m_active_document_->AccessImage().getDimensions()[0]) / FOVImage.width();
+  float scaleY = static_cast<float>(m_active_document_->AccessImage().getDimensions()[1]) / FOVImage.height();
   float minScale = scaleX > scaleY ? scaleY : scaleX;
   float maxScale = scaleX > scaleY ? scaleX : scaleY;
   if ((factor < 1.0 && maxScale < 0.5) || (factor > 1.0 && minScale > 2*maxDownsample)) {
@@ -158,7 +159,7 @@ void PathologyViewer::scalingTime(qreal x)
   QPointF viewport_center = mapFromScene(_zoomToScenePos) - delta_viewport_pos;
   centerOn(mapToScene(viewport_center.toPoint()));
   float tm11 = this->transform().m11();
-  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
+  emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
   emit updateBBox(FOV);
 }
 
@@ -176,7 +177,7 @@ void PathologyViewer::moveTo(const QPointF& pos) {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
+  emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample(maxDownsample / this->transform().m11()));
   emit updateBBox(FOV);
 }
 
@@ -236,11 +237,10 @@ void PathologyViewer::initialize(ASAP::Documents::Document& document) {
   close();
   setEnabled(true);
   m_active_document_ = &document;
-  _img = document.GetImage();
   unsigned int tileSize = 512;
-  unsigned int lastLevel = _img->getNumberOfLevels() - 1;
+  unsigned int lastLevel = m_active_document_->AccessImage().getNumberOfLevels() - 1;
   for (int i = lastLevel; i >= 0; --i) {
-    std::vector<unsigned long long> lastLevelDimensions = _img->getLevelDimensions(i);
+    std::vector<unsigned long long> lastLevelDimensions = m_active_document_->AccessImage().getLevelDimensions(i);
     if (lastLevelDimensions[0] > tileSize && lastLevelDimensions[1] > tileSize) {
       lastLevel = i;
       break;
@@ -249,8 +249,8 @@ void PathologyViewer::initialize(ASAP::Documents::Document& document) {
   _cache = new WSITileGraphicsItemCache();
   _cache->setMaxCacheSize(_cacheSize);
   _renderthread = new RenderThread(this);
-  _renderthread->setBackgroundImage(_img);
-  _manager = new TileManager(_img, tileSize, lastLevel, _renderthread, _cache, scene());
+  _renderthread->setBackgroundImage(m_active_document_->GetImage());
+  _manager = new TileManager(document, tileSize, lastLevel, _renderthread, _cache, scene());
   setMouseTracking(true);
   std::vector<RenderWorker*> workers = _renderthread->getWorkers();
   for (int i = 0; i < workers.size(); ++i) {
@@ -263,7 +263,7 @@ void PathologyViewer::initialize(ASAP::Documents::Document& document) {
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, const unsigned int)));
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
+  emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
 }
 
 void PathologyViewer::onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
@@ -317,12 +317,12 @@ float PathologyViewer::getForegroundOpacity() const {
 }
 
 void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize, unsigned int lastLevel) {  
-  unsigned int nrLevels = _img->getNumberOfLevels();
-  std::vector<unsigned long long> lastLevelDimensions = _img->getLevelDimensions(lastLevel);
+  unsigned int nrLevels = m_active_document_->AccessImage().getNumberOfLevels();
+  std::vector<unsigned long long> lastLevelDimensions = m_active_document_->AccessImage().getLevelDimensions(lastLevel);
   float lastLevelWidth = ((lastLevelDimensions[0] / tileSize) + 1) * tileSize;
   float lastLevelHeight = ((lastLevelDimensions[1] / tileSize) + 1) * tileSize;
   float longest = lastLevelWidth > lastLevelHeight ? lastLevelWidth : lastLevelHeight;
-  _sceneScale = 1. / _img->getLevelDownsample(lastLevel);
+  _sceneScale = 1. / m_active_document_->AccessImage().getLevelDownsample(lastLevel);
   QRectF n((lastLevelDimensions[0] / 2) - 1.5*longest, (lastLevelDimensions[1] / 2) - 1.5*longest, 3 * longest, 3 * longest);
   this->setSceneRect(n);
   this->fitInView(QRectF(0, 0, lastLevelDimensions[0], lastLevelDimensions[1]), Qt::AspectRatioMode::KeepAspectRatio);
@@ -331,22 +331,22 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
+  emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample(maxDownsample / this->transform().m11()));
   while (_renderthread->numberOfJobs() > 0) {
   }
 }
 
 void PathologyViewer::initializeGUIComponents(unsigned int level) {
   // Initialize the minimap
-  std::vector<unsigned long long> overviewDimensions = _img->getLevelDimensions(level);
-  unsigned int size = overviewDimensions[0] * overviewDimensions[1] * _img->getSamplesPerPixel();
+  std::vector<unsigned long long> overviewDimensions = m_active_document_->AccessImage().getLevelDimensions(level);
+  unsigned int size = overviewDimensions[0] * overviewDimensions[1] * m_active_document_->AccessImage().getSamplesPerPixel();
   unsigned char* overview = new unsigned char[size];
-  _img->getRawRegion<unsigned char>(0, 0, overviewDimensions[0], overviewDimensions[1], level, overview);
+  m_active_document_->AccessImage().getRawRegion<unsigned char>(0, 0, overviewDimensions[0], overviewDimensions[1], level, overview);
   QImage ovImg;
-  if (_img->getColorType() == pathology::ARGB) {
+  if (m_active_document_->AccessImage().getColorType() == pathology::ARGB) {
     ovImg = QImage(overview, overviewDimensions[0], overviewDimensions[1], overviewDimensions[0] * 4, QImage::Format_ARGB32).convertToFormat(QImage::Format_RGB888);
   }
-  else if (_img->getColorType() == pathology::RGB) {
+  else if (m_active_document_->AccessImage().getColorType() == pathology::RGB) {
     ovImg = QImage(overview, overviewDimensions[0], overviewDimensions[1], overviewDimensions[0] * 3, QImage::Format_RGB888);
   }
   QPixmap ovPixMap = QPixmap(QPixmap::fromImage(ovImg));
@@ -360,7 +360,7 @@ void PathologyViewer::initializeGUIComponents(unsigned int level) {
     _scaleBar->deleteLater();
     _scaleBar = NULL;
   }
-  std::vector<double> spacing = _img->getSpacing();
+  std::vector<double> spacing = m_active_document_->AccessImage().getSpacing();
   if (!spacing.empty()) {
     _scaleBar = new ScaleBar(spacing[0], this);
   }
@@ -424,16 +424,16 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
 {
   QPoint globalPos = this->mapToGlobal(pos);
 
-  if (_img) {
+  if (m_active_document_) {
     QMenu rightClickMenu;
-    if (_img->getColorType() == pathology::ColorType::Indexed) {
-      for (int i = 0; i < _img->getSamplesPerPixel(); ++i) {
+    if (m_active_document_->AccessImage().getColorType() == pathology::ColorType::Indexed) {
+      for (int i = 0; i < m_active_document_->AccessImage().getSamplesPerPixel(); ++i) {
         rightClickMenu.addAction(QString("Channel ") + QString::number(i+1));
       }
       QAction* selectedItem = rightClickMenu.exec(globalPos);
       if (selectedItem)
       {
-        for (int i = 0; i < _img->getSamplesPerPixel(); ++i) {
+        for (int i = 0; i < m_active_document_->AccessImage().getSamplesPerPixel(); ++i) {
           if (selectedItem->text() == QString("Channel ") + QString::number(i + 1)) {
             emit backgroundChannelChanged(i);
             _manager->refresh();
@@ -441,16 +441,16 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
         }
       }
     }
-    else if (_img->getNumberOfZPlanes() > 1) {
-      for (int i = 0; i < _img->getNumberOfZPlanes(); ++i) {
+    else if (m_active_document_->AccessImage().getNumberOfZPlanes() > 1) {
+      for (int i = 0; i < m_active_document_->AccessImage().getNumberOfZPlanes(); ++i) {
         rightClickMenu.addAction(QString("Plane ") + QString::number(i + 1));
       }
       QAction* selectedItem = rightClickMenu.exec(globalPos);
       if (selectedItem)
       {
-        for (int i = 0; i < _img->getNumberOfZPlanes(); ++i) {
+        for (int i = 0; i < m_active_document_->AccessImage().getNumberOfZPlanes(); ++i) {
           if (selectedItem->text() == QString("Plane ") + QString::number(i + 1)) {
-            _img->setCurrentZPlaneIndex(i);
+			  m_active_document_->AccessImage().setCurrentZPlaneIndex(i);
             _manager->refresh();
           }
         }
@@ -494,7 +494,7 @@ void PathologyViewer::close() {
     delete _cache;
     _cache = NULL;
   }  
-  _img = NULL;
+  m_active_document_ = NULL;
   if (_renderthread) {
     _renderthread->shutdown();
     _renderthread->deleteLater();
@@ -542,7 +542,7 @@ void PathologyViewer::pan(const QPoint& panTo) {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
+  emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample(maxDownsample / this->transform().m11()));
   emit updateBBox(FOV);
 }
 
@@ -550,7 +550,7 @@ void PathologyViewer::updateCurrentFieldOfView() {
   float maxDownsample = 1. / this->_sceneScale;
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
-  emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
+  emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample(maxDownsample / this->transform().m11()));
   emit updateBBox(FOV);
 }
 

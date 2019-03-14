@@ -263,7 +263,7 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 		_settings->setValue("currentFile", QFileInfo(fileName).fileName());
 		this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
 		PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-		view->initialize(m_documents_.begin()->second.GetImage());
+		view->initialize(m_documents_.begin()->second);
 		emit newImageLoaded(m_documents_.begin()->second.GetImage(), fileName.toStdString());
 	}
 	catch (const std::runtime_error& e)
