@@ -63,7 +63,7 @@ private:
   
   // Documents
   size_t m_document_id_count_;
-  std::unordered_map<size_t, ASAP::Documents::Document> m_documents_;
+  std::unordered_map<size_t, ASAP::Document> m_documents_;
 
   // Plugins
   QDir _pluginsDir;

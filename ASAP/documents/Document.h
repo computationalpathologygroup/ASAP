@@ -2,7 +2,6 @@
 #define __ASAP_DOCUMENTS_DOCUMENT__
 
 #include "asaplib_export.h"
-
 #include <map>
 #include <memory>
 #include <string>
@@ -31,7 +30,7 @@ struct TileInformation
 	CoverageMap							coverage;
 };
 
-namespace ASAP::Documents
+namespace ASAP
 {
 	class Document
 	{

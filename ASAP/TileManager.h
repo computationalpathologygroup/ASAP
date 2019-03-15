@@ -29,7 +29,7 @@ private:
   unsigned int _lastRenderLevel;
   std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;*/
 
-	ASAP::Documents::Document&	m_tiled_document_;
+	ASAP::Document&	m_tiled_document_;
 	TileInformation				m_tile_information_;
 
 
@@ -50,7 +50,7 @@ signals:
 
 public:
   // make sure to set `item` to NULL in the constructor
-  TileManager(ASAP::Documents::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
+  TileManager(ASAP::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
   ~TileManager();
 
   void loadAllTilesForLevel(unsigned int level);

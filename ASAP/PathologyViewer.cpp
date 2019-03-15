@@ -233,7 +233,7 @@ void PathologyViewer::onFieldOfViewChanged(const QRectF& FOV, const unsigned int
   }
 }
 
-void PathologyViewer::initialize(ASAP::Documents::Document& document) {
+void PathologyViewer::initialize(ASAP::Document& document) {
   close();
   setEnabled(true);
   m_active_document_ = &document;

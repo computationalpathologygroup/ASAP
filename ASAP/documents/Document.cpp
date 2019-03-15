@@ -4,7 +4,7 @@
 
 #include <multiresolutionimageinterface/MultiResolutionImageReader.h>
 
-namespace ASAP::Documents
+namespace ASAP
 {
 	Document::Document(const std::string& filepath, const std::string& factory) : m_filepath_(filepath), m_image_(nullptr)
 	{

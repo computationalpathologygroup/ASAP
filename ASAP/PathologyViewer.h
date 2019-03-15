@@ -29,7 +29,7 @@ public:
     PathologyViewer(QWidget *parent = 0);
     ~PathologyViewer();
 
-    void initialize(ASAP::Documents::Document& document);
+    void initialize(ASAP::Document& document);
     void close();
 
     float getZoomSensitivity() const;
@@ -92,7 +92,7 @@ private :
     // Interface to the multi-resolution image. Please note that PathologyViewer
     // should never modify _img (it is modified in the RenderThread due to calls
     // to readRegion), otherwise race conditions could occur.
-	ASAP::Documents::Document* m_active_document_;
+	ASAP::Document* m_active_document_;
     std::weak_ptr<MultiResolutionImage> _for_img;
 
     // Minimap

@@ -255,7 +255,7 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 	{
 		on_actionClose_triggered();
 
-		m_documents_.insert({ m_document_id_count_, ASAP::Documents::Document(fileName.toStdString(), factoryName.toStdString()) });
+		m_documents_.insert({ m_document_id_count_, ASAP::Document(fileName.toStdString(), factoryName.toStdString()) });
 		m_document_id_count_++;
 
 		

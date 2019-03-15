@@ -9,7 +9,7 @@
 #include <QCoreApplication>
 #include <cmath>
 
-TileManager::TileManager(ASAP::Documents::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
+TileManager::TileManager(ASAP::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 m_tiled_document_(document),
 m_tile_information_(document.AccessTileInformation()),
 _renderThread(renderThread),
