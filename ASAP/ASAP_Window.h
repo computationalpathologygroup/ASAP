@@ -10,7 +10,6 @@
 
 #include "documents/Document.h"
 
-class MultiResolutionImage;
 class QHBoxLayout;
 class QAction;
 class QStatusBar;

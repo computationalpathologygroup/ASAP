@@ -2,7 +2,10 @@
 
 #include <stdexcept>
 
-#include <multiresolutionimageinterface/MultiResolutionImageReader.h>
+#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
+#include "multiresolutionimageinterface/MultiResolutionImage.h"
+#include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
+#include "multiresolutionimageinterface/OpenSlideImage.h"
 
 namespace ASAP
 {

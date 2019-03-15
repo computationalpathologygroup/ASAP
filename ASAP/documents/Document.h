@@ -10,7 +10,7 @@
 
 #include <qrect.h>
 
-#include <multiresolutionimageinterface/MultiResolutionImage.h>
+class MultiResolutionImage;
 
 class PluginInformation
 {
