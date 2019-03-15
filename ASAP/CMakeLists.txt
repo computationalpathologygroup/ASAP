@@ -14,6 +14,7 @@ set(HEADERS
     ScaleBar.h
     interfaces/interfaces.h
     QtProgressMonitor.h
+	documents/Document.h
 )
 
 set(SOURCE 
@@ -29,6 +30,7 @@ set(SOURCE
     ScaleBar.cpp
     UtilityFunctions.cpp
     QtProgressMonitor.cpp
+	documents/Document.cpp
 )
 
 find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools)
