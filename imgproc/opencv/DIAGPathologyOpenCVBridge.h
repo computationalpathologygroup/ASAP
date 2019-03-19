@@ -25,7 +25,7 @@ Patch<T> matToPatch(const cv::Mat& mat, bool copyData = false) {
   Patch<T> output;
   if (copyData) {
     output = Patch<T>(dims, ctype);
-    std::copy(mat.data, mat.data + mat.cols*mat.rows*mat.channels(), output.getPointer());
+    std::copy((T*) mat.data, ((T*) mat.data) + mat.cols*mat.rows*mat.channels(), output.getPointer());
   }
   else {
     output = Patch<T>(dims, ctype, (T*)mat.data, copyData);
