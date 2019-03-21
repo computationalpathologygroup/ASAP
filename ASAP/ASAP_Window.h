@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "documents/Document.h"
+#include "documents/DocumentWindow.h"
 
 class QHBoxLayout;
 class QAction;

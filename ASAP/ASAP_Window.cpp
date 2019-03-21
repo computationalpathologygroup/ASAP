@@ -374,10 +374,13 @@ void ASAP_Window::setupUi(void)
   horizontalLayout_2->setSpacing(6);
   horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
   horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-  pathologyView = new PathologyViewer(centralWidget);
-  pathologyView->setObjectName(QStringLiteral("pathologyView"));
+  //pathologyView = new PathologyViewer(centralWidget);
+  //pathologyView->setObjectName(QStringLiteral("pathologyView"));
 
-  horizontalLayout_2->addWidget(pathologyView);
+  ASAP::DocumentWindow* document_window = new ASAP::DocumentWindow(centralWidget);
+
+
+  horizontalLayout_2->addWidget(document_window);
 
   this->setCentralWidget(centralWidget);
 }
