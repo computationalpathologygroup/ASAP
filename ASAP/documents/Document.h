@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include <boost/filesystem.hpp>
 #include <qrect.h>
 
 class MultiResolutionImage;
@@ -37,7 +38,7 @@ namespace ASAP
 		public:
 			Document(const std::string& filepath, const std::string& factory = "default");
 
-			const std::string& GetFilepath(void);
+			boost::filesystem::path GetFilepath(void) const;
 			MultiResolutionImage& AccessImage(void);
 			TileInformation& AccessTileInformation(void);
 
@@ -48,7 +49,7 @@ namespace ASAP
 			void SetPluginInformation(const std::string& plugin, PluginInformation* information, const bool allow_override = false);
 
 		private:
-			std::string								m_filepath_;
+			boost::filesystem::path					m_filepath_;
 			std::shared_ptr<MultiResolutionImage>	m_image_;
 			TileInformation							m_tile_information_;
 			std::unordered_map<std::string, std::unique_ptr<PluginInformation>> m_plugin_information_;

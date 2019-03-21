@@ -39,7 +39,7 @@ namespace ASAP
 		std::vector<unsigned long long> dimensions = m_image_->getLevelDimensions(m_image_->getNumberOfLevels() - 1);
 	}
 
-	const std::string& Document::GetFilepath(void)
+	boost::filesystem::path Document::GetFilepath(void) const
 	{
 		return m_filepath_;
 	}
