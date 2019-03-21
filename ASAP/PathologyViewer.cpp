@@ -30,22 +30,22 @@
 
 using std::vector;
 
-PathologyViewer::PathologyViewer(QWidget *parent):
-  QGraphicsView(parent),
-  _renderthread(NULL),
-  _prefetchthread(NULL),
-  _zoomSensitivity(0.5),
-  _panSensitivity(0.5),
-  _numScheduledScalings(0),
-  _pan(false),
-  _prevPan(0, 0),
-  _map(NULL),
-  _cache(NULL),
-  _cacheSize(1000 * 512 * 512 * 3),
-  _activeTool(NULL),
-  _sceneScale(1.),
-  _manager(NULL),
-  _scaleBar(NULL)
+PathologyViewer::PathologyViewer(QWidget *parent) :
+	QGraphicsView(parent),
+	_zoomSensitivity(0.5),
+	_panSensitivity(0.5),
+	_numScheduledScalings(0),
+	_pan(false),
+	_prevPan(0, 0),
+	_cacheSize(1000 * 512 * 512 * 3),
+	_sceneScale(1.),
+	_renderthread(nullptr),
+	_prefetchthread(nullptr),
+	_map(nullptr),
+	_cache(nullptr),
+	_activeTool(nullptr),
+	_manager(nullptr),
+	_scaleBar(nullptr)
 {
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
