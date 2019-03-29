@@ -92,6 +92,16 @@ namespace ASAP::Data
 		return m_previous_sources_;
 	}
 
+	void SourceProxy::SetSourceInformation(const std::string& current_source, const std::vector<std::string>& previous_sources)
+	{
+		m_current_source_ = current_source;
+
+		for (const std::string& source : previous_sources)
+		{
+			m_previous_sources_.push_back(source);
+		}
+	}
+
 	std::string SourceProxy::SerializeSource(const std::string& location, const std::unordered_map<std::string, std::string>& parameters)
 	{
 		std::stringstream serialized_source;

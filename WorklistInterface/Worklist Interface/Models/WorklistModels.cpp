@@ -1,13 +1,7 @@
 #include "WorklistModels.h"
 
 #include <cctype>
-
 #include <QtConcurrent\qtconcurrentrun.h>
-
-#include "Serialization/INI.h"
-#include "Misc/StringManipulation.h"
-#include "Data/SourceLoading.h"
-
 
 #include "../GUI/IconCreator.h"
 

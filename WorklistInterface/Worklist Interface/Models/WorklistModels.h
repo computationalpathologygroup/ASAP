@@ -11,8 +11,6 @@ namespace ASAP::Models
 {
 	class WorklistModels
 	{
-		Q_OBJECT
-
 		public:
 			WorklistModels(void);
 

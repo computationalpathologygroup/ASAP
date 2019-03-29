@@ -22,6 +22,8 @@ namespace ASAP::Data
 			const std::string& GetCurrentSource(void);
 			const std::deque<std::string>& GetPreviousSources(void);
 
+			void SetSourceInformation(const std::string& current_source, const std::vector<std::string>& previous_sources);
+
 			static std::string SerializeSource(const std::string& location, const std::unordered_map<std::string, std::string>& parameters);
 			static std::pair<std::string, std::unordered_map<std::string, std::string>> DeserializeSource(const std::string& source);
 

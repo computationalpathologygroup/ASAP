@@ -14,7 +14,6 @@
 #include "IconCreator.h"
 #include "Serialization/INI.h"
 #include "Misc/StringManipulation.h"
-#include "Data/SourceLoading.h"
 
 using namespace ASAP::Data;
 
@@ -201,21 +200,25 @@ namespace ASAP::GUI
 
 			// Acquires the last known source.
 			auto source_value(values.find("source"));
+			std::string current_source;
 			if (source_value != values.end())
 			{
-				m_settings_.current_source = source_value->second;
+				current_source = source_value->second;
 			}
 
 			// Acquires the five most recent sources.
 			auto previous_sources_value(values.find("previous_sources"));
+			std::vector<std::string> previous_sources;
 			if (previous_sources_value != values.end() && !previous_sources_value->second.empty())
 			{
 				std::vector<std::string> split_sources(Misc::Split(previous_sources_value->second));
 				for (const std::string& source : split_sources)
 				{
-					m_settings_.previous_sources.push_back(source);
+					previous_sources.push_back(source);
 				}
 			}
+
+			m_source_.SetSourceInformation(current_source, previous_sources);
 		}
 		catch (const std::runtime_error& e)
 		{

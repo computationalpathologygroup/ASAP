@@ -211,10 +211,12 @@ namespace ASAP::Data
 		return m_connection_.QueueRequest(request, [receiver, observer, connection=&m_connection_, temp_dir=&m_temporary_directory_](web::http::http_response& response)
 		{
 			// Acquires the URL to the file.
-			Networking::FileDownloadResults results;
 			if (response.status_code() == web::http::status_codes::OK)
 			{
-				std::wstring file_uri = response.extract_json().get().at(L"files").as_array()[0].at(L"file").serialize();
+				web::json::value json(response.extract_json().get());
+
+				std::wstring file_name	= json.at(L"name").serialize();
+				std::wstring file_uri	= json.at(L"files").as_array()[0].at(L"file").serialize();
 				file_uri.erase(std::remove(file_uri.begin(), file_uri.end(), L'"'), file_uri.end());
 
 				// Creates a request to acquire the file.
@@ -234,9 +236,8 @@ namespace ASAP::Data
 				// TODO: implement method to reveal errors to user.
 
 				// Download the image, link the status to the observer and return the results.
-				results = Networking::HTTP_File_Download(image_file_response, temp_dir->GetAbsolutePath(), observer);
+				receiver(HTTP_File_Download(image_file_response, temp_dir->GetAbsolutePath(), Misc::WideStringToString(file_name), observer));
 			}
-			receiver(results.filepath);
 		});
 	}
 
