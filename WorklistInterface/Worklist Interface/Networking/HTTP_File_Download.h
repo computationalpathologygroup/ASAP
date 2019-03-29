@@ -9,23 +9,16 @@
 #include <cpprest/filestream.h>
 #include <cpprest/http_client.h>
 
-namespace ASAP::Networking
+namespace ASAP
 {
-	enum DownloadStatus { DOWNLOAD_FAILURE, FILE_CREATION_FAILURE, NO_ATTACHMENT, SUCCESS };
-
-	struct FileDownloadResults
-	{
-		boost::filesystem::path filepath;
-		DownloadStatus			status;
-	};
-
 	/// <summary>
 	/// Downloads a file that may be tied to a HTTP response.
 	/// </summary>
 	/// <param name="response">The response holding the file.</param>
 	/// <param name="output_directory">The directory to write the image to.</param>
-	/// <return>A struct containing the absolute path to the downloaded file (empty on failure) and the state of the download.</return>
-	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::function<void(uint8_t)> observer = std::function<void(uint8_t)>());
+	/// <param name="output_name">A custom file name for the reulting file.</param>
+	/// <return>An absolute path to the downloaded file.</return>
+	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_name = std::string(), std::function<void(uint8_t)> observer = std::function<void(uint8_t)>());
 
 	namespace
 	{

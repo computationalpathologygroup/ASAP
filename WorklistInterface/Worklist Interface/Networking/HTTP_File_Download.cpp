@@ -1,15 +1,18 @@
 #include "HTTP_File_Download.h"
 
+#include <stdexcept>	
+
 #include "../Misc/StringConversions.h"
 
-namespace ASAP::Networking
+namespace ASAP
 {
-	FileDownloadResults HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::function<void(uint8_t)> observer)
+	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_name, std::function<void(uint8_t)> observer)
 	{
 		// Fails if the path doesn't point towards a directory.
 		if (!boost::filesystem::is_directory(output_directory))
 		{
-			return { boost::filesystem::path(), DownloadStatus::FILE_CREATION_FAILURE };
+			// Replace with filesystem error once it has been moved out of experimental
+			throw std::runtime_error("Defined directory isn't avaible or not a directory.");
 		}
 
 		// Fails if the response wasn't a HTTP 200 message, or lacks the content disposition header.
@@ -28,7 +31,11 @@ namespace ASAP::Networking
 				// Appends the filename to the output directory.
 				boost::filesystem::path output_file(output_directory);
 				output_file.append(disposition.substr(disposition.find_last_of('=') + 1));
-
+				if (!output_name.empty())
+				{
+					output_file = output_file.parent_path() / boost::filesystem::path(output_name + output_file.extension().string());
+				}
+				
 				// Checks if the file has already been downloaded.
 				if (FileIsUnique(output_file, length))
 				{
@@ -55,19 +62,21 @@ namespace ASAP::Networking
 
 						if (FileHasCorrectSize(output_file, length))
 						{
-							return { boost::filesystem::absolute(output_file), DownloadStatus::SUCCESS };
+							return boost::filesystem::absolute(output_file);
 						}
-						return { boost::filesystem::path(), DownloadStatus::DOWNLOAD_FAILURE };
+						throw std::runtime_error("Unable to complete download.");
 					}
-					return { boost::filesystem::path(), DownloadStatus::FILE_CREATION_FAILURE };
+
+					// Replace with filesystem error once it has been moved out of experimental
+					throw std::runtime_error("Unable to create file: " + output_file.string());
 				}
 				// File has already been downloaded.
 				{
-					return { boost::filesystem::absolute(output_file), DownloadStatus::SUCCESS };
+					return boost::filesystem::absolute(output_file);
 				}
 			}
 		}
-		return { boost::filesystem::path(), DownloadStatus::NO_ATTACHMENT };
+		throw std::invalid_argument("HTTP Response contains no attachment.");
 	}
 
 	namespace
