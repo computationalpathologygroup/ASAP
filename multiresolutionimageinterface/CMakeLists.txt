@@ -57,9 +57,6 @@ set_target_properties(jpeg2kcodec PROPERTIES DEBUG_POSTFIX _d)
 target_link_libraries(jpeg2kcodec PRIVATE openjp2)
 target_include_directories(jpeg2kcodec PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${DIAGPathology_SOURCE_DIR} ${DIAGPathology_BINARY_DIR}/core ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${OPENJPEG_INCLUDE_DIRS})
 
-# Get info from PugiXML for the headers
-get_target_property(PUGIXML_INCLUDE_DIR pugixml INTERFACE_INCLUDE_DIRECTORIES)
-
 if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
   # Required for lossless JPEG compression used in VSIs
   find_package(DCMTKJPEG REQUIRED)
@@ -68,7 +65,7 @@ if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 
 add_library(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
-target_include_directories(multiresolutionimageinterface PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${PUGIXML_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${TIFF_INCLUDE_DIR})
+target_include_directories(multiresolutionimageinterface PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${PugiXML_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${TIFF_INCLUDE_DIR})
 target_link_libraries(multiresolutionimageinterface PUBLIC core PRIVATE jpeg2kcodec libtiff Boost::disable_autolinking Boost::thread)
 target_compile_definitions(multiresolutionimageinterface PRIVATE PUGIXML_HEADER_ONLY)
 generate_export_header(multiresolutionimageinterface)
