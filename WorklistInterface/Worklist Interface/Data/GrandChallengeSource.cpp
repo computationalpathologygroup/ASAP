@@ -184,7 +184,7 @@ namespace ASAP::Data
 		});
 	}
 
-	size_t GrandChallengeSource::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
+	size_t GrandChallengeSource::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		/*std::wstringstream url;
 		url << L"/" << m_rest_uri_.image_addition << L"/" << Misc::StringToWideString(image_index) << L"/";
@@ -197,7 +197,7 @@ namespace ASAP::Data
 		return 0;
 	}
 
-	size_t GrandChallengeSource::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
+	size_t GrandChallengeSource::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		std::string sanitized_index(image_index);
 		sanitized_index.erase(std::remove(sanitized_index.begin(), sanitized_index.end(), '"'), sanitized_index.end());
@@ -217,26 +217,26 @@ namespace ASAP::Data
 
 				std::wstring file_name	= json.at(L"name").serialize();
 				std::wstring file_uri	= json.at(L"files").as_array()[0].at(L"file").serialize();
+				file_name.erase(std::remove(file_name.begin(), file_name.end(), L'"'), file_name.end());
 				file_uri.erase(std::remove(file_uri.begin(), file_uri.end(), L'"'), file_uri.end());
 
 				// Creates a request to acquire the file.
 				web::http::http_request image_file_request(web::http::methods::GET);
 				image_file_request.set_request_uri(file_uri);
 
-				// Acquire the response or return an empty path if it fails.
-				web::http::http_response image_file_response;
+				// Acquire the image or return an empty path if it fails.
 				try
 				{
-					image_file_response = connection->SendRequest(image_file_request).get();
+					web::http::http_response image_file_response = connection->SendRequest(image_file_request).get();
+
+					// Download the image, link the status to the observer and return the results.
+					receiver(HTTP_File_Download(image_file_response, temp_dir->GetAbsolutePath(), Misc::WideStringToString(file_name), observer));
 				}
-				catch (...)
+				catch (const std::exception& e)
 				{
+					// TODO: implement method to reveal errors to user.
+					receiver(boost::filesystem::path());
 				}
-
-				// TODO: implement method to reveal errors to user.
-
-				// Download the image, link the status to the observer and return the results.
-				receiver(HTTP_File_Download(image_file_response, temp_dir->GetAbsolutePath(), Misc::WideStringToString(file_name), observer));
 			}
 		});
 	}

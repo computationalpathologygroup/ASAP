@@ -6,7 +6,7 @@
 
 namespace ASAP
 {
-	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_name, std::function<void(uint8_t)> observer)
+	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_file, std::function<void(uint8_t)> observer)
 	{
 		// Fails if the path doesn't point towards a directory.
 		if (!boost::filesystem::is_directory(output_directory))
@@ -17,63 +17,50 @@ namespace ASAP
 
 		// Fails if the response wasn't a HTTP 200 message, or lacks the content disposition header.
 		web::http::http_headers headers(response.headers());
-		auto content_disposition	= headers.find(L"Content-Disposition");
 		auto content_length			= headers.find(L"Content-Length");
-		if (response.status_code() == web::http::status_codes::OK && content_disposition != headers.end() && content_length != headers.end())
+		if (response.status_code() == web::http::status_codes::OK && content_length != headers.end())
 		{
-			// Fails if the content disposition doesn't list a filename.
-			std::wstring disposition(content_disposition->second);
-			size_t length(std::stoi(content_length->second));
-			std::transform(disposition.begin(), disposition.end(), disposition.begin(), ::tolower);
-
-			if (disposition.find(L"filename=") != std::string::npos)
-			{
-				// Appends the filename to the output directory.
-				boost::filesystem::path output_file(output_directory);
-				output_file.append(disposition.substr(disposition.find_last_of('=') + 1));
-				if (!output_name.empty())
-				{
-					output_file = output_file.parent_path() / boost::filesystem::path(output_name + output_file.extension().string());
-				}
+			// Appends the filename to the output directory.
+			boost::filesystem::path output_file(output_directory / boost::filesystem::path(output_file));
 				
-				// Checks if the file has already been downloaded.
-				if (FileIsUnique(output_file, length))
+			// Checks if the file has already been downloaded.
+			size_t length(std::stoi(content_length->second));
+			if (FileIsUnique(output_file, length))
+			{
+				// Changes filename if the binary size is unique, but the filename isn't.
+				FixFilepath(output_file);
+
+				// Fails if the file can't be created and opened.
+				concurrency::streams::ostream stream;
+				concurrency::streams::fstream::open_ostream(output_file.wstring()).then([&stream](concurrency::streams::ostream open_stream)
 				{
-					// Changes filename if the binary size is unique, but the filename isn't.
-					FixFilepath(output_file);
+					stream = open_stream;
+				}).wait();
 
-					// Fails if the file can't be created and opened.
-					concurrency::streams::ostream stream;
-					concurrency::streams::fstream::open_ostream(output_file.wstring()).then([&stream](concurrency::streams::ostream open_stream)
-					{
-						stream = open_stream;
-					}).wait();
-
-					if (stream.is_open())
-					{
-						// Starts monitoring thread.
-						bool finished = false;
-						std::thread thread(StartMonitorThread(finished, length, stream, observer));
-						response.body().read_to_end(stream.streambuf()).wait();
-						stream.close().wait();
+				if (stream.is_open())
+				{
+					// Starts monitoring thread.
+					bool finished = false;
+					std::thread thread(StartMonitorThread(finished, length, stream, observer));
+					response.body().read_to_end(stream.streambuf()).wait();
+					stream.close().wait();
 						
-						// Joins monitoring thread.
-						thread.join();
+					// Joins monitoring thread.
+					thread.join();
 
-						if (FileHasCorrectSize(output_file, length))
-						{
-							return boost::filesystem::absolute(output_file);
-						}
-						throw std::runtime_error("Unable to complete download.");
+					if (FileHasCorrectSize(output_file, length))
+					{
+						return boost::filesystem::absolute(output_file);
 					}
+					throw std::runtime_error("Unable to complete download.");
+				}
 
-					// Replace with filesystem error once it has been moved out of experimental
-					throw std::runtime_error("Unable to create file: " + output_file.string());
-				}
-				// File has already been downloaded.
-				{
-					return boost::filesystem::absolute(output_file);
-				}
+				// Replace with filesystem error once it has been moved out of experimental
+				throw std::runtime_error("Unable to create file: " + output_file.string());
+			}
+			// File has already been downloaded.
+			{
+				return boost::filesystem::absolute(output_file);
 			}
 		}
 		throw std::invalid_argument("HTTP Response contains no attachment.");

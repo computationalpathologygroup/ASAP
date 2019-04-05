@@ -16,9 +16,9 @@ namespace ASAP
 	/// </summary>
 	/// <param name="response">The response holding the file.</param>
 	/// <param name="output_directory">The directory to write the image to.</param>
-	/// <param name="output_name">A custom file name for the reulting file.</param>
+	/// <param name="output_filename">The filename with potential extension to use.</param>
 	/// <return>An absolute path to the downloaded file.</return>
-	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_name = std::string(), std::function<void(uint8_t)> observer = std::function<void(uint8_t)>());
+	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_filename, std::function<void(uint8_t)> observer = std::function<void(uint8_t)>());
 
 	namespace
 	{
