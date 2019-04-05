@@ -19,17 +19,14 @@ namespace ASAP::Networking
 	{
 		public:
 			typedef std::unordered_map<std::string, std::wstring> Credentials;
-			enum AuthenticationType	{ NONE, SESSION, TOKEN };
-			enum AuthenticationStatus	{ AUTHENTICATED, UNAUTHENTICATED, INVALID_CREDENTIALS };
+			enum AuthenticationType		{ NONE, SESSION, TOKEN };
 
 			Django_Connection(const std::wstring base_uri, const AuthenticationType authentication_type = AuthenticationType::NONE, const Credentials credentials = Credentials(), const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
 			Credentials static CreateCredentials(const std::wstring token, const std::wstring validation_path);
 			Credentials static CreateCredentials(const std::wstring username, const std::wstring password, const std::wstring csrf_path, const std::wstring auth_path);
-			const Credentials& Django_Connection::SetCredentials(void);
+			const Credentials& GetCredentials(void);
 			void SetCredentials(const Credentials credentials);
-
-			AuthenticationStatus GetAuthenticationStatus(void) const;
 
 			/// <summary>
 			/// Allows the connection to handle the request, and returns the information to the passed observer function.
@@ -44,7 +41,6 @@ namespace ASAP::Networking
 		private:
 			AuthenticationType		m_authentication_;
 			Credentials				m_credentials_;
-			AuthenticationStatus	m_status_;
 
 			bool ExtractToken_(web::http::http_response& response);
 			void ModifyRequest_(web::http::http_request& request);

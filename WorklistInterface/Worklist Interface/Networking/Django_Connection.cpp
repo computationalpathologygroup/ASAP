@@ -6,7 +6,7 @@
 namespace ASAP::Networking
 {
 	Django_Connection::Django_Connection(const std::wstring base_uri, const AuthenticationType authentication_type, const Credentials credentials, const web::http::client::http_client_config& config)
-		: HTTP_Connection(base_uri, config), m_authentication_(authentication_type), m_credentials_(credentials), m_status_(UNAUTHENTICATED)
+		: HTTP_Connection(base_uri, config), m_authentication_(authentication_type), m_credentials_(credentials)
 	{
 		SetupConnection_();
 	}
@@ -29,7 +29,7 @@ namespace ASAP::Networking
 		return credentials;
 	}
 
-	const Django_Connection::Credentials& Django_Connection::SetCredentials(void)
+	const Django_Connection::Credentials& Django_Connection::GetCredentials(void)
 	{
 		return m_credentials_;
 	}
@@ -41,11 +41,6 @@ namespace ASAP::Networking
 		m_credentials_ = credentials;
 		SetupConnection_();
 		m_access_mutex$.unlock();
-	}
-
-	Django_Connection::AuthenticationStatus Django_Connection::GetAuthenticationStatus(void) const
-	{
-		return m_status_;
 	}
 
 	size_t Django_Connection::QueueRequest(const web::http::http_request& request, std::function<void(web::http::http_response&)> observer)
@@ -92,6 +87,7 @@ namespace ASAP::Networking
 		// Ensures the credentials contain the required information.
 		ValidateCredentials_(m_credentials_);
 
+		bool authenticated = false;
 		try
 		{
 			if (m_authentication_ == TOKEN)
@@ -100,13 +96,9 @@ namespace ASAP::Networking
 				ModifyRequest_(token_test);
 				token_test.set_request_uri(m_credentials_["validation"]);
 
-				AuthenticationStatus* status_ptr(&m_status_);
-				HTTP_Connection::SendRequest(token_test).then([status_ptr](const web::http::http_response& response)
+				HTTP_Connection::SendRequest(token_test).then([authenticated=&authenticated](const web::http::http_response& response)
 				{
-					if (response.status_code() != web::http::status_codes::OK)
-					{
-						*status_ptr = AuthenticationStatus::INVALID_CREDENTIALS;
-					}
+					*authenticated = response.status_code() == web::http::status_codes::OK;
 				}).wait();
 			}
 			else if (m_authentication_ == SESSION)
@@ -121,9 +113,6 @@ namespace ASAP::Networking
 					if (it != response.headers().end() && it->second.find(L"csrf") != std::string::npos)
 					{
 						cred_ptr->insert({ "cookie", it->second });
-
-						//cred_ptr->insert({ "cookie", it->second.substr(it->second.find_first_of('=') + 1, it->second.find_first_of(';') - (it->second.find_first_of('=') + 1)) });
-						//cred_ptr->insert({ "cookie", L"Oxh82QwcIy7UjOVLSLysCK4Lr0DtLJKIWXICMXa8ymkCrEt00Od3lievjdXiKnrx" });
 					}
 				}).wait();
 
@@ -155,13 +144,12 @@ namespace ASAP::Networking
 		}
 		catch (const std::exception& e)
 		{
-			m_status_ = AuthenticationStatus::INVALID_CREDENTIALS;
+			// Allow it to pass, and assume invalid credentials.
 		}
 
-		// Assumes all operations completed succesfully
-		if (m_status_ == UNAUTHENTICATED)
+		if (!authenticated)
 		{
-			m_status_ = AUTHENTICATED;
+			throw std::runtime_error("Unable to authenticate with source.");
 		}
 	}
 
