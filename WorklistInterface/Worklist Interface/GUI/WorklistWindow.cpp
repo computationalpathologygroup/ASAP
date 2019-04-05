@@ -8,6 +8,7 @@
 #include <qfiledialog.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
+#include <QMimeData>
 #include <QtConcurrent\qtconcurrentrun.h>
 
 #include "ExternalSourceDialog.h"
@@ -33,6 +34,7 @@ namespace ASAP::GUI
 		SetSlots_();
 		SetModels_();
 		LoadSettings_();
+		UpdatePreviousSources_();
 
 		SetDataSource(m_source_.GetCurrentSource());
 	}
@@ -77,8 +79,6 @@ namespace ASAP::GUI
 					m_source_.Close();
 					throw std::runtime_error("Selected source has schema errors. Unable to open.");
 				}
-
-				
 
 				UpdatePreviousSources_();
 				UpdateSourceViews_();
@@ -362,6 +362,16 @@ namespace ASAP::GUI
 		m_ui_->view_worklists->setModel(m_worklist_model_);
 	}
 
+	bool WorklistWindow::eventFilter(QObject* obj, QEvent* event)
+	{
+		if (event->type() == QEvent::Drop)
+		{
+			OnImageDrop_((QDropEvent*)event);
+			return true;
+		}
+		return false;
+	}
+
 	//================================= Slots =================================//
 	
 	void WorklistWindow::SetSlots_(void)
@@ -396,7 +406,13 @@ namespace ASAP::GUI
 			this,
 			SLOT(OnStudySelect_(QModelIndex)));
 
-		connect(m_ui_->view_images,
+		connect(m_ui_->button_open_image,
+			&QPushButton::clicked,
+			this,
+			&WorklistWindow::OnImageSelect_);
+
+
+		/*connect(m_ui_->view_images,
 			SIGNAL(clicked(QModelIndex)),
 			this,
 			SLOT(OnImageSelect_(QModelIndex)));
@@ -404,7 +420,7 @@ namespace ASAP::GUI
 		connect(m_ui_->view_images,
 			SIGNAL(activated(QModelIndex)),
 			this,
-			SLOT(OnImageSelect_(QModelIndex)));
+			SLOT(OnImageSelect_(QModelIndex)));*/
 
 		connect(m_ui_->button_create_worklist,
 			&QPushButton::clicked,
@@ -439,36 +455,9 @@ namespace ASAP::GUI
 		connect(this,
 			&WorklistWindow::RequestWorklistRefresh,
 			this,
-			&WorklistWindow::OnWorklistRefresh);		
-	}
+			&WorklistWindow::OnWorklistRefresh);
 
-	void WorklistWindow::MoveImageSelectionLeft(void)
-	{
-		if (m_image_switch_access_.try_lock())
-		{
-			QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
-			if (indexes.size() > 0 && indexes[0].row() > 0)
-			{
-				m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() - 1, 0), QItemSelectionModel::SelectCurrent);
-				OnImageSelect_(m_images_model_->index(indexes[0].row() - 1, 0));
-			}
-			m_image_switch_access_.unlock();
-		}
-	}
-
-	void WorklistWindow::MoveImageSelectionRight(void)
-	{
-		if (m_image_switch_access_.try_lock())
-		{
-			QModelIndexList indexes(m_ui_->view_images->selectionModel()->selectedIndexes());
-			if (indexes.size() > 0 && indexes[0].row() < m_images_model_->rowCount() - 1)
-			{
-
-				m_ui_->view_images->selectionModel()->setCurrentIndex(m_images_model_->index(indexes[0].row() + 1, 0), QItemSelectionModel::SelectCurrent);
-				OnImageSelect_(m_images_model_->index(indexes[0].row() + 1, 0));
-			}
-			m_image_switch_access_.unlock();
-		}
+		QCoreApplication::instance()->installEventFilter(this);
 	}
 
 	void WorklistWindow::UpdateImageIcons(void)
@@ -481,6 +470,38 @@ namespace ASAP::GUI
 		m_status_bar_access_.lock();
 		m_ui_->status_bar->showMessage(message);
 		m_status_bar_access_.unlock();
+	}
+
+	void WorklistWindow::OnImageDrop_(QDropEvent* drop_event)
+	{
+		// Identifies the source of the drop event.
+		QObject* source(drop_event->source());
+		char owner = 0;
+
+		if (source == m_ui_->view_images)
+		{
+			owner = 'i';
+		}
+		else if (source == m_ui_->view_studies)
+		{
+			owner = 's';
+		}
+		else if (source == m_ui_->view_patients)
+		{
+			owner = 'p';
+		}
+
+		// Acquires the additional image ID's.
+		if (owner != 0)
+		{
+			// Acquires current worklist images
+			auto test = drop_event->mimeData()->text();
+		}
+	}
+
+	void WorklistWindow::OnImageDelete_(void)
+	{
+
 	}
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
@@ -557,28 +578,40 @@ namespace ASAP::GUI
 		});
 	}
 
-	void WorklistWindow::OnImageSelect_(QModelIndex index)
+	void WorklistWindow::OnImageSelect_(const bool checked)
 	{
-		QStandardItem* item(m_images_model_->itemFromIndex(index));
-		std::string image_index(item->data().toString().toUtf8().constData());
-
 		if (m_workstation_)
 		{
-			m_ui_->status_bar->showMessage("Loading image: 0%");
-			auto image_loading([this](const boost::filesystem::path& filepath)
-			{
-				this->RequestOpenImage(QString::fromStdString(filepath.string()));
-			});
+			QModelIndexList selected(m_ui_->view_images->selectionModel()->selectedIndexes());
 
-			auto acquisition_tracking([this, bar=m_ui_->status_bar](const uint8_t progress)
+			for (QModelIndex& index : selected)
 			{
-				if (bar->currentMessage().endsWith("%"));
+				QStandardItem* image(m_images_model_->itemFromIndex(index));
+				std::string image_index(image->data().toString().toUtf8().constData());
+
+				m_ui_->status_bar->showMessage("Loading image: 0%");
+				auto image_loading([this](const boost::filesystem::path& filepath)
 				{
-					this->UpdateStatusBar("Loading image: " + QString(std::to_string(progress).data()) + "%");
-				}
-			});
+					if (filepath.has_filename())
+					{
+						this->RequestOpenImage(QString::fromStdString(filepath.string()));
+					}
+					else
+					{
+						this->UpdateStatusBar("Failed to load image.");
+					}
+				});
 
-			m_source_.GetImageFile(image_index, image_loading, acquisition_tracking);
+				auto acquisition_tracking([this, bar = m_ui_->status_bar](const uint8_t progress)
+				{
+					if (bar->currentMessage().endsWith("%"));
+					{
+						this->UpdateStatusBar("Loading image: " + QString(std::to_string(progress).data()) + "%");
+					}
+				});
+
+				m_source_.GetImageFile(image_index, image_loading, acquisition_tracking);
+			}
 		}
 	}
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <QDropEvent>
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
 
@@ -35,8 +36,6 @@ namespace ASAP::GUI
 			void SetImageItems(const Data::DataTable& items, QStandardItemModel* model);
 
 		public slots:
-			void MoveImageSelectionLeft(void);
-			void MoveImageSelectionRight(void);
 			void UpdateImageIcons(void);
 			void UpdateStatusBar(const QString& message);
 
@@ -73,6 +72,8 @@ namespace ASAP::GUI
 			void SetModels_(void);
 			void SetSlots_(void);
 
+			bool eventFilter(QObject* obj, QEvent* event);
+
 		private slots:
 			void OnWorklistClear_(QModelIndex index, int row, int column);
 			void OnPatientsClear_(QModelIndex index, int row, int column);
@@ -81,12 +82,14 @@ namespace ASAP::GUI
 			void OnWorklistSelect_(QModelIndex index);
 			void OnPatientSelect_(QModelIndex index);
 			void OnStudySelect_(QModelIndex index);
-			void OnImageSelect_(QModelIndex index);
+			void OnImageSelect_(const bool checked);
 
 			void OnSelectFileSource_(bool checked);
 			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
 
+			void OnImageDrop_(QDropEvent* drop_event);
+			void OnImageDelete_();
 			void OnCreateWorklist_(void);
 			void OnOpenImage_(QString path);
 			void OnWorklistRefresh(void);

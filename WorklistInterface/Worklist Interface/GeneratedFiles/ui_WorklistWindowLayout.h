@@ -23,7 +23,6 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTableView>
-#include <QtWidgets/QTreeView>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -40,12 +39,12 @@ public:
     QLabel *label_patients;
     QLabel *label_worklists;
     QLabel *label_studies;
-    QTreeView *view_worklists;
     QTableView *view_patients;
-    QListView *view_images;
     QLabel *label_images;
+    QListView *view_images;
     QTableView *view_studies;
     QPushButton *button_open_image;
+    QListView *view_worklists;
     QMenuBar *menuBar;
     QMenu *menu_start;
     QMenu *menu_history;
@@ -90,18 +89,6 @@ public:
 
         gridLayout->addWidget(label_studies, 2, 1, 1, 1);
 
-        view_worklists = new QTreeView(centralWidget);
-        view_worklists->setObjectName(QStringLiteral("view_worklists"));
-        view_worklists->setMinimumSize(QSize(300, 0));
-        view_worklists->setMaximumSize(QSize(300, 16777215));
-        view_worklists->setAcceptDrops(true);
-        view_worklists->setEditTriggers(QAbstractItemView::EditKeyPressed);
-        view_worklists->setDragDropMode(QAbstractItemView::NoDragDrop);
-        view_worklists->setRootIsDecorated(true);
-        view_worklists->setHeaderHidden(true);
-
-        gridLayout->addWidget(view_worklists, 1, 0, 5, 1);
-
         view_patients = new QTableView(centralWidget);
         view_patients->setObjectName(QStringLiteral("view_patients"));
         view_patients->setEnabled(true);
@@ -118,6 +105,11 @@ public:
         view_patients->verticalHeader()->setMinimumSectionSize(20);
 
         gridLayout->addWidget(view_patients, 1, 1, 1, 1);
+
+        label_images = new QLabel(centralWidget);
+        label_images->setObjectName(QStringLiteral("label_images"));
+
+        gridLayout->addWidget(label_images, 4, 1, 1, 1);
 
         view_images = new QListView(centralWidget);
         view_images->setObjectName(QStringLiteral("view_images"));
@@ -139,11 +131,6 @@ public:
 
         gridLayout->addWidget(view_images, 5, 1, 1, 1);
 
-        label_images = new QLabel(centralWidget);
-        label_images->setObjectName(QStringLiteral("label_images"));
-
-        gridLayout->addWidget(label_images, 4, 1, 1, 1);
-
         view_studies = new QTableView(centralWidget);
         view_studies->setObjectName(QStringLiteral("view_studies"));
         view_studies->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed);
@@ -163,6 +150,16 @@ public:
         button_open_image->setMaximumSize(QSize(16777215, 16777215));
 
         gridLayout->addWidget(button_open_image, 6, 1, 1, 1);
+
+        view_worklists = new QListView(centralWidget);
+        view_worklists->setObjectName(QStringLiteral("view_worklists"));
+        view_worklists->setMinimumSize(QSize(300, 0));
+        view_worklists->setMaximumSize(QSize(300, 16777215));
+        view_worklists->setAcceptDrops(true);
+        view_worklists->setEditTriggers(QAbstractItemView::EditKeyPressed);
+        view_worklists->setDragDropMode(QAbstractItemView::DropOnly);
+
+        gridLayout->addWidget(view_worklists, 1, 0, 5, 1);
 
         WorklistWindowLayout->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(WorklistWindowLayout);

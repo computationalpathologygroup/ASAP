@@ -57,19 +57,23 @@ namespace ASAP::GUI
 
 	void CompositeWindow::OnTabChange_(int index)
 	{
-		// Stores the menu bar back into the originating child.
-		if (m_current_child_ > -1 && index > -1)
+		// Ensures the object still exists.
+		if (this)
 		{
-			m_children_[m_current_child_]->setMenuBar(this->menuBar());
-		}
-		
-		// Acquires the menu bar from the current child.
-		if (index > -1)
-		{
-			this->setMenuBar(m_children_[index]->menuBar());
-		}
+			// Stores the menu bar back into the originating child.
+			if (m_current_child_ > -1 && index > -1)
+			{
+				m_children_[m_current_child_]->setMenuBar(this->menuBar());
+			}
 
-		m_current_child_ = index;
+			// Acquires the menu bar from the current child.
+			if (index > -1)
+			{
+				this->setMenuBar(m_children_[index]->menuBar());
+			}
+
+			m_current_child_ = index;
+		}
 	}
 
 	void CompositeWindow::OnTabRequest_(int tab_id)
