@@ -96,14 +96,14 @@ namespace ASAP::Data
 			/// <param name="image_index">The id of the image to acquire the thumbnail for.</param>
 			/// <param name="receiver">A lamba that accepts a filepath pointing towards the thumbnail.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer) = 0;
+			virtual size_t GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer) = 0;
 			/// <summary>
 			/// Offers an image through a filepath.
 			/// </summary>
 			/// <param name="image_index">The id of the image to acquire.</param>
 			/// <param name="receiver">A lamba that accepts a filepath pointing towards the image.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer) = 0;
+			virtual size_t GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer) = 0;
 
 			/// <summary>
 			/// Returns the headers for the Worklist table.
