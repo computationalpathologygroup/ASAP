@@ -18,15 +18,11 @@
 
 using namespace ASAP::Data;
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	WorklistWindow::WorklistWindow(QWidget* parent) :
 		CompositeChild(parent),
 		m_ui_(new Ui::WorklistWindowLayout),
-		m_images_model_(new QStandardItemModel(0, 0)),
-		m_patients_model_(new QStandardItemModel(0, 0)),
-		m_studies_model_(new QStandardItemModel(0, 0)),
-		m_worklist_model_(new QStandardItemModel(0, 0)),
 		m_storage_directory_(boost::filesystem::path("/temp/"), Misc::TemporaryDirectoryTracker::GetStandardConfiguration()),
 		m_source_(m_storage_directory_)
 	{
@@ -90,82 +86,6 @@ namespace ASAP::GUI
 				QMessageBox::question(this, "Error", e.what(), QMessageBox::Ok);
 			}
 		}
-	}
-
-	void WorklistWindow::SetWorklistItems(const DataTable& items, QStandardItemModel* model)
-	{
-		if (model->rowCount() == 0)
-		{
-			QStandardItem* model_item(new QStandardItem("All"));
-			model->setItem(m_worklist_model_->rowCount(), 0, model_item);
-		}
-
-		model->removeRows(1, model->rowCount());
-		for (size_t item = 0; item < items.Size(); ++item)
-		{
-			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{ "id", "title" }));
-			QStandardItem* model_item(new QStandardItem(QString(record[1]->data())));
-			model_item->setData(QVariant(record[0]->data()));
-			model->setItem(m_worklist_model_->rowCount(), 0, model_item);
-		}
-	}
-
-	void WorklistWindow::SetPatientsItems(const Data::DataTable& items, QStandardItemModel* model)
-	{
-		model->removeRows(0, model->rowCount());
-		model->setRowCount(items.Size());
-		for (size_t item = 0; item < items.Size(); ++item)
-		{
-			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
-			for (size_t field = 0; field < record.size(); ++field)
-			{
-				QStandardItem* model_item = new QStandardItem(QString(record[field]->data()));
-				model_item->setData(QVariant(items.At(item, { "id" })[0]->data()));
-				model->setItem(item, field, model_item);
-			}
-		}
-	}
-
-	void WorklistWindow::SetStudyItems(const Data::DataTable& items, QStandardItemModel* model)
-	{
-		model->removeRows(0, model->rowCount());
-		model->setRowCount(items.Size());
-		for (size_t item = 0; item < items.Size(); ++item)
-		{
-			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
-			for (size_t field = 0; field < record.size(); ++field)
-			{
-				QStandardItem* model_item = new QStandardItem(QString(record[field]->data()));
-				model_item->setData(QVariant(items.At(item, { "id" })[0]->data()));
-				model->setItem(item, field, model_item);
-			}
-		}
-	}
-
-	// Todo: Loading and halting might be a bit too messy in terms of tasks and code calling, refactor
-	void WorklistWindow::SetImageItems(const Data::DataTable& items, QStandardItemModel* model)
-	{
-		m_stop_loading_ = false;
-
-		model->removeRows(0, model->rowCount());
-		QtConcurrent::run([this, items, model, lock=&m_image_loading_access_, stop_loading=&m_stop_loading_, size=200]()
-		{
-			IconCreator creator;
-
-			connect(&creator,
-					&IconCreator::RequiresItemRefresh,
-					this,
-					&WorklistWindow::UpdateImageIcons);
-
-			connect(&creator,
-					&IconCreator::RequiresStatusBarChange,
-					this,
-					&WorklistWindow::UpdateStatusBar);
-
-			lock->lock();
-			creator.InsertIcons(items, model, size, *stop_loading);
-			lock->unlock();
-		});
 	}
 
 	// Todo: Decouple and create abstraction of schema's
@@ -249,7 +169,7 @@ namespace ASAP::GUI
 
 	void WorklistWindow::StopThumbnailLoading_(void)
 	{
-		m_stop_loading_ = true;
+		m_continue_loading_ = false;
 		m_image_loading_access_.lock();
 		m_image_loading_access_.unlock();
 	}
@@ -283,10 +203,10 @@ namespace ASAP::GUI
 	void WorklistWindow::UpdateSourceViews_(void)
 	{
 		// Clears all previous source information.
-		SetWorklistItems(Data::DataTable(), m_worklist_model_);
-		SetPatientsItems(Data::DataTable(), m_patients_model_);
-		SetStudyItems(Data::DataTable(), m_studies_model_);
-		SetImageItems(Data::DataTable(), m_images_model_);
+		m_models_.SetWorklistItems(Data::DataTable());
+		m_models_.SetPatientsItems(Data::DataTable());
+		m_models_.SetStudyItems(Data::DataTable());
+		m_models_.SetImageItems(Data::DataTable(), this, m_continue_loading_);
 
 		// Resets the view to the Filelist standard.
 		WorklistSourceInterface::SourceType type = WorklistSourceInterface::SourceType::FILELIST;
@@ -298,20 +218,25 @@ namespace ASAP::GUI
 
 			if (type == WorklistSourceInterface::SourceType::FILELIST)
 			{
-				QStandardItemModel* image_model = m_images_model_;
-				m_source_.GetImageRecords(std::string(), std::string(), [this, image_model](Data::DataTable& table, int error)
+				m_source_.GetImageRecords(std::string(), std::string(), [this, models=&m_models_, continue_loading=&m_continue_loading_](Data::DataTable& table, int error)
 				{
 					if (error == 0)
 					{
-						this->SetImageItems(table, image_model);
+						models->SetImageItems(table, this, *continue_loading);
 					}
 				});
 			}
 			else if (type == WorklistSourceInterface::SourceType::FULL_WORKLIST)
 			{
-				SetHeaders_(m_source_.GetPatientHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_patients_model_, m_ui_->view_patients);
-				SetHeaders_(m_source_.GetStudyHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_studies_model_, m_ui_->view_studies);
+				std::vector<std::pair<std::set<std::string>, QAbstractItemView*>> headers(
+				{
+					{ std::set<std::string>(), nullptr },
+					{ m_source_.GetPatientHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_ui_->view_patients },
+					{ m_source_.GetStudyHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_ui_->view_studies },
+					{ std::set<std::string>(), nullptr }
+				});
 
+				m_models_.UpdateHeaders(headers);
 				this->RequestWorklistRefresh();
 			}
 		}
@@ -340,26 +265,12 @@ namespace ASAP::GUI
 		}
 	}
 
-	void WorklistWindow::SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
-	{
-		QStringList q_headers;
-		for (const std::string& column : headers)
-		{
-			std::string capital_column = column;
-			capital_column[0] = std::toupper(capital_column[0]);
-			q_headers.push_back(QString(capital_column.c_str()));
-		}
-		model->setColumnCount(q_headers.size());
-		model->setHorizontalHeaderLabels(q_headers);
-		view->update();
-	}
-
 	void WorklistWindow::SetModels_(void)
 	{
-		m_ui_->view_images->setModel(m_images_model_);
-		m_ui_->view_patients->setModel(m_patients_model_);
-		m_ui_->view_studies->setModel(m_studies_model_);
-		m_ui_->view_worklists->setModel(m_worklist_model_);
+		m_ui_->view_images->setModel(m_models_.images);
+		m_ui_->view_patients->setModel(m_models_.patients);
+		m_ui_->view_studies->setModel(m_models_.studies);
+		m_ui_->view_worklists->setModel(m_models_.worklists);
 	}
 
 	bool WorklistWindow::eventFilter(QObject* obj, QEvent* event)
@@ -376,17 +287,17 @@ namespace ASAP::GUI
 	
 	void WorklistWindow::SetSlots_(void)
 	{
-		connect(m_worklist_model_,
+		connect(m_models_.worklists,
 			SIGNAL(rowsRemoved(QModelIndex, int, int)),
 			this,
 			SLOT(OnWorklistClear_(QModelIndex, int, int)));
 
-		connect(m_patients_model_,
+		connect(m_models_.patients,
 			SIGNAL(rowsRemoved(QModelIndex, int, int)),
 			this,
 			SLOT(OnPatientsClear_(QModelIndex, int, int)));
 
-		connect(m_studies_model_,
+		connect(m_models_.studies,
 			SIGNAL(rowsRemoved(QModelIndex, int, int)),
 			this,
 			SLOT(OnStudyClear_(QModelIndex, int, int)));
@@ -410,17 +321,6 @@ namespace ASAP::GUI
 			&QPushButton::clicked,
 			this,
 			&WorklistWindow::OnImageSelect_);
-
-
-		/*connect(m_ui_->view_images,
-			SIGNAL(clicked(QModelIndex)),
-			this,
-			SLOT(OnImageSelect_(QModelIndex)));
-
-		connect(m_ui_->view_images,
-			SIGNAL(activated(QModelIndex)),
-			this,
-			SLOT(OnImageSelect_(QModelIndex)));*/
 
 		connect(m_ui_->button_create_worklist,
 			&QPushButton::clicked,
@@ -462,7 +362,7 @@ namespace ASAP::GUI
 
 	void WorklistWindow::UpdateImageIcons(void)
 	{
-		m_images_model_->layoutChanged();
+		m_models_.images->layoutChanged();
 	}
 
 	void WorklistWindow::UpdateStatusBar(const QString& message)
@@ -494,8 +394,20 @@ namespace ASAP::GUI
 		// Acquires the additional image ID's.
 		if (owner != 0)
 		{
-			// Acquires current worklist images
-			auto test = drop_event->mimeData()->text();
+			QByteArray encoded = drop_event->mimeData()->data("application/x-qabstractitemmodeldatalist");
+			QDataStream stream(&encoded, QIODevice::ReadOnly);
+			int row, column;
+			stream >> row >> column;
+
+			QStandardItemModel* model;
+			switch (owner)
+			{
+				case 'i': model = m_models_.images;		break;
+				case 's': model = m_models_.studies;	break;
+				case 'p': model = m_models_.patients;	break;
+			}
+			QStandardItem* item = model->itemFromIndex(model->index(row, column));
+			std::string item_id(item->data().toString().toUtf8().constData());
 		}
 	}
 
@@ -506,34 +418,34 @@ namespace ASAP::GUI
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
 	{
-		m_patients_model_->removeRows(0, m_patients_model_->rowCount());
+		m_models_.patients->removeRows(0, m_models_.patients->rowCount());
 		m_ui_->view_patients->update();
 	}
 
 	void WorklistWindow::OnPatientsClear_(QModelIndex index, int, int)
 	{
-		m_studies_model_->removeRows(0, m_studies_model_->rowCount());
+		m_models_.studies->removeRows(0, m_models_.studies->rowCount());
 		m_ui_->view_studies->update();
 	}
 
 	void WorklistWindow::OnStudyClear_(QModelIndex index, int, int)
 	{
-		m_images_model_->removeRows(0, m_images_model_->rowCount());
+		m_models_.images->removeRows(0, m_models_.images->rowCount());
 		m_ui_->view_images->update();
 	}
 
 	void WorklistWindow::OnWorklistSelect_(QModelIndex index)
 	{
-		QStandardItem* item(m_worklist_model_->itemFromIndex(index));
+		QStandardItem* item(m_models_.worklists->itemFromIndex(index));
 		std::string worklist_id(item->data().toString().toUtf8().constData());
 
-		QStandardItemModel* patient_model	= m_patients_model_;
+		QStandardItemModel* patient_model	= m_models_.patients;
 		QTableView* patient_view			= m_ui_->view_patients;
 		m_source_.GetPatientRecords(worklist_id, [this, patient_model, patient_view](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
-				this->SetPatientsItems(table, patient_model);
+				m_models_.SetPatientsItems(table);
 				patient_view->update();
 			}
 		});
@@ -541,16 +453,16 @@ namespace ASAP::GUI
 
 	void WorklistWindow::OnPatientSelect_(QModelIndex index)
 	{
-		QStandardItem* item(m_patients_model_->itemFromIndex(index));
+		QStandardItem* item(m_models_.patients->itemFromIndex(index));
 		std::string patient_id(item->data().toString().toUtf8().constData());
 
-		QStandardItemModel* study_model = m_studies_model_;
+		QStandardItemModel* study_model = m_models_.studies;
 		QTableView* study_view = m_ui_->view_studies;
 		m_source_.GetStudyRecords(patient_id, [this, study_model, study_view](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
-				this->SetStudyItems(table, study_model);
+				m_models_.SetStudyItems(table);
 				study_view->update();
 			}
 		});
@@ -560,19 +472,17 @@ namespace ASAP::GUI
 	{
 		QModelIndexList selected_worklist(m_ui_->view_worklists->selectionModel()->selectedIndexes());
 
-		QStandardItem* study_item(m_studies_model_->itemFromIndex(index));
-		QStandardItem* worklist_item(m_worklist_model_->itemFromIndex(selected_worklist[0]));
+		QStandardItem* study_item(m_models_.studies->itemFromIndex(index));
+		QStandardItem* worklist_item(m_models_.worklists->itemFromIndex(selected_worklist[0]));
 
 		std::string study_id(study_item->data().toString().toUtf8().constData());
 		std::string worklist_id(worklist_item->data().toString().toUtf8().constData());
 
-		QStandardItemModel* image_model = m_images_model_;
-		QListView* image_view = m_ui_->view_images;
-		m_source_.GetImageRecords(worklist_id, study_id, [this, image_model, image_view](Data::DataTable table, int error)
+		m_source_.GetImageRecords(worklist_id, study_id, [this, models=&m_models_, continue_loading=&m_continue_loading_, image_view=m_ui_->view_images](Data::DataTable table, int error)
 		{
 			if (error == 0)
 			{
-				this->SetImageItems(table, image_model);
+				models->SetImageItems(table, this, *continue_loading);
 				image_view->update();
 			}
 		});
@@ -586,7 +496,7 @@ namespace ASAP::GUI
 
 			for (QModelIndex& index : selected)
 			{
-				QStandardItem* image(m_images_model_->itemFromIndex(index));
+				QStandardItem* image(m_models_.images->itemFromIndex(index));
 				std::string image_index(image->data().toString().toUtf8().constData());
 
 				m_ui_->status_bar->showMessage("Loading image: 0%");
@@ -684,11 +594,11 @@ namespace ASAP::GUI
 
 	void WorklistWindow::OnWorklistRefresh(void)
 	{
-		m_source_.GetWorklistRecords([this, worklist_model = m_worklist_model_](Data::DataTable& table, int error)
+		m_source_.GetWorklistRecords([models=&m_models_](Data::DataTable& table, int error)
 		{
 			if (error == 0)
 			{
-				this->SetWorklistItems(table, worklist_model);
+				models->SetWorklistItems(table);
 			}
 		});
 	}

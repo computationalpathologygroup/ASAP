@@ -11,11 +11,12 @@
 
 #include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
+#include "ASAP/ASAP_Window.h"
 #include "Data/SourceProxy.h"
 #include "Misc/TemporaryDirectoryTracker.h"
-#include "ASAP/ASAP_Window.h"
+#include "Models/WorklistModels.h"
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	// TODO: Decouple source management from worklist window
 	class WorklistWindow : public CompositeChild
@@ -30,10 +31,6 @@ namespace ASAP::GUI
 
 			void SetDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> parameters);
 			void SetDataSource(const std::string& source);
-			void SetWorklistItems(const Data::DataTable& items, QStandardItemModel* model);
-			void SetPatientsItems(const Data::DataTable& items, QStandardItemModel* model);
-			void SetStudyItems(const Data::DataTable& items, QStandardItemModel* model);
-			void SetImageItems(const Data::DataTable& items, QStandardItemModel* model);
 
 		public slots:
 			void UpdateImageIcons(void);
@@ -45,21 +42,17 @@ namespace ASAP::GUI
 			void RequestWorklistRefresh(void);
 
 		private:
-			Data::SourceProxy										m_source_;
-			std::unique_ptr<Ui::WorklistWindowLayout>				m_ui_;
-			bool													m_stop_loading_; // Todo: Refactor into something cleaner
-			std::mutex												m_image_loading_access_; // Todo: Refactor into something cleaner
-			std::mutex												m_image_switch_access_;
-			std::mutex												m_status_bar_access_;
-			Misc::TemporaryDirectoryTracker							m_storage_directory_;
-			std::vector<std::unique_ptr<QAction>>					m_history_actions_;
-			ASAP_Window*											m_workstation_; // Todo: Clean up or perhaps combine in struct
-			int														m_workstation_tab_id_;
-
-			QStandardItemModel* m_images_model_;
-			QStandardItemModel* m_patients_model_;
-			QStandardItemModel* m_studies_model_;
-			QStandardItemModel* m_worklist_model_;
+			Data::SourceProxy							m_source_;
+			std::unique_ptr<Ui::WorklistWindowLayout>	m_ui_;
+			bool										m_continue_loading_; // Todo: Refactor into something cleaner
+			std::mutex									m_image_loading_access_; // Todo: Refactor into something cleaner
+			std::mutex									m_image_switch_access_;
+			std::mutex									m_status_bar_access_;
+			Misc::TemporaryDirectoryTracker				m_storage_directory_;
+			std::vector<std::unique_ptr<QAction>>		m_history_actions_;
+			ASAP_Window*								m_workstation_; // Todo: Clean up or perhaps combine in struct
+			int											m_workstation_tab_id_;
+			WorklistModels								m_models_;
 
 			bool CheckSchema_(void);
 			void LoadSettings_(void);
@@ -68,7 +61,6 @@ namespace ASAP::GUI
 			void UpdatePreviousSources_(void);
 			void UpdateSourceViews_(void);
 
-			void SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
 			void SetModels_(void);
 			void SetSlots_(void);
 
