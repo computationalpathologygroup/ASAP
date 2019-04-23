@@ -27,7 +27,7 @@ namespace ASAP::Data
 
 	GrandChallengeURLInfo GrandChallengeSource::GetStandardURI(const std::wstring base_url)
 	{
-		return { base_url, L"worklists/list/", L"worklists/set/", L"patients/patient/", L"studies/study/", L"api/v1/cases/images/" };
+		return { base_url, L"api/v1/worklists/", L"api/v1/patients/", L"api/v1/studies/", L"api/v1/cases/images/" };
 	}
 
 	size_t GrandChallengeSource::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
