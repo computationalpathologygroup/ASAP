@@ -9,7 +9,7 @@
 #include "CompositeChild.h"
 #include "ui_CompositeWindowLayout.h"
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	/// <summary>
 	/// Holds a shortcut bound to an action.

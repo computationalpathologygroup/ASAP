@@ -2,7 +2,7 @@
 
 #include <qshortcut.h>
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	CompositeWindow::CompositeWindow(QWidget* parent) : QMainWindow(parent), m_ui_(new Ui::CompositeWindowLayout), m_current_child_(-1)
 	{

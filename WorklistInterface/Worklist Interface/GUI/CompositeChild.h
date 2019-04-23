@@ -2,7 +2,7 @@
 #define __ASAP_GUI_COMPOSITECHILD__
 #include <QMainWindow>
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	/// <summary>
 	/// Provides an interface that interacts with the CompositeWindow class,
