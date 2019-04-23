@@ -3,13 +3,14 @@
 #include <cctype>
 #include <QtConcurrent\qtconcurrentrun.h>
 
-#include "../GUI/IconCreator.h"
+#include "GUI/IconCreator.h"
+#include "GUI/WorklistWindow.h"
 
 using namespace ASAP::Data;
 
-namespace ASAP::Models
+namespace ASAP
 {
-	WorklistModels::WorklistModels(void)
+	WorklistModels::WorklistModels(void) : images(new QStandardItemModel(0, 0)), patients(new QStandardItemModel(0, 0)), studies(new QStandardItemModel(0, 0)), worklists(new QStandardItemModel(0, 0))
 	{
 	}
 
@@ -26,6 +27,7 @@ namespace ASAP::Models
 		{
 			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{ "id", "title" }));
 			QStandardItem* model_item(new QStandardItem(QString(record[1]->data())));
+
 			model_item->setData(QVariant(record[0]->data()));
 			worklists->setItem(worklists->rowCount(), 0, model_item);
 		}
@@ -63,7 +65,7 @@ namespace ASAP::Models
 		}
 	}
 
-	void WorklistModels::SetImageItems(const Data::DataTable& items, GUI::WorklistWindow* window, bool& continue_loading)
+	void WorklistModels::SetImageItems(const Data::DataTable& items, WorklistWindow* window, bool& continue_loading)
 	{
 		continue_loading = true;
 
@@ -75,12 +77,12 @@ namespace ASAP::Models
 			QObject::connect(&creator,
 					&GUI::IconCreator::RequiresItemRefresh,
 					window,
-					&GUI::WorklistWindow::UpdateImageIcons);
+					&WorklistWindow::UpdateImageIcons);
 
 			QObject::connect(&creator,
 					&GUI::IconCreator::RequiresStatusBarChange,
 					window,
-					&GUI::WorklistWindow::UpdateStatusBar);
+					&WorklistWindow::UpdateStatusBar);
 
 			creator.InsertIcons(items, images, size, *continue_loading);
 		});
@@ -91,10 +93,12 @@ namespace ASAP::Models
 		std::vector<QStandardItemModel*> models({ worklists, patients, studies, images });
 		for (size_t m = 0; m < models.size(); ++m)
 		{
-			SetHeaders_(header_view_couple[m].first, models[m], header_view_couple[m].second);
+			if (header_view_couple[m].second)
+			{
+				SetHeaders_(header_view_couple[m].first, models[m], header_view_couple[m].second);
+			}
 		}
 	}
-
 
 	void WorklistModels::SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view)
 	{

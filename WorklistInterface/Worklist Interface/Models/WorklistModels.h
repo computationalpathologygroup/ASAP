@@ -2,13 +2,16 @@
 #define __ASAP_MODELS_WORKLISTMODELS__
 
 #include <set>
+#include <QAbstractItemView>
 #include <QStandardItemModel>
 
 #include "Data/DataTable.h"
-#include "../GUI/WorklistWindow.h"
 
-namespace ASAP::Models
+namespace ASAP
 {
+	// Forward declaration
+	class WorklistWindow;
+
 	class WorklistModels
 	{
 		public:
@@ -22,7 +25,7 @@ namespace ASAP::Models
 			void SetWorklistItems(const Data::DataTable& items);
 			void SetPatientsItems(const Data::DataTable& items);
 			void SetStudyItems(const Data::DataTable& items);
-			void SetImageItems(const Data::DataTable& items, GUI::WorklistWindow* window, bool& continue_loading);
+			void SetImageItems(const Data::DataTable& items, WorklistWindow* window, bool& continue_loading);
 
 			void UpdateHeaders(std::vector<std::pair<std::set<std::string>, QAbstractItemView*>>& header_view_couple);
 
