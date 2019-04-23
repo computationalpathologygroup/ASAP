@@ -52,37 +52,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" rowspan="5">
-     <widget class="QTreeView" name="view_worklists">
-      <property name="minimumSize">
-       <size>
-        <width>300</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>300</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="acceptDrops">
-       <bool>true</bool>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::EditKeyPressed</set>
-      </property>
-      <property name="dragDropMode">
-       <enum>QAbstractItemView::NoDragDrop</enum>
-      </property>
-      <property name="rootIsDecorated">
-       <bool>true</bool>
-      </property>
-      <property name="headerHidden">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="1">
      <widget class="QTableView" name="view_patients">
       <property name="enabled">
@@ -121,6 +90,13 @@
       <attribute name="verticalHeaderMinimumSectionSize">
        <number>20</number>
       </attribute>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QLabel" name="label_images">
+      <property name="text">
+       <string>Images</string>
+      </property>
      </widget>
     </item>
     <item row="5" column="1">
@@ -169,13 +145,6 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
-     <widget class="QLabel" name="label_images">
-      <property name="text">
-       <string>Images</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="1">
      <widget class="QTableView" name="view_studies">
       <property name="editTriggers">
@@ -217,6 +186,31 @@
       </property>
       <property name="text">
        <string>Open Image</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="5">
+     <widget class="QListView" name="view_worklists">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::EditKeyPressed</set>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::DropOnly</enum>
       </property>
      </widget>
     </item>
