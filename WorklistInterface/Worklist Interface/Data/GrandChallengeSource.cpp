@@ -17,7 +17,6 @@ namespace ASAP::Data
 		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4), m_temporary_directory_(temp_dir)
 	{
 		InitializeTables_();
-		AcquireWorklistSet_();
 	}
 
 	WorklistSourceInterface::SourceType GrandChallengeSource::GetSourceType(void)
@@ -33,7 +32,7 @@ namespace ASAP::Data
 	size_t GrandChallengeSource::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
 	{
 		std::wstringstream body;
-		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"set\":\"" << m_worklist_set_id_ << "\", \"images\": [] }";
+		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"images\": [] }";
 
 		web::http::http_request request(web::http::methods::POST);
 		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
@@ -48,7 +47,7 @@ namespace ASAP::Data
 	size_t GrandChallengeSource::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
 	{
 		std::wstringstream body;
-		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"set\":\"" << m_worklist_set_id_ << "\", \"images\": [ ";
+		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"images\": [ ";
 
 		for (size_t i = 0; i < images.size(); ++i)
 		{
@@ -261,36 +260,6 @@ namespace ASAP::Data
 	void GrandChallengeSource::CancelTask(size_t id)
 	{
 		m_connection_.CancelTask(id);
-	}
-
-	void GrandChallengeSource::AcquireWorklistSet_(void)
-	{
-		web::http::http_request set_request(web::http::methods::GET);
-		set_request.set_request_uri(L"/" + m_rest_uri_.worklist_set_addition);
-
-		m_connection_.SendRequest(set_request).then([connection=&m_connection_, info=&m_rest_uri_, &set_id=m_worklist_set_id_](web::http::http_response& response)
-		{
-			// If there is a set, acquire worklists.
-			web::json::value set_json(response.extract_json().get());
-			if (set_json.size() == 0)
-			{
-				web::http::http_request set_creation(web::http::methods::POST);
-				set_creation.set_request_uri(L"/" + info->worklist_set_addition);
-				set_creation.set_body(L"{ \"title\": \"user worklists\" }", L"application/json");
-
-				connection->SendRequest(set_creation).then([&set_id](web::http::http_response& response)
-				{
-					web::json::value set_json = response.extract_json().get();
-					set_id = set_json.at(L"id").to_string();
-				}).wait();
-			}
-			else
-			{
-				set_id = set_json.as_array()[0].at(L"id").to_string();
-			}
-
-			set_id.erase(std::remove(set_id.begin(), set_id.end(), L'"'), set_id.end());
-		}).wait();
 	}
 
 	void GrandChallengeSource::InitializeTables_(void)

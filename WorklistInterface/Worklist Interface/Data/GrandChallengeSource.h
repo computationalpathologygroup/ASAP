@@ -57,9 +57,7 @@ namespace ASAP::Data
 			GrandChallengeURLInfo				m_rest_uri_;
 			std::vector<DataTable>				m_schemas_;
 			Misc::TemporaryDirectoryTracker&	m_temporary_directory_;
-			std::wstring						m_worklist_set_id_;
 
-			void AcquireWorklistSet_(void);
 			void InitializeTables_(void);
 	};
 }
