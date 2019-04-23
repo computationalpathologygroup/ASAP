@@ -9,7 +9,7 @@
 #include <QGridLayout>
 #include <QCheckBox>
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	class ExternalSourceDialog : public QDialog
 	{

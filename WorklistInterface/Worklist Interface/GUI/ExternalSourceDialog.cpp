@@ -1,6 +1,6 @@
 #include "ExternalSourceDialog.h"
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	ExternalSourceDialog::ExternalSourceDialog(QWidget* parent) : QDialog(parent)
 	{
