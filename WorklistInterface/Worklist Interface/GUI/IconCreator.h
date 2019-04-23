@@ -24,7 +24,7 @@ namespace ASAP::GUI
 		public:
 			IconCreator(void);
 	
-			void InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading);
+			void InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
 		
 		private:

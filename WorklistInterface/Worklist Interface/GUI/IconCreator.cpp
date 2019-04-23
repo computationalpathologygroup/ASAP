@@ -13,7 +13,7 @@ namespace ASAP::GUI
 	{
 	}
 
-	void IconCreator::InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& stop_loading)
+	void IconCreator::InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading)
 	{
 		QIcon placeholder_icon(CreateBlankIcon_(size));
 		QIcon invalid_icon(CreateInvalidIcon_(size));
@@ -36,7 +36,7 @@ namespace ASAP::GUI
 		for (size_t item = 0; item < image_items.Size(); ++item)
 		{
 			// Exits the loading loop if the signal is flipped to true.
-			if (stop_loading)
+			if (!continue_loading)
 			{
 				break;
 			}

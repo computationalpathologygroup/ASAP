@@ -73,13 +73,13 @@ namespace ASAP::Data
 		}
 		catch (const std::exception& e)
 		{
-			throw std::runtime_error("Unable to open source: " + source_path);
+			throw std::runtime_error("Unable to open source: " + source_path + "\n" + e.what());
 		}
 	}
 
 	bool SourceProxy::IsInitialized(void)
 	{
-		return m_source_ == nullptr;
+		return m_source_ != nullptr;
 	}
 
 	const std::string& SourceProxy::GetCurrentSource(void)
@@ -191,12 +191,12 @@ namespace ASAP::Data
 		return m_source_->GetImageRecords(worklist_index, study_index, receiver);
 	}
 
-	size_t SourceProxy::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
+	size_t SourceProxy::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		return m_source_->GetImageThumbnailFile(image_index, receiver, observer);
 	}
 
-	size_t SourceProxy::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)> observer)
+	size_t SourceProxy::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		return m_source_->GetImageFile(image_index, receiver, observer);
 	}
