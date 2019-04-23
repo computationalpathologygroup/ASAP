@@ -199,11 +199,8 @@ namespace ASAP::Data
 
 	size_t GrandChallengeSource::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		std::string sanitized_index(image_index);
-		sanitized_index.erase(std::remove(sanitized_index.begin(), sanitized_index.end(), '"'), sanitized_index.end());
-
 		std::wstringstream url;
-		url << L"/" << m_rest_uri_.image_addition << Misc::StringToWideString(sanitized_index) << L"/";
+		url << L"/" << m_rest_uri_.image_addition << Misc::StringToWideString(image_index) << L"/";
 
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
@@ -292,7 +289,7 @@ namespace ASAP::Data
 				set_id = set_json.as_array()[0].at(L"id").to_string();
 			}
 
-			set_id.erase(std::remove(set_id.begin(), set_id.end(), '"'), set_id.end());
+			set_id.erase(std::remove(set_id.begin(), set_id.end(), L'"'), set_id.end());
 		}).wait();
 	}
 
