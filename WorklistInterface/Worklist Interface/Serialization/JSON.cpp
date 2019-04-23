@@ -39,7 +39,9 @@ namespace ASAP::Serialization::JSON
 
 					for (const std::wstring& field : converted_fields)
 					{
-						results.back().push_back(Misc::WideStringToString(object.at(field).serialize()));
+						std::string field(Misc::WideStringToString(object.at(field).serialize()));
+						field.erase(std::remove(field.begin(), field.end(), '"'), field.end());
+						results.back().push_back(field);						
 					}
 				}
 			}
