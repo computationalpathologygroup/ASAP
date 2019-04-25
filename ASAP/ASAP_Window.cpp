@@ -58,19 +58,18 @@ ASAP_Window::ASAP_Window(QWidget *parent) :
   connect(actionClose, SIGNAL(triggered(bool)), this, SLOT(on_actionClose_triggered()));
   connect(actionAbout, SIGNAL(triggered(bool)), this, SLOT(on_actionAbout_triggered()));
 
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  this->loadPlugins();
-  view->setCacheSize(_cacheMaxByteSize);
-  if (view->hasTool("pan")) {
-    view->setActiveTool("pan");
+    this->loadPlugins();
+	m_document_window_->m_view_->setCacheSize(_cacheMaxByteSize);
+  if (m_document_window_->m_view_->hasTool("pan")) {
+	  m_document_window_->m_view_->setActiveTool("pan");
     QList<QAction*> toolButtons = mainToolBar->actions();
     for (QList<QAction*>::iterator it = toolButtons.begin(); it != toolButtons.end(); ++it) {
       if ((*it)->objectName() == "pan") {
         (*it)->setChecked(true);
       }
     }
-  }  
-  view->setEnabled(false);
+  }
+  m_document_window_->m_view_->setEnabled(false);
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
   readSettings();
   QStringList args = QApplication::arguments();
@@ -243,8 +242,7 @@ void ASAP_Window::on_actionClose_triggered(void)
 	if (!m_documents_.empty())
 	{
 		m_documents_.erase(m_documents_.begin());
-		PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-		view->close();
+		m_document_window_->m_view_->close();
 		statusBar->showMessage("Closed file!", 5);
 	}
 }
@@ -253,18 +251,20 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 	statusBar->clearMessage();
 	try
 	{
-		on_actionClose_triggered();
+		//on_actionClose_triggered();
 
-		m_documents_.insert({ m_document_id_count_, ASAP::Document(fileName.toStdString(), factoryName.toStdString()) });
+		auto result = m_documents_.insert({ m_document_id_count_, ASAP::Document(fileName.toStdString(), factoryName.toStdString()) });
 		m_document_id_count_++;
 
-		
-		_settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
-		_settings->setValue("currentFile", QFileInfo(fileName).fileName());
-		this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
-		PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-		view->initialize(m_documents_.begin()->second);
-		emit newImageLoaded(m_documents_.begin()->second.GetImage(), fileName.toStdString());
+		if (result.second)
+		{
+			_settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
+			_settings->setValue("currentFile", QFileInfo(fileName).fileName());
+			this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
+
+			m_document_window_->AddDocument(result.first->second);
+			emit newImageLoaded(result.first->second.GetImage(), fileName.toStdString());
+		}		
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -304,17 +304,16 @@ void ASAP_Window::on_actionOpen_triggered(void)
 }
 
 void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    view->setCacheSize(_cacheMaxByteSize);
+  if (m_document_window_->m_view_) {
+	  m_document_window_->m_view_->setCacheSize(_cacheMaxByteSize);
   }
 }
     
 unsigned long long ASAP_Window::getCacheSize(void) const {
-  PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
-  if (view) {
-    return view->getCacheSize();
+  if (m_document_window_->m_view_) {
+    return m_document_window_->m_view_->getCacheSize();
   }
+	return 1;
 }
 
 void ASAP_Window::setupUi(void)
@@ -377,10 +376,10 @@ void ASAP_Window::setupUi(void)
   //pathologyView = new PathologyViewer(centralWidget);
   //pathologyView->setObjectName(QStringLiteral("pathologyView"));
 
-  ASAP::DocumentWindow* document_window = new ASAP::DocumentWindow(centralWidget);
+  m_document_window_ = new ASAP::DocumentWindow(centralWidget);
 
 
-  horizontalLayout_2->addWidget(document_window);
+  horizontalLayout_2->addWidget(m_document_window_);
 
   this->setCentralWidget(centralWidget);
 }

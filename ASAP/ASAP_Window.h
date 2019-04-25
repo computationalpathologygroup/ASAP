@@ -15,7 +15,6 @@ class QHBoxLayout;
 class QAction;
 class QStatusBar;
 class QMenuBar;
-class PathologyViewer;
 class WorkstationExtensionPluginInterface;
 class QActionGroup;
 class QSettings;
@@ -79,13 +78,14 @@ private:
   QActionGroup *_toolActions;
   QWidget *centralWidget;
   QHBoxLayout *horizontalLayout_2;
-  PathologyViewer *pathologyView;
+ // PathologyViewer *pathologyView;
   QMenuBar *menuBar;
   QMenu *menuFile;
   QMenu *menuView;
   QMenu *menuHelp;
   QToolBar *mainToolBar;
   QStatusBar *statusBar;
+  ASAP::DocumentWindow* m_document_window_;
 
   // Initialize the GUI
   void initializeDocks(void);
