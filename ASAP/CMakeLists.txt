@@ -15,6 +15,7 @@ set(HEADERS
     interfaces/interfaces.h
     QtProgressMonitor.h
 	documents/Document.h
+	documents/DocumentWindow.h
 )
 
 set(SOURCE 
@@ -31,6 +32,7 @@ set(SOURCE
     UtilityFunctions.cpp
     QtProgressMonitor.cpp
 	documents/Document.cpp
+	documents/DocumentWindow.cpp
 )
 
 find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools)
