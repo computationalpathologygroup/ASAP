@@ -376,9 +376,9 @@ void ASAP_Window::setupUi(void)
   //pathologyView = new PathologyViewer(centralWidget);
   //pathologyView->setObjectName(QStringLiteral("pathologyView"));
 
-  m_document_window_ = new ASAP::DocumentWindow(centralWidget);
+ // m_document_window_ = new ASAP::DocumentWindow(centralWidget);
 
-
+  m_document_window_ = new ASAP::DocumentWindow(this);
   horizontalLayout_2->addWidget(m_document_window_);
 
   this->setCentralWidget(centralWidget);

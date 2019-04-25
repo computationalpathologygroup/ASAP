@@ -1,12 +1,13 @@
 #include "DocumentWindow.h"
 
 #include <sstream>
-
 #include <qmessagebox.h>
+
+#include "../PathologyViewer.h"
 
 namespace ASAP
 {
-	DocumentWindow::DocumentWindow(QWidget* parent) : QMainWindow(parent), m_active_document_(nullptr)
+	DocumentWindow::DocumentWindow(QWidget* parent) : QMainWindow(parent), m_active_document_(nullptr), m_documents_()
 	{
 		SetupUI_();
 	}
@@ -16,7 +17,7 @@ namespace ASAP
 		std::string filename(document.GetFilepath().filename().string());
 
 		// Inserts document into internal list.
-		auto result = m_documents_.insert({ document.GetFilepath().filename().string() , &document });
+		auto result = m_documents_.insert({ filename, &document });
 
 		if (result.second)
 		{
@@ -36,7 +37,10 @@ namespace ASAP
 
 	void DocumentWindow::SetupSlots_(void)
 	{
-
+		connect(m_document_bar_,
+			&QTabBar::currentChanged,
+			this,
+			&DocumentWindow::OnDocumentSelect_);
 	}
 
 	void DocumentWindow::SetupUI_(void)
@@ -45,5 +49,10 @@ namespace ASAP
 
 		m_view_ = new PathologyViewer(this);
 		m_view_->setObjectName(QStringLiteral("pathologyView"));
+	}
+
+	void DocumentWindow::OnDocumentSelect_(int index)
+	{
+		m_view_->initialize(*m_documents_[m_document_bar_->tabText(index).toStdString()]);
 	}
 }

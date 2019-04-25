@@ -4,10 +4,12 @@
 #include "asaplib_export.h"
 #include <string>
 #include <unordered_map>
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <qtabbar.h>
 
-#include "../PathologyViewer.h"
+#include "Document.h"
+
+class PathologyViewer;
 
 namespace ASAP
 {
@@ -18,7 +20,7 @@ namespace ASAP
 		public:
 			PathologyViewer*		m_view_;
 
-			DocumentWindow(QWidget* parent);
+			explicit DocumentWindow(QWidget* parent = 0);
 
 			void AddDocument(Document& document);
 
@@ -31,7 +33,7 @@ namespace ASAP
 			void SetupSlots_(void);
 
 		private slots:
-			void OnDocumentSelect_(void);
+			void OnDocumentSelect_(int index);
 	};
 }
 #endif // __ASAP_DOCUMENTS_DOCUMENTWINDOW__
