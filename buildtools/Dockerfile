@@ -45,4 +45,5 @@ WORKDIR /root/build
 COPY build_ASAP.sh /root/build/build_ASAP.sh
 ENV BUILD_GUI=${only_multiresolutionimageinterface}
 ENV BUILD_PYTHON_VERSION=${python_version}
+RUN chmod a+rxwX ./build_ASAP.sh
 CMD ./build_ASAP.sh
