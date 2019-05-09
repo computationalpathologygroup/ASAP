@@ -77,16 +77,74 @@ namespace ASAP::Serialization::JSON
 						web::json::object object(json_response[o].as_object());
 						for (auto it = object.cbegin(); it != object.cend(); ++it)
 						{
-							values.push_back(Misc::WideStringToString(it->second.to_string()));
+							std::string value(Misc::WideStringToString(it->second.to_string()));
+							value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
 
-							if (values.back()[0] == '"' && values.back()[values.back().size() - 1] == '"')
+							if (value == "null")
 							{
-								values.back() = values.back().substr(1, values.back().size() - 2);
+								value.clear();
+								value.shrink_to_fit();
 							}
-							else if (values.back() == "null")
+						}
+
+						table.Insert(values);
+						values.clear();
+					}
+				}
+			}
+			catch (const web::http::http_exception& e)
+			{
+				// Indicates a parsing error.
+				error_code = e.error_code().value();
+			}
+			catch (const std::exception& e)
+			{
+				// Indicates a parsing error.
+				error_code = -1;
+			}
+		}).wait();
+		return error_code;
+	}
+
+	int ParseJsonResponseToTable(const web::http::http_response& response, Data::DataTable& table)
+	{
+		int error_code = 0;
+		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
+		{
+			try
+			{
+				web::json::value json_response(previousTask.get());
+				if (json_response.size() > 0)
+				{
+					std::vector<std::string> values;
+					values.reserve(json_response[0].as_object().size());
+
+					for (size_t o = 0; o < json_response.size(); ++o)
+					{
+						web::json::object object(json_response[o].as_object());
+
+						// Acquires headers, if the table lacks them.
+						if (table.GetColumnCount() == 0)
+						{
+							std::vector<std::string> header;
+							for (auto it = object.cbegin(); it != object.cend(); ++it)
 							{
-								values.back().clear();
-								values.back().shrink_to_fit();
+								std::string column(Misc::WideStringToString(it->second.to_string()));
+								column.erase(std::remove(column.begin(), column.end(), '"'), column.end());
+								header.push_back(column);
+							}
+							table = Data::DataTable(header);
+						}
+						
+						for (auto it = object.cbegin(); it != object.cend(); ++it)
+						{
+							std::string value(Misc::WideStringToString(it->second.to_string()));
+							value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+
+							if (value == "null")
+							{
+								value.clear();
+								value.shrink_to_fit();
 							}
 						}
 

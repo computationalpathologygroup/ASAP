@@ -11,6 +11,7 @@ namespace ASAP::Serialization::JSON
 
 	int ParseJsonFieldsToVector(const web::http::http_response& response, const std::vector<std::string> fields, std::vector<std::vector<std::string>>& results);
 	int ParseJsonResponseToRecords(const web::http::http_response& response, Data::DataTable& table);
+	int ParseJsonResponseToTable(const web::http::http_response& response, Data::DataTable& table);
 	int ParseJsonResponseToTableSchema(const web::http::http_response& response, Data::DataTable& table);
 }
 #endif // __ASAP_SERIALIZATION_JSON__
