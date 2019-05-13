@@ -15,6 +15,7 @@ ${ASAP_INCLUDE_DIR}/annotation
 ${ASAP_INCLUDE_DIR}/ASAP
 ${ASAP_INCLUDE_DIR}/imgproc
 ${ASAP_INCLUDE_DIR}/ASAP/plugins/workstationextension
+${ASAP_INCLUDE_DIR}/worklist_interface
 )
 
 set(ASAP_BINARY_DIR "${ASAP_CMAKE_DIR}/@REL_BINARY_DIR@")

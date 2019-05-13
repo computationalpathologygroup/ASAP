@@ -82,6 +82,7 @@ endif()
 add_subdirectory(core)
 add_subdirectory(multiresolutionimageinterface)
 add_subdirectory(annotation)
+add_subdirectory(worklist_interface)
 
 IF(BUILD_EXECUTABLES)
   add_subdirectory(executables)
