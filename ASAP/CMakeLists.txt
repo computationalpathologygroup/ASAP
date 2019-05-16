@@ -1,5 +1,6 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
+
 set(HEADERS
     ASAP_Window.h
     PathologyViewer.h
@@ -76,3 +77,4 @@ ADD_SUBDIRECTORY(annotation)
 ADD_SUBDIRECTORY(visualization)
 ADD_SUBDIRECTORY(filters)
 ADD_SUBDIRECTORY(basictools)
+ADD_SUBDIRECTORY(worklist_interface)
