@@ -1,48 +1,38 @@
-CMAKE_DEPENDENT_OPTION(BUILD_WORKLIST_INTERFACE "Builds an additional executable of ASAP that adds Worklist support." ON
-						"NOT BUILD_ASAP" OFF)
+include(CMakeDependentOption)
+
+CMAKE_DEPENDENT_OPTION(BUILD_WORKLIST_INTERFACE "Builds an additional executable of ASAP that adds Worklist support." OFF
+						"BUILD_ASAP" OFF)
 
 if (BUILD_WORKLIST_INTERFACE)
 	PROJECT(WorklistInterface)
-	SET(CMAKE_AUTOMOC ON)
-	SET(CMAKE_AUTOUIC ON)
-	SET(Boost_USE_STATIC_LIBS OFF)
 	
 	FIND_PACKAGE(cpprestsdk REQUIRED)	
-	FIND_PACKAGE(Boost REQUIRED COMPONENTS filesystem system)
 
-	IF (WIN32)
-		SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}\ /std:c++latest)
-	ELSE()
-		SET(CMAKE_CXX_STANDARD 17)
-	ENDIF()
-	
 	SET(GROUP_DATA
-		worklist/Data/DataTable.h
-		worklist/Data/DataTable.cpp
-		worklist/Data/DirectorySource.h
-		worklist/Data/DirectoryDataSource.cpp
-		worklist/Data/DjangoSource.h
-		worklist/Data/DjangoSource.cpp
-		worklist/Data/FilelistSource.h
-		worklist/Data/FilelistSource.cpp
-		worklist/Data/GrandChallengeSource.h
-		worklist/Data/GrandChallengeSource.cpp
-		worklist/Data/SourceLoading.h
-		worklist/Data/SourceLoading.cpp
-		worklist/Data/WorklistSource.h
-		worklist/Data/WorklistSource.cpp
+		Data/DataTable.h
+		Data/DataTable.cpp
+		Data/DirectorySource.h
+		Data/DirectorySource.cpp
+		Data/FilelistSource.h
+		Data/FilelistSource.cpp
+		Data/GrandChallengeSource.h
+		Data/GrandChallengeSource.cpp
+		Data/SourceProxy.h
+		Data/SourceProxy.cpp
+		Data/WorklistSourceInterface.h
+		Data/WorklistSourceInterface.cpp
 	)
 	SET(GROUP_GUI
-		worklist/GUI/CompositeChild.h
-		worklist/GUI/CompositeChild.cpp
-		worklist/GUI/CompositeWindow.h
-		worklist/GUI/CompositeWindow.cpp
-		worklist/GUI/ExternalSourceDialog.h
-		worklist/GUI/ExternalSourceDialog.cpp
-		worklist/GUI/IconCreator.h
-		worklist/GUI/IconCreator.cpp
-		worklist/GUI/WorklistWindow.h
-		worklist/GUI/WorklistWindow.cpp
+		GUI/CompositeChild.h
+		GUI/CompositeChild.cpp
+		GUI/CompositeWindow.h
+		GUI/CompositeWindow.cpp
+		GUI/ExternalSourceDialog.h
+		GUI/ExternalSourceDialog.cpp
+		GUI/IconCreator.h
+		GUI/IconCreator.cpp
+		GUI/WorklistWindow.h
+		GUI/WorklistWindow.cpp
 	)
 	SET(GROUP_MISC
 		Misc/StringConversions.h
@@ -69,8 +59,6 @@ if (BUILD_WORKLIST_INTERFACE)
 		Serialization/INI.cpp
 		Serialization/JSON.h
 		Serialization/JSON.cpp
-		Serialization/Misc.h	
-		Serialization/Misc.cpp
 	)
 	SET(RESOURCE
 		resources/unavailable.png
