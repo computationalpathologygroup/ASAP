@@ -21,8 +21,8 @@ set(CMAKE_MODULE_PATH ${DIAGPathology_SOURCE_DIR}/cmakemodules)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if(NOT WIN32)
-set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
-set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+	set(CMAKE_MACOSX_RPATH TRUE)
 ENDIF(NOT WIN32)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -39,6 +39,7 @@ endif()
 
 # Use boost for cross-platform use of threading, file system and date_time handling
 find_package(Boost QUIET REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
+SET(Boost_USE_STATIC_LIBS OFF)
 
 # OpenJPEG for JPEG2000 codec
 find_package(OpenJPEG REQUIRED)
@@ -76,7 +77,7 @@ option(PACKAGE_ON_INSTALL "Copies dependent DLLs and packages install" OFF)
 
 if(BUILD_IMAGEPROCESSING)
   set(OpenCV_STATIC OFF)
-  find_package(OpenCV QUIET)
+  find_package(OpenCV REQUIRED)
 endif()
 
 add_subdirectory(core)
