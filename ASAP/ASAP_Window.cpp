@@ -103,7 +103,8 @@ void ASAP_Window::readSettings(void)
 }
 
 void ASAP_Window::loadPlugins(void) {
-  PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
+  //PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
+	PathologyViewer* viewer = m_document_window_->m_view_;
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
     if (_pluginsDir.cd("tools")) {
@@ -364,11 +365,13 @@ void ASAP_Window::setupUi(void)
   menuFile->addAction(actionOpen);
   menuFile->addAction(actionClose);
   menuHelp->addAction(actionAbout);
+
   centralWidget = new QWidget(this);
   centralWidget->setObjectName(QStringLiteral("centralWidget"));
   sizePolicy.setHeightForWidth(centralWidget->sizePolicy().hasHeightForWidth());
   centralWidget->setSizePolicy(sizePolicy);
   centralWidget->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+
   horizontalLayout_2 = new QHBoxLayout(centralWidget);
   horizontalLayout_2->setSpacing(6);
   horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
@@ -378,7 +381,9 @@ void ASAP_Window::setupUi(void)
 
  // m_document_window_ = new ASAP::DocumentWindow(centralWidget);
 
-  m_document_window_ = new ASAP::DocumentWindow(this);
+  m_document_window_ = new ASAP::DocumentWindow(centralWidget);
+ // m_document_window_->m_view_ = new PathologyViewer(centralWidget);
+  //m_document_window_->m_view_->setObjectName(QStringLiteral("pathologyView"));
   horizontalLayout_2->addWidget(m_document_window_);
 
   this->setCentralWidget(centralWidget);
