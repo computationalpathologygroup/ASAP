@@ -34,6 +34,7 @@ namespace ASAP
 
 		private slots:
 			void OnDocumentSelect_(int index);
+			void OnTabClose_(int index);
 	};
 }
 #endif // __ASAP_DOCUMENTS_DOCUMENTWINDOW__

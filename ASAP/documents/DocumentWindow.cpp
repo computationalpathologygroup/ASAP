@@ -41,6 +41,11 @@ namespace ASAP
 			&QTabBar::currentChanged,
 			this,
 			&DocumentWindow::OnDocumentSelect_);
+
+		connect(m_document_bar_,
+			&QTabBar::tabCloseRequested,
+			this,
+			&DocumentWindow::OnTabClose_);
 	}
 
 	void DocumentWindow::SetupUI_(void)
@@ -54,5 +59,17 @@ namespace ASAP
 	void DocumentWindow::OnDocumentSelect_(int index)
 	{
 		m_view_->initialize(*m_documents_[m_document_bar_->tabText(index).toStdString()]);
+		auto document_it = m_documents_.find(m_document_bar_->tabText(index).toStdString());
+		if (document_it != m_documents_.end())
+		{
+			m_view_->initialize(*document_it->second);
+		}
+	}
+
+	void DocumentWindow::OnTabClose_(int index)
+	{
+		m_view_->close();
+		m_documents_.erase(m_document_bar_->tabText(index).toStdString());
+		m_document_bar_->removeTab(index);
 	}
 }
