@@ -1,15 +1,23 @@
 #include "DocumentWindow.h"
 
 #include <sstream>
+#include <qformlayout.h>
 #include <qmessagebox.h>
+#include <qlabel.h>
 
 #include "../PathologyViewer.h"
 
 namespace ASAP
 {
-	DocumentWindow::DocumentWindow(QWidget* parent) : QMainWindow(parent), m_active_document_(nullptr), m_documents_()
+	DocumentWindow::DocumentWindow(QWidget* parent) : QWidget(parent), m_active_document_(nullptr)
 	{
+		//resizeDocks
+
+	//	this->setResizeAnchor(parent);
+
+
 		SetupUI_();
+		SetupSlots_();
 	}
 
 	void DocumentWindow::AddDocument(Document& document)
@@ -23,6 +31,7 @@ namespace ASAP
 		{
 			// Inserts document into tab bar;
 			m_document_bar_->insertTab(m_document_bar_->count(), QString::fromStdString(filename));
+			m_view_->initialize(*result.first->second);
 		}
 		else
 		{
@@ -50,15 +59,25 @@ namespace ASAP
 
 	void DocumentWindow::SetupUI_(void)
 	{
-		m_document_bar_ = new QTabBar(this);
+		m_coordinates_label_	= new QLabel("Coordinates", this);
+		m_document_bar_			= new QTabBar(this);		
+		m_view_					= new PathologyViewer(this);
 
-		m_view_ = new PathologyViewer(this);
+		m_document_bar_->setTabsClosable(true);
+
 		m_view_->setObjectName(QStringLiteral("pathologyView"));
+
+		QFormLayout* layout(new QFormLayout());
+		layout->addRow(m_document_bar_);		
+		layout->addRow(m_view_);
+		layout->addRow(m_coordinates_label_);
+		this->setLayout(layout);
+
+		this->setContentsMargins(0, 0, 0, 0);
 	}
 
 	void DocumentWindow::OnDocumentSelect_(int index)
 	{
-		m_view_->initialize(*m_documents_[m_document_bar_->tabText(index).toStdString()]);
 		auto document_it = m_documents_.find(m_document_bar_->tabText(index).toStdString());
 		if (document_it != m_documents_.end())
 		{
