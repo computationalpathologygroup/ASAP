@@ -11,32 +11,8 @@ namespace ASAP
 {
 	Document::Document(const std::string& filepath, const std::string& factory) : m_filepath_(filepath), m_image_(nullptr)
 	{
-		// Ensures parameters have been set.
-		if (filepath.empty())
-		{
-			throw std::invalid_argument("Filepath is empty.");
-		}
-		if (factory.empty())
-		{
-			throw std::invalid_argument("No factory selected");
-		}
-
-		// Attempts to open the file.
-		MultiResolutionImageReader reader;
-		m_image_.reset(reader.open(filepath, factory));
-
-		// Checks if the image is valid.
-		if (!m_image_)
-		{
-			throw std::runtime_error("Invalid file type");
-		}
-		if (!m_image_->valid())
-		{
-			throw std::runtime_error("Unsupported file type version");
-		}
-
-		// TODO: Ask why this is being done.
-		std::vector<unsigned long long> dimensions = m_image_->getLevelDimensions(m_image_->getNumberOfLevels() - 1);
+		InitializeImage_(filepath, factory);
+		InitializeTileInformation_();
 	}
 
 	boost::filesystem::path Document::GetFilepath(void) const
@@ -74,6 +50,45 @@ namespace ASAP
 		if (allow_override || m_plugin_information_.find(plugin) == m_plugin_information_.end())
 		{
 			m_plugin_information_.insert({ plugin, std::unique_ptr<PluginInformation>(information) });
+		}
+	}
+
+	void Document::InitializeImage_(const std::string& filepath, const std::string& factory)
+	{
+		// Ensures parameters have been set.
+		if (filepath.empty())
+		{
+			throw std::invalid_argument("Filepath is empty.");
+		}
+		if (factory.empty())
+		{
+			throw std::invalid_argument("No factory selected");
+		}
+
+		// Attempts to open the file.
+		MultiResolutionImageReader reader;
+		m_image_.reset(reader.open(filepath, factory));
+
+		// Checks if the image is valid.
+		if (!m_image_)
+		{
+			throw std::runtime_error("Invalid file type");
+		}
+		if (!m_image_->valid())
+		{
+			throw std::runtime_error("Unsupported file type version");
+		}
+
+		// TODO: Ask why this is being done.
+		std::vector<unsigned long long> dimensions = m_image_->getLevelDimensions(m_image_->getNumberOfLevels() - 1);
+	}
+
+	void Document::InitializeTileInformation_(void)
+	{
+		for (unsigned int i = 0; i < m_image_->getNumberOfLevels(); ++i)
+		{
+			m_tile_information_.downsamples.push_back(m_image_->getLevelDownsample(i));
+			m_tile_information_.dimensions.push_back(m_image_->getLevelDimensions(i));
 		}
 	}
 }

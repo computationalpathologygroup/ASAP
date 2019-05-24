@@ -53,6 +53,9 @@ namespace ASAP
 			std::shared_ptr<MultiResolutionImage>	m_image_;
 			TileInformation							m_tile_information_;
 			std::unordered_map<std::string, std::unique_ptr<PluginInformation>> m_plugin_information_;
+
+			void InitializeImage_(const std::string& filepath, const std::string& factory);
+			void InitializeTileInformation_(void);
 	};
 }
 #endif // __ASAP_DOCUMENTS_DOCUMENT__
