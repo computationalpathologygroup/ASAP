@@ -45,7 +45,8 @@ PathologyViewer::PathologyViewer(QWidget *parent) :
 	_cache(nullptr),
 	_activeTool(nullptr),
 	_manager(nullptr),
-	_scaleBar(nullptr)
+	_scaleBar(nullptr),
+	m_active_document_(nullptr)
 {
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -591,7 +592,8 @@ void PathologyViewer::mouseReleaseEvent(QMouseEvent *event)
 void PathologyViewer::mouseMoveEvent(QMouseEvent *event)
 {
   QPointF imgLoc = this->mapToScene(event->pos()) / this->_sceneScale;
-  qobject_cast<QMainWindow*>(this->parentWidget()->parentWidget())->statusBar()->showMessage(QString("Current position in image coordinates: (") + QString::number(imgLoc.x()) + QString(", ") + QString::number(imgLoc.y()) + QString(")"), 1000);
+	// TODO: Clean this up or implement a more elegant selection method.
+  qobject_cast<QMainWindow*>(this->parentWidget()->parentWidget()->parentWidget())->statusBar()->showMessage(QString("Current position in image coordinates: (") + QString::number(imgLoc.x()) + QString(", ") + QString::number(imgLoc.y()) + QString(")"), 1000);
   if (this->_pan) {
     pan(event->pos());
     event->accept();
