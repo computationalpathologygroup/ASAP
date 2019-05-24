@@ -225,7 +225,7 @@ void TileManager::clear() {
       delete itm;
     }
   }
-  m_tile_information_.coverage.clear();
+  //m_tile_information_.coverage.clear();
   _coverageMaps.clear();
   emit coverageUpdated();
 }
@@ -239,4 +239,9 @@ void TileManager::refresh() {
   unsigned int level = m_tile_information_.last_level;
   loadAllTilesForLevel(m_tile_information_.last_render_level);
   loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(topLeft, level), tileCoordinatesToPixelCoordinates(bottomRight, level)), level);
+}
+
+void TileManager::rebuildCoverageMap_(void)
+{
+
 }

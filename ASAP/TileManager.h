@@ -29,8 +29,8 @@ private:
   unsigned int _lastRenderLevel;
   std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;*/
 
-	ASAP::Document&	m_tiled_document_;
-	TileInformation				m_tile_information_;
+	ASAP::Document&		m_tiled_document_;
+	TileInformation	m_tile_information_;
 
 
   QPointer<RenderThread> _renderThread;
@@ -71,6 +71,7 @@ public slots:
   void onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);
   void onTileRemoved(WSITileGraphicsItem* tile);
 
+private:
+	void rebuildCoverageMap_(void);
 };
-
 #endif
