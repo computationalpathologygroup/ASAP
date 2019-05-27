@@ -20,11 +20,8 @@ _coverageMapCacheMode(false)
 {
 	m_tile_information_.tile_size = tileSize;
 	m_tile_information_.last_render_level = lastRenderLevel;
-	for (unsigned int i = 0; i < m_tiled_document_.AccessImage().getNumberOfLevels(); ++i)
-	{
-		m_tile_information_.downsamples.push_back(m_tiled_document_.AccessImage().getLevelDownsample(i));
-		m_tile_information_.dimensions.push_back(m_tiled_document_.AccessImage().getLevelDimensions(i));
-	}
+
+	rebuildCoverageMap_();
 }
 
 TileManager::~TileManager() {
@@ -184,25 +181,7 @@ bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
 
 void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers) {
   m_tile_information_.coverage[level][tile_x][tile_y] = covers;
-  if (_coverageMaps.empty()) {
-    _coverageMaps.resize(m_tile_information_.last_render_level + 1);
-  }
-  if (level != m_tile_information_.last_render_level) {
-    if (covers == 2 || covers == 0) {
-      float rectSize = m_tile_information_.tile_size / (m_tile_information_.downsamples[m_tile_information_.last_render_level] / m_tile_information_.downsamples[level]);
-      QPainterPath rect;
-      rect.addRect(QRectF(tile_x * rectSize - 1, tile_y * rectSize - 1, rectSize + 1, rectSize + 1));
-      if (covers == 2) {
-        _coverageMaps[level] = _coverageMaps[level].united(rect);
-      }
-      else if (covers == 0) {
-        if (_coverageMapCacheMode) {
-          _coverageMaps[level] = _coverageMaps[level].subtracted(rect);
-        }
-      }
-    }
-  }
-  emit coverageUpdated();
+  updateCoverageMap_(level, tile_x, tile_y, covers);
 }
 
 std::vector<QPainterPath> TileManager::getCoverageMaps() {
@@ -241,7 +220,40 @@ void TileManager::refresh() {
   loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(topLeft, level), tileCoordinatesToPixelCoordinates(bottomRight, level)), level);
 }
 
+void TileManager::updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers)
+{
+	if (_coverageMaps.empty()) {
+		_coverageMaps.resize(m_tile_information_.last_render_level + 1);
+	}
+	if (level != m_tile_information_.last_render_level) {
+		if (covers == 2 || covers == 0) {
+			float rectSize = m_tile_information_.tile_size / (m_tile_information_.downsamples[m_tile_information_.last_render_level] / m_tile_information_.downsamples[level]);
+			QPainterPath rect;
+			rect.addRect(QRectF(tile_x * rectSize - 1, tile_y * rectSize - 1, rectSize + 1, rectSize + 1));
+			if (covers == 2) {
+				_coverageMaps[level] = _coverageMaps[level].united(rect);
+			}
+			else if (covers == 0) {
+				if (_coverageMapCacheMode) {
+					_coverageMaps[level] = _coverageMaps[level].subtracted(rect);
+				}
+			}
+		}
+	}
+	emit coverageUpdated();
+}
+
 void TileManager::rebuildCoverageMap_(void)
 {
-
+	auto& coverage = m_tile_information_.coverage;
+	for (const auto& level : m_tile_information_.coverage)
+	{
+		for (const auto& tile_x : level.second)
+		{
+			for (const auto& tile_y : tile_x.second)
+			{
+				updateCoverageMap_(level.first, tile_x.first, tile_y.first, tile_y.second);
+			}
+		}
+	}
 }

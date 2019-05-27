@@ -30,7 +30,7 @@ private:
   std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;*/
 
 	ASAP::Document&		m_tiled_document_;
-	TileInformation	m_tile_information_;
+	TileInformation&	m_tile_information_;
 
 
   QPointer<RenderThread> _renderThread;
@@ -72,6 +72,7 @@ public slots:
   void onTileRemoved(WSITileGraphicsItem* tile);
 
 private:
+	void updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers);
 	void rebuildCoverageMap_(void);
 };
 #endif
