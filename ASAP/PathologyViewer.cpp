@@ -238,27 +238,21 @@ void PathologyViewer::initialize(ASAP::Document& document) {
   close();
   setEnabled(true);
   m_active_document_ = &document;
-  unsigned int tileSize = 512;
-  unsigned int lastLevel = m_active_document_->AccessImage().getNumberOfLevels() - 1;
-  for (int i = lastLevel; i >= 0; --i) {
-    std::vector<unsigned long long> lastLevelDimensions = m_active_document_->AccessImage().getLevelDimensions(i);
-    if (lastLevelDimensions[0] > tileSize && lastLevelDimensions[1] > tileSize) {
-      lastLevel = i;
-      break;
-    }
-  }
+
+  auto test = document.GetTileInformation();
+
   _cache = new WSITileGraphicsItemCache();
   _cache->setMaxCacheSize(_cacheSize);
   _renderthread = new RenderThread(this);
   _renderthread->setBackgroundImage(m_active_document_->GetImage());
-  _manager = new TileManager(document, tileSize, lastLevel, _renderthread, _cache, scene());
+  _manager = new TileManager(document, _renderthread, _cache, scene());
   setMouseTracking(true);
   std::vector<RenderWorker*> workers = _renderthread->getWorkers();
   for (int i = 0; i < workers.size(); ++i) {
     QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)));
   }
-  initializeImage(scene(), tileSize, lastLevel);
-  initializeGUIComponents(lastLevel);
+  initializeImage(scene(), test.tile_size, test.top_level);
+  initializeGUIComponents(test.top_level);
   QObject::connect(this, SIGNAL(backgroundChannelChanged(int)), _renderthread, SLOT(onBackgroundChannelChanged(int)));
   QObject::connect(_cache, SIGNAL(itemEvicted(WSITileGraphicsItem*)), _manager, SLOT(onTileRemoved(WSITileGraphicsItem*)));
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, const unsigned int)));
