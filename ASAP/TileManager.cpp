@@ -9,19 +9,15 @@
 #include <QCoreApplication>
 #include <cmath>
 
-TileManager::TileManager(ASAP::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
+TileManager::TileManager(ASAP::Document& document, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 m_tiled_document_(document),
-m_tile_information_(document.AccessTileInformation()),
+m_doc_state_(document.AccessState()),
+m_tile_information_(document.GetTileInformation()),
 _renderThread(renderThread),
 _cache(cache),
 _scene(scene),
-_coverageMaps(),
 _coverageMapCacheMode(false)
 {
-	m_tile_information_.tile_size = tileSize;
-	m_tile_information_.last_render_level = lastRenderLevel;
-
-	rebuildCoverageMap_();
 }
 
 TileManager::~TileManager() {
@@ -32,10 +28,10 @@ TileManager::~TileManager() {
 
 void TileManager::resetCoverage(unsigned int level)
 {
-	m_tile_information_.coverage[level] = std::map<int32_t, std::map<int32_t, uchar>>();
-	if (_coverageMaps.size() > level)
+	_coverage[level] = std::map<int32_t, std::map<int32_t, uchar>>();
+	if (m_doc_state_.minimap_coverage.size() > level)
 	{
-		_coverageMaps[level] = QPainterPath();
+		m_doc_state_.minimap_coverage[level] = QPainterPath();
 	}
 }
 
@@ -77,35 +73,40 @@ void TileManager::loadAllTilesForLevel(unsigned int level) {
 }
 
 void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level) {
-  if (level > m_tile_information_.last_render_level) {
-    return;
-  }
-  if (_renderThread) {
-    QPoint topLeftTile = this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
-    QPoint bottomRightTile = this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
-    QRect FOVTile = QRect(topLeftTile, bottomRightTile);
-    QPoint nrTiles = getLevelTiles(level);
-    float levelDownsample = m_tile_information_.downsamples[level];
-    if (FOVTile != m_tile_information_.last_FOV || level != m_tile_information_.last_level) {
-      m_tile_information_.last_level = level;
-      m_tile_information_.last_FOV = FOVTile;
-      for (int x = topLeftTile.x(); x <= bottomRightTile.x(); ++x) {
-        if (x >= 0 && x <= nrTiles.x()) {
-          for (int y = topLeftTile.y(); y <= bottomRightTile.y(); ++y) {
-            if (y >= 0 && y <= nrTiles.y() && providesCoverage(level, x, y) < 1)
+	if (level <= m_tile_information_.top_level && _renderThread)
+	{
+		QPoint topLeftTile		= this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
+		QPoint bottomRightTile	= this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
+
+		QRect FOVTile	= QRect(topLeftTile, bottomRightTile);
+		QPoint nrTiles	= getLevelTiles(level);
+		float levelDownsample = m_tile_information_.downsamples[level];
+		if (FOVTile != m_last_loaded_FOV_ || level != m_doc_state_.current_level)
+		{
+			m_doc_state_.current_FOV	= FOVTile;
+			m_last_loaded_FOV_			= FOVTile;
+			m_doc_state_.current_level	= level;
+
+			for (int x = topLeftTile.x(); x <= bottomRightTile.x(); ++x)
 			{
-				setCoverage(level, x, y, 1);
-				_renderThread->addJob(m_tile_information_.tile_size, x, y, level);
-            }
-          }
-        }
-      }
-    }
-  }
+				if (x >= 0 && x <= nrTiles.x())
+				{
+					for (int y = topLeftTile.y(); y <= bottomRightTile.y(); ++y)
+					{
+						if (y >= 0 && y <= nrTiles.y() && providesCoverage(level, x, y) < 1)
+						{
+							setCoverage(level, x, y, 1);
+							_renderThread->addJob(m_tile_information_.tile_size, x, y, level);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel) {
-  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, m_tile_information_.last_render_level, m_tile_information_.downsamples, this);
+  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, m_tile_information_.top_level, m_tile_information_.downsamples, this);
   std::stringstream ss;
   ss << tileX << "_" << tileY << "_" << tileLevel;
   std::string key;
@@ -113,7 +114,7 @@ void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int t
   if (_scene) {
     setCoverage(tileLevel, tileX, tileY, 2);
     float tileDownsample = m_tile_information_.downsamples[tileLevel];
-    float maxDownsample = m_tile_information_.downsamples[m_tile_information_.last_render_level];
+    float maxDownsample = m_tile_information_.downsamples[m_tile_information_.top_level];
     float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
     float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
     _scene->addItem(item);
@@ -121,7 +122,7 @@ void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int t
     item->setZValue(1. / ((float)tileLevel + 1.));
   }
   if (_cache) {
-    _cache->set(key, item, tileByteSize, tileLevel == m_tile_information_.last_render_level);
+    _cache->set(key, item, tileByteSize, tileLevel == m_tile_information_.top_level);
   }
 }
 
@@ -139,7 +140,7 @@ void TileManager::setCoverageMapModeToVisited() {
 }
 
 unsigned char TileManager::providesCoverage(unsigned int level, int tile_x, int tile_y) {
-  std::map<int32_t, std::map<int32_t, uchar>>& cover_level = m_tile_information_.coverage[level];
+  std::map<int32_t, std::map<int32_t, uchar>>& cover_level = _coverage[level];
   if (cover_level.empty()) {
     return 0;
   }
@@ -180,12 +181,12 @@ bool TileManager::isCovered(unsigned int level, int tile_x, int tile_y) {
 }
 
 void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers) {
-  m_tile_information_.coverage[level][tile_x][tile_y] = covers;
+  _coverage[level][tile_x][tile_y] = covers;
   updateCoverageMap_(level, tile_x, tile_y, covers);
 }
 
 std::vector<QPainterPath> TileManager::getCoverageMaps() {
-  return _coverageMaps;
+  return m_doc_state_.minimap_coverage;
 }
 
 void TileManager::clear() {
@@ -204,56 +205,36 @@ void TileManager::clear() {
       delete itm;
     }
   }
-  //m_tile_information_.coverage.clear();
-  _coverageMaps.clear();
+
+  _coverage.clear();
+  m_last_loaded_FOV_ = QRect();
+
   emit coverageUpdated();
 }
 
 void TileManager::refresh() {
   clear();
-  QRect FOV = m_tile_information_.last_FOV;
-  QPoint topLeft = FOV.topLeft();
-  QPoint bottomRight = FOV.bottomRight();
-  m_tile_information_.last_FOV = QRect();
-  unsigned int level = m_tile_information_.last_level;
-  loadAllTilesForLevel(m_tile_information_.last_render_level);
-  loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(topLeft, level), tileCoordinatesToPixelCoordinates(bottomRight, level)), level);
+  loadAllTilesForLevel(m_tile_information_.top_level);
+  loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(m_doc_state_.current_FOV.topLeft(), m_doc_state_.current_level), tileCoordinatesToPixelCoordinates(m_doc_state_.current_FOV.bottomRight(), m_doc_state_.current_level)), m_doc_state_.current_level);
 }
 
 void TileManager::updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers)
 {
-	if (_coverageMaps.empty()) {
-		_coverageMaps.resize(m_tile_information_.last_render_level + 1);
+	if (m_doc_state_.minimap_coverage.empty()) {
+		m_doc_state_.minimap_coverage.resize(m_tile_information_.top_level + 1);
 	}
-	if (level != m_tile_information_.last_render_level) {
-		if (covers == 2 || covers == 0) {
-			float rectSize = m_tile_information_.tile_size / (m_tile_information_.downsamples[m_tile_information_.last_render_level] / m_tile_information_.downsamples[level]);
+	if (level != m_tile_information_.top_level && (covers == 2 || covers == 0))
+	{
+			float rectSize = m_tile_information_.tile_size / (m_tile_information_.downsamples[m_tile_information_.top_level] / m_tile_information_.downsamples[level]);
 			QPainterPath rect;
 			rect.addRect(QRectF(tile_x * rectSize - 1, tile_y * rectSize - 1, rectSize + 1, rectSize + 1));
 			if (covers == 2) {
-				_coverageMaps[level] = _coverageMaps[level].united(rect);
+				m_doc_state_.minimap_coverage[level] = m_doc_state_.minimap_coverage[level].united(rect);
 			}
-			else if (covers == 0) {
-				if (_coverageMapCacheMode) {
-					_coverageMaps[level] = _coverageMaps[level].subtracted(rect);
-				}
+			else if (covers == 0 && _coverageMapCacheMode)
+			{
+				m_doc_state_.minimap_coverage[level] = m_doc_state_.minimap_coverage[level].subtracted(rect);
 			}
-		}
 	}
 	emit coverageUpdated();
-}
-
-void TileManager::rebuildCoverageMap_(void)
-{
-	auto& coverage = m_tile_information_.coverage;
-	for (const auto& level : m_tile_information_.coverage)
-	{
-		for (const auto& tile_x : level.second)
-		{
-			for (const auto& tile_y : tile_x.second)
-			{
-				updateCoverageMap_(level.first, tile_x.first, tile_y.first, tile_y.second);
-			}
-		}
-	}
 }

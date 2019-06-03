@@ -17,6 +17,8 @@ class WSITileGraphicsItem;
 class QGraphicsScene;
 class QPainterPath;
 
+typedef std::map<uint32_t, std::map<int32_t, std::map<int32_t, uchar>>> CoverageMap;
+
 class TileManager : public QObject {
   Q_OBJECT
 
@@ -26,17 +28,18 @@ private:
   unsigned int _tileSize;
   QRect _lastFOV;
   unsigned int _lastLevel;
-  unsigned int _lastRenderLevel;
-  std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;*/
-
-	ASAP::Document&		m_tiled_document_;
-	TileInformation&	m_tile_information_;
+  unsigned int _lastRenderLevel;*/
+	CoverageMap _coverage;
+	ASAP::Document&			m_tiled_document_;
+	DocumentState&			m_doc_state_;
+	const TileInformation	m_tile_information_;
+	QRect					m_last_loaded_FOV_;
 
 
   QPointer<RenderThread> _renderThread;
   QPointer<WSITileGraphicsItemCache> _cache;
   QPointer<QGraphicsScene> _scene;
-  std::vector<QPainterPath> _coverageMaps;
+  //std::vector<QPainterPath> _coverageMaps;
   bool _coverageMapCacheMode;
   
   QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
@@ -50,7 +53,7 @@ signals:
 
 public:
   // make sure to set `item` to NULL in the constructor
-  TileManager(ASAP::Document& document, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
+  TileManager(ASAP::Document& document, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
   ~TileManager();
 
   void loadAllTilesForLevel(unsigned int level);
@@ -73,6 +76,5 @@ public slots:
 
 private:
 	void updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers);
-	void rebuildCoverageMap_(void);
 };
 #endif
