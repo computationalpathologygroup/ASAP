@@ -29,7 +29,6 @@ namespace ASAP
 		private:
 			Document*									m_active_document_;
 			std::unordered_map<std::string, Document*>	m_documents_;
-			QLabel*										m_coordinates_label_;
 			QTabBar*									m_document_bar_;
 
 			void SetupUI_(void);

@@ -31,7 +31,6 @@ namespace ASAP
 		{
 			// Inserts document into tab bar;
 			m_document_bar_->insertTab(m_document_bar_->count(), QString::fromStdString(filename));
-			m_view_->initialize(*result.first->second);
 		}
 		else
 		{
@@ -59,18 +58,15 @@ namespace ASAP
 
 	void DocumentWindow::SetupUI_(void)
 	{
-		m_coordinates_label_	= new QLabel("Coordinates", this);
 		m_document_bar_			= new QTabBar(this);		
 		m_view_					= new PathologyViewer(this);
 
 		m_document_bar_->setTabsClosable(true);
-
 		m_view_->setObjectName(QStringLiteral("pathologyView"));
 
 		QFormLayout* layout(new QFormLayout());
 		layout->addRow(m_document_bar_);		
 		layout->addRow(m_view_);
-		layout->addRow(m_coordinates_label_);
 		this->setLayout(layout);
 
 		this->setContentsMargins(0, 0, 0, 0);
