@@ -25,7 +25,12 @@ namespace ASAP
 		return *m_image_;
 	}
 
-	TileInformation& Document::AccessTileInformation(void)
+	DocumentState& Document::AccessState(void)
+	{
+		return m_state_;
+	}
+
+	const TileInformation Document::GetTileInformation(void)
 	{
 		return m_tile_information_;
 	}
@@ -85,6 +90,18 @@ namespace ASAP
 
 	void Document::InitializeTileInformation_(void)
 	{
+		m_tile_information_.tile_size	= 512;
+		m_tile_information_.top_level	= m_image_->getNumberOfLevels() - 1;
+		for (uint64_t level = m_tile_information_.top_level; level >= 0; --level)
+		{
+			std::vector<unsigned long long> lastLevelDimensions = m_image_->getLevelDimensions(level);
+			if (lastLevelDimensions[0] > m_tile_information_.tile_size && lastLevelDimensions[1] > m_tile_information_.tile_size)
+			{
+				m_tile_information_.top_level = level;
+				break;
+			}
+		}
+
 		for (unsigned int i = 0; i < m_image_->getNumberOfLevels(); ++i)
 		{
 			m_tile_information_.downsamples.push_back(m_image_->getLevelDownsample(i));
