@@ -252,11 +252,12 @@ void PathologyViewer::initialize(ASAP::Document& document) {
   for (int i = 0; i < workers.size(); ++i) {
     QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)));
   }
-  initializeImage(scene(), test.tile_size, test.top_level);
-  initializeGUIComponents(test.top_level);
+  initializeImage(scene(), tile_info.tile_size, tile_info.top_level);
+  initializeGUIComponents(tile_info.top_level);
   QObject::connect(this, SIGNAL(backgroundChannelChanged(int)), _renderthread, SLOT(onBackgroundChannelChanged(int)));
   QObject::connect(_cache, SIGNAL(itemEvicted(WSITileGraphicsItem*)), _manager, SLOT(onTileRemoved(WSITileGraphicsItem*)));
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, const unsigned int)));
+
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
   emit fieldOfViewChanged(FOVImage, m_active_document_->AccessImage().getBestLevelForDownSample((1. / this->_sceneScale) / this->transform().m11()));
