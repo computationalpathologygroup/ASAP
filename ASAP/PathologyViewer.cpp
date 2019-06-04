@@ -239,7 +239,8 @@ void PathologyViewer::initialize(ASAP::Document& document) {
   setEnabled(true);
   m_active_document_ = &document;
 
-  auto test = document.GetTileInformation();
+  TileInformation tile_info = document.GetTileInformation();
+  DocumentState state		= document.AccessState();
 
   _cache = new WSITileGraphicsItemCache();
   _cache->setMaxCacheSize(_cacheSize);
@@ -506,6 +507,11 @@ void PathologyViewer::close() {
     _scaleBar = NULL;
   }
   setEnabled(false);
+  if (m_active_document_)
+  {
+	  m_active_document_->AccessState().scene_scale = _sceneScale;
+	  m_active_document_ = nullptr;
+  }
 }
 
 void PathologyViewer::togglePan(bool pan, const QPoint& startPos) {
