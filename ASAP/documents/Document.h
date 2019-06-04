@@ -10,7 +10,8 @@
 
 #include <boost/filesystem.hpp>
 #include <QPainterPath>
-#include <qrect.h>
+#include <QRect>
+#include <QRectF>
 
 class MultiResolutionImage;
 
@@ -35,8 +36,10 @@ struct TileInformation
 struct DocumentState
 {
 	uint64_t					current_level;
-	QRect						current_FOV;
+	QRect						current_fov;
+	//QRect						current_fov_tile;
 	std::vector<QPainterPath>	minimap_coverage;
+	float						scene_scale;
 };
 
 struct TileInformation

@@ -83,7 +83,7 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 		float levelDownsample = m_tile_information_.downsamples[level];
 		if (FOVTile != m_last_loaded_FOV_ || level != m_doc_state_.current_level)
 		{
-			m_doc_state_.current_FOV	= FOVTile;
+			m_doc_state_.current_fov	= FOVTile;
 			m_last_loaded_FOV_			= FOVTile;
 			m_doc_state_.current_level	= level;
 
@@ -215,7 +215,7 @@ void TileManager::clear() {
 void TileManager::refresh() {
   clear();
   loadAllTilesForLevel(m_tile_information_.top_level);
-  loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(m_doc_state_.current_FOV.topLeft(), m_doc_state_.current_level), tileCoordinatesToPixelCoordinates(m_doc_state_.current_FOV.bottomRight(), m_doc_state_.current_level)), m_doc_state_.current_level);
+  loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(m_doc_state_.current_fov.topLeft(), m_doc_state_.current_level), tileCoordinatesToPixelCoordinates(m_doc_state_.current_fov.bottomRight(), m_doc_state_.current_level)), m_doc_state_.current_level);
 }
 
 void TileManager::updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers)
