@@ -15,6 +15,7 @@ set(HEADERS
     interfaces/interfaces.h
     QtProgressMonitor.h
 	documents/Document.h
+	documents/DocumentInstance.h
 	documents/DocumentWindow.h
 )
 
@@ -32,6 +33,7 @@ set(SOURCE
     UtilityFunctions.cpp
     QtProgressMonitor.cpp
 	documents/Document.cpp
+	documents/DocumentInstance.cpp
 	documents/DocumentWindow.cpp
 )
 

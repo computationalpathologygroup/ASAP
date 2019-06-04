@@ -13,6 +13,8 @@ namespace ASAP
 	{
 		InitializeImage_(filepath, factory);
 		InitializeTileInformation_();
+		
+		m_state_ = CreateDocumentInstance(*this);
 	}
 
 	boost::filesystem::path Document::GetFilepath(void) const
@@ -30,7 +32,7 @@ namespace ASAP
 		return m_state_;
 	}
 
-	const TileInformation Document::GetTileInformation(void)
+	const TileInformation Document::GetTileInformation(void) const
 	{
 		return m_tile_information_;
 	}

@@ -8,8 +8,8 @@
 #include <qtabbar.h>
 #include <QtWidgets/qwidget.h>
 
-
 #include "Document.h"
+#include "DocumentInstance.h"
 
 class PathologyViewer;
 
@@ -27,9 +27,9 @@ namespace ASAP
 			void AddDocument(Document& document);
 
 		private:
-			Document*									m_active_document_;
-			std::unordered_map<std::string, Document*>	m_documents_;
-			QTabBar*									m_document_bar_;
+			DocumentInstance*									m_active_document_;
+			std::unordered_map<std::string, DocumentInstance>	m_documents_;
+			QTabBar*											m_document_bar_;
 
 			void SetupUI_(void);
 			void SetupSlots_(void);

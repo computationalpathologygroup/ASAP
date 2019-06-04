@@ -25,7 +25,7 @@ namespace ASAP
 		std::string filename(document.GetFilepath().filename().string());
 
 		// Inserts document into internal list.
-		auto result = m_documents_.insert({ filename, &document });
+		auto result = m_documents_.insert({ filename, DocumentInstance(document) });
 
 		if (result.second)
 		{
