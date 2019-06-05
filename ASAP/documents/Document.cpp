@@ -13,8 +13,6 @@ namespace ASAP
 	{
 		InitializeImage_(filepath, factory);
 		InitializeTileInformation_();
-		
-		m_state_ = CreateDocumentInstance(*this);
 	}
 
 	boost::filesystem::path Document::GetFilepath(void) const
@@ -22,14 +20,9 @@ namespace ASAP
 		return m_filepath_;
 	}
 
-	MultiResolutionImage& Document::AccessImage(void)
+	MultiResolutionImage& Document::image(void)
 	{
 		return *m_image_;
-	}
-
-	DocumentState& Document::AccessState(void)
-	{
-		return m_state_;
 	}
 
 	const TileInformation Document::GetTileInformation(void) const
@@ -40,24 +33,6 @@ namespace ASAP
 	std::weak_ptr<MultiResolutionImage> Document::GetImage(void)
 	{
 		return m_image_;
-	}
-
-	PluginInformation* Document::GetPluginInformation(const std::string& plugin)
-	{
-		return m_plugin_information_[plugin].get();
-	}
-
-	bool Document::HasPluginInformation(const std::string& plugin)
-	{
-		return m_plugin_information_.find(plugin) != m_plugin_information_.end();
-	}
-
-	void Document::SetPluginInformation(const std::string& plugin, PluginInformation* information, const bool allow_override)
-	{
-		if (allow_override || m_plugin_information_.find(plugin) == m_plugin_information_.end())
-		{
-			m_plugin_information_.insert({ plugin, std::unique_ptr<PluginInformation>(information) });
-		}
 	}
 
 	void Document::InitializeImage_(const std::string& filepath, const std::string& factory)
