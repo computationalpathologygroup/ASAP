@@ -1,11 +1,16 @@
-include(CMakeDependentOption)
+INCLUDE(CMakeDependentOption)
 
 CMAKE_DEPENDENT_OPTION(BUILD_WORKLIST_INTERFACE "Builds an additional executable of ASAP that adds Worklist support." OFF
 						"BUILD_ASAP" OFF)
 
 if (BUILD_WORKLIST_INTERFACE)
+	SET(CMAKE_VERBOSE_MAKEFILE ON)
+	SET(CMAKE_AUTOMOC ON)
+	SET(CMAKE_AUTOUIC ON)
+	SET(CMAKE_AUTORCC ON)
+
 	PROJECT(WorklistInterface)
-	
+
 	FIND_PACKAGE(cpprestsdk REQUIRED)	
 
 	SET(GROUP_DATA
@@ -33,6 +38,8 @@ if (BUILD_WORKLIST_INTERFACE)
 		GUI/IconCreator.cpp
 		GUI/WorklistWindow.h
 		GUI/WorklistWindow.cpp
+		GUI/CompositeWindowLayout.ui
+		GUI/WorklistWindowLayout.ui
 	)
 	SET(GROUP_MISC
 		Misc/StringConversions.h
@@ -61,8 +68,10 @@ if (BUILD_WORKLIST_INTERFACE)
 		Serialization/JSON.cpp
 	)
 	SET(RESOURCE
-		resources/unavailable.png
+		resources/WorklistInterface.qrc
 	)
+	
+	qt5_add_resources(RESOURCE_ADDED ${RESOURCE}) 
 	
 	ADD_EXECUTABLE(ASAP_Worklist
 		main.cpp
@@ -72,6 +81,7 @@ if (BUILD_WORKLIST_INTERFACE)
 		${GROUP_MODELS}
 		${GROUP_NETWORKING}
 		${GROUP_SERIALIZATION}
+		${RESOURCE_ADDED}
 	)
 
 	SOURCE_GROUP("Data"				FILES ${GROUP_DATA})
@@ -81,11 +91,20 @@ if (BUILD_WORKLIST_INTERFACE)
 	SOURCE_GROUP("Networking"		FILES ${GROUP_NETWORKING})
 	SOURCE_GROUP("Serialization"	FILES ${GROUP_SERIALIZATION})
 
-	target_link_libraries(ASAP_Worklist PUBLIC ASAPLib core)
+	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC ASAPLib core multiresolutionimageinterface)
 	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC cpprestsdk::cpprest)
 	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC ${Boost_LIBRARIES})	
 	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools)
-
+	
 	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 	LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+	
+	add_definitions(-DBOOST_ALL_DYN_LINK)
+	
+	install(TARGETS ASAP_Worklist
+        EXPORT worklist-targets
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+)
 ENDIF()
