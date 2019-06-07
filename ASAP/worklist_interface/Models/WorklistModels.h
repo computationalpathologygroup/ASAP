@@ -5,7 +5,7 @@
 #include <QAbstractItemView>
 #include <QStandardItemModel>
 
-#include "Data/DataTable.h"
+#include "../Data/DataTable.h"
 
 namespace ASAP
 {
@@ -22,10 +22,10 @@ namespace ASAP
 			QStandardItemModel* studies;
 			QStandardItemModel* worklists;
 
-			void SetWorklistItems(const Data::DataTable& items);
-			void SetPatientsItems(const Data::DataTable& items);
-			void SetStudyItems(const Data::DataTable& items);
-			void SetImageItems(const Data::DataTable& items, WorklistWindow* window, bool& continue_loading);
+			void SetWorklistItems(const DataTable& items);
+			void SetPatientsItems(const DataTable& items);
+			void SetStudyItems(const DataTable& items);
+			void SetImageItems(const DataTable& items, WorklistWindow* window, bool& continue_loading);
 
 			void UpdateHeaders(std::vector<std::pair<std::set<std::string>, QAbstractItemView*>>& header_view_couple);
 

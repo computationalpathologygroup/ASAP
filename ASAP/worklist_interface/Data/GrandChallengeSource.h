@@ -11,7 +11,7 @@
 #include "../Networking/Django_Connection.h"
 #include "../Misc/TemporaryDirectoryTracker.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	struct GrandChallengeURLInfo
 	{
@@ -25,7 +25,7 @@ namespace ASAP::Data
 	class GrandChallengeSource : public WorklistSourceInterface
 	{
 		public:
-			GrandChallengeSource(const GrandChallengeURLInfo uri_info, Misc::TemporaryDirectoryTracker& temp_dir, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config = web::http::client::http_client_config());
+			GrandChallengeSource(const GrandChallengeURLInfo uri_info, TemporaryDirectoryTracker& temp_dir, const Django_Connection::Credentials credentials, const web::http::client::http_client_config& config = web::http::client::http_client_config());
 
 			static GrandChallengeURLInfo GetStandardURI(const std::wstring base_url);
 			WorklistSourceInterface::SourceType GetSourceType(void);
@@ -52,10 +52,10 @@ namespace ASAP::Data
 		private:
 			enum TableEntry { WORKLIST, PATIENT, STUDY, IMAGE };
 
-			Networking::Django_Connection		m_connection_;
-			GrandChallengeURLInfo				m_rest_uri_;
-			std::vector<DataTable>				m_schemas_;
-			Misc::TemporaryDirectoryTracker&	m_temporary_directory_;
+			Django_Connection			m_connection_;
+			GrandChallengeURLInfo		m_rest_uri_;
+			std::vector<DataTable>		m_schemas_;
+			TemporaryDirectoryTracker&	m_temporary_directory_;
 
 			void RefreshTables_(void);
 	};

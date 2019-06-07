@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-namespace ASAP::Misc
+namespace ASAP { namespace Misc
 {
 	std::vector<std::string> Split(const std::string& string, const char delimiter = ',', const char encapsulation = '"');
-}
+} }
 #endif // __ASAP_SERIALIZATION_JSON__

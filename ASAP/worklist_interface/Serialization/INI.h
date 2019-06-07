@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace ASAP::Serialization::INI
+namespace ASAP { namespace INI
 {
 	std::unordered_map<std::string, std::string> ParseINI(const std::string filepath);
 	void WriteINI(const std::string absolute_filepath, const std::unordered_map<std::string, std::string>& records);
@@ -13,5 +13,5 @@ namespace ASAP::Serialization::INI
 	{
 		void ParseLine(const std::string& line, std::unordered_map<std::string, std::string>& variable_map);
 	}
-}
+} }
 #endif // __ASAP_SERIALIZATION_INI__

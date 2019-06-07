@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace ASAP::Data
+namespace ASAP
 {
 	DataTable::DataTable(void)
 	{

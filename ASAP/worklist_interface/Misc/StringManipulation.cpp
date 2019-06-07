@@ -1,6 +1,6 @@
 #include "StringManipulation.h"
 
-namespace ASAP::Misc
+namespace ASAP { namespace Misc
 {
 	std::vector<std::string> Split(const std::string& string, const char delimiter, const char encapsulation)
 	{
@@ -44,4 +44,4 @@ namespace ASAP::Misc
 
 		return split_string;
 	}
-}
+} }

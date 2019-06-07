@@ -10,9 +10,9 @@
 #include <qlistview.h>
 #include <qstatusbar.h>
 
-#include <Data/DataTable.h>
+#include "../Data/DataTable.h"
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	/// <summary>
 	/// Creates thumbnail icons based on WSIs readable by the multiresolution reader.
@@ -24,7 +24,7 @@ namespace ASAP::GUI
 		public:
 			IconCreator(void);
 	
-			void InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading);
+			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
 		
 		private:

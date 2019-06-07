@@ -5,7 +5,7 @@
 
 #include <boost/range/iterator_range.hpp>
 
-namespace ASAP::Misc
+namespace ASAP
 {
 	TemporaryDirectoryTracker::TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration) : m_configuration_(configuration), m_continue_(true), m_directory_(directory)
 	{

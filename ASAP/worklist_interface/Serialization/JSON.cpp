@@ -2,7 +2,7 @@
 
 #include "../Misc/StringConversions.h"
 
-namespace ASAP::Serialization::JSON
+namespace ASAP { namespace JSON
 {
 	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json)
 	{
@@ -59,7 +59,7 @@ namespace ASAP::Serialization::JSON
 		return error_code;
 	}
 
-	int ParseJsonResponseToRecords(const web::http::http_response& response, Data::DataTable& table)
+	int ParseJsonResponseToRecords(const web::http::http_response& response, DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
@@ -106,7 +106,7 @@ namespace ASAP::Serialization::JSON
 		return error_code;
 	}
 
-	int ParseJsonResponseToTable(const web::http::http_response& response, Data::DataTable& table)
+	int ParseJsonResponseToTable(const web::http::http_response& response, DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
@@ -133,7 +133,7 @@ namespace ASAP::Serialization::JSON
 								column.erase(std::remove(column.begin(), column.end(), '"'), column.end());
 								header.push_back(column);
 							}
-							table = Data::DataTable(header);
+							table = DataTable(header);
 						}
 						
 						for (auto it = object.cbegin(); it != object.cend(); ++it)
@@ -167,7 +167,7 @@ namespace ASAP::Serialization::JSON
 		return error_code;
 	}
 
-	int ParseJsonResponseToTableSchema(const web::http::http_response& response, Data::DataTable& table)
+	int ParseJsonResponseToTableSchema(const web::http::http_response& response, DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previous_task)
@@ -185,7 +185,7 @@ namespace ASAP::Serialization::JSON
 						columns.push_back(Misc::WideStringToString(it->first));
 					}
 
-					table = Data::DataTable(columns);
+					table = DataTable(columns);
 				}
 				catch (const std::exception& e)
 				{
@@ -200,4 +200,4 @@ namespace ASAP::Serialization::JSON
 		}).wait();
 		return error_code;
 	}
-}
+} }

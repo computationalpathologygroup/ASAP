@@ -4,7 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace ASAP::Serialization::INI
+namespace ASAP { namespace INI
 {
 	std::unordered_map<std::string, std::string> ParseINI(const std::string filepath)
 	{
@@ -80,4 +80,4 @@ namespace ASAP::Serialization::INI
 			}
 		}
 	}
-}
+} }

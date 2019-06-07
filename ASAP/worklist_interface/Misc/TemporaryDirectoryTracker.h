@@ -6,7 +6,7 @@
 
 #include <boost/filesystem.hpp>
 
-namespace ASAP::Misc
+namespace ASAP
 {
 	// TODO: Perhaps expand this class to handle a set of directoryies
 

@@ -11,12 +11,9 @@
 #include "../Misc/StringManipulation.h"
 #include "../Misc/StringConversions.h"
 
-using namespace ASAP::Misc;
-using namespace ASAP::Networking;
-
-namespace ASAP::Data
+namespace ASAP
 {
-	SourceProxy::SourceProxy(Misc::TemporaryDirectoryTracker& temp_dir) : m_source_(nullptr), m_temporary_directory_(temp_dir)
+	SourceProxy::SourceProxy(TemporaryDirectoryTracker& temp_dir) : m_source_(nullptr), m_temporary_directory_(temp_dir)
 	{
 	}
 
@@ -41,20 +38,20 @@ namespace ASAP::Data
 			boost::filesystem::path potential_system_path(source_path);
 			if (boost::filesystem::is_regular_file(potential_system_path) && CheckParameters_(parameters, FilelistSource::GetRequiredParameterFields()))
 			{
-				m_source_ = std::unique_ptr<Data::WorklistSourceInterface>(new Data::FilelistSource(source_path));
+				m_source_ = std::unique_ptr<WorklistSourceInterface>(new FilelistSource(source_path));
 			}
 			else if (boost::filesystem::is_directory(potential_system_path) && CheckParameters_(parameters, DirectorySource::GetRequiredParameterFields()))
 			{
-				m_source_ = std::unique_ptr<Data::DirectorySource>(new Data::DirectorySource(source_path));
+				m_source_ = std::unique_ptr<DirectorySource>(new DirectorySource(source_path));
 			}
 			else if (CheckParameters_(parameters, GrandChallengeSource::GetRequiredParameterFields()))
 			{
 				web::http::client::http_client_config config;
 				config.set_validate_certificates(!static_cast<bool>(parameters.find("ignore_certificate")->second[0]));
 
-				Data::GrandChallengeURLInfo uri_info = Data::GrandChallengeSource::GetStandardURI(Misc::StringToWideString(source_path));
-				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(StringToWideString(parameters.find("token")->second), L"api/v1/"));
-				m_source_ = std::unique_ptr<Data::WorklistSourceInterface>(new Data::GrandChallengeSource(uri_info, m_temporary_directory_, credentials, config));
+				GrandChallengeURLInfo uri_info = GrandChallengeSource::GetStandardURI(Misc::StringToWideString(source_path));
+				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(Misc::StringToWideString(parameters.find("token")->second), L"api/v1/"));
+				m_source_ = std::unique_ptr<WorklistSourceInterface>(new GrandChallengeSource(uri_info, m_temporary_directory_, credentials, config));
 			}
 
 			// Adds the new source to the previous sources.

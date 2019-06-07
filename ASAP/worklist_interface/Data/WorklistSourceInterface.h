@@ -7,7 +7,7 @@
 
 #include "datatable.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	/// <summary>
 	/// Provides a basic interface that all Worklist GUI operations are based upon. Because t assumes

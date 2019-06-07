@@ -3,7 +3,7 @@
 #include <functional>
 #include <stdexcept>
 
-namespace ASAP::Networking
+namespace ASAP
 {
 	Django_Connection::Django_Connection(const std::wstring base_uri, const AuthenticationType authentication_type, const Credentials credentials, const web::http::client::http_client_config& config)
 		: HTTP_Connection(base_uri, config), m_authentication_(authentication_type), m_credentials_(credentials)
@@ -118,27 +118,12 @@ namespace ASAP::Networking
 
 				if (m_credentials_.find("cookie") != m_credentials_.end())
 				{
-					std::wstringstream body_stream;
+					// Placeholder example
+					/*std::wstringstream body_stream;
 					body_stream << L"{ \"username\": \"" << m_credentials_["username"] << L"\", \"password\": \"" << m_credentials_["password"] << L"\" }", L"application/json";
-
 					web::http::http_request token_request(web::http::methods::POST);
-				//	token_request.set_body(body_stream.str());
-					token_request.set_request_uri(m_credentials_["auth"] + L"login");
-
-
-					web::http::http_response rep;
-					SendRequest(token_request).then([&rep](const web::http::http_response& response)
-					{
-						rep = response;
-					}).wait();
-
-					std::wstring test;
-					rep.extract_string().then([&test](std::wstring b)
-					{
-						test = b;
-					}).wait();
-
-
+					token_request.set_body(body_stream.str());
+					token_request.set_request_uri(m_credentials_["auth"] + L"login");*/
 				}
 			}
 		}

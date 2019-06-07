@@ -9,7 +9,7 @@
 
 #include "HTTP_Connection.h"
 
-namespace ASAP::Networking
+namespace ASAP
 {
 	/// <summary>
 	/// Represents a connection towards a specified Django URI that handles authentication.

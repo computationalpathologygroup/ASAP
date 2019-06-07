@@ -7,7 +7,7 @@
 
 #include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	FilelistSource::FilelistSource(const std::string filepath) : m_images_(GetImageFilelist_(filepath))
 	{

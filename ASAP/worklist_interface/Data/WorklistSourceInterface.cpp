@@ -1,6 +1,6 @@
 #include "WorklistSourceInterface.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	std::vector<std::string> WorklistSourceInterface::GetRequiredParameterFields(void)
 	{

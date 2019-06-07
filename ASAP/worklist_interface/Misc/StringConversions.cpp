@@ -1,6 +1,6 @@
 #include "StringConversions.h"
 
-namespace ASAP::Misc
+namespace ASAP { namespace Misc
 {
 	// ##### String to WideString ##### //
 
@@ -41,4 +41,4 @@ namespace ASAP::Misc
 		}
 		return new_strings;
 	}
-}
+} }

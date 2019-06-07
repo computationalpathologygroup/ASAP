@@ -6,7 +6,7 @@
 #include <set>
 #include <vector>
 
-namespace ASAP::Data
+namespace ASAP
 {
 	class DataTable
 	{

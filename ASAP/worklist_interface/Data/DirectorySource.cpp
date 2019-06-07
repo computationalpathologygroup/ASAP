@@ -2,7 +2,7 @@
 
 #include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	DirectorySource::DirectorySource(const std::string directory_path) : m_images_(GetImageFilelist_(directory_path))
 	{

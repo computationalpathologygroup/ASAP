@@ -5,7 +5,7 @@
 
 #include "WorklistSourceInterface.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	class FilelistSource : public WorklistSourceInterface
 	{

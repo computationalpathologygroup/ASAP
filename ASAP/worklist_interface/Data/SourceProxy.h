@@ -8,12 +8,12 @@
 #include "WorklistSourceInterface.h"
 #include "../Misc/TemporaryDirectoryTracker.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	class SourceProxy : public WorklistSourceInterface
 	{
 		public:
-			SourceProxy(Misc::TemporaryDirectoryTracker& temp_dir);
+			SourceProxy(TemporaryDirectoryTracker& temp_dir);
 
 			void Close(void);
 			void LoadSource(const std::string& source);
@@ -49,8 +49,8 @@ namespace ASAP::Data
 			std::set<std::string> GetImageHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL);
 
 		private:
-			Misc::TemporaryDirectoryTracker&				m_temporary_directory_;
-			std::unique_ptr<Data::WorklistSourceInterface>	m_source_;
+			TemporaryDirectoryTracker&					m_temporary_directory_;
+			std::unique_ptr<WorklistSourceInterface>	m_source_;
 
 			std::string				m_current_source_;
 			std::deque<std::string>	m_previous_sources_;

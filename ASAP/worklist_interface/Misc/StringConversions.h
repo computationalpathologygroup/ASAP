@@ -6,7 +6,7 @@
 #include <string> 
 #include <vector>
 
-namespace ASAP::Misc
+namespace ASAP { namespace Misc
 {
 	/// <summary>
 	/// Converts a string into a wstring.
@@ -33,5 +33,5 @@ namespace ASAP::Misc
 	/// <param name="string">The wstrings to convert.</param>
 	/// <returns>The converted wstrings as strings.</returns>
 	std::vector<std::string> WideStringsToStrings(const std::vector<std::wstring> strings);
-}
+} }
 #endif // __ASAP_MISC_STRINGCONVERSIONS__

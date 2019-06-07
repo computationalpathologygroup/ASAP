@@ -3,7 +3,7 @@
 
 #include "WorklistSourceInterface.h"
 
-namespace ASAP::Data
+namespace ASAP
 {
 	class DirectorySource : public WorklistSourceInterface
 	{

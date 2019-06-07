@@ -12,9 +12,9 @@
 #include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
 #include "ASAP/ASAP_Window.h"
-#include "Data/SourceProxy.h"
-#include "Misc/TemporaryDirectoryTracker.h"
-#include "Models/WorklistModels.h"
+#include "../Data/SourceProxy.h"
+#include "../Misc/TemporaryDirectoryTracker.h"
+#include "../Models/WorklistModels.h"
 
 namespace ASAP
 {
@@ -42,13 +42,13 @@ namespace ASAP
 			void RequestWorklistRefresh(void);
 
 		private:
-			Data::SourceProxy							m_source_;
+			SourceProxy									m_source_;
 			std::unique_ptr<Ui::WorklistWindowLayout>	m_ui_;
 			bool										m_continue_loading_; // Todo: Refactor into something cleaner
 			std::mutex									m_image_loading_access_; // Todo: Refactor into something cleaner
 			std::mutex									m_image_switch_access_;
 			std::mutex									m_status_bar_access_;
-			Misc::TemporaryDirectoryTracker				m_storage_directory_;
+			TemporaryDirectoryTracker					m_storage_directory_;
 			std::vector<std::unique_ptr<QAction>>		m_history_actions_;
 			ASAP_Window*								m_workstation_; // Todo: Clean up or perhaps combine in struct
 			int											m_workstation_tab_id_;

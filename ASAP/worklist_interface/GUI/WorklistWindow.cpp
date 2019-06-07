@@ -13,17 +13,15 @@
 
 #include "ExternalSourceDialog.h"
 #include "IconCreator.h"
-#include "Serialization/INI.h"
-#include "Misc/StringManipulation.h"
-
-using namespace ASAP::Data;
+#include "../Serialization/INI.h"
+#include "../Misc/StringManipulation.h"
 
 namespace ASAP
 {
 	WorklistWindow::WorklistWindow(QWidget* parent) :
 		CompositeChild(parent),
 		m_ui_(new Ui::WorklistWindowLayout),
-		m_storage_directory_(boost::filesystem::path("/temp/"), Misc::TemporaryDirectoryTracker::GetStandardConfiguration()),
+		m_storage_directory_(boost::filesystem::path("/temp/"), TemporaryDirectoryTracker::GetStandardConfiguration()),
 		m_source_(m_storage_directory_)
 	{
 		m_ui_->setupUi(this);
@@ -94,7 +92,7 @@ namespace ASAP
 		if (m_source_.IsInitialized())
 		{
 			// No schema check is required for a filelist source.
-			if (m_source_.GetSourceType() == Data::WorklistSourceInterface::FULL_WORKLIST)
+			if (m_source_.GetSourceType() == WorklistSourceInterface::FULL_WORKLIST)
 			{
 				std::set<std::string> worklist_headers(m_source_.GetWorklistHeaders());
 				std::set<std::string> patient_headers(m_source_.GetPatientHeaders());
@@ -116,7 +114,7 @@ namespace ASAP
 	{
 		try
 		{
-			std::unordered_map<std::string, std::string> values(Serialization::INI::ParseINI("worklist_config.ini"));
+			std::unordered_map<std::string, std::string> values(INI::ParseINI("worklist_config.ini"));
 
 			// Acquires the last known source.
 			auto source_value(values.find("source"));
@@ -146,7 +144,7 @@ namespace ASAP
 			std::unordered_map<std::string, std::string> values;
 			values.insert({ "source", "" });
 			values.insert({ "previous_sources", "" });
-			Serialization::INI::WriteINI("worklist_config.ini", values);
+			INI::WriteINI("worklist_config.ini", values);
 		}
 	}
 	
@@ -164,7 +162,7 @@ namespace ASAP
 		// Removes the last comma and then inserts.
 		values.insert({ "previous_sources", previous_sources.substr(0, previous_sources.size() - 1)});
 
-		Serialization::INI::WriteINI("worklist_config.ini", values);
+		INI::WriteINI("worklist_config.ini", values);
 	}
 
 	void WorklistWindow::StopThumbnailLoading_(void)
@@ -203,10 +201,10 @@ namespace ASAP
 	void WorklistWindow::UpdateSourceViews_(void)
 	{
 		// Clears all previous source information.
-		m_models_.SetWorklistItems(Data::DataTable());
-		m_models_.SetPatientsItems(Data::DataTable());
-		m_models_.SetStudyItems(Data::DataTable());
-		m_models_.SetImageItems(Data::DataTable(), this, m_continue_loading_);
+		m_models_.SetWorklistItems(DataTable());
+		m_models_.SetPatientsItems(DataTable());
+		m_models_.SetStudyItems(DataTable());
+		m_models_.SetImageItems(DataTable(), this, m_continue_loading_);
 
 		// Resets the view to the Filelist standard.
 		WorklistSourceInterface::SourceType type = WorklistSourceInterface::SourceType::FILELIST;
@@ -218,7 +216,7 @@ namespace ASAP
 
 			if (type == WorklistSourceInterface::SourceType::FILELIST)
 			{
-				m_source_.GetImageRecords(std::string(), std::string(), [this, models=&m_models_, continue_loading=&m_continue_loading_](Data::DataTable& table, int error)
+				m_source_.GetImageRecords(std::string(), std::string(), [this, models=&m_models_, continue_loading=&m_continue_loading_](DataTable& table, int error)
 				{
 					if (error == 0)
 					{
@@ -231,8 +229,8 @@ namespace ASAP
 				std::vector<std::pair<std::set<std::string>, QAbstractItemView*>> headers(
 				{
 					{ std::set<std::string>(), nullptr },
-					{ m_source_.GetPatientHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_ui_->view_patients },
-					{ m_source_.GetStudyHeaders(Data::DataTable::FIELD_SELECTION::VISIBLE), m_ui_->view_studies },
+					{ m_source_.GetPatientHeaders(DataTable::FIELD_SELECTION::VISIBLE), m_ui_->view_patients },
+					{ m_source_.GetStudyHeaders(DataTable::FIELD_SELECTION::VISIBLE), m_ui_->view_studies },
 					{ std::set<std::string>(), nullptr }
 				});
 
@@ -441,7 +439,7 @@ namespace ASAP
 
 		QStandardItemModel* patient_model	= m_models_.patients;
 		QTableView* patient_view			= m_ui_->view_patients;
-		m_source_.GetPatientRecords(worklist_id, [this, patient_model, patient_view](Data::DataTable table, int error)
+		m_source_.GetPatientRecords(worklist_id, [this, patient_model, patient_view](DataTable table, int error)
 		{
 			if (error == 0)
 			{
@@ -458,7 +456,7 @@ namespace ASAP
 
 		QStandardItemModel* study_model = m_models_.studies;
 		QTableView* study_view = m_ui_->view_studies;
-		m_source_.GetStudyRecords(patient_id, [this, study_model, study_view](Data::DataTable table, int error)
+		m_source_.GetStudyRecords(patient_id, [this, study_model, study_view](DataTable table, int error)
 		{
 			if (error == 0)
 			{
@@ -478,7 +476,7 @@ namespace ASAP
 		std::string study_id(study_item->data().toString().toUtf8().constData());
 		std::string worklist_id(worklist_item->data().toString().toUtf8().constData());
 
-		m_source_.GetImageRecords(worklist_id, study_id, [this, models=&m_models_, continue_loading=&m_continue_loading_, image_view=m_ui_->view_images](Data::DataTable table, int error)
+		m_source_.GetImageRecords(worklist_id, study_id, [this, models=&m_models_, continue_loading=&m_continue_loading_, image_view=m_ui_->view_images](DataTable table, int error)
 		{
 			if (error == 0)
 			{
@@ -514,7 +512,7 @@ namespace ASAP
 
 				auto acquisition_tracking([this, bar = m_ui_->status_bar](const uint8_t progress)
 				{
-					if (bar->currentMessage().endsWith("%"));
+					if (bar->currentMessage().endsWith("%"))
 					{
 						this->UpdateStatusBar("Loading image: " + QString(std::to_string(progress).data()) + "%");
 					}
@@ -594,7 +592,7 @@ namespace ASAP
 
 	void WorklistWindow::OnWorklistRefresh(void)
 	{
-		m_source_.GetWorklistRecords([models=&m_models_](Data::DataTable& table, int error)
+		m_source_.GetWorklistRecords([models=&m_models_](DataTable& table, int error)
 		{
 			if (error == 0)
 			{

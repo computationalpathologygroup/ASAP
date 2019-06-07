@@ -3,10 +3,8 @@
 #include <cctype>
 #include <QtConcurrent\qtconcurrentrun.h>
 
-#include "GUI/IconCreator.h"
-#include "GUI/WorklistWindow.h"
-
-using namespace ASAP::Data;
+#include "../GUI/IconCreator.h"
+#include "../GUI/WorklistWindow.h"
 
 namespace ASAP
 {
@@ -33,13 +31,13 @@ namespace ASAP
 		}
 	}
 
-	void WorklistModels::SetPatientsItems(const Data::DataTable& items)
+	void WorklistModels::SetPatientsItems(const DataTable& items)
 	{
 		patients->removeRows(0, patients->rowCount());
 		patients->setRowCount(items.Size());
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
+			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
 			for (size_t field = 0; field < record.size(); ++field)
 			{
 				QStandardItem* model_item = new QStandardItem(QString(record[field]->data()));
@@ -49,13 +47,13 @@ namespace ASAP
 		}
 	}
 
-	void WorklistModels::SetStudyItems(const Data::DataTable& items)
+	void WorklistModels::SetStudyItems(const DataTable& items)
 	{
 		studies->removeRows(0, studies->rowCount());
 		studies->setRowCount(items.Size());
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(items.At(item, Data::DataTable::FIELD_SELECTION::VISIBLE));
+			std::vector<const std::string*> record(items.At(item, DataTable::FIELD_SELECTION::VISIBLE));
 			for (size_t field = 0; field < record.size(); ++field)
 			{
 				QStandardItem* model_item = new QStandardItem(QString(record[field]->data()));
@@ -65,22 +63,22 @@ namespace ASAP
 		}
 	}
 
-	void WorklistModels::SetImageItems(const Data::DataTable& items, WorklistWindow* window, bool& continue_loading)
+	void WorklistModels::SetImageItems(const DataTable& items, WorklistWindow* window, bool& continue_loading)
 	{
 		continue_loading = true;
 
 		images->removeRows(0, images->rowCount());
 		QtConcurrent::run([items, images=images, window=window, continue_loading=&continue_loading, size=200]()
 		{
-			GUI::IconCreator creator;
+			IconCreator creator;
 
 			QObject::connect(&creator,
-					&GUI::IconCreator::RequiresItemRefresh,
+					&IconCreator::RequiresItemRefresh,
 					window,
 					&WorklistWindow::UpdateImageIcons);
 
 			QObject::connect(&creator,
-					&GUI::IconCreator::RequiresStatusBarChange,
+					&IconCreator::RequiresStatusBarChange,
 					window,
 					&WorklistWindow::UpdateStatusBar);
 

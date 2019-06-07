@@ -15,10 +15,10 @@
 //		 through actual records currently. Once schema's are made available through the API, the
 //		 refresh tables function should be refactored.
 
-namespace ASAP::Data
+namespace ASAP
 {
-	GrandChallengeSource::GrandChallengeSource(const GrandChallengeURLInfo uri_info, Misc::TemporaryDirectoryTracker& temp_dir, const Networking::Django_Connection::Credentials credentials, const web::http::client::http_client_config& config)
-		: m_connection_(uri_info.base_url, Networking::Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4), m_temporary_directory_(temp_dir)
+	GrandChallengeSource::GrandChallengeSource(const GrandChallengeURLInfo uri_info, TemporaryDirectoryTracker& temp_dir, const Django_Connection::Credentials credentials, const web::http::client::http_client_config& config)
+		: m_connection_(uri_info.base_url, Django_Connection::AuthenticationType::TOKEN, credentials, config), m_rest_uri_(uri_info), m_schemas_(4), m_temporary_directory_(temp_dir)
 	{
 		RefreshTables_();
 	}
@@ -30,7 +30,7 @@ namespace ASAP::Data
 
 	GrandChallengeURLInfo GrandChallengeSource::GetStandardURI(const std::wstring base_url)
 	{
-		return { base_url, L"api/v1/worklists/", L"api/v1/patients/", L"api/v1/studies/", L"api/v1/cases/images/" };
+		return { base_url + L"api/v1/", L"worklists/", L"patients/", L"studies/", L"cases/images/" };
 	}
 
 	size_t GrandChallengeSource::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
@@ -98,7 +98,7 @@ namespace ASAP::Data
 		{
 			// Parses the worklist sets into a data table.
 			DataTable worklists(*worklist_schema);
-			int error_code = Serialization::JSON::ParseJsonResponseToRecords(response, worklists);
+			int error_code = JSON::ParseJsonResponseToRecords(response, worklists);
 			receiver(worklists, error_code);
 		});
 	}
@@ -120,7 +120,7 @@ namespace ASAP::Data
 		{
 			// Parses the worklist sets into a data table.
 			DataTable patients(*patient_schema);
-			int error_code = Serialization::JSON::ParseJsonResponseToTable(response, patients);
+			int error_code = JSON::ParseJsonResponseToTable(response, patients);
 
 			// TODO: Remove once Grand Challenge supports schema's
 			if (patients.Size() > 0 && patient_schema->GetColumnCount() == 0)
@@ -144,7 +144,7 @@ namespace ASAP::Data
 		{
 			// Parses the worklist sets into a data table.
 			DataTable studies(*study_schema);
-			int error_code = Serialization::JSON::ParseJsonResponseToTable(response, studies);
+			int error_code = JSON::ParseJsonResponseToTable(response, studies);
 
 			// TODO: Remove once Grand Challenge supports schema's
 			if (studies.Size() > 0 && study_schema->GetColumnCount() == 0)
@@ -187,7 +187,7 @@ namespace ASAP::Data
 		return m_connection_.QueueRequest(request, [image_schema=&m_schemas_[TableEntry::IMAGE], receiver](web::http::http_response& response)
 		{
 		std::vector<std::vector<std::string>> image_records;				
-			int error_code = Serialization::JSON::ParseJsonFieldsToVector(response, { "pk", "name" }, image_records);
+			int error_code = JSON::ParseJsonFieldsToVector(response, { "pk", "name" }, image_records);
 
 			DataTable images(*image_schema);
 			if (error_code == 0)
@@ -288,7 +288,7 @@ namespace ASAP::Data
 
 		m_connection_.SendRequest(request).then([patient_schema=&m_schemas_[TableEntry::PATIENT]](web::http::http_response& response)
 		{
-			Serialization::JSON::ParseJsonResponseToTable(response, *patient_schema);
+			JSON::ParseJsonResponseToTable(response, *patient_schema);
 			patient_schema->Clear();
 		});
 
@@ -297,18 +297,18 @@ namespace ASAP::Data
 
 		m_connection_.SendRequest(request).then([study_schema=&m_schemas_[TableEntry::STUDY]](web::http::http_response& response)
 		{
-			Serialization::JSON::ParseJsonResponseToTable(response, *study_schema);
+			JSON::ParseJsonResponseToTable(response, *study_schema);
 			study_schema->Clear();
 		});
 
 		// Acquires Worklists schema.
-		web::http::http_request request(web::http::methods::OPTIONS);
+		request = web::http::http_request(web::http::methods::OPTIONS);
 		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
 
 		DataTable* datatable(&m_schemas_[TableEntry::WORKLIST]);
 		m_connection_.SendRequest(request).then([datatable](web::http::http_response& response)
 		{
-			Serialization::JSON::ParseJsonResponseToTableSchema(response, *datatable);
+			JSON::ParseJsonResponseToTableSchema(response, *datatable);
 		}).wait();
 
 		// The image table supplies the OPTIONS request differently, hence why it'll be treated differently.

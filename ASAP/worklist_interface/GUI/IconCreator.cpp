@@ -3,17 +3,17 @@
 #include <functional>
 #include <stdexcept>
 
-#include "multiresolutionimageinterface/MultiResolutionImage.h"
-#include "multiresolutionimageinterface/MultiResolutionImageReader.h"
-#include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
+#include <multiresolutionimageinterface/MultiResolutionImage.h>
+#include <multiresolutionimageinterface/MultiResolutionImageReader.h>
+#include <multiresolutionimageinterface/MultiResolutionImageFactory.h>
 
-namespace ASAP::GUI
+namespace ASAP
 {
 	IconCreator::IconCreator(void)
 	{
 	}
 
-	void IconCreator::InsertIcons(const Data::DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading)
+	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading)
 	{
 		QIcon placeholder_icon(CreateBlankIcon_(size));
 		QIcon invalid_icon(CreateInvalidIcon_(size));
