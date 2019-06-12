@@ -49,12 +49,6 @@
 %include "std_map.i"
 %include "std_shared_ptr.i"
 
-%shared_ptr(ImageSource)
-%shared_ptr(MultiResolutionImage)
-%shared_ptr(OpenSlideImage)
-%shared_ptr(VSIImage)
-%shared_ptr(TIFFImage)
-%shared_ptr(LIFImage)
 %shared_ptr(Annotation)
 %shared_ptr(AnnotationBase)
 %shared_ptr(AnnotationGroup)
@@ -113,11 +107,7 @@ import_array();
 %numpy_typemaps(void, NPY_NOTYPE, int)
 %include "MultiResolutionImage.h";
 %include "TIFFImage.h";
-%extend MultiResolutionImage {
-     void close() { 
-		self->~MultiResolutionImage();
-	}
-};
+
 %extend MultiResolutionImage {
      PyObject* getUCharPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
 						     const unsigned long long& height, const unsigned int& level) { 
@@ -210,6 +200,7 @@ import_array();
   }
 %}
 
+%newobject MultiResolutionImageReader::open;
 %include "MultiResolutionImageReader.h"
 
 %apply (void* IN_ARRAY1_UNKNOWN_SIZE) {(void* data)};

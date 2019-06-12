@@ -3,6 +3,8 @@ cmake_policy(SET CMP0020 NEW)
 cmake_policy(SET CMP0043 NEW)
 cmake_policy(SET CMP0053 NEW)
 cmake_policy(SET CMP0071 NEW)
+cmake_policy(SET CMP0078 OLD)
+cmake_policy(SET CMP0086 NEW)
 project(DIAGPathology)
 
 set(CURRENT_MAJOR_VERSION 1)
