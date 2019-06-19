@@ -73,7 +73,7 @@ if (BUILD_WORKLIST_INTERFACE)
 	
 	qt5_add_resources(RESOURCE_ADDED ${RESOURCE}) 
 	
-	ADD_EXECUTABLE(ASAP_Worklist
+	ADD_EXECUTABLE(ASAP_Worklist WIN32
 		main.cpp
 		${GROUP_DATA}
 		${GROUP_GUI}
