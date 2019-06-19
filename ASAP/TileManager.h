@@ -8,7 +8,7 @@
 #include <map>
 #include <memory>
 
-#include "documents/Document.h"
+#include "documents/DocumentInstance.h"
 
 class MultiResolutionImage;
 class RenderThread;
@@ -21,60 +21,50 @@ typedef std::map<uint32_t, std::map<int32_t, std::map<int32_t, uchar>>> Coverage
 
 class TileManager : public QObject {
   Q_OBJECT
+	signals:
+	  void coverageUpdated();
 
-private:
-  /*std::vector<float> _levelDownsamples;
-  std::vector<std::vector<unsigned long long> > _levelDimensions;
-  unsigned int _tileSize;
-  QRect _lastFOV;
-  unsigned int _lastLevel;
-  unsigned int _lastRenderLevel;*/
-	CoverageMap _coverage;
-	ASAP::Document&			m_tiled_document_;
-	DocumentState&			m_doc_state_;
-	const TileInformation	m_tile_information_;
-	QRect					m_last_loaded_FOV_;
+	public:
+	  // make sure to set `item` to NULL in the constructor
+	  TileManager(ASAP::DocumentInstance& document_instance, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
+	  ~TileManager();
 
+	  void loadAllTilesForLevel(unsigned int level);
+	  void loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level);
 
-  QPointer<RenderThread> _renderThread;
-  QPointer<WSITileGraphicsItemCache> _cache;
-  QPointer<QGraphicsScene> _scene;
-  //std::vector<QPainterPath> _coverageMaps;
-  bool _coverageMapCacheMode;
+	  void resetCoverage(unsigned int level);
+	  unsigned char providesCoverage(unsigned int level, int tile_x = -1, int tile_y = -1);
+	  bool isCovered(unsigned int level, int tile_x = -1, int tile_y = -1);
+	  void setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers);
+	  std::vector<QPainterPath> getCoverageMaps();
+	  void setCoverageMapModeToCache();
+	  void setCoverageMapModeToVisited();
   
-  QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
-  QPointF tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level);
-  QPoint getLevelTiles(unsigned int level);
+	  QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
+	  QPointF tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level);
 
-  TileManager(const TileManager& that);
+	  void clear();
+	  void refresh();
 
-signals:
-  void coverageUpdated();
+	public slots:
+	  void onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);
+	  void onTileRemoved(WSITileGraphicsItem* tile);
 
-public:
-  // make sure to set `item` to NULL in the constructor
-  TileManager(ASAP::Document& document, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
-  ~TileManager();
+	private:
+		CoverageMap					_coverage;
+		ASAP::DocumentInstance&		m_instance_;
+		const ASAP::TileInformation	m_tile_information_;
+		QRect						m_last_loaded_FOV_;
 
-  void loadAllTilesForLevel(unsigned int level);
-  void loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level);
 
-  void resetCoverage(unsigned int level);
-  unsigned char providesCoverage(unsigned int level, int tile_x = -1, int tile_y = -1);
-  bool isCovered(unsigned int level, int tile_x = -1, int tile_y = -1);
-  void setCoverage(unsigned int level, int tile_x, int tile_y, unsigned char covers);
-  std::vector<QPainterPath> getCoverageMaps();
-  void setCoverageMapModeToCache();
-  void setCoverageMapModeToVisited();
-  
-  void clear();
-  void refresh();
+		QPointer<RenderThread> _renderThread;
+		QPointer<WSITileGraphicsItemCache> _cache;
+		QPointer<QGraphicsScene> _scene;
+		bool _coverageMapCacheMode;
 
-public slots:
-  void onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);
-  void onTileRemoved(WSITileGraphicsItem* tile);
+		QPoint getLevelTiles(unsigned int level);
 
-private:
-	void updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers);
+		TileManager(const TileManager& that);
+		void updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers);
 };
 #endif

@@ -9,15 +9,19 @@
 #include <QCoreApplication>
 #include <cmath>
 
-TileManager::TileManager(ASAP::Document& document, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
-m_tiled_document_(document),
-m_doc_state_(document.AccessState()),
-m_tile_information_(document.GetTileInformation()),
+TileManager::TileManager(ASAP::DocumentInstance& document_instance, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
+m_instance_(document_instance),
+m_tile_information_(document_instance.document.GetTileInformation()),
 _renderThread(renderThread),
 _cache(cache),
 _scene(scene),
 _coverageMapCacheMode(false)
 {
+	// Ensures the minimap coverage vector has the correct size.
+	if (m_instance_.minimap_coverage.empty() || m_instance_.minimap_coverage.size() != m_tile_information_.top_level + 1)
+	{
+		m_instance_.minimap_coverage.resize(m_tile_information_.top_level + 1);
+	}
 }
 
 TileManager::~TileManager() {
@@ -29,9 +33,9 @@ TileManager::~TileManager() {
 void TileManager::resetCoverage(unsigned int level)
 {
 	_coverage[level] = std::map<int32_t, std::map<int32_t, uchar>>();
-	if (m_doc_state_.minimap_coverage.size() > level)
+	if (m_instance_.minimap_coverage.size() > level)
 	{
-		m_doc_state_.minimap_coverage[level] = QPainterPath();
+		m_instance_.minimap_coverage[level] = QPainterPath();
 	}
 }
 
@@ -81,11 +85,11 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 		QRect FOVTile	= QRect(topLeftTile, bottomRightTile);
 		QPoint nrTiles	= getLevelTiles(level);
 		float levelDownsample = m_tile_information_.downsamples[level];
-		if (FOVTile != m_last_loaded_FOV_ || level != m_doc_state_.current_level)
+		if (FOVTile != m_last_loaded_FOV_ || level != m_instance_.current_level)
 		{
-			m_doc_state_.current_fov	= FOVTile;
+			m_instance_.current_fov		= FOVTile;
 			m_last_loaded_FOV_			= FOVTile;
-			m_doc_state_.current_level	= level;
+			m_instance_.current_level	= level;
 
 			for (int x = topLeftTile.x(); x <= bottomRightTile.x(); ++x)
 			{
@@ -186,7 +190,7 @@ void TileManager::setCoverage(unsigned int level, int tile_x, int tile_y, unsign
 }
 
 std::vector<QPainterPath> TileManager::getCoverageMaps() {
-  return m_doc_state_.minimap_coverage;
+  return m_instance_.minimap_coverage;
 }
 
 void TileManager::clear() {
@@ -215,25 +219,22 @@ void TileManager::clear() {
 void TileManager::refresh() {
   clear();
   loadAllTilesForLevel(m_tile_information_.top_level);
-  loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(m_doc_state_.current_fov.topLeft(), m_doc_state_.current_level), tileCoordinatesToPixelCoordinates(m_doc_state_.current_fov.bottomRight(), m_doc_state_.current_level)), m_doc_state_.current_level);
+  loadTilesForFieldOfView(QRectF(tileCoordinatesToPixelCoordinates(m_instance_.current_fov.topLeft(), m_instance_.current_level), tileCoordinatesToPixelCoordinates(m_instance_.current_fov.bottomRight(), m_instance_.current_level)), m_instance_.current_level);
 }
 
 void TileManager::updateCoverageMap_(const unsigned int level, const int tile_x, const int tile_y, const unsigned char covers)
 {
-	if (m_doc_state_.minimap_coverage.empty()) {
-		m_doc_state_.minimap_coverage.resize(m_tile_information_.top_level + 1);
-	}
 	if (level != m_tile_information_.top_level && (covers == 2 || covers == 0))
 	{
 			float rectSize = m_tile_information_.tile_size / (m_tile_information_.downsamples[m_tile_information_.top_level] / m_tile_information_.downsamples[level]);
 			QPainterPath rect;
 			rect.addRect(QRectF(tile_x * rectSize - 1, tile_y * rectSize - 1, rectSize + 1, rectSize + 1));
 			if (covers == 2) {
-				m_doc_state_.minimap_coverage[level] = m_doc_state_.minimap_coverage[level].united(rect);
+				m_instance_.minimap_coverage[level] = m_instance_.minimap_coverage[level].united(rect);
 			}
 			else if (covers == 0 && _coverageMapCacheMode)
 			{
-				m_doc_state_.minimap_coverage[level] = m_doc_state_.minimap_coverage[level].subtracted(rect);
+				m_instance_.minimap_coverage[level] = m_instance_.minimap_coverage[level].subtracted(rect);
 			}
 	}
 	emit coverageUpdated();
