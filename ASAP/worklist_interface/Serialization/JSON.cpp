@@ -22,152 +22,73 @@ namespace ASAP { namespace JSON
 		throw std::runtime_error("Tag not found.");
 	}
 
-	int ParseJsonFieldsToVector(const web::http::http_response& response, const std::vector<std::string> fields, std::vector<std::vector<std::string>>& results)
+	std::vector<std::string> ParseJsonObjectToHeaderVector(const web::json::object& object)
 	{
-		std::vector<std::wstring> converted_fields(Misc::StringsToWideStrings(fields));
-
-		int error_code = 0;
-		try
+		std::vector<std::string> header;
+		for (auto it = object.cbegin(); it != object.cend(); ++it)
 		{
-			web::json::value json_response = response.extract_json().get();;
-			try
-			{
-				for (size_t obj = 0; obj < json_response.size(); ++obj)
-				{
-					auto object = json_response[obj];
-					results.push_back(std::vector<std::string>());
-
-					for (const std::wstring& field : converted_fields)
-					{
-						std::string field(Misc::WideStringToString(object.at(field).serialize()));
-						field.erase(std::remove(field.begin(), field.end(), '"'), field.end());
-						results.back().push_back(field);						
-					}
-				}
-			}
-			catch (const std::exception& e)
-			{
-				// Indicates a parsing error.
-				error_code = -1;
-			}
+			std::string column(Misc::WideStringToString(it->first));
+			column.erase(std::remove(column.begin(), column.end(), '"'), column.end());
+			header.push_back(column);
 		}
-		catch (const web::http::http_exception& e)
+		return header;
+	}
+
+	std::vector<std::string> ParseJsonObjectToValueVector(const web::json::object& object)
+	{
+		std::vector<std::string> values;
+		for (auto it = object.cbegin(); it != object.cend(); ++it)
 		{
-			error_code = e.error_code().value();
+			std::string value;
+			if (!it->second.is_null())
+			{
+				if (it->second.is_array())
+				{
+					std::wstringstream value_stream;
+					web::json::array arr(it->second.as_array());
+					for (auto val = arr.begin(); val != arr.end(); ++val)
+					{
+						value_stream << val->as_string();
+						if (val != --arr.end())
+						{
+							value_stream << ',';
+						}
+					}
+					value = Misc::WideStringToString(value_stream.str());
+				}
+				else
+				{
+					value = Misc::WideStringToString(it->second.to_string());
+				}
+			}
+			value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
+			values.push_back(value);
 		}
-
-		return error_code;
+		return values;
 	}
 
-	int ParseJsonResponseToRecords(const web::http::http_response& response, DataTable& table)
+	int ResponseToFilteredTable(Django_Connection& connection, const web::http::http_response& response, DataTable& table, std::vector<std::string>& fields)
 	{
-		int error_code = 0;
-		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
+		return ParseJsonResponse(connection, response, table, [&fields](web::json::value& json, DataTable& table)
 		{
-			try
+			std::vector<std::wstring> conv_fields(Misc::StringsToWideStrings(fields));
+			for (size_t obj = 0; obj < json.size(); ++obj)
 			{
-				web::json::value json_response(previousTask.get());
-				if (json_response.size() > 0)
+				auto object = json[obj];
+				std::vector<std::string> record;
+				for (const std::wstring& field : conv_fields)
 				{
-					std::vector<std::string> values;
-					values.reserve(json_response[0].as_object().size());
-
-					for (size_t o = 0; o < json_response.size(); ++o)
-					{
-						web::json::object object(json_response[o].as_object());
-						for (auto it = object.cbegin(); it != object.cend(); ++it)
-						{
-							std::string value(Misc::WideStringToString(it->second.to_string()));
-							value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
-
-							if (value == "null")
-							{
-								value.clear();
-								value.shrink_to_fit();
-							}
-						}
-
-						table.Insert(values);
-						values.clear();
-					}
+					std::string field(Misc::WideStringToString(object.at(field).serialize()));
+					field.erase(std::remove(field.begin(), field.end(), '"'), field.end());
+					record.push_back(field);
 				}
+				table.Insert(record);
 			}
-			catch (const web::http::http_exception& e)
-			{
-				// Indicates a parsing error.
-				error_code = e.error_code().value();
-			}
-			catch (const std::exception& e)
-			{
-				// Indicates a parsing error.
-				error_code = -1;
-			}
-		}).wait();
-		return error_code;
+		});
+
 	}
 
-	int ParseJsonResponseToTable(const web::http::http_response& response, DataTable& table)
-	{
-		int error_code = 0;
-		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previousTask)
-		{
-			try
-			{
-				web::json::value json_response(previousTask.get());
-				if (json_response.size() > 0)
-				{
-					std::vector<std::string> values;
-					values.reserve(json_response[0].as_object().size());
-
-					for (size_t o = 0; o < json_response.size(); ++o)
-					{
-						web::json::object object(json_response[o].as_object());
-
-						// Acquires headers, if the table lacks them.
-						if (table.GetColumnCount() == 0)
-						{
-							std::vector<std::string> header;
-							for (auto it = object.cbegin(); it != object.cend(); ++it)
-							{
-								std::string column(Misc::WideStringToString(it->second.to_string()));
-								column.erase(std::remove(column.begin(), column.end(), '"'), column.end());
-								header.push_back(column);
-							}
-							table = DataTable(header);
-						}
-						
-						for (auto it = object.cbegin(); it != object.cend(); ++it)
-						{
-							std::string value(Misc::WideStringToString(it->second.to_string()));
-							value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
-
-							if (value == "null")
-							{
-								value.clear();
-								value.shrink_to_fit();
-							}
-						}
-
-						table.Insert(values);
-						values.clear();
-					}
-				}
-			}
-			catch (const web::http::http_exception& e)
-			{
-				// Indicates a parsing error.
-				error_code = e.error_code().value();
-			}
-			catch (const std::exception& e)
-			{
-				// Indicates a parsing error.
-				error_code = -1;
-			}
-		}).wait();
-		return error_code;
-	}
-
-	int ParseJsonResponseToTableSchema(const web::http::http_response& response, DataTable& table)
+	int OptionsResponseToTableSchema(const web::http::http_response& response, DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previous_task)
@@ -199,5 +120,66 @@ namespace ASAP { namespace JSON
 			}
 		}).wait();
 		return error_code;
+	}
+
+	int ResponseToTable(Django_Connection& connection, const web::http::http_response& response, DataTable& table)
+	{
+		return ParseJsonResponse(connection, response, table, [](web::json::value& json, DataTable& table)
+		{
+			if (json.is_array())
+			{
+				if (table.GetColumnCount() == 0)
+				{
+					table = DataTable(ParseJsonObjectToHeaderVector(json[0].as_object()));
+				}
+				for (size_t o = 0; o < json.size(); ++o)
+				{
+					table.Insert(ParseJsonObjectToValueVector(json[o].as_object()));
+				}
+			}
+			else
+			{
+				table = DataTable(ParseJsonObjectToHeaderVector(json.as_object()));
+				table.Insert(ParseJsonObjectToValueVector(json.as_object()));
+			}
+		});
+	}
+
+	namespace
+	{
+		int ParseJsonResponse(Django_Connection& connection, const web::http::http_response& response, DataTable& table, std::function<void(web::json::value&, DataTable&)> parser)
+		{
+			int error_code = 0;
+
+			try
+			{
+				web::json::value json(response.extract_json().get());
+				if (json.has_field(L"count") && json.has_field(L"next") && json.has_field(L"results"))
+				{
+					parser(json[L"results"], table);
+					while (json[L"next"].to_string() != L"null")
+					{
+						web::http::http_request page_request(web::http::methods::GET);
+						page_request.set_request_uri(json[L"next"].as_string());
+						json	= connection.SendRequest(page_request).get().extract_json().get();
+						parser(json[L"results"], table);
+					}
+				}
+				else
+				{
+					parser(json, table);
+				}
+			}
+			catch (const web::http::http_exception& e)
+			{
+				error_code = e.error_code().value();
+			}
+			catch (const std::exception& e)
+			{
+				error_code = -1;
+			}
+
+			return error_code;
+		}
 	}
 } }
