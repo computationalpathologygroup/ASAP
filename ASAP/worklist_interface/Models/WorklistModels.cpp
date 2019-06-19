@@ -5,6 +5,7 @@
 
 #include "../GUI/IconCreator.h"
 #include "../GUI/WorklistWindow.h"
+#include "../Misc/StringConversions.h"
 
 namespace ASAP
 {
@@ -34,10 +35,10 @@ namespace ASAP
 		worklists->removeRows(1, worklists->rowCount() - 1);
 		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{ "id", "title" }));
+			std::vector<const std::string*> record(items.At(item, std::vector<std::string>{ "id", "title", "images" }));
 			QStandardItem* model_item(new QStandardItem(QString(record[1]->data())));
-
-			model_item->setData(QVariant(record[0]->data()));
+			
+			model_item->setData(QVariant(QList<QString>({ QString(record[0]->data()), QString(record[2]->data()) })));
 			worklists->setItem(worklists->rowCount(), 0, model_item);
 		}
 	}
