@@ -62,14 +62,16 @@ namespace ASAP
 		m_view_					= new PathologyViewer(this);
 
 		m_document_bar_->setTabsClosable(true);
+		m_document_bar_->setDrawBase(true);
+		m_document_bar_->setVisible(true);
+
 		m_view_->setObjectName(QStringLiteral("pathologyView"));
 
-		QFormLayout* layout(new QFormLayout());
-		layout->addRow(m_document_bar_);		
-		layout->addRow(m_view_);
+		QBoxLayout* layout(new QBoxLayout(QBoxLayout::Direction::TopToBottom));
+		layout->addWidget(m_document_bar_);
+		layout->addWidget(m_view_);
 		this->setLayout(layout);
-
-		this->setContentsMargins(0, 0, 0, 0);
+ 		this->setContentsMargins(0, 0, 0, 0);
 	}
 
 	void DocumentWindow::OnDocumentSelect_(int index)
@@ -77,7 +79,7 @@ namespace ASAP
 		auto document_it = m_documents_.find(m_document_bar_->tabText(index).toStdString());
 		if (document_it != m_documents_.end())
 		{
-			m_view_->initialize(*document_it->second);
+			m_view_->initialize(document_it->second);
 		}
 	}
 
