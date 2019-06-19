@@ -12,6 +12,17 @@ namespace ASAP
 	{
 	}
 
+	QStandardItemModel* WorklistModels::GetModel(const ModelEnum model)
+	{
+		switch (model)
+		{
+			case WORKLISTS: return worklists;
+			case PATIENTS: return patients;
+			case STUDIES: return studies;
+			case IMAGES: return images;
+		}
+	}
+
 	void WorklistModels::SetWorklistItems(const DataTable& items)
 	{
 		if (worklists->rowCount() == 0)

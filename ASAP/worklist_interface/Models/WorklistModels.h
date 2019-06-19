@@ -17,11 +17,14 @@ namespace ASAP
 		public:
 			WorklistModels(void);
 
+			enum ModelEnum { WORKLISTS, PATIENTS, STUDIES, IMAGES };
+
 			QStandardItemModel* images;
 			QStandardItemModel* patients;
 			QStandardItemModel* studies;
 			QStandardItemModel* worklists;
 
+			QStandardItemModel* GetModel(const ModelEnum model);
 			void SetWorklistItems(const DataTable& items);
 			void SetPatientsItems(const DataTable& items);
 			void SetStudyItems(const DataTable& items);
