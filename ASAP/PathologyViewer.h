@@ -76,12 +76,12 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 		void zoomFinished();
 
 	private :
-		//float _sceneScale;
+		float _sceneScale;
 
 		// Interface to the multi-resolution image. Please note that PathologyViewer
 		// should never modify _img (it is modified in the RenderThread due to calls
 		// to readRegion), otherwise race conditions could occur.
-		ASAP::DocumentInstance* m_active_instance_;
+		ASAP::DocumentInstance* m_instance_;
 		std::weak_ptr<MultiResolutionImage> _for_img;
 
 		// Internals

@@ -19,7 +19,6 @@ namespace ASAP
 			Document&					document;
 			uint64_t					current_level;
 			QRect						current_fov;
-			float						current_scale;
 			std::vector<QPainterPath>	minimap_coverage;
 
 			//std::unordered_map<std::string, std::unique_ptr<PluginInformation>> m_plugin_information_;
