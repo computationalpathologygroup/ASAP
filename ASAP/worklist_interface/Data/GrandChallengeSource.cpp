@@ -30,7 +30,7 @@ namespace ASAP
 
 	GrandChallengeURLInfo GrandChallengeSource::GetStandardURI(const std::wstring base_url)
 	{
-		return { base_url + L"api/v1/", L"worklists/", L"patients/", L"studies/", L"cases/images/" };
+		return { base_url, L"api/v1/worklists/", L"api/v1/patients/", L"api/v1/studies/", L"api/v1/cases/images/" };
 	}
 
 	size_t GrandChallengeSource::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
@@ -48,24 +48,25 @@ namespace ASAP
 		});
 	}
 
-	size_t GrandChallengeSource::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
+	size_t GrandChallengeSource::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::set<std::string> images, const std::function<void(const bool)>& observer)
 	{
 		std::wstringstream body;
 		body << L"{ \"title\": \"" << Misc::StringToWideString(title) << "\", \"images\": [ ";
 
-		for (size_t i = 0; i < images.size(); ++i)
+		for (auto it = images.begin(); it != images.end(); ++it)
 		{
-			body << L"\"" << Misc::StringToWideString(images[i]) << L"\"";
-			if (i < images.size() - 1)
+			body << L"\"" << Misc::StringToWideString(*it) << L"\"";
+			if (it != --images.end())
 			{
-					body << L",";
+				body << L",";
 			}
 		}
+		body << L" ] }";
 
 		std::wstringstream url;
 		url << L"/" << m_rest_uri_.worklist_addition << Misc::StringToWideString(worklist_index) << L"/";
 
-		web::http::http_request request(web::http::methods::POST);
+		web::http::http_request request(web::http::methods::PATCH);
 		request.set_request_uri(url.str());
 		request.set_body(body.str(), L"application/json");
 
@@ -94,11 +95,11 @@ namespace ASAP
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(L"/" + m_rest_uri_.worklist_addition);
 
-		return m_connection_.QueueRequest(request, [receiver, worklist_schema=&m_schemas_[TableEntry::WORKLIST]](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [this, receiver](web::http::http_response& response)
 		{
-			// Parses the worklist sets into a data table.
-			DataTable worklists(*worklist_schema);
-			int error_code = JSON::ParseJsonResponseToRecords(response, worklists);
+			// Parses the worklists into a data table.
+			DataTable worklists(this->m_schemas_[TableEntry::WORKLIST]);
+			int error_code = JSON::ResponseToTable(this->m_connection_, response, worklists);
 			receiver(worklists, error_code);
 		});
 	}
@@ -116,14 +117,16 @@ namespace ASAP
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 
-		return m_connection_.QueueRequest(request,[this, receiver, patient_schema=&m_schemas_[TableEntry::PATIENT]](web::http::http_response& response)
+		return m_connection_.QueueRequest(request,[this, receiver](web::http::http_response& response)
 		{
-			// Parses the worklist sets into a data table.
-			DataTable patients(*patient_schema);
-			int error_code = JSON::ParseJsonResponseToTable(response, patients);
+			DataTable& patient_schema = this->m_schemas_[TableEntry::PATIENT];
+			DataTable patients(this->m_schemas_[TableEntry::PATIENT]);
+
+			// Parses the patients into a data table.
+			int error_code = JSON::ResponseToTable(this->m_connection_, response, patients);
 
 			// TODO: Remove once Grand Challenge supports schema's
-			if (patients.Size() > 0 && patient_schema->GetColumnCount() == 0)
+			if (patients.Size() > 0 && patient_schema.GetColumnCount() == 0)
 			{
 				this->RefreshTables_();
 			}
@@ -140,14 +143,16 @@ namespace ASAP
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 
-		return m_connection_.QueueRequest(request, [this, receiver, study_schema=&m_schemas_[TableEntry::STUDY]](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [this, receiver](web::http::http_response& response)
 		{
-			// Parses the worklist sets into a data table.
-			DataTable studies(*study_schema);
-			int error_code = JSON::ParseJsonResponseToTable(response, studies);
+			DataTable& study_schema = this->m_schemas_[TableEntry::STUDY];
+			DataTable studies(this->m_schemas_[TableEntry::STUDY]);
+
+			// Parses the studies into a data table.
+			int error_code = JSON::ResponseToTable(this->m_connection_, response, studies);
 
 			// TODO: Remove once Grand Challenge supports schema's
-			if (studies.Size() > 0 && study_schema->GetColumnCount() == 0)
+			if (studies.Size() > 0 && study_schema.GetColumnCount() == 0)
 			{
 				this->RefreshTables_();
 			}
@@ -184,19 +189,10 @@ namespace ASAP
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 
-		return m_connection_.QueueRequest(request, [image_schema=&m_schemas_[TableEntry::IMAGE], receiver](web::http::http_response& response)
+		return m_connection_.QueueRequest(request, [this, receiver](web::http::http_response& response)
 		{
-		std::vector<std::vector<std::string>> image_records;				
-			int error_code = JSON::ParseJsonFieldsToVector(response, { "pk", "name" }, image_records);
-
-			DataTable images(*image_schema);
-			if (error_code == 0)
-			{
-				for (const std::vector<std::string>& record : image_records)
-				{
-					images.Insert(record);
-				}
-			}
+			DataTable images(this->m_schemas_[TableEntry::IMAGE]);
+			int error_code = JSON::ResponseToFilteredTable(this->m_connection_, response, images, std::vector<std::string>({ "pk", "name"}));
 			receiver(images, error_code);
 		});
 	}
@@ -286,20 +282,21 @@ namespace ASAP
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(L"/" + m_rest_uri_.patient_addition);
 
-		m_connection_.SendRequest(request).then([patient_schema=&m_schemas_[TableEntry::PATIENT]](web::http::http_response& response)
+		m_connection_.SendRequest(request).then([this](web::http::http_response& response)
 		{
-			JSON::ParseJsonResponseToTable(response, *patient_schema);
-			patient_schema->Clear();
-		});
+			JSON::ResponseToTable(this->m_connection_, response, m_schemas_[TableEntry::PATIENT]);
+			m_schemas_[TableEntry::PATIENT].Clear();
+		}).wait();
 
+		// Acquires the Studies schema
 		request = web::http::http_request(web::http::methods::GET);
 		request.set_request_uri(L"/" + m_rest_uri_.study_addition);
 
-		m_connection_.SendRequest(request).then([study_schema=&m_schemas_[TableEntry::STUDY]](web::http::http_response& response)
+		m_connection_.SendRequest(request).then([this](web::http::http_response& response)
 		{
-			JSON::ParseJsonResponseToTable(response, *study_schema);
-			study_schema->Clear();
-		});
+			JSON::ResponseToTable(this->m_connection_, response, m_schemas_[TableEntry::STUDY]);
+			m_schemas_[TableEntry::STUDY].Clear();
+		}).wait();
 
 		// Acquires Worklists schema.
 		request = web::http::http_request(web::http::methods::OPTIONS);
@@ -308,7 +305,7 @@ namespace ASAP
 		DataTable* datatable(&m_schemas_[TableEntry::WORKLIST]);
 		m_connection_.SendRequest(request).then([datatable](web::http::http_response& response)
 		{
-			JSON::ParseJsonResponseToTableSchema(response, *datatable);
+			JSON::OptionsResponseToTableSchema(response, *datatable);
 		}).wait();
 
 		// The image table supplies the OPTIONS request differently, hence why it'll be treated differently.
