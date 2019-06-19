@@ -1,6 +1,7 @@
 #include "WorklistWindow.h"
 
 #include <cctype>
+#include <condition_variable>
 #include <sstream>
 #include <unordered_map>
 
@@ -71,7 +72,7 @@ namespace ASAP
 				if (!CheckSchema_())
 				{
 					m_source_.Close();
-					throw std::runtime_error("Selected source has schema errors. Unable to open.");
+					throw std::runtime_error("Loaded source has schema errors or lacks Patient and Study data.");
 				}
 
 				UpdatePreviousSources_();
@@ -100,14 +101,75 @@ namespace ASAP
 				std::set<std::string> image_headers(m_source_.GetImageHeaders());
 
 				return	(worklist_headers.find("id") != worklist_headers.end()) &&
-						(patient_headers.find("id") != worklist_headers.end()) &&
-						(study_headers.find("id") != worklist_headers.end()) &&
-						(image_headers.find("id") != worklist_headers.end()) &&
-						(image_headers.find("title") != worklist_headers.end());
+						(patient_headers.find("id") != patient_headers.end()) &&
+						(study_headers.find("id") != study_headers.end()) &&
+						(image_headers.find("id") != image_headers.end()) &&
+						(image_headers.find("title") != image_headers.end());
 			}
 			return true;
 		}
 		return false;
+	}
+
+	std::vector<std::string> WorklistWindow::GetImagesForItem_(const std::string& id, const WorklistModels::ModelEnum& model)
+	{
+		std::vector<std::string> images;
+		if (model > WorklistModels::WORKLISTS)
+		{
+			if (model == WorklistModels::IMAGES)
+			{
+				images.push_back(id);
+			}
+			else
+			{
+				// Acquires the studies attached to a passed patient id or only selects the passed id as study.
+				std::vector<std::string> studies_to_acquire;
+				std::condition_variable condition;
+				std::mutex completed_flag;
+				if (model == WorklistModels::STUDIES)
+				{
+					studies_to_acquire.push_back(id);
+				}
+				else if (model == WorklistModels::PATIENTS)
+				{
+					std::unique_lock<std::mutex> lock(completed_flag);
+					m_source_.GetStudyRecords(id, [&studies_to_acquire, &condition](DataTable& table, int error_code)
+					{
+						if (error_code == 0)
+						{
+							for (size_t record = 0; record < table.Size(); ++record)
+							{
+								studies_to_acquire.push_back(*table.At(record, { "id" })[0]);
+							}
+						}
+						condition.notify_one();
+					});
+					condition.wait(lock);
+				}
+
+				// Acquires the images for all available studies, while keeping worklist constraints in mind.
+				QModelIndexList selected_worklist(m_ui_->view_worklists->selectionModel()->selectedIndexes());
+				QStandardItem* worklist_item(m_models_.worklists->itemFromIndex(selected_worklist[0]));
+				std::string worklist_id = !worklist_item->data().isNull() ? worklist_item->data().toList()[0].toString().toStdString() : std::string();
+				for (const std::string& study_id : studies_to_acquire)
+				{
+					std::unique_lock<std::mutex> lock(completed_flag);
+					m_source_.GetImageRecords(worklist_id, study_id, [&images, &condition](DataTable& table, int error_code)
+					{
+						if (error_code == 0)
+						{
+							for (size_t record = 0; record < table.Size(); ++record)
+							{
+								images.push_back(*table.At(record, { "id" })[0]);
+							}
+						}
+						condition.notify_one();
+					});
+					condition.wait(lock);
+				}
+			}
+		}
+		return images;
 	}
 
 	void WorklistWindow::LoadSettings_(void)
@@ -263,6 +325,44 @@ namespace ASAP
 		}
 	}
 
+	void WorklistWindow::UpdateWorklist_(const QStandardItem* worklist_item, const std::vector<std::string>& image_list, bool remove)
+	{
+		QVariantList worklist_variants(worklist_item->data().toList());
+		std::string worklist_id(worklist_variants[0].toString().toStdString());
+		std::set<std::string> worklist_images;
+		for (const std::string& image_id : Misc::Split(worklist_variants[1].toString().toStdString()))
+		{
+			worklist_images.insert(image_id);
+		}
+
+		std::string error_message;
+		if (remove)
+		{
+			error_message = "Unable to delete images.";
+			for (const std::string& image_id : image_list)
+			{
+				worklist_images.erase(image_id);
+			}
+		}
+		else
+		{
+			error_message = "Unable to add images.";
+			for (const std::string& image_id : image_list)
+			{
+				worklist_images.insert(image_id);
+			}
+		}
+		m_source_.UpdateWorklistRecord(worklist_id, worklist_item->text().toStdString(), worklist_images, [this, error_message](const bool succesful)
+		{
+			if (!succesful)
+			{
+				// TODO: Create an emit to create the message box in the main thread
+				QMessageBox::question(this, "Error", QString(error_message.data()), QMessageBox::Ok);
+			}
+			this->RequestWorklistRefresh();
+		});
+	}
+
 	void WorklistWindow::SetModels_(void)
 	{
 		m_ui_->view_images->setModel(m_models_.images);
@@ -275,8 +375,8 @@ namespace ASAP
 	{
 		if (event->type() == QEvent::Drop)
 		{
+			static_cast<QDropEvent*>(event)->setDropAction(Qt::DropAction::IgnoreAction);
 			OnImageDrop_((QDropEvent*)event);
-			return true;
 		}
 		return false;
 	}
@@ -374,42 +474,43 @@ namespace ASAP
 	{
 		// Identifies the source of the drop event.
 		QObject* source(drop_event->source());
-		char owner = 0;
+		WorklistModels::ModelEnum owner = WorklistModels::WORKLISTS;
 
 		if (source == m_ui_->view_images)
 		{
-			owner = 'i';
+			owner = WorklistModels::IMAGES;
 		}
 		else if (source == m_ui_->view_studies)
 		{
-			owner = 's';
+			owner = WorklistModels::STUDIES;
 		}
 		else if (source == m_ui_->view_patients)
 		{
-			owner = 'p';
+			owner = WorklistModels::PATIENTS;
 		}
 
 		// Acquires the additional image ID's.
-		if (owner != 0)
+		if (owner != WorklistModels::WORKLISTS)
 		{
 			QByteArray encoded = drop_event->mimeData()->data("application/x-qabstractitemmodeldatalist");
 			QDataStream stream(&encoded, QIODevice::ReadOnly);
 			int row, column;
 			stream >> row >> column;
 
-			QStandardItemModel* model;
-			switch (owner)
-			{
-				case 'i': model = m_models_.images;		break;
-				case 's': model = m_models_.studies;	break;
-				case 'p': model = m_models_.patients;	break;
-			}
+			QStandardItemModel* model(m_models_.GetModel(owner));
 			QStandardItem* item = model->itemFromIndex(model->index(row, column));
-			std::string item_id(item->data().toString().toUtf8().constData());
+			QStandardItem* worklist_item = m_models_.worklists->itemFromIndex(m_ui_->view_worklists->indexAt(drop_event->pos()));
+
+			// Checks if the worklist item can be selected, and whether or not it's the statically created "All" entry.
+			if (worklist_item && worklist_item->row() > 0)
+			{
+				std::string item_id(item->data().toString().toStdString());
+				UpdateWorklist_(worklist_item, GetImagesForItem_(item_id, owner), false);
+			}
 		}
 	}
 
-	void WorklistWindow::OnImageDelete_(void)
+	void WorklistWindow::OnImageDelete_(const std::string& id, const WorklistModels::ModelEnum& model)
 	{
 
 	}
@@ -435,7 +536,7 @@ namespace ASAP
 	void WorklistWindow::OnWorklistSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_models_.worklists->itemFromIndex(index));
-		std::string worklist_id(item->data().toString().toUtf8().constData());
+		std::string worklist_id = !item->data().isNull() ? item->data().toList()[0].toString().toStdString() : std::string();
 
 		QStandardItemModel* patient_model	= m_models_.patients;
 		QTableView* patient_view			= m_ui_->view_patients;
@@ -452,7 +553,7 @@ namespace ASAP
 	void WorklistWindow::OnPatientSelect_(QModelIndex index)
 	{
 		QStandardItem* item(m_models_.patients->itemFromIndex(index));
-		std::string patient_id(item->data().toString().toUtf8().constData());
+		std::string patient_id(item->data().toString().toStdString());
 
 		QStandardItemModel* study_model = m_models_.studies;
 		QTableView* study_view = m_ui_->view_studies;
@@ -473,8 +574,8 @@ namespace ASAP
 		QStandardItem* study_item(m_models_.studies->itemFromIndex(index));
 		QStandardItem* worklist_item(m_models_.worklists->itemFromIndex(selected_worklist[0]));
 
-		std::string study_id(study_item->data().toString().toUtf8().constData());
-		std::string worklist_id(worklist_item->data().toString().toUtf8().constData());
+		std::string study_id(study_item->data().toString().toStdString());
+		std::string worklist_id = !worklist_item->data().isNull() ? worklist_item->data().toList()[0].toString().toStdString() : std::string();
 
 		m_source_.GetImageRecords(worklist_id, study_id, [this, models=&m_models_, continue_loading=&m_continue_loading_, image_view=m_ui_->view_images](DataTable table, int error)
 		{
@@ -495,7 +596,7 @@ namespace ASAP
 			for (QModelIndex& index : selected)
 			{
 				QStandardItem* image(m_models_.images->itemFromIndex(index));
-				std::string image_index(image->data().toString().toUtf8().constData());
+				std::string image_index(image->data().toString().toStdString());
 
 				m_ui_->status_bar->showMessage("Loading image: 0%");
 				auto image_loading([this](const boost::filesystem::path& filepath)
@@ -533,7 +634,7 @@ namespace ASAP
 		
 		if (names.size() > 0)
 		{
-			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData(), std::unordered_map<std::string, std::string>());
+			SetDataSource(dialog->selectedFiles()[0].toStdString(), std::unordered_map<std::string, std::string>());
 		}
 	}
 	
@@ -546,7 +647,7 @@ namespace ASAP
 
 		if (names.size() > 0)
 		{
-			SetDataSource(dialog->selectedFiles()[0].toUtf8().constData(), std::unordered_map<std::string, std::string>());
+			SetDataSource(dialog->selectedFiles()[0].toStdString(), std::unordered_map<std::string, std::string>());
 		}
 	}
 
@@ -560,10 +661,10 @@ namespace ASAP
 			ExternalSourceDialog::SourceDialogResults results(dialog->GetLoginDetails());
 
 			std::unordered_map<std::string, std::string> params;
-			params.insert({ "token", results.token.toUtf8().constData() });
+			params.insert({ "token", results.token.toStdString() });
 			params.insert({ "ignore_certificate", std::to_string(results.ignore_certificate) });
 
-			SetDataSource(std::string(results.location.toUtf8().constData()), params);
+			SetDataSource(std::string(results.location.toStdString()), params);
 		}
 	}
 
@@ -573,7 +674,7 @@ namespace ASAP
 		QString worklist = QInputDialog::getText(this, tr("Create New Worklist"), tr("Worklist title:"), QLineEdit::Normal, "", &succesful);
 		if (succesful && !worklist.isEmpty())
 		{
-			m_source_.AddWorklistRecord(std::string(worklist.toUtf8().constData()), [this](const bool succesful)
+			m_source_.AddWorklistRecord(std::string(worklist.toStdString()), [this](const bool succesful)
 			{
 				if (succesful)
 				{

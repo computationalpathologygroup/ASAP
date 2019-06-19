@@ -55,11 +55,13 @@ namespace ASAP
 			WorklistModels								m_models_;
 
 			bool CheckSchema_(void);
+			std::vector<std::string> GetImagesForItem_(const std::string& id, const WorklistModels::ModelEnum& model);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
 			void StopThumbnailLoading_(void);
 			void UpdatePreviousSources_(void);
 			void UpdateSourceViews_(void);
+			void UpdateWorklist_(const QStandardItem* worklist_item, const std::vector<std::string>& image_list, bool remove);
 
 			void SetModels_(void);
 			void SetSlots_(void);
@@ -81,7 +83,7 @@ namespace ASAP
 			void OnSelectExternalSource_(bool checked);
 
 			void OnImageDrop_(QDropEvent* drop_event);
-			void OnImageDelete_();
+			void OnImageDelete_(const std::string& id, const WorklistModels::ModelEnum& model);
 			void OnCreateWorklist_(void);
 			void OnOpenImage_(QString path);
 			void OnWorklistRefresh(void);
