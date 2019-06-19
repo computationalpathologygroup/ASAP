@@ -18,7 +18,7 @@ namespace ASAP
 		return 0;
 	}
 
-	size_t DirectorySource::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
+	size_t DirectorySource::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::set<std::string> images, const std::function<void(const bool)>& observer)
 	{
 		return 0;
 	}

@@ -57,7 +57,7 @@ namespace ASAP
 			/// <param name="images">A vector containing the ids of the images the worklist should list.</param>
 			/// <param name="observer">A lamba that accepts a boolean which details whether or not the task was succesful.</param>
 			/// <return>The task id, which can be used to cancel asynchronous tasks.</return>
-			virtual size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer) = 0;
+			virtual size_t UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::set<std::string> images, const std::function<void(const bool)>& observer) = 0;
 
 			virtual size_t DeleteWorklistRecord(const std::string& worklist_index, const std::function<void(const bool)>& observer) = 0;
 

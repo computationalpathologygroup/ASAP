@@ -50,7 +50,7 @@ namespace ASAP
 				config.set_validate_certificates(!static_cast<bool>(parameters.find("ignore_certificate")->second[0]));
 
 				GrandChallengeURLInfo uri_info = GrandChallengeSource::GetStandardURI(Misc::StringToWideString(source_path));
-				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(Misc::StringToWideString(parameters.find("token")->second), L"api/v1/"));
+				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(Misc::StringToWideString(parameters.find("token")->second), L""));
 				m_source_ = std::unique_ptr<WorklistSourceInterface>(new GrandChallengeSource(uri_info, m_temporary_directory_, credentials, config));
 			}
 
@@ -158,7 +158,7 @@ namespace ASAP
 		return m_source_->AddWorklistRecord(title, observer);
 	}
 
-	size_t SourceProxy::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::vector<std::string> images, const std::function<void(const bool)>& observer)
+	size_t SourceProxy::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::set<std::string> images, const std::function<void(const bool)>& observer)
 	{
 		return m_source_->UpdateWorklistRecord(worklist_index, title, images, observer);
 	}
