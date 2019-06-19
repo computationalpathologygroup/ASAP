@@ -2,7 +2,7 @@
 
 namespace ASAP
 {
-	ExternalSourceDialog::ExternalSourceDialog(QWidget* parent) : QDialog(parent)
+	ExternalSourceDialog::ExternalSourceDialog(QWidget* parent) : QDialog(parent), m_valid_(false)
 	{
 		setWindowTitle(tr("Open External Source"));
 		setModal(true);
