@@ -1,0 +1,16 @@
+language: minimal
+
+env:
+  -  NO_GUI=true PYTHON_VERSION=3.7
+  -  NO_GUI=true PYTHON_VERSION=3.6
+  -  NO_GUI=false PYTHON_VERSION=3.7
+  -  NO_GUI=false PYTHON_VERSION=3.6  
+
+services:
+  - docker
+
+before_install:
+- docker build -t build_env ./buildtools --build-arg only_multiresolutionimageinterface=$NO_GUI --build-arg python_version=$PYTHON_VERSION
+
+script:
+- docker run -v ${PWD}:/artifacts build_env
