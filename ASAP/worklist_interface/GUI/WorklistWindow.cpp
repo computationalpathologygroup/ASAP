@@ -111,7 +111,7 @@ namespace ASAP
 		return false;
 	}
 
-	std::vector<std::string> WorklistWindow::GetImagesForItem_(const std::string& id, const WorklistModels::ModelEnum& model)
+	std::vector<std::string> WorklistWindow::GetImagesForItem_(const std::string& id, const WorklistModels::ModelEnum model)
 	{
 		std::vector<std::string> images;
 		if (model > WorklistModels::WORKLISTS)
@@ -327,40 +327,46 @@ namespace ASAP
 
 	void WorklistWindow::UpdateWorklist_(const QStandardItem* worklist_item, const std::vector<std::string>& image_list, bool remove)
 	{
-		QVariantList worklist_variants(worklist_item->data().toList());
-		std::string worklist_id(worklist_variants[0].toString().toStdString());
-		std::set<std::string> worklist_images;
-		for (const std::string& image_id : Misc::Split(worklist_variants[1].toString().toStdString()))
+		if (worklist_item && !worklist_item->data().isNull())
 		{
-			worklist_images.insert(image_id);
-		}
-
-		std::string error_message;
-		if (remove)
-		{
-			error_message = "Unable to delete images.";
-			for (const std::string& image_id : image_list)
-			{
-				worklist_images.erase(image_id);
-			}
-		}
-		else
-		{
-			error_message = "Unable to add images.";
-			for (const std::string& image_id : image_list)
+			QVariantList worklist_variants(worklist_item->data().toList());
+			std::string worklist_id(worklist_variants[0].toString().toStdString());
+			std::set<std::string> worklist_images;
+			for (const std::string& image_id : Misc::Split(worklist_variants[1].toString().toStdString()))
 			{
 				worklist_images.insert(image_id);
 			}
-		}
-		m_source_.UpdateWorklistRecord(worklist_id, worklist_item->text().toStdString(), worklist_images, [this, error_message](const bool succesful)
-		{
-			if (!succesful)
+
+			QString error_message;
+			if (remove)
 			{
-				// TODO: Create an emit to create the message box in the main thread
-				QMessageBox::question(this, "Error", QString(error_message.data()), QMessageBox::Ok);
+				error_message = "Unable to delete images.";
+				for (const std::string& image_id : image_list)
+				{
+					worklist_images.erase(image_id);
+				}
 			}
-			this->RequestWorklistRefresh();
-		});
+			else
+			{
+				error_message = "Unable to add images.";
+				for (const std::string& image_id : image_list)
+				{
+					worklist_images.insert(image_id);
+				}
+			}
+			m_source_.UpdateWorklistRecord(worklist_id, worklist_item->text().toStdString(), worklist_images, [this, error_message](const bool succesful)
+			{
+				if (!succesful)
+				{
+					this->ShowMessageBox(error_message);
+				}
+				else
+				{
+
+				}
+				this->RequestWorklistRefresh();
+			});
+		}
 	}
 
 	void WorklistWindow::SetModels_(void)
@@ -369,6 +375,45 @@ namespace ASAP
 		m_ui_->view_patients->setModel(m_models_.patients);
 		m_ui_->view_studies->setModel(m_models_.studies);
 		m_ui_->view_worklists->setModel(m_models_.worklists);
+	}
+
+	void WorklistWindow::keyPressEvent(QKeyEvent* event)
+	{
+		if (event->key() == Qt::Key::Key_Delete)
+		{
+			QWidget* origin(this->focusWidget());
+			if (origin &&
+				(origin == m_ui_->view_worklists ||
+				 origin == m_ui_->view_patients ||
+				 origin == m_ui_->view_studies ||
+				 origin == m_ui_->view_images))
+			{
+				QAbstractItemView* view((QAbstractItemView*)origin);
+				QStandardItemModel* model((QStandardItemModel*)view->model());
+				WorklistModels::ModelEnum model_enum(m_models_.GetModelEnum(model));
+				QStandardItem* item(model->itemFromIndex(view->selectionModel()->selectedIndexes()[0]));
+
+				if (model_enum == WorklistModels::WORKLISTS && item->row() > 0)
+				{
+					m_source_.DeleteWorklistRecord(item->data().toList()[0].toString().toStdString(), [this](bool succesful)
+					{
+						if (!succesful)
+						{
+							this->ShowMessageBox("Unable to delete Worklist.");
+						}
+						else
+						{
+							this->RequestWorklistRefresh();
+						}
+					});
+				}
+				else
+				{
+					QStandardItem* worklist_item(m_models_.worklists->itemFromIndex(m_ui_->view_worklists->selectionModel()->selectedIndexes()[0]));
+					UpdateWorklist_(worklist_item, GetImagesForItem_(item->data().toString().toStdString(), model_enum), true);
+				}
+			}
+		}
 	}
 
 	bool WorklistWindow::eventFilter(QObject* obj, QEvent* event)
@@ -404,6 +449,11 @@ namespace ASAP
 			SIGNAL(clicked(QModelIndex)),
 			this,
 			SLOT(OnWorklistSelect_(QModelIndex)));
+
+		connect(m_models_.worklists,
+			&QStandardItemModel::itemChanged,
+			this,
+			&WorklistWindow::OnWorklistNameChange_);
 
 		connect(m_ui_->view_patients,
 			SIGNAL(clicked(QModelIndex)),
@@ -453,7 +503,12 @@ namespace ASAP
 		connect(this,
 			&WorklistWindow::RequestWorklistRefresh,
 			this,
-			&WorklistWindow::OnWorklistRefresh);
+			&WorklistWindow::OnWorklistRefresh_);
+
+		connect(this,
+			&WorklistWindow::ShowMessageBox,
+			this,
+			&WorklistWindow::OnShowMessageBox_);
 
 		QCoreApplication::instance()->installEventFilter(this);
 	}
@@ -470,24 +525,16 @@ namespace ASAP
 		m_status_bar_access_.unlock();
 	}
 
+	void WorklistWindow::OnShowMessageBox_(const QString message)
+	{
+		QMessageBox::question(this, "Error", message, QMessageBox::Ok);
+	}
+
 	void WorklistWindow::OnImageDrop_(QDropEvent* drop_event)
 	{
 		// Identifies the source of the drop event.
 		QObject* source(drop_event->source());
-		WorklistModels::ModelEnum owner = WorklistModels::WORKLISTS;
-
-		if (source == m_ui_->view_images)
-		{
-			owner = WorklistModels::IMAGES;
-		}
-		else if (source == m_ui_->view_studies)
-		{
-			owner = WorklistModels::STUDIES;
-		}
-		else if (source == m_ui_->view_patients)
-		{
-			owner = WorklistModels::PATIENTS;
-		}
+		WorklistModels::ModelEnum owner = m_models_.GetModelEnum((QStandardItemModel*)static_cast<QAbstractItemView*>(source)->model());
 
 		// Acquires the additional image ID's.
 		if (owner != WorklistModels::WORKLISTS)
@@ -508,11 +555,6 @@ namespace ASAP
 				UpdateWorklist_(worklist_item, GetImagesForItem_(item_id, owner), false);
 			}
 		}
-	}
-
-	void WorklistWindow::OnImageDelete_(const std::string& id, const WorklistModels::ModelEnum& model)
-	{
-
 	}
 
 	void WorklistWindow::OnWorklistClear_(QModelIndex index, int, int)
@@ -668,6 +710,13 @@ namespace ASAP
 		}
 	}
 
+	void WorklistWindow::OnOpenImage_(QString path)
+	{
+		this->UpdateStatusBar("Loaded file: " + path);
+		m_workstation_->openFile(path);
+		RequiresTabSwitch(m_workstation_tab_id_);
+	}
+
 	void WorklistWindow::OnCreateWorklist_(void)
 	{
 		bool succesful;
@@ -684,14 +733,12 @@ namespace ASAP
 		}
 	}
 
-	void WorklistWindow::OnOpenImage_(QString path)
+	void WorklistWindow::OnWorklistNameChange_(QStandardItem* item)
 	{
-		this->UpdateStatusBar("Loaded file: " + path);
-		m_workstation_->openFile(path);
-		RequiresTabSwitch(m_workstation_tab_id_);
+		UpdateWorklist_(item, { }, false);
 	}
 
-	void WorklistWindow::OnWorklistRefresh(void)
+	void WorklistWindow::OnWorklistRefresh_(void)
 	{
 		m_source_.GetWorklistRecords([models=&m_models_](DataTable& table, int error)
 		{

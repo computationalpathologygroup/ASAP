@@ -37,6 +37,7 @@ namespace ASAP
 			void UpdateStatusBar(const QString& message);
 
 		signals:
+			void ShowMessageBox(const QString message);
 			void RequestStatusBarUpdate(const QString& message);
 			void RequestOpenImage(const QString& filepath);
 			void RequestWorklistRefresh(void);
@@ -55,17 +56,20 @@ namespace ASAP
 			WorklistModels								m_models_;
 
 			bool CheckSchema_(void);
-			std::vector<std::string> GetImagesForItem_(const std::string& id, const WorklistModels::ModelEnum& model);
 			void LoadSettings_(void);
 			void StoreSettings_(void);
 			void StopThumbnailLoading_(void);
 			void UpdatePreviousSources_(void);
 			void UpdateSourceViews_(void);
+
+			std::vector<std::string> GetImagesForItem_(const std::string& id, const WorklistModels::ModelEnum model);
+			void WorklistWindow::DeleteFromWorklist_(QStandardItem* item, const WorklistModels::ModelEnum model);
 			void UpdateWorklist_(const QStandardItem* worklist_item, const std::vector<std::string>& image_list, bool remove);
 
 			void SetModels_(void);
 			void SetSlots_(void);
 
+			void keyPressEvent(QKeyEvent* event);
 			bool eventFilter(QObject* obj, QEvent* event);
 
 		private slots:
@@ -82,11 +86,13 @@ namespace ASAP
 			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
 
+		//	void OnDeletePress_();
+			void OnShowMessageBox_(const QString message);
 			void OnImageDrop_(QDropEvent* drop_event);
-			void OnImageDelete_(const std::string& id, const WorklistModels::ModelEnum& model);
-			void OnCreateWorklist_(void);
 			void OnOpenImage_(QString path);
-			void OnWorklistRefresh(void);
+			void OnCreateWorklist_(void);
+			void OnWorklistNameChange_(QStandardItem* item);
+			void OnWorklistRefresh_(void);
 	};
 }
 #endif // __ASAP_GUI_WORKLISTDATAACQUISITIONINTERFACE__
