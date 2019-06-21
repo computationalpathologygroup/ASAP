@@ -103,7 +103,6 @@ void ASAP_Window::readSettings(void)
 }
 
 void ASAP_Window::loadPlugins(void) {
-  //PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
 	PathologyViewer* viewer = m_document_window_->m_view_;
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
