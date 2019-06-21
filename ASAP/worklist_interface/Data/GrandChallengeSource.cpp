@@ -86,7 +86,7 @@ namespace ASAP
 
 		return m_connection_.QueueRequest(request, [observer](web::http::http_response& response)
 		{
-			observer(response.status_code() == web::http::status_codes::OK);
+			observer(response.status_code() == web::http::status_codes::NoContent);
 		});
 	}
 
