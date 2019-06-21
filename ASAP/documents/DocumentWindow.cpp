@@ -64,6 +64,8 @@ namespace ASAP
 		m_document_bar_->setTabsClosable(true);
 		m_document_bar_->setDrawBase(true);
 		m_document_bar_->setVisible(true);
+		m_document_bar_->setAcceptDrops(true);
+		m_document_bar_->setMovable(true);
 
 		m_view_->setObjectName(QStringLiteral("pathologyView"));
 
