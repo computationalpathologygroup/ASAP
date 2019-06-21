@@ -17,6 +17,11 @@ namespace ASAP
 			void SetPluginInformation(const std::string& plugin, PluginInformation* information, const bool allow_override = false);*/
 
 			Document&					document;
+			QPointF						view_center;
+			QPointF						scene_center;
+			qreal						scale;
+
+
 			uint64_t					current_level;
 			QRect						current_fov;
 			std::vector<QPainterPath>	minimap_coverage;

@@ -2,7 +2,7 @@
 
 namespace ASAP
 {
-	DocumentInstance::DocumentInstance(Document& document) : document(document)
+	DocumentInstance::DocumentInstance(Document& document) : document(document), scale(1.0f)
 	{
 		const TileInformation& tile_info(this->document.GetTileInformation());
 
