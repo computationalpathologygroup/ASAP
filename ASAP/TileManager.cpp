@@ -201,13 +201,16 @@ void TileManager::clear() {
   if (_cache) {
     _cache->clear();
   }
-  QList<QGraphicsItem *> itms = _scene->items();
-  for (QList<QGraphicsItem *>::iterator it = itms.begin(); it != itms.end(); ++it) {
-    WSITileGraphicsItem* itm = dynamic_cast<WSITileGraphicsItem*>((*it));
-    if (itm) {
-      _scene->removeItem(itm);
-      delete itm;
-    }
+  if (_scene)
+  {
+	  QList<QGraphicsItem *> itms = _scene->items();
+	  for (QList<QGraphicsItem *>::iterator it = itms.begin(); it != itms.end(); ++it) {
+		  WSITileGraphicsItem* itm = dynamic_cast<WSITileGraphicsItem*>((*it));
+		  if (itm) {
+			  _scene->removeItem(itm);
+			  delete itm;
+		  }
+	  }
   }
 
   _coverage.clear();
