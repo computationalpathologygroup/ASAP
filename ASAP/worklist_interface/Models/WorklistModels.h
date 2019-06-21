@@ -25,6 +25,7 @@ namespace ASAP
 			QStandardItemModel* worklists;
 
 			QStandardItemModel* GetModel(const ModelEnum model);
+			ModelEnum GetModelEnum(QStandardItemModel* model);
 			void SetWorklistItems(const DataTable& items);
 			void SetPatientsItems(const DataTable& items);
 			void SetStudyItems(const DataTable& items);

@@ -1,5 +1,6 @@
 #include "WorklistModels.h"
 
+#include <stdexcept>
 #include <cctype>
 #include <QtConcurrent\qtconcurrentrun.h>
 
@@ -18,10 +19,32 @@ namespace ASAP
 		switch (model)
 		{
 			case WORKLISTS: return worklists;
-			case PATIENTS: return patients;
-			case STUDIES: return studies;
-			case IMAGES: return images;
+			case PATIENTS:	return patients;
+			case STUDIES:	return studies;
+			case IMAGES:	return images;
 		}
+		return nullptr;
+	}
+
+	WorklistModels::ModelEnum WorklistModels::GetModelEnum(QStandardItemModel* model)
+	{
+		if (model == worklists)
+		{
+			return WORKLISTS;
+		}
+		else if (model == patients)
+		{
+			return PATIENTS;
+		}
+		else if (model == studies)
+		{
+			return STUDIES;
+		}
+		else if (model == images)
+		{
+			return IMAGES;
+		}
+		throw std::runtime_error("Model pointer doesn't match with any available model.");
 	}
 
 	void WorklistModels::SetWorklistItems(const DataTable& items)
