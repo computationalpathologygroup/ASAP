@@ -57,7 +57,12 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 		void setCacheSize(unsigned long long& maxCacheSize);
 		void setAutoUpdate(bool autoUpdate);
 
-		void updateCurrentFieldOfView();
+		void refreshView(void);
+		void modifyZoom(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
+		void modifyPan(const QPoint& pan_to_point);
+		void modifyViewState(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
+		void setViewState(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
+		//void modifyView(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor, const bool force = false);
 
 	signals :
 		void fieldOfViewChanged(const QRectF& FOV, const unsigned int level);
@@ -77,6 +82,7 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 
 	private :
 		float _sceneScale;
+		float m_view_scale_;
 
 		// Interface to the multi-resolution image. Please note that PathologyViewer
 		// should never modify _img (it is modified in the RenderThread due to calls
