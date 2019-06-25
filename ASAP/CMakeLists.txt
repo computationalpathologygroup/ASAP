@@ -3,6 +3,7 @@ set(CMAKE_AUTOUIC ON)
 set(HEADERS
     ASAP_Window.h
     PathologyViewer.h
+	PathologyViewState.h
     WSITileGraphicsItemCache.h
     MiniMap.h
     RenderThread.h
