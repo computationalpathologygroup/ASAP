@@ -9,7 +9,7 @@
 
 namespace ASAP
 {
-	Document::Document(const std::string& filepath, const std::string& factory) : m_filepath_(filepath), m_image_(nullptr)
+	Document::Document(const boost::filesystem::path& filepath, const std::string& factory) : m_filepath_(filepath), m_image_(nullptr)
 	{
 		InitializeImage_(filepath, factory);
 		InitializeTileInformation_();
@@ -35,12 +35,12 @@ namespace ASAP
 		return m_image_;
 	}
 
-	void Document::InitializeImage_(const std::string& filepath, const std::string& factory)
+	void Document::InitializeImage_(const boost::filesystem::path& filepath, const std::string& factory)
 	{
 		// Ensures parameters have been set.
-		if (filepath.empty())
+		if (boost::filesystem::is_regular_file(filepath))
 		{
-			throw std::invalid_argument("Filepath is empty.");
+			throw std::invalid_argument("Filepath doesn't point to file.");
 		}
 		if (factory.empty())
 		{
@@ -49,7 +49,7 @@ namespace ASAP
 
 		// Attempts to open the file.
 		MultiResolutionImageReader reader;
-		m_image_.reset(reader.open(filepath, factory));
+		m_image_.reset(reader.open(filepath.string(), factory));
 
 		// Checks if the image is valid.
 		if (!m_image_)

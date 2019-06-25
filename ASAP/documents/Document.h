@@ -31,7 +31,7 @@ namespace ASAP
 	class Document
 	{
 		public:
-			Document(const std::string& filepath, const std::string& factory = "default");
+			Document(const boost::filesystem::path& filepath, const std::string& factory = "default");
 
 			MultiResolutionImage& image(void);
 
@@ -44,7 +44,7 @@ namespace ASAP
 			std::shared_ptr<MultiResolutionImage>	m_image_;
 			TileInformation							m_tile_information_;
 
-			void InitializeImage_(const std::string& filepath, const std::string& factory);
+			void InitializeImage_(const boost::filesystem::path& filepath, const std::string& factory);
 			void InitializeTileInformation_(void);
 	};
 }
