@@ -16,6 +16,7 @@ set(HEADERS
     QtProgressMonitor.h
 	documents/Document.h
 	documents/DocumentInstance.h
+	documents/DocumentRetainer.h
 	documents/DocumentWindow.h
 )
 
@@ -34,6 +35,7 @@ set(SOURCE
     QtProgressMonitor.cpp
 	documents/Document.cpp
 	documents/DocumentInstance.cpp
+	documents/DocumentRetainer.cpp
 	documents/DocumentWindow.cpp
 )
 
