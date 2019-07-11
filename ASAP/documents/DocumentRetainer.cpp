@@ -1,4 +1,4 @@
-#include "DocumentCollection.h"
+#include "DocumentRetainer.h"
 
 namespace ASAP
 {
@@ -6,12 +6,20 @@ namespace ASAP
 	{
 	}
 
-	size_t DocumentRetainer::LoadDocument(const boost::filesystem::path& filepath)
+	size_t DocumentRetainer::LoadDocument(const boost::filesystem::path& filepath, const std::string& factory)
 	{
-		auto result = m_documents_.insert({ m_id_counter_, Document(filepath) });
+		auto existing_entry = m_path_to_id_.find(filepath.string());
+		if (existing_entry != m_path_to_id_.end())
+		{
+			return existing_entry->second;
+		}
+
+		auto result = m_documents_.insert({ m_document_counter_, Document(filepath, factory) });
 		m_ptr_map_.insert({ result.first->first, std::shared_ptr<Document>(&result.first->second) });
+		m_instance_counters_.insert({ result.first->first, 0 });
 		m_path_to_id_.insert({ filepath.string(), result.first->first });
-		++m_id_counter_;
+		++m_document_counter_;
+		return result.first->first;
 	}
 
 	void DocumentRetainer::UnloadDocument(const size_t id, const bool force)
@@ -23,6 +31,7 @@ namespace ASAP
 
 			for (auto it = m_path_to_id_.begin(); it != m_path_to_id_.end(); ++it)
 			{
+
 				if (it->second == id)
 				{
 					m_path_to_id_.erase(it);
@@ -34,12 +43,15 @@ namespace ASAP
 
 	DocumentInstance DocumentRetainer::GetDocument(const size_t id)
 	{
-		return DocumentInstance(m_ptr_map_[id]);
+		m_instance_counters_[id] += 1;
+		return DocumentInstance(m_ptr_map_[id], m_instance_counters_[id]);
 	}
 
 	DocumentInstance DocumentRetainer::GetDocument(const boost::filesystem::path& filepath)
 	{
-		return DocumentInstance(m_ptr_map_[this->GetDocumentId(filepath)]);
+		size_t id = this->GetDocumentId(filepath);
+		m_instance_counters_[id] += 1;
+		return DocumentInstance(m_ptr_map_[id], m_instance_counters_[id]);
 	}
 
 	size_t DocumentRetainer::GetDocumentId(const boost::filesystem::path& filepath)

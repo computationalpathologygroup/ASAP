@@ -27,8 +27,9 @@ namespace ASAP
 			/// Loads a document into the retainer.
 			/// </summary>
 			/// <param name="filepath">A filepath pointing towards an accepted ASAP image.</param>
+			/// <param name="factory">The factory to utilize for the image loading.</param>
 			/// <returns>The ID of the loaded document.</returns>
-			size_t LoadDocument(const boost::filesystem::path& filepath);
+			size_t LoadDocument(const boost::filesystem::path& filepath, const std::string& factory = "default");
 			/// <summary>
 			/// Unloads or removes a document from the retainer, which will invalidate the
 			/// passed id for future calls.
@@ -60,8 +61,9 @@ namespace ASAP
 		private:
 			std::unordered_map<size_t, Document>					m_documents_;
 			std::unordered_map <size_t, std::shared_ptr<Document>>	m_ptr_map_;
+			std::unordered_map<size_t, uint16_t>					m_instance_counters_;
 			std::unordered_map<std::string, size_t>					m_path_to_id_;
-			size_t													m_id_counter_;
+			size_t													m_document_counter_;
 	};
 }
 #endif // __ASAP_DOCUMENTS_DOCUMENTRETAINER__
