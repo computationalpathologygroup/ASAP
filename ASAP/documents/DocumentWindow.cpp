@@ -11,35 +11,40 @@ namespace ASAP
 {
 	DocumentWindow::DocumentWindow(QWidget* parent) : QWidget(parent), m_active_document_(nullptr)
 	{
-		//resizeDocks
-
-	//	this->setResizeAnchor(parent);
-
-
 		SetupUI_();
 		SetupSlots_();
 	}
 
-	void DocumentWindow::AddDocument(Document& document)
+	DocumentWindow::~DocumentWindow(void)
 	{
-		std::string filename(document.GetFilepath().filename().string());
+		Clear();
+	}
 
+	void DocumentWindow::AddDocumentInstance(DocumentInstance& instance)
+	{
 		// Inserts document into internal list.
-		auto result = m_documents_.insert({ filename, DocumentInstance(document) });
-
+		auto result = m_documents_.insert({ instance.name, instance });
 		if (result.second)
 		{
 			// Inserts document into tab bar;
-			m_document_bar_->insertTab(m_document_bar_->count(), QString::fromStdString(filename));
+			m_document_bar_->insertTab(m_document_bar_->count(), QString::fromStdString(instance.name));
 		}
 		else
 		{
 			std::stringstream message;
-			message << "Document: " << filename << " has already been added to this window.";
+			message << "Unable to add: " << instance.name << " to this viewer.";
 
 			QMessageBox message_box;
 			message_box.setText(QString::fromStdString(message.str()));
 			message_box.exec();
+		}
+	}
+
+	void DocumentWindow::Clear(void)
+	{
+		for (size_t tab = 0; tab < m_document_bar_->count(); ++tab)
+		{
+			OnTabClose_(tab);
 		}
 	}
 
@@ -81,14 +86,21 @@ namespace ASAP
 		auto document_it = m_documents_.find(m_document_bar_->tabText(index).toStdString());
 		if (document_it != m_documents_.end())
 		{
-			m_view_->initialize(document_it->second);
+			m_active_document_ = &document_it->second;
+			m_view_->initialize(*m_active_document_);
 		}
 	}
 
 	void DocumentWindow::OnTabClose_(int index)
 	{
-		m_view_->close();
-		m_documents_.erase(m_document_bar_->tabText(index).toStdString());
+		std::string tab_name(m_document_bar_->tabText(index).toStdString());
+		m_documents_.erase(tab_name);
 		m_document_bar_->removeTab(index);
+
+		if (m_active_document_->name == tab_name)
+		{
+			m_view_->close();
+			m_active_document_ = nullptr;
+		}
 	}
 }

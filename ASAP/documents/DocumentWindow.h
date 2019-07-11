@@ -23,9 +23,10 @@ namespace ASAP
 			PathologyViewer*		m_view_;
 
 			explicit DocumentWindow(QWidget* parent = 0);
+			~DocumentWindow(void);
 
-			void AddDocument(Document& document);
-
+			void AddDocumentInstance(DocumentInstance& instance);
+			void Clear(void);
 		private:
 			DocumentInstance*									m_active_document_;
 			std::unordered_map<std::string, DocumentInstance>	m_documents_;
