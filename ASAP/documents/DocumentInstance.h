@@ -12,16 +12,16 @@ namespace ASAP
 	class DocumentInstance
 	{
 		public:
-			DocumentInstance(Document& document);
-			DocumentInstance(std::shared_ptr<Document> document);
-			DocumentInstance(std::weak_ptr<Document> document);
+			DocumentInstance(Document& document, const uint16_t instance_id = 1);
+			DocumentInstance(std::shared_ptr<Document> document, const uint16_t instance_id = 1);
+			DocumentInstance(std::weak_ptr<Document> document, const uint16_t instance_id = 1);
 
 			/*PluginInformation* GetPluginInformation(const std::string& plugin);
 			bool HasPluginInformation(const std::string& plugin);
 			void SetPluginInformation(const std::string& plugin, PluginInformation* information, const bool allow_override = false);*/
-
-			const std::shared_ptr<Document>	document;
-			PathologyViewState				view_state;
+			std::shared_ptr<Document>	document;
+			const std::string			name;
+			PathologyViewState			view_state;
 
 			uint64_t					current_level;
 			QRect						current_fov;
@@ -29,6 +29,7 @@ namespace ASAP
 
 			//std::unordered_map<std::string, std::unique_ptr<PluginInformation>> m_plugin_information_;
 		private:
+			static std::string GetInstanceName_(Document& document, const uint16_t instance_id);
 			void SetupInstance_(void);
 	};
 }
