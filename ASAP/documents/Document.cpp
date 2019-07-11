@@ -25,7 +25,7 @@ namespace ASAP
 		return *m_image_;
 	}
 
-	const TileInformation Document::GetTileInformation(void) const
+	const TileInformation& Document::GetTileInformation(void) const
 	{
 		return m_tile_information_;
 	}
@@ -38,7 +38,7 @@ namespace ASAP
 	void Document::InitializeImage_(const boost::filesystem::path& filepath, const std::string& factory)
 	{
 		// Ensures parameters have been set.
-		if (boost::filesystem::is_regular_file(filepath))
+		if (!boost::filesystem::is_regular_file(filepath))
 		{
 			throw std::invalid_argument("Filepath doesn't point to file.");
 		}

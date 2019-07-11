@@ -36,7 +36,7 @@ namespace ASAP
 			MultiResolutionImage& image(void);
 
 			boost::filesystem::path GetFilepath(void) const;
-			const TileInformation GetTileInformation(void) const;
+			const TileInformation& GetTileInformation(void) const;
 			std::weak_ptr<MultiResolutionImage> GetImage(void);
 
 		private:
