@@ -8,7 +8,7 @@ set(MULTIRESOLUTIONIMAGEINTERFACE_HS
 	TIFFImageFactory.h
     MultiResolutionImage.h
 	MultiResolutionImageFactory.h
-    TileCache.h
+    TileCache.hpp
     LIFImage.h
 	LIFImageFactory.h
 )
@@ -22,7 +22,6 @@ set(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
 	MultiResolutionImageFactory.cpp
     MultiResolutionImage.cpp
 	TIFFImageFactory.cpp
-    TileCache.cpp
     LIFImage.cpp
 	LIFImageFactory.cpp
 )
