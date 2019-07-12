@@ -1,31 +1,28 @@
 #ifndef WSITileGraphicsItemCache_H
 #define WSITileGraphicsItemCache_H
 
-#include "multiresolutionimageinterface/TileCache.h"
+#include <mutex>
+#include "multiresolutionimageinterface/TileCache.hpp"
 #include <QObject>
 
 class WSITileGraphicsItem;
+class WSITileGraphicsItemCache : public QObject, public TileCache<WSITileGraphicsItem> 
+{
+	Q_OBJECT
+	public:
+		~WSITileGraphicsItemCache(void);
 
-class WSITileGraphicsItemCache : public QObject, public TileCache<WSITileGraphicsItem* >  {
-  Q_OBJECT
+		void clear(void);
+		void get(const keyType& k, WSITileGraphicsItem* tile, uint32_t& size);
+		bool set(const keyType& k, WSITileGraphicsItem* v, uint32_t size, bool topLevel = false);
 
-public :
-  ~WSITileGraphicsItemCache();
-  void clear();
-  void get(const keyType& k, WSITileGraphicsItem* tile, unsigned int& size);
-  int set(const keyType& k, WSITileGraphicsItem* v, unsigned int size, bool topLevel = false);
+	protected:
+		void evict(void);
 
-protected:
-  void evict();
+	private:
+		std::mutex m_mutex_;
 
-private :
-
-  // Structure of the cache is as follow: each entry has a position string as the key (x-y-level)
-  // Each value contains ((tile, size), iterator to position in _LRU)
-  std::map<keyType, std::pair<std::pair<WSITileGraphicsItem*, unsigned int>, keyTypeList::iterator> > _cache;
-
-signals:
-  void itemEvicted(WSITileGraphicsItem* item);
+	signals:
+		void itemEvicted(WSITileGraphicsItem* item);
 };
-
-#endif
+#endif // WSITileGraphicsItemCache_H
