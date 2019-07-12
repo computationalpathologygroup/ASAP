@@ -16,21 +16,21 @@
 
 namespace ASAP
 {
-	class ASAPLIB_EXPORT PathologyViewController : QObject
+	class ASAPLIB_EXPORT PathologyViewController : public QObject
 	{
 		public:
 			PathologyViewController(void);
 			~PathologyViewController(void);
 
-			void SetMasterViewer(PathologyViewer* viewer);
-			const PathologyViewer* GetMasterViewer(void) const;
-
-			uint64_t GetCacheSize(void) const;
+			/*uint64_t GetCacheSize(void) const;
 			/// <summary>
 			/// Changes the size of the internal cache. This operation isn't thread safe.
 			/// </summary>
 			/// <param name="size">The new size in bytes.</param>
 			void SetCacheSize(uint64_t size);
+			*/
+			void SetMasterViewer(PathologyViewer* viewer);
+			PathologyViewer* GetMasterViewer(void);
 
 			void AddSlaveViewer(PathologyViewer* viewer);
 			void ClearSlaveViewers(void);
@@ -56,7 +56,8 @@ namespace ASAP
 		private:
 			std::mutex m_modification_mutex_;
 
-			WSITileGraphicsItemCache				m_cache_;
+			//WSITileGraphicsItemCache				m_cache_;
+			//WSITileGraphicsItemCache&				m_cache_;
 			PathologyViewer*						m_master_;
 			std::unordered_set<PathologyViewer*>	m_slaves_;
 

@@ -13,7 +13,7 @@ namespace ASAP
 		m_modification_mutex_.lock();
 		m_modification_mutex_.unlock();
 	}
-
+	/*
 	uint64_t PathologyViewController::GetCacheSize(void) const
 	{
 		return m_cache_.getMaxCacheSize();
@@ -22,7 +22,7 @@ namespace ASAP
 	void PathologyViewController::SetCacheSize(uint64_t size)
 	{
 		m_cache_.setMaxCacheSize(size);
-	}
+	}*/
 
 	void PathologyViewController::SetMasterViewer(PathologyViewer* viewer)
 	{
