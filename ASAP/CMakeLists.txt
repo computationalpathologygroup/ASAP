@@ -3,6 +3,7 @@ set(CMAKE_AUTOUIC ON)
 set(HEADERS
     ASAP_Window.h
     PathologyViewer.h
+	PathologyViewController.h
 	PathologyViewState.h
     WSITileGraphicsItemCache.h
     MiniMap.h
@@ -19,11 +20,13 @@ set(HEADERS
 	documents/DocumentInstance.h
 	documents/DocumentRetainer.h
 	documents/DocumentWindow.h
+	documents/DocumentWindowController.h
 )
 
 set(SOURCE 
     ASAP_Window.cpp
     PathologyViewer.cpp
+	PathologyViewController.cpp
     WSITileGraphicsItemCache.cpp
     MiniMap.cpp
     RenderThread.cpp
@@ -38,6 +41,7 @@ set(SOURCE
 	documents/DocumentInstance.cpp
 	documents/DocumentRetainer.cpp
 	documents/DocumentWindow.cpp
+	documents/DocumentWindowController.cpp
 )
 
 find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools)
