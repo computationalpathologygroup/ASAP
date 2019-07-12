@@ -1,4 +1,4 @@
-#include "PathologyViewerUiControl.h"
+#include "PathologyViewController.h"
 
 #include <QTimeLine>
 
