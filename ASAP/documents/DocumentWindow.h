@@ -10,6 +10,7 @@
 
 #include "Document.h"
 #include "DocumentInstance.h"
+#include "../WSITileGraphicsItemCache.h"
 
 class PathologyViewer;
 
@@ -22,17 +23,25 @@ namespace ASAP
 		public:
 			PathologyViewer*		m_view_;
 
-			explicit DocumentWindow(QWidget* parent = 0);
+			explicit DocumentWindow(WSITileGraphicsItemCache& cache, QWidget* parent = 0);
 			~DocumentWindow(void);
 
 			void AddDocumentInstance(DocumentInstance& instance);
 			void Clear(void);
+
+		signals:
+			void acquiredDocumentInstance(const DocumentInstance& instance);
+			void changedDocumentInstanceDisplay(const DocumentInstance& instance);
+			void closedDocumentInstance(const DocumentInstance& instance);
+			void receivedFocus(DocumentWindow* window);
+			
+
 		private:
 			DocumentInstance*									m_active_document_;
 			std::unordered_map<std::string, DocumentInstance>	m_documents_;
 			QTabBar*											m_document_bar_;
 
-			void SetupUI_(void);
+			void SetupUI_(WSITileGraphicsItemCache& cache);
 			void SetupSlots_(void);
 
 		private slots:

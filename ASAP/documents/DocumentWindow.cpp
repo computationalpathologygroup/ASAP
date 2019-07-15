@@ -9,9 +9,9 @@
 
 namespace ASAP
 {
-	DocumentWindow::DocumentWindow(QWidget* parent) : QWidget(parent), m_active_document_(nullptr)
+	DocumentWindow::DocumentWindow(WSITileGraphicsItemCache& cache, QWidget* parent) : QWidget(parent), m_active_document_(nullptr)
 	{
-		SetupUI_();
+		SetupUI_(cache);
 		SetupSlots_();
 	}
 
@@ -28,6 +28,7 @@ namespace ASAP
 		{
 			// Inserts document into tab bar;
 			m_document_bar_->insertTab(m_document_bar_->count(), QString::fromStdString(instance.name));
+			emit acquiredDocumentInstance(result.first->second);
 		}
 		else
 		{
@@ -37,6 +38,11 @@ namespace ASAP
 			QMessageBox message_box;
 			message_box.setText(QString::fromStdString(message.str()));
 			message_box.exec();
+		}
+
+		if (!m_documents_.empty())
+		{
+			m_view_->setEnabled(false);
 		}
 	}
 
@@ -61,10 +67,10 @@ namespace ASAP
 			&DocumentWindow::OnTabClose_);
 	}
 
-	void DocumentWindow::SetupUI_(void)
+	void DocumentWindow::SetupUI_(WSITileGraphicsItemCache& cache)
 	{
 		m_document_bar_			= new QTabBar(this);		
-		m_view_					= new PathologyViewer(this);
+		m_view_					= new PathologyViewer(cache, this);
 
 		m_document_bar_->setTabsClosable(true);
 		m_document_bar_->setDrawBase(true);
@@ -88,12 +94,15 @@ namespace ASAP
 		{
 			m_active_document_ = &document_it->second;
 			m_view_->initialize(*m_active_document_);
+			emit changedDocumentInstanceDisplay(*m_active_document_);
 		}
 	}
 
 	void DocumentWindow::OnTabClose_(int index)
 	{
 		std::string tab_name(m_document_bar_->tabText(index).toStdString());
+		emit closedDocumentInstance(m_documents_[tab_name]);
+
 		m_documents_.erase(tab_name);
 		m_document_bar_->removeTab(index);
 
@@ -101,6 +110,11 @@ namespace ASAP
 		{
 			m_view_->close();
 			m_active_document_ = nullptr;
+		}
+
+		if (m_documents_.empty())
+		{
+			m_view_->setEnabled(false);
 		}
 	}
 }
