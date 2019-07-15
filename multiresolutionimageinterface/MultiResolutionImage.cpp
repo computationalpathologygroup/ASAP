@@ -233,16 +233,16 @@ const unsigned long long MultiResolutionImage::getCacheSize() {
   _cacheMutex->lock();
   if (_cache && _isValid) {
     if (_dataType == UInt32) {
-      cacheSize = (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<unsigned int> >(_cache))->getMaxCacheSize();
     }
     else if (_dataType == UInt16) {
-      cacheSize = (std::static_pointer_cast<TileCache<unsigned short> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<unsigned short> >(_cache))->getMaxCacheSize();
     }
     else if (_dataType == UChar) {
-      cacheSize = (std::static_pointer_cast<TileCache<unsigned char> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<unsigned char> >(_cache))->getMaxCacheSize();
     }
     else if (_dataType == Float) {
-      cacheSize = (std::static_pointer_cast<TileCache<float> >(_cache))->maxCacheSize();
+      cacheSize = (std::static_pointer_cast<TileCache<float> >(_cache))->getMaxCacheSize();
     }
   _cacheMutex->unlock();
   }

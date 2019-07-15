@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 #include "multiresolutionimageinterface_export.h"
-#include "TileCache.h"
+#include "TileCache.hpp"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
