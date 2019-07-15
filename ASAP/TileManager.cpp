@@ -11,7 +11,7 @@
 
 TileManager::TileManager(ASAP::DocumentInstance& document_instance, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
 m_instance_(document_instance),
-m_tile_information_(document_instance.document.GetTileInformation()),
+m_tile_information_(document_instance.document->GetTileInformation()),
 _renderThread(renderThread),
 _cache(cache),
 _scene(scene),
@@ -112,18 +112,17 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel) {
   WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, m_tile_information_.top_level, m_tile_information_.downsamples, this);
   std::stringstream ss;
-  ss << tileX << "_" << tileY << "_" << tileLevel;
-  std::string key;
-  ss >> key;
+  ss << m_instance_.name << "_" << tileX << "_" << tileY << "_" << tileLevel;
+  std::string key(ss.str());
   if (_scene) {
     setCoverage(tileLevel, tileX, tileY, 2);
     float tileDownsample = m_tile_information_.downsamples[tileLevel];
     float maxDownsample = m_tile_information_.downsamples[m_tile_information_.top_level];
     float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
     float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
+	item->setPos(posX, posY);
+	item->setZValue(1. / ((float)tileLevel + 1.));
     _scene->addItem(item);
-    item->setPos(posX, posY);
-    item->setZValue(1. / ((float)tileLevel + 1.));
   }
   if (_cache) {
     _cache->set(key, item, tileByteSize, tileLevel == m_tile_information_.top_level);
