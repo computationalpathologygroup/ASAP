@@ -101,16 +101,16 @@ namespace ASAP
 	void DocumentWindow::OnTabClose_(int index)
 	{
 		std::string tab_name(m_document_bar_->tabText(index).toStdString());
-		emit closedDocumentInstance(m_documents_[tab_name]);
-
-		m_documents_.erase(tab_name);
-		m_document_bar_->removeTab(index);
+		emit closedDocumentInstance(m_documents_.find(tab_name)->second);
 
 		if (m_active_document_->name == tab_name)
 		{
 			m_view_->close();
 			m_active_document_ = nullptr;
 		}
+
+		m_documents_.erase(tab_name);
+		m_document_bar_->removeTab(index);
 
 		if (m_documents_.empty())
 		{
