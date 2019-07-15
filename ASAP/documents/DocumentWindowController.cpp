@@ -6,6 +6,17 @@ namespace ASAP
 	{
 	}
 
+
+	uint64_t DocumentWindowController::GetCacheSize(void) const
+	{
+		return m_cache_.getMaxCacheSize();
+	}
+
+	void DocumentWindowController::SetCacheSize(uint64_t size)
+	{
+		m_cache_.setMaxCacheSize(size);
+	}
+
 	ASAP::DocumentWindow* DocumentWindowController::GetActiveWindow(void) const
 	{
 		return m_active_;
@@ -13,7 +24,7 @@ namespace ASAP
 
 	ASAP::DocumentWindow* DocumentWindowController::SpawnWindow(QWidget* parent)
 	{
-		m_viewers_.push_back(new DocumentWindow(parent));
+		m_viewers_.push_back(new DocumentWindow(m_cache_, parent));
 		ASAP::DocumentWindow* viewer = m_viewers_.back();
 
 		QObject::connect(viewer->m_view_,
@@ -22,9 +33,6 @@ namespace ASAP
 			&DocumentWindowController::OnFocusChanged_);
 		return viewer;
 	}
-
-
-
 
 	void DocumentWindowController::SetupSlots_(void)
 	{

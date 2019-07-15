@@ -8,28 +8,24 @@
 #include "documents/DocumentInstance.h"
 #include "Documents/DocumentWindow.h"
 #include "PathologyViewer.h"
+#include "WSITileGraphicsItemCache.h"
 
 #include "asaplib_export.h"
 
-class MultiResolutionImage;
-class RenderThread;
-class PrefetchThread;
-class ToolPluginInterface;
-class MiniMap;
-class WSITileGraphicsItemCache;
-class TileManager;
-class ScaleBar;
-class QSettings;
-class PathologyViewer;
-class DocumentWindow;
-
 namespace ASAP
 {
-	class ASAPLIB_EXPORT DocumentWindowController : QObject
+	class ASAPLIB_EXPORT DocumentWindowController : public QObject
 	{
 		Q_OBJECT
 		public:
 			DocumentWindowController(void);
+
+			uint64_t GetCacheSize(void) const;
+			/// <summary>
+			/// Changes the size of the internal cache. This operation isn't thread safe.
+			/// </summary>
+			/// <param name="size">The new size in bytes.</param>
+			void SetCacheSize(uint64_t size);
 
 			DocumentWindow* GetActiveWindow(void) const;
 			DocumentWindow* SpawnWindow(QWidget* parent = nullptr);
@@ -38,8 +34,9 @@ namespace ASAP
 			void FocusChanged(DocumentWindow* window);
 
 		private:
-			DocumentWindow* m_active_;
-			std::vector<DocumentWindow*> m_viewers_;
+			DocumentWindow*					m_active_;
+			std::vector<DocumentWindow*>	m_viewers_;
+			WSITileGraphicsItemCache		m_cache_;
 
 			void SetupSlots_(void);
 
