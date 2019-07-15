@@ -3,11 +3,10 @@
 #include "../PathologyViewer.h"
 
 void PanTool::mouseMoveEvent(QMouseEvent *event) {
-  if (_viewer) {
-    if (_viewer->isPanning()) {
-      _viewer->pan(event->pos());
-      event->accept();
-    }
+  if (_controller && _controller->IsPanning())
+  {
+	_controller->Pan(event->pos());
+	event->accept();
   }
 }
 
