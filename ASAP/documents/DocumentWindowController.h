@@ -46,7 +46,7 @@ namespace ASAP
 			void SetupSlots_(void);
 
 		private slots:
-			void CheckMouseMoveOrigin_(QMouseEvent* event);
+			void CheckMouseOrigin_(QMouseEvent* event);
 	};
 }
 #endif // __ASAP_DOCUMENTS_DOCUMENTWINDOWCONTROLLER__

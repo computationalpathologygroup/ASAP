@@ -33,9 +33,9 @@ namespace ASAP
 		ASAP::DocumentWindow* viewer = m_viewers_.back();
 
 		QObject::connect(viewer->m_view_,
-			&PathologyViewer::mouseMoveOccured,
+			&PathologyViewer::mouseReleaseOccured,
 			this,
-			&DocumentWindowController::CheckMouseMoveOrigin_);
+			&DocumentWindowController::CheckMouseOrigin_);
 
 		return viewer;
 	}
@@ -45,7 +45,7 @@ namespace ASAP
 
 	}
 
-	void DocumentWindowController::CheckMouseMoveOrigin_(QMouseEvent* event)
+	void DocumentWindowController::CheckMouseOrigin_(QMouseEvent* event)
 	{
 		m_active_change_mutex_.lock();
 		if (!m_active_ || sender() != m_active_->m_view_)
