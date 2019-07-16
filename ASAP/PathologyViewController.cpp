@@ -4,7 +4,7 @@
 
 namespace ASAP
 {
-	PathologyViewController::PathologyViewController(void) : QObject()
+	PathologyViewController::PathologyViewController(void) : QObject(), m_master_(nullptr)
 	{
 	}
 
@@ -19,10 +19,11 @@ namespace ASAP
 		m_modification_mutex_.lock();
 		if (m_master_ != viewer)
 		{
-			if (!m_master_)
+			if (m_master_)
 			{
 				DisconnectObserved_(m_master_);
 				DisconnectObserver_(m_master_);
+				m_is_panning_ = false;
 			}
 
 			m_master_ = viewer;
@@ -178,12 +179,12 @@ namespace ASAP
 
 		if (changed && m_master_)
 		{
-			m_master_->togglePan(pan, startPos);
+			m_master_->togglePan(m_is_panning_, startPos);
 			for (PathologyViewer* viewer : m_slaves_)
 			{
 				if (viewer)
 				{
-					viewer->togglePan(pan, startPos);
+					viewer->togglePan(m_is_panning_, startPos);
 				}
 			}
 		}
