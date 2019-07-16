@@ -22,13 +22,6 @@ namespace ASAP
 			PathologyViewController(void);
 			~PathologyViewController(void);
 
-			/*uint64_t GetCacheSize(void) const;
-			/// <summary>
-			/// Changes the size of the internal cache. This operation isn't thread safe.
-			/// </summary>
-			/// <param name="size">The new size in bytes.</param>
-			void SetCacheSize(uint64_t size);
-			*/
 			void SetMasterViewer(PathologyViewer* viewer);
 			PathologyViewer* GetMasterViewer(void);
 
@@ -48,16 +41,16 @@ namespace ASAP
 			bool HasTool(const std::string& name) const;
 			void SetActiveTool(const std::string& name);
 			
+			void Pan(const QPoint position);
 			void TogglePan(bool pan, const QPoint& startPos = QPoint());
-			void Zoom(const float numSteps, const QPointF& center_view, const QPointF& center_scene);
+			void Zoom(const float steps);
+			void Zoom(const float steps, const QPointF& center_view, const QPointF& center_scene);
 
 		public slots:
 
 		private:
 			std::mutex m_modification_mutex_;
 
-			//WSITileGraphicsItemCache				m_cache_;
-			//WSITileGraphicsItemCache&				m_cache_;
 			PathologyViewer*						m_master_;
 			std::unordered_set<PathologyViewer*>	m_slaves_;
 

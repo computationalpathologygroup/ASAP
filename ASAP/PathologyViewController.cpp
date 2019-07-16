@@ -13,16 +13,6 @@ namespace ASAP
 		m_modification_mutex_.lock();
 		m_modification_mutex_.unlock();
 	}
-	/*
-	uint64_t PathologyViewController::GetCacheSize(void) const
-	{
-		return m_cache_.getMaxCacheSize();
-	}
-
-	void PathologyViewController::SetCacheSize(uint64_t size)
-	{
-		m_cache_.setMaxCacheSize(size);
-	}*/
 
 	void PathologyViewController::SetMasterViewer(PathologyViewer* viewer)
 	{
@@ -164,6 +154,11 @@ namespace ASAP
 		m_modification_mutex_.unlock();
 	}
 
+	void PathologyViewController::Pan(const QPoint position)
+	{
+		UpdatePan_(position);
+	}
+
 	void PathologyViewController::TogglePan(bool pan, const QPoint& startPos)
 	{
 		m_modification_mutex_.lock();
@@ -193,18 +188,23 @@ namespace ASAP
 		m_modification_mutex_.unlock();
 	}
 
-	void PathologyViewController::Zoom(const float numSteps, const QPointF& center_view, const QPointF& center_scene)
+	void PathologyViewController::Zoom(const float steps)
+	{
+		Zoom(steps, m_zoom_view_center_, m_zoom_scene_center_);
+	}
+
+	void PathologyViewController::Zoom(const float steps, const QPointF& center_view, const QPointF& center_scene)
 	{
 		m_modification_mutex_.lock();
 		if (m_master_)
 		{
 			m_zoom_view_center_		= center_view;
 			m_zoom_scene_center_	= center_scene;
-			m_zoom_steps_			+= numSteps;
+			m_zoom_steps_			+= steps;
 
-			if (m_zoom_steps_ * numSteps < 0)
+			if (m_zoom_steps_ * steps < 0)
 			{
-				m_zoom_steps_ = numSteps;
+				m_zoom_steps_ = steps;
 			}
 
 			QTimeLine* anim = new QTimeLine(300, this);
