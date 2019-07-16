@@ -8,8 +8,10 @@
 #include <memory>
 #include <unordered_map>
 
-#include "documents/Document.h"
+#include "PathologyViewController.h"
+#include "documents/DocumentRetainer.h"
 #include "documents/DocumentWindow.h"
+#include "documents/DocumentWindowController.h"
 
 class QHBoxLayout;
 class QAction;
@@ -49,6 +51,8 @@ signals:
   void imageClosed(void);
 
 private slots:
+  void onViewerFocusChanged(ASAP::DocumentWindow* window);
+
   void on_actionClose_triggered();
   void on_actionOpen_triggered();
   void on_actionAbout_triggered();
@@ -61,8 +65,9 @@ private:
   void closeEvent(QCloseEvent *event);
   
   // Documents
-  size_t m_document_id_count_;
-  std::unordered_map<size_t, ASAP::Document> m_documents_;
+  ASAP::DocumentRetainer			m_documents_;
+  ASAP::DocumentWindowController	m_document_window_controller_;
+  ASAP::PathologyViewController		m_view_controller_;
 
   // Plugins
   QDir _pluginsDir;
@@ -86,6 +91,7 @@ private:
   QToolBar *mainToolBar;
   QStatusBar *statusBar;
   ASAP::DocumentWindow* m_document_window_;
+  ASAP::DocumentWindow* window2;
 
   // Initialize the GUI
   void initializeDocks(void);

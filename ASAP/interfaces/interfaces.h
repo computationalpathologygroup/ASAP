@@ -15,6 +15,7 @@
 #include "core/Patch.h"
 #include "imgproc/basicfilters/FilterBase.h"
 #include "ASAP/PathologyViewer.h"
+#include "ASAP/PathologyViewController.h"
 
 class QSettings;
 class QToolBar;
@@ -23,6 +24,11 @@ class PathologyViewer;
 class QMenu;
 class ProgressMonitor;
 class MultiResolutionImage;
+
+namespace ASAP
+{
+	class PathologyViewController;
+}
 
 class ImageFilterPluginInterface : public QObject
 {
@@ -84,8 +90,9 @@ public:
     _viewer = NULL;
     _button = NULL;
   }
-
+  
   virtual std::string name() = 0;
+  void setController(ASAP::PathologyViewController& controller) { _controller = &controller; }
   void setViewer(PathologyViewer* viewer) { _viewer = viewer; }
   bool active() { return _active; }
   virtual void setActive(bool active) {
@@ -98,7 +105,8 @@ public:
   virtual void keyPressEvent(QKeyEvent *event) { event->ignore(); };
   virtual QAction* getToolButton() = 0;
 
-protected :
+protected:
+  QPointer<ASAP::PathologyViewController> _controller;
   QPointer<PathologyViewer> _viewer;
   QPointer<QAction> _button;
   bool _active;
@@ -116,6 +124,7 @@ public :
   virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
 
 protected:
+  QPointer<ASAP::PathologyViewController> _controller;
   QPointer<PathologyViewer> _viewer;
   QSettings* _settings;
 

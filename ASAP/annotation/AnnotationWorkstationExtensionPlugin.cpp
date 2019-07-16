@@ -640,7 +640,7 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
       connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
     }
     else if (kpEvent->key() == Qt::Key::Key_Z) {
-      if (std::shared_ptr<AnnotationTool> tool = std::dynamic_pointer_cast<AnnotationTool>(_viewer->getActiveTool())) {
+      if (std::shared_ptr<AnnotationTool> tool = std::dynamic_pointer_cast<AnnotationTool>(_controller->GetActiveTool())) {
         tool->keyPressEvent(kpEvent);
       }
     }

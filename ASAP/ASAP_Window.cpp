@@ -52,30 +52,38 @@ ASAP_Window::ASAP_Window(QWidget *parent) :
     _cacheMaxByteSize(1000*512*512*3),
     _settings(NULL)
 {
-  setupUi();
-  retranslateUi();
-  connect(actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_actionOpen_triggered()));
-  connect(actionClose, SIGNAL(triggered(bool)), this, SLOT(on_actionClose_triggered()));
-  connect(actionAbout, SIGNAL(triggered(bool)), this, SLOT(on_actionAbout_triggered()));
+	setupUi();
+	retranslateUi();
+	connect(actionOpen, SIGNAL(triggered(bool)), this, SLOT(on_actionOpen_triggered()));
+	connect(actionClose, SIGNAL(triggered(bool)), this, SLOT(on_actionClose_triggered()));
+	connect(actionAbout, SIGNAL(triggered(bool)), this, SLOT(on_actionAbout_triggered()));
 
-    this->loadPlugins();
-	m_document_window_->m_view_->setCacheSize(_cacheMaxByteSize);
-  if (m_document_window_->m_view_->hasTool("pan")) {
-	  m_document_window_->m_view_->setActiveTool("pan");
-    QList<QAction*> toolButtons = mainToolBar->actions();
-    for (QList<QAction*>::iterator it = toolButtons.begin(); it != toolButtons.end(); ++it) {
-      if ((*it)->objectName() == "pan") {
-        (*it)->setChecked(true);
-      }
-    }
-  }
-  m_document_window_->m_view_->setEnabled(false);
-  _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
-  readSettings();
-  QStringList args = QApplication::arguments();
-  if (args.size() > 1) {
-    openFile(args[1], "default");
-  }
+	connect(&m_document_window_controller_,
+		&ASAP::DocumentWindowController::viewerFocusChanged,
+		this,
+		&ASAP_Window::onViewerFocusChanged);
+
+	m_document_window_controller_.SetCacheSize(_cacheMaxByteSize);
+	if (m_view_controller_.HasTool("pan"))
+	{
+		m_view_controller_.SetActiveTool("pan");
+		QList<QAction*> toolButtons = mainToolBar->actions();
+		for (QList<QAction*>::iterator it = toolButtons.begin(); it != toolButtons.end(); ++it)
+		{
+			if ((*it)->objectName() == "pan")
+			{
+				(*it)->setChecked(true);
+			}
+		}
+	}
+	
+	_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
+	readSettings();
+	QStringList args = QApplication::arguments();
+	if (args.size() > 1)
+	{
+		openFile(args[1], "default");
+	}
 }
 
 ASAP_Window::~ASAP_Window(void)
@@ -103,7 +111,7 @@ void ASAP_Window::readSettings(void)
 }
 
 void ASAP_Window::loadPlugins(void) {
-	PathologyViewer* viewer = m_document_window_->m_view_;
+	PathologyViewer* viewer(m_view_controller_.GetMasterViewer());
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
     if (_pluginsDir.cd("tools")) {
@@ -114,11 +122,11 @@ void ASAP_Window::loadPlugins(void) {
           if (plugin) {
             std::shared_ptr<ToolPluginInterface> tool(qobject_cast<ToolPluginInterface*>(plugin));
             if (tool) {
-              tool->setViewer(viewer);
-              QAction* toolAction = tool->getToolButton();
+				QAction* toolAction = tool->getToolButton();
               connect(toolAction, SIGNAL(triggered(bool)), viewer, SLOT(changeActiveTool()));
               _toolPluginFileNames.push_back(fileName.toStdString());
-              viewer->addTool(tool);
+
+			  m_view_controller_.AddTool(tool);
               QToolBar* mainToolBar = this->findChild<QToolBar *>("mainToolBar");
               toolAction->setCheckable(true);
               _toolActions->addAction(toolAction);
@@ -175,7 +183,7 @@ void ASAP_Window::loadPlugins(void) {
                 for (unsigned int i = 0; i < tools.size(); ++i) {
                   QAction* toolAction = tools[i]->getToolButton();
                   connect(toolAction, SIGNAL(triggered(bool)), viewer, SLOT(changeActiveTool()));
-                  viewer->addTool(tools[i]);
+				  m_view_controller_.AddTool(tools[i]);
                   mainToolBar->addAction(toolAction);
                   toolAction->setCheckable(true);
                   _toolActions->addAction(toolAction);
@@ -192,6 +200,11 @@ void ASAP_Window::loadPlugins(void) {
       }
     }
   }
+}
+
+void ASAP_Window::onViewerFocusChanged(ASAP::DocumentWindow* window)
+{
+	m_view_controller_.SetMasterViewer(window->m_view_);
 }
 
 void ASAP_Window::closeEvent(QCloseEvent *event) {
@@ -239,32 +252,32 @@ void ASAP_Window::on_actionClose_triggered(void)
     _settings->setValue("currentFile", QString());
     this->setWindowTitle("ASAP");
 
+	/*
 	if (!m_documents_.empty())
 	{
 		m_documents_.erase(m_documents_.begin());
 		m_document_window_->m_view_->close();
 		statusBar->showMessage("Closed file!", 5);
-	}
+	}*/
 }
 
 void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) {
 	statusBar->clearMessage();
 	try
 	{
-		//on_actionClose_triggered();
+		size_t document_id = m_documents_.LoadDocument(boost::filesystem::path(fileName.toStdString()), factoryName.toStdString());
+		_settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
+		_settings->setValue("currentFile", QFileInfo(fileName).fileName());
+		this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
 
-		auto result = m_documents_.insert({ m_document_id_count_, ASAP::Document(fileName.toStdString(), factoryName.toStdString()) });
-		m_document_id_count_++;
 
-		if (result.second)
-		{
-			_settings->setValue("lastOpenendPath", QFileInfo(fileName).dir().path());
-			_settings->setValue("currentFile", QFileInfo(fileName).fileName());
-			this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
+		ASAP::DocumentInstance instance = m_documents_.GetDocument(document_id);
+		m_document_window_->AddDocumentInstance(instance);
 
-			m_document_window_->AddDocument(result.first->second);
-			emit newImageLoaded(result.first->second.GetImage(), fileName.toStdString());
-		}		
+		ASAP::DocumentInstance instance2 = m_documents_.GetDocument(document_id);
+		window2->AddDocumentInstance(instance2);
+
+		emit newImageLoaded(instance.document->GetImage(), fileName.toStdString());
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -274,6 +287,7 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 	catch (const std::invalid_argument& e)
 	{
 		// Implies an invalid call with no filename or factory name, we can safely ignore this.
+		statusBar->showMessage(e.what());
 	}
 }
 
@@ -303,17 +317,14 @@ void ASAP_Window::on_actionOpen_triggered(void)
   openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
 }
 
-void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
-  if (m_document_window_->m_view_) {
-	  m_document_window_->m_view_->setCacheSize(_cacheMaxByteSize);
-  }
+void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize)
+{
+	m_document_window_controller_.SetCacheSize(cacheMaxByteSize);
 }
     
-unsigned long long ASAP_Window::getCacheSize(void) const {
-  if (m_document_window_->m_view_) {
-    return m_document_window_->m_view_->getCacheSize();
-  }
-	return 1;
+unsigned long long ASAP_Window::getCacheSize(void) const
+{
+	return m_document_window_controller_.GetCacheSize();
 }
 
 void ASAP_Window::setupUi(void)
@@ -375,16 +386,11 @@ void ASAP_Window::setupUi(void)
   horizontalLayout_2->setSpacing(6);
   horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
   horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-  //pathologyView = new PathologyViewer(centralWidget);
-  //pathologyView->setObjectName(QStringLiteral("pathologyView"));
 
- // m_document_window_ = new ASAP::DocumentWindow(centralWidget);
-
-  m_document_window_ = new ASAP::DocumentWindow(centralWidget);
- // m_document_window_->m_view_ = new PathologyViewer(centralWidget);
-  //m_document_window_->m_view_->setObjectName(QStringLiteral("pathologyView"));
+  m_document_window_ = m_document_window_controller_.SpawnWindow(centralWidget);
+  window2 = m_document_window_controller_.SpawnWindow(centralWidget);
   horizontalLayout_2->addWidget(m_document_window_);
-
+  horizontalLayout_2->addWidget(window2);
   this->setCentralWidget(centralWidget);
 }
 
