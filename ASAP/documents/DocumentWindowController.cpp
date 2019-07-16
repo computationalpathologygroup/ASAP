@@ -6,6 +6,11 @@ namespace ASAP
 	{
 	}
 
+	DocumentWindowController::~DocumentWindowController(void)
+	{
+		m_active_change_mutex_.lock();
+		m_active_change_mutex_.unlock();
+	}
 
 	uint64_t DocumentWindowController::GetCacheSize(void) const
 	{
@@ -28,9 +33,10 @@ namespace ASAP
 		ASAP::DocumentWindow* viewer = m_viewers_.back();
 
 		QObject::connect(viewer->m_view_,
-			&PathologyViewer::receivedFocus,
+			&PathologyViewer::mouseMoveOccured,
 			this,
-			&DocumentWindowController::OnFocusChanged_);
+			&DocumentWindowController::CheckMouseMoveOrigin_);
+
 		return viewer;
 	}
 
@@ -39,18 +45,21 @@ namespace ASAP
 
 	}
 
-	void DocumentWindowController::OnFocusChanged_(const PathologyViewer* view)
+	void DocumentWindowController::CheckMouseMoveOrigin_(QMouseEvent* event)
 	{
-		// Finishes the operations of the currently active view.
-
-		// Switches the focused view to active view.
-		for (DocumentWindow* w : m_viewers_)
+		m_active_change_mutex_.lock();
+		if (!m_active_ || sender() != m_active_->m_view_)
 		{
-			if (w->m_view_ == view)
+			for (DocumentWindow* window : m_viewers_)
 			{
-				m_active_ = w;
-				break;
+				if (window->m_view_ == sender())
+				{
+					m_active_ = window;
+					emit viewerFocusChanged(window);
+					break;
+				}
 			}
 		}
+		m_active_change_mutex_.unlock();
 	}
 }

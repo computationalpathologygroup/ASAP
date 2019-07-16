@@ -1,9 +1,12 @@
 #ifndef __ASAP_DOCUMENTS_DOCUMENTWINDOWCONTROLLER__
 #define __ASAP_DOCUMENTS_DOCUMENTWINDOWCONTROLLER__
 
-#include <QObject>
 #include <vector>
 #include <memory>
+#include <mutex>
+
+#include <QObject>
+#include <QMouseEvent>
 
 #include "documents/DocumentInstance.h"
 #include "Documents/DocumentWindow.h"
@@ -19,6 +22,7 @@ namespace ASAP
 		Q_OBJECT
 		public:
 			DocumentWindowController(void);
+			~DocumentWindowController(void);
 
 			uint64_t GetCacheSize(void) const;
 			/// <summary>
@@ -31,17 +35,18 @@ namespace ASAP
 			DocumentWindow* SpawnWindow(QWidget* parent = nullptr);
 
 		signals:
-			void FocusChanged(DocumentWindow* window);
+			void viewerFocusChanged(DocumentWindow* window);
 
 		private:
 			DocumentWindow*					m_active_;
 			std::vector<DocumentWindow*>	m_viewers_;
 			WSITileGraphicsItemCache		m_cache_;
+			std::mutex						m_active_change_mutex_;
 
 			void SetupSlots_(void);
 
 		private slots:
-			void OnFocusChanged_(const PathologyViewer* view);
+			void CheckMouseMoveOrigin_(QMouseEvent* event);
 	};
 }
 #endif // __ASAP_DOCUMENTS_DOCUMENTWINDOWCONTROLLER__
