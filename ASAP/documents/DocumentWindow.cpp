@@ -42,7 +42,7 @@ namespace ASAP
 
 		if (!m_documents_.empty())
 		{
-			m_view_->setEnabled(false);
+			m_view_->setEnabled(true);
 		}
 	}
 
