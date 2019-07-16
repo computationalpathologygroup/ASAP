@@ -4,20 +4,20 @@
 
 namespace ASAP
 {
-	DocumentInstance::DocumentInstance(Document& document, const uint16_t instance_id)
-		: document(&document), name(GetInstanceName_(document, instance_id))
+	DocumentInstance::DocumentInstance(Document& document, const size_t document_id, const uint16_t instance_id)
+		: document(&document), document_id(std::to_string(document_id)), name(GetInstanceName_(document, instance_id))
 	{
 		SetupInstance_();
 	}
 
-	DocumentInstance::DocumentInstance(std::shared_ptr<Document> document, const uint16_t instance_id)
-		: document(document), name(GetInstanceName_(*document, instance_id))
+	DocumentInstance::DocumentInstance(std::shared_ptr<Document> document, const size_t document_id, const uint16_t instance_id)
+		: document(document), document_id(std::to_string(document_id)), name(GetInstanceName_(*document, instance_id))
 	{
 		SetupInstance_();
 	}
 
-	DocumentInstance::DocumentInstance(std::weak_ptr<Document> document, const uint16_t instance_id)
-		: document(document), name(GetInstanceName_(*this->document, instance_id))
+	DocumentInstance::DocumentInstance(std::weak_ptr<Document> document, const size_t document_id, const uint16_t instance_id)
+		: document(document), document_id(std::to_string(document_id)), name(GetInstanceName_(*this->document, instance_id))
 	{
 		SetupInstance_();
 	}

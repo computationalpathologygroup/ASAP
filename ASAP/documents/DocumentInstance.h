@@ -12,17 +12,20 @@ namespace ASAP
 	class DocumentInstance
 	{
 		public:
-			DocumentInstance(Document& document, const uint16_t instance_id = 1);
-			DocumentInstance(std::shared_ptr<Document> document, const uint16_t instance_id = 1);
-			DocumentInstance(std::weak_ptr<Document> document, const uint16_t instance_id = 1);
+			DocumentInstance(Document& document, const size_t document_id = 0, const uint16_t instance_id = 1);
+			DocumentInstance(std::shared_ptr<Document> document, const size_t document_id = 0, const uint16_t instance_id = 1);
+			DocumentInstance(std::weak_ptr<Document> document, const size_t document_id = 0, const uint16_t instance_id = 1);
 
 			/*PluginInformation* GetPluginInformation(const std::string& plugin);
 			bool HasPluginInformation(const std::string& plugin);
 			void SetPluginInformation(const std::string& plugin, PluginInformation* information, const bool allow_override = false);*/
 			std::shared_ptr<Document>	document;
+			const std::string			document_id;
 			const std::string			name;
 			PathologyViewState			view_state;
 
+
+			// TODO: Remove these
 			uint64_t					current_level;
 			QRect						current_fov;
 			std::vector<QPainterPath>	minimap_coverage;
