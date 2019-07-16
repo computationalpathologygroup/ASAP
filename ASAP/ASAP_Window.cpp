@@ -389,8 +389,21 @@ void ASAP_Window::setupUi(void)
 
   m_document_window_ = m_document_window_controller_.SpawnWindow(centralWidget);
   window2 = m_document_window_controller_.SpawnWindow(centralWidget);
+
+  QDockWidget* dock = new QDockWidget(tr("Viewer 1"), centralWidget);
+  dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+  dock->setWidget(m_document_window_);
+  addDockWidget(Qt::RightDockWidgetArea, dock);
+
+  dock = new QDockWidget(tr("Viewer 2"), centralWidget);
+  dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+  dock->setWidget(window2);
+  addDockWidget(Qt::RightDockWidgetArea, dock);
+
+ /*
   horizontalLayout_2->addWidget(m_document_window_);
   horizontalLayout_2->addWidget(window2);
+  horizontalLayout_2->*/
   this->setCentralWidget(centralWidget);
 }
 
