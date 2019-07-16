@@ -44,14 +44,14 @@ namespace ASAP
 	DocumentInstance DocumentRetainer::GetDocument(const size_t id)
 	{
 		m_instance_counters_[id] += 1;
-		return DocumentInstance(m_ptr_map_[id], m_instance_counters_[id]);
+		return DocumentInstance(m_ptr_map_[id], id, m_instance_counters_[id]);
 	}
 
 	DocumentInstance DocumentRetainer::GetDocument(const boost::filesystem::path& filepath)
 	{
 		size_t id = this->GetDocumentId(filepath);
 		m_instance_counters_[id] += 1;
-		return DocumentInstance(m_ptr_map_[id], m_instance_counters_[id]);
+		return DocumentInstance(m_ptr_map_[id], id, m_instance_counters_[id]);
 	}
 
 	size_t DocumentRetainer::GetDocumentId(const boost::filesystem::path& filepath)
