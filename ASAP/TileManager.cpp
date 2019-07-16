@@ -112,7 +112,7 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel) {
   WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, m_tile_information_.top_level, m_tile_information_.downsamples, this);
   std::stringstream ss;
-  ss << m_instance_.name << "_" << tileX << "_" << tileY << "_" << tileLevel;
+  ss << m_instance_.document_id << "_" << tileX << "_" << tileY << "_" << tileLevel;
   std::string key(ss.str());
   if (_scene) {
     setCoverage(tileLevel, tileX, tileY, 2);
@@ -130,9 +130,8 @@ void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int t
 }
 
 void TileManager::onTileRemoved(WSITileGraphicsItem* tile) {
-  _scene->removeItem(tile);
-  setCoverage(tile->getTileLevel(), tile->getTileX(), tile->getTileY(), 0);
-  delete tile;
+		_scene->removeItem(tile);
+		setCoverage(tile->getTileLevel(), tile->getTileX(), tile->getTileY(), 0);
 }
 
 void TileManager::setCoverageMapModeToCache() {

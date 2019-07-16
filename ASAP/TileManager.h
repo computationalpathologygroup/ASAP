@@ -56,7 +56,6 @@ class TileManager : public QObject {
 		const ASAP::TileInformation	m_tile_information_;
 		QRect						m_last_loaded_FOV_;
 
-
 		QPointer<RenderThread> _renderThread;
 		QPointer<WSITileGraphicsItemCache> _cache;
 		QPointer<QGraphicsScene> _scene;

@@ -75,4 +75,5 @@ void WSITileGraphicsItemCache::evict(void)
 	_cache.erase(it);
 	_LRU.pop_front();
 	emit itemEvicted(itemToEvict);
+	delete itemToEvict;
 }
