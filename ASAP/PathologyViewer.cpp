@@ -30,24 +30,21 @@
 
 using std::vector;
 
-PathologyViewer::PathologyViewer(QWidget *parent) :
+PathologyViewer::PathologyViewer(WSITileGraphicsItemCache& cache, QWidget* parent) :
 	QGraphicsView(parent),
-	_zoomSensitivity(0.5),
-	_panSensitivity(0.5),
-	_numScheduledScalings(0),
-	_pan(false),
-	_prevPan(0, 0),
-	_cacheSize(1000 * 512 * 512 * 3),
+	//_zoomSensitivity(0.5),
+	//_panSensitivity(0.5),
+	//_numScheduledScalings(0),
+	//_pan(false),
+	//_cacheSize(1000 * 512 * 512 * 3),
 	_sceneScale(1.0f),
 	_renderthread(nullptr),
 	_prefetchthread(nullptr),
 	_map(nullptr),
-	_cache(nullptr),
-	_activeTool(nullptr),
+	_cache(cache),
 	_manager(nullptr),
 	_scaleBar(nullptr),
-	m_instance_(nullptr),
-	m_view_scale_(1)
+	m_instance_(nullptr)
 {
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -88,10 +85,10 @@ PathologyViewer::~PathologyViewer()
 {
   close();
 }
-
+/*
 unsigned long long PathologyViewer::getCacheSize(void) const {
   if (_cache) {
-    return _cache->maxCacheSize();
+    return _cache->getMaxCacheSize();
   }
   else {
     return 0;
@@ -103,6 +100,7 @@ void PathologyViewer::setCacheSize(unsigned long long& maxCacheSize) {
     _cache->setMaxCacheSize(maxCacheSize);
   }
 }
+*/
 
 void PathologyViewer::resizeEvent(QResizeEvent *event) {
 	QGraphicsView::resizeEvent(event);

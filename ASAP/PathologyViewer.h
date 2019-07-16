@@ -101,40 +101,36 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 		ScaleBar*	_scaleBar;
 		QSettings*	_settings;
 
-		// Tools
-		std::shared_ptr<ToolPluginInterface> _activeTool;
-		std::map<std::string, std::shared_ptr<ToolPluginInterface> > _tools;
+	
 
 		// Members to track panning and zooming
-		float _zoomSensitivity;
+	/*	float _zoomSensitivity;
 		float _numScheduledScalings;
 		float _panSensitivity;
-		bool _pan;
-		QPoint _prevPan;
+		bool _pan;*/
 
 		// Members related to rendering
 		RenderThread* _renderthread;
-		int _backgroundChannel;
-		int _foregroundChannel;
-		float _opacity;
-		float _window;
-		float _level;
-		std::string _LUTname;
-		float _foregroundImageScale;
 
+		void setPan_(const QPoint& pan_to_point);
+		void setZoom_(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
+
+		virtual void resizeEvent(QResizeEvent *event);
+
+		
 		// Functions for panning
 		virtual void mouseMoveEvent(QMouseEvent *event);
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseReleaseEvent(QMouseEvent *event);
 		virtual void mouseDoubleClickEvent(QMouseEvent *event);
-		virtual void keyPressEvent(QKeyEvent *event);
-		virtual void resizeEvent(QResizeEvent *event);
+		//virtual void keyPressEvent(QKeyEvent *event);
+		
 
 		// Functions for zooming and resizing
 		void wheelEvent(QWheelEvent *event);    
-
+		
 		// Functions for overviewmap
 		void initializeGUIComponents(unsigned int level);
-		void initializeImage(QGraphicsScene *scn, unsigned int tileSize, unsigned int lastLevel);
+		void initializeImage(unsigned int tileSize, unsigned int lastLevel);
 };
 #endif // PATHOLOGYVIEWER_H
