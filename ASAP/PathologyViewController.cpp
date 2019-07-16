@@ -32,7 +32,7 @@ namespace ASAP
 		m_modification_mutex_.unlock();
 	}
 
-	const PathologyViewer* PathologyViewController::GetMasterViewer(void) const
+	PathologyViewer* PathologyViewController::GetMasterViewer(void)
 	{
 		return m_master_;
 	}
@@ -124,6 +124,8 @@ namespace ASAP
 		if (tool)
 		{
 			m_tools_.insert({ tool->name(), tool });
+			tool->setController(*this);
+			tool->setViewer(m_master_);
 		}
 		m_modification_mutex_.unlock();
 	}
@@ -142,7 +144,7 @@ namespace ASAP
 	{
 		m_modification_mutex_.lock();
 		auto tool = m_tools_.find(name);
-		if (tool!= m_tools_.end())
+		if (tool != m_tools_.end())
 		{
 			if (m_active_tool_)
 			{
@@ -233,11 +235,30 @@ namespace ASAP
 
 	void PathologyViewController::ConnectObserved_(PathologyViewer* viewer)
 	{
-		QObject::connect(
-			viewer,
-			&PathologyViewer::mouseEventOccured,
+		QObject::connect(viewer,
+			&PathologyViewer::mouseDoubleClickOccured,
 			this,
-			&PathologyViewController::OnMasterMouseEvent_);
+			&PathologyViewController::OnMouseDoubleClickEvent);
+
+		QObject::connect(viewer,
+			&PathologyViewer::mouseMoveOccured,
+			this,
+			&PathologyViewController::OnMouseMoveEvent);
+
+		QObject::connect(viewer,
+			&PathologyViewer::mousePressOccured,
+			this,
+			&PathologyViewController::OnMousePressEvent);
+
+		QObject::connect(viewer,
+			&PathologyViewer::mouseReleaseOccured,
+			this,
+			&PathologyViewController::OnMouseReleaseEvent);
+
+		QObject::connect(viewer,
+			&PathologyViewer::wheelOccured,
+			this,
+			&PathologyViewController::OnWheelEvent);
 	}
 
 	void PathologyViewController::ConnectObserver_(PathologyViewer* viewer)
@@ -246,11 +267,30 @@ namespace ASAP
 
 	void PathologyViewController::DisconnectObserved_(PathologyViewer* viewer)
 	{
-		QObject::disconnect(
-			viewer,
-			&PathologyViewer::mouseEventOccured,
+		QObject::disconnect(viewer,
+			&PathologyViewer::mouseDoubleClickOccured,
 			this,
-			&PathologyViewController::OnMasterMouseEvent_);
+			&PathologyViewController::OnMouseDoubleClickEvent);
+
+		QObject::disconnect(viewer,
+			&PathologyViewer::mouseMoveOccured,
+			this,
+			&PathologyViewController::OnMouseMoveEvent);
+
+		QObject::disconnect(viewer,
+			&PathologyViewer::mousePressOccured,
+			this,
+			&PathologyViewController::OnMousePressEvent);
+
+		QObject::disconnect(viewer,
+			&PathologyViewer::mouseReleaseOccured,
+			this,
+			&PathologyViewController::OnMouseReleaseEvent);
+
+		QObject::disconnect(viewer,
+			&PathologyViewer::wheelOccured,
+			this,
+			&PathologyViewController::OnWheelEvent);
 	}
 
 	void PathologyViewController::DisconnectObserver_(PathologyViewer* viewer)
@@ -311,11 +351,11 @@ namespace ASAP
 	{
 		switch (event->type())
 		{
-			case QEvent::MouseButtonDblClick:	OnMouseDoubleClickEvent(event);	break;
-			case QEvent::MouseButtonPress:		OnMousePressEvent(event);		break;
-			case QEvent::MouseButtonRelease:	OnMouseReleaseEvent(event);		break;
-			case QEvent::MouseMove:				OnMouseMoveEvent(event);		break;
-			case QEvent::Wheel:					OnMouseMoveEvent(event);		break;
+			case QEvent::MouseButtonDblClick:	OnMouseDoubleClickEvent(event);		break;
+			case QEvent::MouseButtonPress:		OnMousePressEvent(event);			break;
+			case QEvent::MouseButtonRelease:	OnMouseReleaseEvent(event);			break;
+			case QEvent::MouseMove:				OnMouseMoveEvent(event);			break;
+			case QEvent::Wheel:					OnWheelEvent((QWheelEvent*)event);	break;
 		}
 	}
 
@@ -342,7 +382,7 @@ namespace ASAP
 		QPointF img_loc = m_master_->mapToScene(event->pos()) / m_master_->getSceneScale();
 		// TODO: Clean this up or implement a more elegant selection method.
 		//qobject_cast<QMainWindow*>(this->parentWidget()->parentWidget()->parentWidget())->statusBar()->showMessage(QString("Current position in image coordinates: (") + QString::number(imgLoc.x()) + QString(", ") + QString::number(imgLoc.y()) + QString(")"), 1000);
-		
+
 		if (m_is_panning_)
 		{
 			UpdatePan_(event->pos());
@@ -404,3 +444,4 @@ namespace ASAP
 		int numSteps	= numDegrees / 15;  // see QWheelEvent documentation
 		Zoom(numSteps, event->pos(), m_master_->mapToScene(event->pos()));
 	}
+}
