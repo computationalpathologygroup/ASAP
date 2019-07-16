@@ -22,19 +22,22 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
     Q_OBJECT
     
 	public:
-		QPointF _zoomToScenePos;
-		QPointF _zoomToViewPos;
-
-		PathologyViewer(QWidget *parent = 0);
+		PathologyViewer(WSITileGraphicsItemCache& cache, QWidget* parent = 0);
 		~PathologyViewer(void);
 
 		void initialize(ASAP::DocumentInstance& instance);
 		void close(void);
 
-		float getZoomSensitivity() const;
-		float getPanSensitivity() const;
+		/*
+		QPointF zoom_view_center;
+		QPointF zoom_scene_center;
+
+		
+		float getZoomSensitivity(void) const;
+		float getPanSensitivity(void) const;
 		void  setZoomSensitivity(float zoomSensitivity);
 		void  setPanSensitivity(float panSensitivity);
+		*/
 
 		float getForegroundOpacity() const;
 		void setForegroundOpacity(const float& opacity);
@@ -43,56 +46,67 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 		void setForegroundChannel(unsigned int channel);
 
 		void togglePan(bool pan, const QPoint& startPos = QPoint());
-		void pan(const QPoint& panTo);
-		bool isPanning();
-		void zoom(float numSteps);
+		/*bool isPanning();
+		void zoom(float numSteps, QPointF center_view, QPointF center_scene);
    
 		bool hasTool(const std::string& toolName) const;
 		void addTool(std::shared_ptr<ToolPluginInterface> tool);
 		void setActiveTool(const std::string& toolName);
-		std::shared_ptr<ToolPluginInterface> getActiveTool(void);
+		std::shared_ptr<ToolPluginInterface> getActiveTool(void);*/
+
+
 		float getSceneScale(void) const;
 
-		unsigned long long getCacheSize(void) const;
-		void setCacheSize(unsigned long long& maxCacheSize);
+
+
+
 		void setAutoUpdate(bool autoUpdate);
 
-		void refreshView(void);
+		void modifyZoom(const qreal x, float num_steps, const QPointF& view_center, const QPointF& scene_center);
 		void modifyZoom(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
 		void modifyPan(const QPoint& pan_to_point);
-		void modifyViewState(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
-		void setViewState(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);
-		//void modifyView(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor, const bool force = false);
+		void setViewState(const PathologyViewState& state);
+		void refreshView(void);
 
-	signals :
+		bool eventFilter(QObject *object, QEvent *event);
+
+
+	signals:
+		void mouseMoveOccured(QMouseEvent* event);
+		void mousePressOccured(QMouseEvent* event);
+		void mouseReleaseOccured(QMouseEvent* event);
+		void mouseDoubleClickOccured(QMouseEvent* event);
+		void wheelOccured(QWheelEvent* event);
+
+	//	void mouseEventOccured(QMouseEvent* event, const QPointF scene_location);
 		void fieldOfViewChanged(const QRectF& FOV, const unsigned int level);
 		void updateBBox(const QRectF& FOV);
 		void backgroundChannelChanged(int channelNr);
+		void receivedFocus(const PathologyViewer* viewer);
+		void documentInstanceChanged(ASAP::DocumentInstance* instance);
 
 	public slots :
 		void moveTo(const QPointF& pos);
-		void changeActiveTool();
+		//void changeActiveTool();
 		void onFieldOfViewChanged(const QRectF& FOV, const unsigned int level);
 		void onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale);
 
 	private slots:
 		void showContextMenu(const QPoint& pos);
-		void scalingTime(qreal x);
-		void zoomFinished();
+		//void scalingTime(qreal x);
+	//	void zoomFinished();
 
 	private :
 		float _sceneScale;
-		float m_view_scale_;
 
 		// Interface to the multi-resolution image. Please note that PathologyViewer
 		// should never modify _img (it is modified in the RenderThread due to calls
 		// to readRegion), otherwise race conditions could occur.
 		ASAP::DocumentInstance* m_instance_;
-		std::weak_ptr<MultiResolutionImage> _for_img;
+		//std::weak_ptr<MultiResolutionImage> _for_img;
 
 		// Internals
-		unsigned long long			_cacheSize;
-		WSITileGraphicsItemCache*	_cache;
+		WSITileGraphicsItemCache&	_cache;
 		TileManager*				_manager;
 		PrefetchThread*				_prefetchthread;
 
