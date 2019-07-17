@@ -387,16 +387,18 @@ void ASAP_Window::setupUi(void)
   horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
   horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
 
-  m_document_window_ = m_document_window_controller_.SpawnWindow(centralWidget);
-  window2 = m_document_window_controller_.SpawnWindow(centralWidget);
+  m_document_window_ = m_document_window_controller_.SpawnWindow();
+  window2 = m_document_window_controller_.SpawnWindow();
 
   QDockWidget* dock = new QDockWidget(tr("Viewer 1"), centralWidget);
-  dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+  dock->setAllowedAreas(Qt::AllDockWidgetAreas);
   dock->setWidget(m_document_window_);
-  addDockWidget(Qt::RightDockWidgetArea, dock);
+  dock->setContentsMargins(0, 0, 0, 0);
+  addDockWidget(Qt::LeftDockWidgetArea, dock);
 
   dock = new QDockWidget(tr("Viewer 2"), centralWidget);
-  dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+  dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+  dock->setContentsMargins(0, 0, 0, 0);
   dock->setWidget(window2);
   addDockWidget(Qt::RightDockWidgetArea, dock);
 
