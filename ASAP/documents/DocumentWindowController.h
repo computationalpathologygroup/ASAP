@@ -24,6 +24,8 @@ namespace ASAP
 			DocumentWindowController(void);
 			~DocumentWindowController(void);
 
+			void CleanAllWindows(void);
+
 			uint64_t GetCacheSize(void) const;
 			/// <summary>
 			/// Changes the size of the internal cache. This operation isn't thread safe.
@@ -39,7 +41,7 @@ namespace ASAP
 
 		private:
 			DocumentWindow*					m_active_;
-			std::vector<DocumentWindow*>	m_viewers_;
+			std::vector<DocumentWindow*>	m_windows_;
 			WSITileGraphicsItemCache		m_cache_;
 			std::mutex						m_active_change_mutex_;
 

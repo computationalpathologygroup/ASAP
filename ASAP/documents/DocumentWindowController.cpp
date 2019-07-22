@@ -8,7 +8,18 @@ namespace ASAP
 
 	DocumentWindowController::~DocumentWindowController(void)
 	{
+		CleanAllWindows();
 		m_active_change_mutex_.lock();
+		m_active_change_mutex_.unlock();
+	}
+
+	void DocumentWindowController::CleanAllWindows(void)
+	{
+		m_active_change_mutex_.lock();
+		for (DocumentWindow* window : m_windows_)
+		{
+			window->Clear();
+		}
 		m_active_change_mutex_.unlock();
 	}
 
@@ -29,15 +40,15 @@ namespace ASAP
 
 	ASAP::DocumentWindow* DocumentWindowController::SpawnWindow(QWidget* parent)
 	{
-		m_viewers_.push_back(new DocumentWindow(m_cache_, parent));
-		ASAP::DocumentWindow* viewer = m_viewers_.back();
+		m_windows_.push_back(new DocumentWindow(m_cache_, parent));
+		ASAP::DocumentWindow* window = m_windows_.back();
 
-		QObject::connect(viewer->m_view_,
+		QObject::connect(window->viewer,
 			&PathologyViewer::mouseReleaseOccured,
 			this,
 			&DocumentWindowController::CheckMouseOrigin_);
 
-		return viewer;
+		return window;
 	}
 
 	void DocumentWindowController::SetupSlots_(void)
@@ -48,11 +59,11 @@ namespace ASAP
 	void DocumentWindowController::CheckMouseOrigin_(QMouseEvent* event)
 	{
 		m_active_change_mutex_.lock();
-		if (!m_active_ || sender() != m_active_->m_view_)
+		if (!m_active_ || sender() != m_active_->viewer)
 		{
-			for (DocumentWindow* window : m_viewers_)
+			for (DocumentWindow* window : m_windows_)
 			{
-				if (window->m_view_ == sender())
+				if (window->viewer == sender())
 				{
 					m_active_ = window;
 					emit viewerFocusChanged(window);
