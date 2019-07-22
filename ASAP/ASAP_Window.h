@@ -46,6 +46,8 @@ public:
 
   void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
+  ASAP::DocumentWindow* openViewer(const QString name, QWidget* parent = 0);
+
 signals:
   void newImageLoaded(std::weak_ptr<MultiResolutionImage>, const std::string&);
   void imageClosed(void);
@@ -56,6 +58,7 @@ private slots:
   void on_actionClose_triggered();
   void on_actionOpen_triggered();
   void on_actionAbout_triggered();
+  void onDocumentClose(const size_t document_id);
 
 private:
   static const char* sharedLibraryExtensions;

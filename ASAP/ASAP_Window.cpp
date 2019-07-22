@@ -204,7 +204,7 @@ void ASAP_Window::loadPlugins(void) {
 
 void ASAP_Window::onViewerFocusChanged(ASAP::DocumentWindow* window)
 {
-	m_view_controller_.SetMasterViewer(window->m_view_);
+	m_view_controller_.SetMasterViewer(window->viewer);
 }
 
 void ASAP_Window::closeEvent(QCloseEvent *event) {
@@ -252,6 +252,8 @@ void ASAP_Window::on_actionClose_triggered(void)
     _settings->setValue("currentFile", QString());
     this->setWindowTitle("ASAP");
 
+	m_document_window_controller_.CleanAllWindows();
+
 	/*
 	if (!m_documents_.empty())
 	{
@@ -291,6 +293,24 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 	}
 }
 
+ASAP::DocumentWindow* ASAP_Window::openViewer(const QString name, QWidget* parent)
+{
+	ASAP::DocumentWindow* window = m_document_window_controller_.SpawnWindow();
+
+	QDockWidget* dock = new QDockWidget(name, parent);
+	dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+	dock->setWidget(window);
+	dock->setContentsMargins(0, 0, 0, 0);
+	addDockWidget(Qt::LeftDockWidgetArea, dock);
+
+	connect(window, &
+		ASAP::DocumentWindow::closedDocumentInstance,
+		this,
+		&ASAP_Window::onDocumentClose);
+
+	return window;
+}
+
 void ASAP_Window::on_actionOpen_triggered(void)
 { 
   QString filterList;
@@ -315,6 +335,11 @@ void ASAP_Window::on_actionOpen_triggered(void)
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), filterList, &selectedFilter);
   QString selectedFactory = selectedFilter.split("(")[0].trimmed();
   openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
+}
+
+void ASAP_Window::onDocumentClose(const size_t document_id)
+{
+	m_documents_.UnloadDocument(document_id, false);
 }
 
 void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize)
@@ -387,25 +412,9 @@ void ASAP_Window::setupUi(void)
   horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
   horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
 
-  m_document_window_ = m_document_window_controller_.SpawnWindow();
-  window2 = m_document_window_controller_.SpawnWindow();
+  m_document_window_ = openViewer(tr("Viewer 1"));
+  window2 = openViewer(tr("Viewer 2"));
 
-  QDockWidget* dock = new QDockWidget(tr("Viewer 1"), centralWidget);
-  dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-  dock->setWidget(m_document_window_);
-  dock->setContentsMargins(0, 0, 0, 0);
-  addDockWidget(Qt::LeftDockWidgetArea, dock);
-
-  dock = new QDockWidget(tr("Viewer 2"), centralWidget);
-  dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-  dock->setContentsMargins(0, 0, 0, 0);
-  dock->setWidget(window2);
-  addDockWidget(Qt::RightDockWidgetArea, dock);
-
- /*
-  horizontalLayout_2->addWidget(m_document_window_);
-  horizontalLayout_2->addWidget(window2);
-  horizontalLayout_2->*/
   this->setCentralWidget(centralWidget);
 }
 
