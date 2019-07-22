@@ -28,13 +28,33 @@ RenderThread::~RenderThread()
 
 void RenderThread::shutdown() {
   _abort = true;
-  for (std::vector<RenderWorker*>::iterator it = _workers.begin(); it != _workers.end(); ++it) {
-    (*it)->abort();
-    while ((*it)->isRunning()) {
+  for (RenderWorker* worker : _workers)
+  {
+	  worker->abort();
+  }
+
+  _condition.wakeAll();
+
+  for (RenderWorker* worker : _workers)
+  {
+	  while (!worker->wait(100));
+  }
+
+
+ /* for (std::vector<RenderWorker*>::iterator it = _workers.begin(); it != _workers.end(); ++it) {
+   // (*it)->abort();
+	//while (!(*it)->wait(200))
+	{
+	}
+
+	//(*it)->wait();
+
+
+    /*while ((*it)->isRunning()) {
       _condition.wakeOne();
     }
     delete (*it);
-  }
+  }*/
   _workers.clear();
 }
 

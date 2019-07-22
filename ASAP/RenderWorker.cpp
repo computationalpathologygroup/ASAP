@@ -23,7 +23,8 @@ RenderWorker::RenderWorker(RenderThread* thread) :
 
 RenderWorker::~RenderWorker()
 {
-  wait();
+	abort();
+	wait();
 }
 
 void RenderWorker::abort() {
@@ -81,49 +82,50 @@ float RenderWorker::getForegroundOpacity() const {
 void RenderWorker::run()
 {
   forever {
-    RenderJob currentJob = dynamic_cast<RenderThread*>(parent())->getJob();
-    if (_abort) {
-      return;
-    }
-    mutex.lock();
+	if (_abort)
+	{
+		break;
+	}
+	RenderJob currentJob = dynamic_cast<RenderThread*>(parent())->getJob();
+	mutex.lock();
 
-    std::shared_ptr<MultiResolutionImage> local_bck_img = _bck_img.lock();
-    float levelDownsample = local_bck_img->getLevelDownsample(currentJob._level);
-    QPixmap _foreground;
-    if (std::shared_ptr<MultiResolutionImage> local_for_img = _for_img.lock()) {
-      if (local_for_img->getDataType() == pathology::DataType::UChar) {
-        _foreground = renderForegroundImage<unsigned char>(local_for_img, currentJob, local_for_img->getColorType());
-      }
-      else if (local_for_img->getDataType() == pathology::DataType::UInt32) {
-        _foreground = renderForegroundImage<unsigned int>(local_for_img, currentJob, local_for_img->getColorType());
-      }
-      else if (local_for_img->getDataType() == pathology::DataType::Float) {
-        _foreground = renderForegroundImage<float>(local_for_img, currentJob, local_for_img->getColorType());
-      }
-    }
+	std::shared_ptr<MultiResolutionImage> local_bck_img = _bck_img.lock();
+	//float levelDownsample = local_bck_img->getLevelDownsample(currentJob._level);
+	QPixmap _foreground;
+	if (std::shared_ptr<MultiResolutionImage> local_for_img = _for_img.lock()) {
+		if (local_for_img->getDataType() == pathology::DataType::UChar) {
+			_foreground = renderForegroundImage<unsigned char>(local_for_img, currentJob, local_for_img->getColorType());
+		}
+		else if (local_for_img->getDataType() == pathology::DataType::UInt32) {
+			_foreground = renderForegroundImage<unsigned int>(local_for_img, currentJob, local_for_img->getColorType());
+		}
+		else if (local_for_img->getDataType() == pathology::DataType::Float) {
+			_foreground = renderForegroundImage<float>(local_for_img, currentJob, local_for_img->getColorType());
+		}
+	}
 
-    if (local_bck_img) {
-      QPixmap temp;
-      pathology::ColorType cType = local_bck_img->getColorType();
-      if (local_bck_img->getDataType() == pathology::DataType::UChar) {
-        temp = renderBackgroundImage<unsigned char>(local_bck_img, currentJob, cType);
-      }
-      else if (local_bck_img->getDataType() == pathology::DataType::Float) {
-        temp = renderBackgroundImage<float>(local_bck_img, currentJob, cType);
-      }
-      else if (local_bck_img->getDataType() == pathology::DataType::UInt16) {
-        temp = renderBackgroundImage<unsigned short>(local_bck_img, currentJob, cType);
-      }
-      else if (local_bck_img->getDataType() == pathology::DataType::UInt32) {
-        temp = renderBackgroundImage<unsigned int>(local_bck_img, currentJob, cType);
-      }
-      if (!_foreground.isNull()) {
-        QPainter painter(&temp);
-        painter.setOpacity(_opacity);
-        painter.drawPixmap(0, 0, _foreground);
-      }
-      emit tileLoaded(new QPixmap(temp), currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize*currentJob._tileSize*local_bck_img->getSamplesPerPixel(), currentJob._level);
-      mutex.unlock();
+	if (local_bck_img) {
+		QPixmap temp;
+		pathology::ColorType cType = local_bck_img->getColorType();
+		if (local_bck_img->getDataType() == pathology::DataType::UChar) {
+			temp = renderBackgroundImage<unsigned char>(local_bck_img, currentJob, cType);
+		}
+		else if (local_bck_img->getDataType() == pathology::DataType::Float) {
+			temp = renderBackgroundImage<float>(local_bck_img, currentJob, cType);
+		}
+		else if (local_bck_img->getDataType() == pathology::DataType::UInt16) {
+			temp = renderBackgroundImage<unsigned short>(local_bck_img, currentJob, cType);
+		}
+		else if (local_bck_img->getDataType() == pathology::DataType::UInt32) {
+			temp = renderBackgroundImage<unsigned int>(local_bck_img, currentJob, cType);
+		}
+		if (!_foreground.isNull()) {
+			QPainter painter(&temp);
+			painter.setOpacity(_opacity);
+			painter.drawPixmap(0, 0, _foreground);
+		}
+		emit tileLoaded(new QPixmap(temp), currentJob._imgPosX, currentJob._imgPosY, currentJob._tileSize, currentJob._tileSize*currentJob._tileSize*local_bck_img->getSamplesPerPixel(), currentJob._level);
+		mutex.unlock();
     }
   }
 }
