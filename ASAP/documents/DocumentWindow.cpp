@@ -42,12 +42,13 @@ namespace ASAP
 
 		if (!m_documents_.empty())
 		{
-			m_view_->setEnabled(true);
+			viewer->setEnabled(true);
 		}
 	}
 
 	void DocumentWindow::Clear(void)
 	{
+		viewer->close();
 		for (size_t tab = 0; tab < m_document_bar_->count(); ++tab)
 		{
 			OnTabClose_(tab);
@@ -69,8 +70,8 @@ namespace ASAP
 
 	void DocumentWindow::SetupUI_(WSITileGraphicsItemCache& cache)
 	{
-		m_document_bar_			= new QTabBar(this);		
-		m_view_					= new PathologyViewer(cache, this);
+		m_document_bar_	= new QTabBar(this);		
+		viewer			= new PathologyViewer(cache, this);
 
 		m_document_bar_->setTabsClosable(true);
 		m_document_bar_->setDrawBase(true);
@@ -78,11 +79,9 @@ namespace ASAP
 		m_document_bar_->setAcceptDrops(true);
 		m_document_bar_->setMovable(true);
 
-		m_view_->setObjectName(QStringLiteral("pathologyView"));
-
 		QBoxLayout* layout(new QBoxLayout(QBoxLayout::Direction::TopToBottom));
 		layout->addWidget(m_document_bar_);
-		layout->addWidget(m_view_);
+		layout->addWidget(viewer);
 		this->setLayout(layout);
  		this->setContentsMargins(0, 0, 0, 0);
 	}
@@ -93,7 +92,7 @@ namespace ASAP
 		if (document_it != m_documents_.end())
 		{
 			m_active_document_ = &document_it->second;
-			m_view_->initialize(*m_active_document_);
+			viewer->initialize(*m_active_document_);
 			emit changedDocumentInstanceDisplay(*m_active_document_);
 		}
 	}
@@ -101,11 +100,11 @@ namespace ASAP
 	void DocumentWindow::OnTabClose_(int index)
 	{
 		std::string tab_name(m_document_bar_->tabText(index).toStdString());
-		emit closedDocumentInstance(m_documents_.find(tab_name)->second);
+		size_t document_id(std::stoi(m_documents_.find(tab_name)->second.document_id));
 
 		if (m_active_document_->name == tab_name)
 		{
-			m_view_->close();
+			viewer->close();
 			m_active_document_ = nullptr;
 		}
 
@@ -114,7 +113,9 @@ namespace ASAP
 
 		if (m_documents_.empty())
 		{
-			m_view_->setEnabled(false);
+			viewer->setEnabled(false);
 		}
+
+		emit closedDocumentInstance(document_id);
 	}
 }

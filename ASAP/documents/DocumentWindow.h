@@ -21,7 +21,7 @@ namespace ASAP
 		Q_OBJECT
 
 		public:
-			PathologyViewer*		m_view_;
+			PathologyViewer* viewer;
 
 			explicit DocumentWindow(WSITileGraphicsItemCache& cache, QWidget* parent = 0);
 			~DocumentWindow(void);
@@ -32,7 +32,7 @@ namespace ASAP
 		signals:
 			void acquiredDocumentInstance(const DocumentInstance& instance);
 			void changedDocumentInstanceDisplay(const DocumentInstance& instance);
-			void closedDocumentInstance(const DocumentInstance& instance);
+			void closedDocumentInstance(const size_t document_id);
 			void receivedFocus(DocumentWindow* window);
 			
 
