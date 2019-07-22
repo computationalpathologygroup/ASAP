@@ -21,7 +21,33 @@ namespace ASAP
 	{
 		SetupInstance_();
 	}
+	
+	const PluginInformation* DocumentInstance::GetPluginInformation(const std::string& plugin) const
+	{
+		auto it = m_plugin_information_.find(plugin);
+		if (it != m_plugin_information_.end())
+		{
+			return it->second.information.get();
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
 
+	bool DocumentInstance::HasPluginInformation(const std::string& plugin) const
+	{
+		return m_plugin_information_.find(plugin) != m_plugin_information_.end();
+	}
+
+	void DocumentInstance::SetPluginInformation(const std::string& plugin, PluginInformation* information, const bool allow_override)
+	{
+		if (!HasPluginInformation(plugin) || allow_override)
+		{
+			m_plugin_information_.insert({plugin, PluginState(information)});
+		}
+	}
+	
 	std::string DocumentInstance::GetInstanceName_(Document& document, const uint16_t instance_id)
 	{
 		std::stringstream instance_name;
