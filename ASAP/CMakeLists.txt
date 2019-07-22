@@ -5,6 +5,7 @@ set(HEADERS
     PathologyViewer.h
 	PathologyViewController.h
 	PathologyViewState.h
+	PluginState.h
     WSITileGraphicsItemCache.h
     MiniMap.h
     RenderThread.h
@@ -27,6 +28,7 @@ set(SOURCE
     ASAP_Window.cpp
     PathologyViewer.cpp
 	PathologyViewController.cpp
+	PluginState.cpp
     WSITileGraphicsItemCache.cpp
     MiniMap.cpp
     RenderThread.cpp
