@@ -27,11 +27,11 @@ namespace ASAP
 		if (m_ptr_map_[id].use_count() == 1 || force)
 		{
 			m_ptr_map_.erase(id);
+			m_instance_counters_.erase(id);
 			m_documents_.erase(id);
 
 			for (auto it = m_path_to_id_.begin(); it != m_path_to_id_.end(); ++it)
 			{
-
 				if (it->second == id)
 				{
 					m_path_to_id_.erase(it);
