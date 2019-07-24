@@ -37,6 +37,7 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 		void togglePan(bool pan, const QPoint& startPos = QPoint());
 
 		float getSceneScale(void) const;
+		ASAP::DocumentInstance* GetDocumentInstance(void);
 
 		void modifyZoom(const qreal x, float num_steps, const QPointF& view_center, const QPointF& scene_center);
 		void modifyZoom(const QPointF& zoom_view, const QPointF& zoom_scene, const qreal zoom_factor);

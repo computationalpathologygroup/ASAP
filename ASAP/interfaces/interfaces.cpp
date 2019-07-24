@@ -49,5 +49,7 @@ void WorkstationExtensionPluginInterface::onViewerChangeFinished(void)
 			&ASAP::DocumentWindow::DocumentInstanceCloseStarted,
 			this,
 			&WorkstationExtensionPluginInterface::onDocumentInstanceClose);
+
+		onDocumentChange(master_view->GetDocumentInstance());
 	}
 }

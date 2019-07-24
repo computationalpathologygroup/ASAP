@@ -93,6 +93,11 @@ float PathologyViewer::getSceneScale(void) const
 	return _sceneScale;
 }
 
+ASAP::DocumentInstance* PathologyViewer::GetDocumentInstance(void)
+{
+	return m_instance_;
+}
+
 void PathologyViewer::moveTo(const QPointF& pos) {
   this->centerOn(pos);
   this->refreshView();
