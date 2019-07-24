@@ -5,8 +5,8 @@
 #include "AnnotationWorkstationExtensionPlugin.h"
 #include "../PathologyViewer.h"
 
-SplineAnnotationTool::SplineAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) :
-PolyAnnotationTool(annotationPlugin, viewer)
+SplineAnnotationTool::SplineAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
+PolyAnnotationTool(annotationPlugin, controller)
 {
 }
 

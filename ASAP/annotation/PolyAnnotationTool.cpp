@@ -13,22 +13,22 @@
 #include <iostream>
 #include <QTimeLine>
 
-PolyAnnotationTool::PolyAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) : 
-  AnnotationTool(annotationPlugin, viewer),
-  _activeLine(NULL)
+PolyAnnotationTool::PolyAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
+  AnnotationTool(annotationPlugin, controller), _activeLine(NULL)
 {
 }
 
 void PolyAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
-  if (_viewer) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
     if (_generating) {
       if (!_activeLine) {
         _activeLine = new QGraphicsLineItem();
         _activeLine->setZValue(std::numeric_limits<float>::max());
-        _viewer->scene()->addItem(_activeLine);
+		viewer->scene()->addItem(_activeLine);
       }
-      QPointF scenePos = _viewer->mapToScene(event->pos());
-      _activeLine->setPen(QPen(QBrush(Qt::green), 3. / _viewer->transform().m11(), Qt::PenStyle::DashLine));
+      QPointF scenePos = viewer->mapToScene(event->pos());
+      _activeLine->setPen(QPen(QBrush(Qt::green), 3. / viewer->transform().m11(), Qt::PenStyle::DashLine));
       _activeLine->setLine(_last.getX(), _last.getY(), scenePos.x(), scenePos.y());
     }
     AnnotationTool::mouseMoveEvent(event);
@@ -37,9 +37,10 @@ void PolyAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void PolyAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
-  QPointF scenePos = _viewer->mapToScene(event->pos());
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  QPointF scenePos = viewer->mapToScene(event->pos());
   if (!_generating) {
-    PolyQtAnnotation* selected = dynamic_cast<PolyQtAnnotation*>(this->_viewer->itemAt(event->pos()));
+    PolyQtAnnotation* selected = dynamic_cast<PolyQtAnnotation*>(viewer->itemAt(event->pos()));
     if (selected) {
       PolyQtAnnotation* active = dynamic_cast<PolyQtAnnotation*>(_annotationPlugin->getActiveAnnotation());
       if (active && active->getEditable()) {
@@ -58,11 +59,12 @@ void PolyAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void PolyAnnotationTool::cancelAnnotation() {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
   if (_generating) {
     AnnotationTool::cancelAnnotation();
     if (_activeLine) {
       _activeLine->hide();
-      _viewer->scene()->removeItem(_activeLine);
+	  viewer->scene()->removeItem(_activeLine);
       delete _activeLine;
       _activeLine = NULL;
     }
@@ -70,10 +72,11 @@ void PolyAnnotationTool::cancelAnnotation() {
 }
 
 void PolyAnnotationTool::addCoordinate(const QPointF& scenePos) {
-  if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && QLineF(_viewer->mapFromScene(QPointF(_start.getX(), _start.getY())), _viewer->mapFromScene(scenePos)).length() < 12) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && QLineF(viewer->mapFromScene(QPointF(_start.getX(), _start.getY())), viewer->mapFromScene(scenePos)).length() < 12) {
     _annotationPlugin->finishAnnotation();
     if (_activeLine) {
-      _viewer->scene()->removeItem(_activeLine);
+		viewer->scene()->removeItem(_activeLine);
       delete _activeLine;
       _activeLine = NULL;
     }
@@ -82,7 +85,7 @@ void PolyAnnotationTool::addCoordinate(const QPointF& scenePos) {
     _generating = false;
   }
   else {
-    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
+    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / viewer->getSceneScale(), scenePos.y() / viewer->getSceneScale());
     _last = Point(scenePos.x(), scenePos.y());
   }
 }

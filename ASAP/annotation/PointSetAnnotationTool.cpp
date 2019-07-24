@@ -13,8 +13,8 @@
 #include <iostream>
 #include <QTimeLine>
 
-PointSetAnnotationTool::PointSetAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) :
-AnnotationTool(annotationPlugin, viewer)
+PointSetAnnotationTool::PointSetAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
+AnnotationTool(annotationPlugin, controller)
 {
 }
 

@@ -11,7 +11,8 @@ _prevZoomPoint(QPoint(0, 0))
 }
 
 void ZoomTool::mouseMoveEvent(QMouseEvent *event) {
-  if (_viewer && _zooming) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer && _zooming) {
     float delta = event->pos().y() - _prevZoomPoint.y();
     _prevZoomPoint = event->pos();
     _accumZoom += delta/20.;
@@ -27,21 +28,23 @@ void ZoomTool::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void ZoomTool::mousePressEvent(QMouseEvent *event) {
-  if (_viewer) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
     _zooming = true;
     _accumZoom = 0;
     _prevZoomPoint = event->pos();
-    _viewer->setCursor(QCursor(Qt::CursorShape::SizeVerCursor));
-	_controller->Zoom(0, event->pos(), _viewer->mapToScene(event->pos()));
+	viewer->setCursor(QCursor(Qt::CursorShape::SizeVerCursor));
+	_controller->Zoom(0, event->pos(), viewer->mapToScene(event->pos()));
     event->accept();
   }
 }
 
 void ZoomTool::mouseReleaseEvent(QMouseEvent *event) {
-  if (_viewer) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
     _zooming = false;
     _prevZoomPoint = QPoint(0, 0);
-    _viewer->setCursor(Qt::ArrowCursor);
+	viewer->setCursor(Qt::ArrowCursor);
     event->accept();
   }
 }

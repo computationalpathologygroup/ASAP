@@ -12,7 +12,7 @@ class ANNOTATIONPLUGIN_EXPORT PointSetAnnotationTool : public  AnnotationTool {
 
 public:
   
-  PointSetAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer);
+  PointSetAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller);
   std::string name();
   void mouseDoubleClickEvent(QMouseEvent *event);
   QAction* getToolButton();

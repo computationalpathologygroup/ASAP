@@ -29,32 +29,33 @@ void MeasurementAnnotationTool::QGraphicsTextItemWithBackground::paint(QPainter 
   QGraphicsTextItem::paint(painter, o, w);
 }
 
-MeasurementAnnotationTool::MeasurementAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) :
-AnnotationTool(annotationPlugin, viewer),
+MeasurementAnnotationTool::MeasurementAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
+AnnotationTool(annotationPlugin, controller),
 _activeLine(NULL),
 _sizeText(NULL)
 {
 }
 
 void MeasurementAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
-  if (_viewer) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
     if (_generating) {
       if (!_activeLine) {
         _activeLine = new QGraphicsLineItem();
         _activeLine->setZValue(std::numeric_limits<float>::max());
-        _viewer->scene()->addItem(_activeLine);
+		viewer->scene()->addItem(_activeLine);
       }
       if (!_sizeText) {
         _sizeText = new QGraphicsTextItemWithBackground("");
         _sizeText->setZValue(std::numeric_limits<float>::max());
         _sizeText->setFlag(QGraphicsItem::ItemIgnoresTransformations);
         _sizeText->setDefaultTextColor(Qt::white);
-        _viewer->scene()->addItem(_sizeText);
+		viewer->scene()->addItem(_sizeText);
       }
-      QPointF scenePos = _viewer->mapToScene(event->pos());
+      QPointF scenePos = viewer->mapToScene(event->pos());
       if (std::shared_ptr<MultiResolutionImage> local_img = _annotationPlugin->getCurrentImage().lock()) {
         std::vector<double> spacing = local_img->getSpacing();
-        float sizeInPixels = sqrt(pow(scenePos.x() / _viewer->getSceneScale() - _last.getX() / _viewer->getSceneScale(), 2) + pow(scenePos.y() / _viewer->getSceneScale() - _last.getY() / _viewer->getSceneScale(), 2));
+        float sizeInPixels = sqrt(pow(scenePos.x() / viewer->getSceneScale() - _last.getX() / viewer->getSceneScale(), 2) + pow(scenePos.y() / viewer->getSceneScale() - _last.getY() / viewer->getSceneScale(), 2));
         if (spacing.size() > 0) {
           float sizeInUnits = sizeInPixels * spacing[0];
           QString unit = " um";
@@ -67,9 +68,9 @@ void MeasurementAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
         else {
           _sizeText->setPlainText(QString::number(sizeInPixels) + QString(" pixels"));
         }
-        _sizeText->setPos(scenePos.x() + 20 / _viewer->transform().m11(), scenePos.y() + 20 / _viewer->transform().m11());
+        _sizeText->setPos(scenePos.x() + 20 / viewer->transform().m11(), scenePos.y() + 20 / viewer->transform().m11());
       }
-      _activeLine->setPen(QPen(QBrush(Qt::black), 3. / _viewer->transform().m11()));
+      _activeLine->setPen(QPen(QBrush(Qt::black), 3. / viewer->transform().m11()));
       _activeLine->setLine(_last.getX(), _last.getY(), scenePos.x(), scenePos.y());
     }
     AnnotationTool::mouseMoveEvent(event);
@@ -89,17 +90,18 @@ void MeasurementAnnotationTool::keyPressEvent(QKeyEvent *event) {
 }
 
 void MeasurementAnnotationTool::cancelAnnotation() {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
   if (_generating) {
     AnnotationTool::cancelAnnotation();
     if (_activeLine) {
       _activeLine->hide();
-      _viewer->scene()->removeItem(_activeLine);
+	  viewer->scene()->removeItem(_activeLine);
       delete _activeLine;
       _activeLine = NULL;
     }
     if (_sizeText) {
       _sizeText->hide();
-      _viewer->scene()->removeItem(_sizeText);
+	  viewer->scene()->removeItem(_sizeText);
       delete _sizeText;
       _sizeText = NULL;
     }
@@ -107,16 +109,17 @@ void MeasurementAnnotationTool::cancelAnnotation() {
 }
 
 void MeasurementAnnotationTool::addCoordinate(const QPointF& scenePos) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
   if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 0) {
-    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
+    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / viewer->getSceneScale(), scenePos.y() / viewer->getSceneScale());
     _annotationPlugin->finishAnnotation();
     if (_activeLine) {
-      _viewer->scene()->removeItem(_activeLine);
+	  viewer->scene()->removeItem(_activeLine);
       delete _activeLine;
       _activeLine = NULL;
     }
     if (_sizeText) {
-      _viewer->scene()->removeItem(_sizeText);
+	  viewer->scene()->removeItem(_sizeText);
       delete _sizeText;
       _sizeText = NULL;
     }
@@ -125,7 +128,7 @@ void MeasurementAnnotationTool::addCoordinate(const QPointF& scenePos) {
     _generating = false;
   }
   else {
-    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
+    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / viewer->getSceneScale(), scenePos.y() / viewer->getSceneScale());
     _last = Point(scenePos.x(), scenePos.y());
   }
 }

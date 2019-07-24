@@ -15,7 +15,7 @@ class ANNOTATIONPLUGIN_EXPORT RectangleAnnotationTool : public AnnotationTool {
   Q_OBJECT
 
 public :
-  RectangleAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer);
+  RectangleAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller);
   virtual std::string name();
   virtual QAction* getToolButton();
   void mouseMoveEvent(QMouseEvent *event);

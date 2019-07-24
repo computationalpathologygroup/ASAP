@@ -33,8 +33,8 @@ void RectangleAnnotationTool::QGraphicsTextItemWithBackground::paint(QPainter *p
   QGraphicsTextItem::paint(painter, o, w);
 }
 
-RectangleAnnotationTool::RectangleAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) :
-AnnotationTool(annotationPlugin, viewer),
+RectangleAnnotationTool::RectangleAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
+AnnotationTool(annotationPlugin, controller),
 _activeRect(NULL),
 _sizeText(NULL),
 _lastAction("")
@@ -42,26 +42,27 @@ _lastAction("")
 }
 
 void RectangleAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
-  if (_viewer) {
+	PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
     if (_generating) {
       if (!_activeRect) {
         _activeRect = new QGraphicsRectItem();
         _activeRect->setZValue(std::numeric_limits<float>::max());
-        _viewer->scene()->addItem(_activeRect);
+		viewer->scene()->addItem(_activeRect);
       }
       if (!_sizeText) {
         _sizeText = new QGraphicsTextItemWithBackground("");
         _sizeText->setZValue(std::numeric_limits<float>::max());
         _sizeText->setFlag(QGraphicsItem::ItemIgnoresTransformations);
         _sizeText->setDefaultTextColor(Qt::white);
-        _viewer->scene()->addItem(_sizeText);
+		viewer->scene()->addItem(_sizeText);
       }
-      QPointF scenePos = _viewer->mapToScene(event->pos());
+      QPointF scenePos = viewer->mapToScene(event->pos());
       float activeRectWidth = 2 * (scenePos.x() - _start.getX());
       float activeRectHeight = 2 * (scenePos.y() - _start.getY());
       if (std::shared_ptr<MultiResolutionImage> local_img = _annotationPlugin->getCurrentImage().lock()) {
         std::vector<double> spacing = local_img->getSpacing();
-        float sizeInPixels = (activeRectWidth / _viewer->getSceneScale()) * (activeRectHeight / _viewer->getSceneScale());
+        float sizeInPixels = (activeRectWidth / viewer->getSceneScale()) * (activeRectHeight / viewer->getSceneScale());
         if (spacing.size() > 0) {
           float sizeInUnits = sizeInPixels * (spacing[0] * spacing[0]);
           QString unit = " um<sup>2</sup>";
@@ -74,9 +75,9 @@ void RectangleAnnotationTool::mouseMoveEvent(QMouseEvent *event) {
         else {
           _sizeText->setHtml(QString::number(sizeInPixels) + QString(" pixels"));
         }
-        _sizeText->setPos(scenePos.x() + 20 / _viewer->transform().m11(), scenePos.y() + 20 / _viewer->transform().m11());
+        _sizeText->setPos(scenePos.x() + 20 / viewer->transform().m11(), scenePos.y() + 20 / viewer->transform().m11());
       }
-      _activeRect->setPen(QPen(QBrush(Qt::green), 4. / _viewer->transform().m11()));
+      _activeRect->setPen(QPen(QBrush(Qt::green), 4. / viewer->transform().m11()));
       _activeRect->setRect(_start.getX() - activeRectWidth / 2., _start.getY() - activeRectHeight / 2., activeRectWidth, activeRectHeight);
     }
     AnnotationTool::mouseMoveEvent(event);
@@ -96,17 +97,18 @@ void RectangleAnnotationTool::keyPressEvent(QKeyEvent *event) {
 }
 
 void RectangleAnnotationTool::cancelAnnotation() {
+	PathologyViewer* viewer(_controller->GetMasterViewer());
   if (_generating) {
     AnnotationTool::cancelAnnotation();
     if (_activeRect) {
       _activeRect->hide();
-      _viewer->scene()->removeItem(_activeRect);
+	  viewer->scene()->removeItem(_activeRect);
       delete _activeRect;
       _activeRect = NULL;
     }
     if (_sizeText) {
       _sizeText->hide();
-      _viewer->scene()->removeItem(_sizeText);
+	  viewer->scene()->removeItem(_sizeText);
       delete _sizeText;
       _sizeText = NULL;
     }
@@ -114,6 +116,7 @@ void RectangleAnnotationTool::cancelAnnotation() {
 }
 
 void RectangleAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
+	PathologyViewer* viewer(_controller->GetMasterViewer());
   if (std::shared_ptr<MultiResolutionImage> local_img = _annotationPlugin->getCurrentImage().lock()) {
     std::vector<double> spacing = local_img->getSpacing();
     QString suffix(" pixels");
@@ -159,8 +162,8 @@ void RectangleAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
         rectWidth /= spacing[0];
         rectHeight /= spacing[1];
       }
-      QPointF scenePos = _viewer->mapToScene(event->pos());
-      this->addCoordinate(QPointF(scenePos.x() + (_viewer->getSceneScale() * rectWidth / 2), scenePos.y() + (_viewer->getSceneScale() * rectHeight / 2)));
+      QPointF scenePos = viewer->mapToScene(event->pos());
+      this->addCoordinate(QPointF(scenePos.x() + (viewer->getSceneScale() * rectWidth / 2), scenePos.y() + (viewer->getSceneScale() * rectHeight / 2)));
     }
     else {
       this->cancelAnnotation();
@@ -169,25 +172,26 @@ void RectangleAnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void RectangleAnnotationTool::addCoordinate(const QPointF& scenePos) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
   if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 0) {
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->clearCoordinates();
-    float width = std::abs(2 * (scenePos.x() - _start.getX()) / _viewer->getSceneScale());
-    float height = std::abs(2 * (scenePos.y() - _start.getY()) / _viewer->getSceneScale());
-    float left = (_start.getX() / _viewer->getSceneScale()) - width / 2.;
-    float top = (_start.getY() / _viewer->getSceneScale()) - height / 2.;    
+    float width = std::abs(2 * (scenePos.x() - _start.getX()) / viewer->getSceneScale());
+    float height = std::abs(2 * (scenePos.y() - _start.getY()) / viewer->getSceneScale());
+    float left = (_start.getX() / viewer->getSceneScale()) - width / 2.;
+    float top = (_start.getY() / viewer->getSceneScale()) - height / 2.;
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->addCoordinate(left, top);
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->addCoordinate(left + width, top);
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->addCoordinate(left + width, top + height);
     _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->addCoordinate(left, top + height);
-    _annotationPlugin->getGeneratedAnnotation()->setPos(QPointF(left * _viewer->getSceneScale(), top * _viewer->getSceneScale()));
+    _annotationPlugin->getGeneratedAnnotation()->setPos(QPointF(left * viewer->getSceneScale(), top * viewer->getSceneScale()));
     _annotationPlugin->finishAnnotation();
     if (_activeRect) {
-      _viewer->scene()->removeItem(_activeRect);
+		viewer->scene()->removeItem(_activeRect);
       delete _activeRect;
       _activeRect = NULL;
     }
     if (_sizeText) {
-      _viewer->scene()->removeItem(_sizeText);
+		viewer->scene()->removeItem(_sizeText);
       delete _sizeText;
       _sizeText = NULL;
     }
@@ -196,7 +200,7 @@ void RectangleAnnotationTool::addCoordinate(const QPointF& scenePos) {
     _generating = false;
   }
   else {
-    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
+    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / viewer->getSceneScale(), scenePos.y() / viewer->getSceneScale());
     _last = Point(scenePos.x(), scenePos.y());
   }
 }

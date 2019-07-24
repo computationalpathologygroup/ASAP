@@ -5,8 +5,8 @@
 #include "AnnotationWorkstationExtensionPlugin.h"
 #include "core/Point.h"
 
-DotAnnotationTool::DotAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) : 
-  AnnotationTool(annotationPlugin, viewer)
+DotAnnotationTool::DotAnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
+  AnnotationTool(annotationPlugin, controller)
 {
 }
 

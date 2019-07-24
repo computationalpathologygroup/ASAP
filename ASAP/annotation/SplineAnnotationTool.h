@@ -11,7 +11,7 @@ class ANNOTATIONPLUGIN_EXPORT SplineAnnotationTool : public PolyAnnotationTool {
   Q_OBJECT
 
 public :
-  SplineAnnotationTool(AnnotationWorkstationExtensionPlugin *annotationPlugin, PathologyViewer *viewer);
+  SplineAnnotationTool(AnnotationWorkstationExtensionPlugin *annotationPlugin, ASAP::PathologyViewController& controller);
   virtual std::string name();
   virtual QAction* getToolButton();
 };

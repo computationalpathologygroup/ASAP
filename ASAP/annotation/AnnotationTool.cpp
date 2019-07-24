@@ -8,7 +8,7 @@
 #include <iostream>
 #include <QTimeLine>
 
-AnnotationTool::AnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer) :
+AnnotationTool::AnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller) :
 ToolPluginInterface(),
 _annotationPlugin(annotationPlugin),
 _start(-1, -1),
@@ -17,21 +17,22 @@ _generating(false),
 _startSelectionMove(false),
 _moveStart(-1, -1)
 {
-  _viewer = viewer;
+	ToolPluginInterface::setController(controller);
 }
 
 void AnnotationTool::mouseMoveEvent(QMouseEvent *event) {
-  if (_viewer) {
+	PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
     if (_generating) {
-      QPointF scenePos = _viewer->mapToScene(event->pos());
+      QPointF scenePos = viewer->mapToScene(event->pos());
       if (event->buttons() == Qt::LeftButton) {
-        if (QLineF(_viewer->mapFromScene(scenePos), _viewer->mapFromScene(QPointF(_last.getX(), _last.getY()))).length() > 40) {
+        if (QLineF(viewer->mapFromScene(scenePos), viewer->mapFromScene(QPointF(_last.getX(), _last.getY()))).length() > 40) {
           addCoordinate(scenePos);
         }
       }
     }
     else if (_startSelectionMove && event->modifiers() == Qt::AltModifier) {
-      QPointF scenePos = _viewer->mapToScene(event->pos());
+      QPointF scenePos = viewer->mapToScene(event->pos());
       QSet<QtAnnotation*> selected = _annotationPlugin->getSelectedAnnotations();
       for (QSet<QtAnnotation*>::iterator it = selected.begin(); it != selected.end(); ++it) {
         QPointF delta = (scenePos - _moveStart);
@@ -40,7 +41,7 @@ void AnnotationTool::mouseMoveEvent(QMouseEvent *event) {
       _moveStart = scenePos;
     }
     else if (_startSelectionMove) {
-      QPointF scenePos = _viewer->mapToScene(event->pos());
+      QPointF scenePos = viewer->mapToScene(event->pos());
       QtAnnotation* active = _annotationPlugin->getActiveAnnotation();
       if (active && active->getEditable()) {
         int activeSeedPoint = active->getActiveSeedPoint();
@@ -59,6 +60,7 @@ void AnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void AnnotationTool::keyPressEvent(QKeyEvent *event) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
   if (event->key() == Qt::Key::Key_Escape) {
     cancelAnnotation();
   }
@@ -82,7 +84,7 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
         _annotationPlugin->getGeneratedAnnotation()->removeCoordinate(-1);
         if (!_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().empty()) {
           Point prev = _annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinate(-1);
-          _last = Point(prev.getX() * _viewer->getSceneScale(), prev.getY() * _viewer->getSceneScale());
+          _last = Point(prev.getX() * viewer->getSceneScale(), prev.getY() * viewer->getSceneScale());
         }
       }
     }
@@ -109,7 +111,7 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
     if (_annotationPlugin->getActiveAnnotation()) {
       QTimeLine * anim = new QTimeLine(500);
 
-      _start_zoom = _viewer->mapToScene(_viewer->viewport()->rect()).boundingRect();
+      _start_zoom = viewer->mapToScene(viewer->viewport()->rect()).boundingRect();
       _end_zoom = _annotationPlugin->getActiveAnnotation()->mapToScene(_annotationPlugin->getActiveAnnotation()->boundingRect()).boundingRect();
       anim->setFrameRange(0, 100);
       anim->setUpdateInterval(5);
@@ -132,12 +134,12 @@ void AnnotationTool::setActive(bool active) {
 
 void AnnotationTool::zoomToAnnotation(qreal val) {
   QRectF current = QRectF(_start_zoom.topLeft() + val*(_end_zoom.topLeft() - _start_zoom.topLeft()), _start_zoom.bottomRight() + val*(_end_zoom.bottomRight() - _start_zoom.bottomRight()));
-  _viewer->fitInView(current, Qt::AspectRatioMode::KeepAspectRatio);
+  _controller->GetMasterViewer()->fitInView(current, Qt::AspectRatioMode::KeepAspectRatio);
 }
 
 void AnnotationTool::zoomToAnnotationFinished() {
   sender()->~QObject();
-  _viewer->refreshView();
+  _controller->GetMasterViewer()->refreshView();
 }
 
 void AnnotationTool::cancelAnnotation() {
@@ -150,10 +152,11 @@ void AnnotationTool::cancelAnnotation() {
 }
 
 void AnnotationTool::mousePressEvent(QMouseEvent *event) {
-  if (_viewer) {
-    QPointF scenePos = _viewer->mapToScene(event->pos());
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (viewer) {
+    QPointF scenePos = viewer->mapToScene(event->pos());
     if (!_generating) {
-      QtAnnotation* selected = dynamic_cast<QtAnnotation*>(this->_viewer->itemAt(event->pos()));
+      QtAnnotation* selected = dynamic_cast<QtAnnotation*>(viewer->itemAt(event->pos()));
       if (selected) {
         if (event->modifiers() != Qt::ControlModifier && event->modifiers() != Qt::AltModifier) {
           _annotationPlugin->clearSelection();
@@ -209,20 +212,21 @@ void AnnotationTool::mousePressEvent(QMouseEvent *event) {
 }
 
 void AnnotationTool::addCoordinate(const QPointF& scenePos) {
-  if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && QLineF(_viewer->mapFromScene(QPointF(_start.getX(), _start.getY())), _viewer->mapFromScene(scenePos)).length() < 12) {
+  PathologyViewer* viewer(_controller->GetMasterViewer());
+  if (_annotationPlugin->getGeneratedAnnotation()->getAnnotation()->getCoordinates().size() > 2 && QLineF(viewer->mapFromScene(QPointF(_start.getX(), _start.getY())), viewer->mapFromScene(scenePos)).length() < 12) {
     _annotationPlugin->finishAnnotation();
     _start = Point(-1, -1);
     _last = _start;
     _generating = false;
   }
   else {
-    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / _viewer->getSceneScale(), scenePos.y() / _viewer->getSceneScale());
+    _annotationPlugin->getGeneratedAnnotation()->addCoordinate(scenePos.x() / viewer->getSceneScale(), scenePos.y() / viewer->getSceneScale());
     _last = Point(scenePos.x(), scenePos.y());
   }
 }
 
 void AnnotationTool::mouseReleaseEvent(QMouseEvent *event) {
-  if (_viewer) {
+  if (_controller->GetMasterViewer()) {
     if (_startSelectionMove) {
       _startSelectionMove = false;
       _moveStart = QPointF(-1, -1);

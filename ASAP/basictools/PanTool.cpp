@@ -11,17 +11,14 @@ void PanTool::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void PanTool::mousePressEvent(QMouseEvent *event) {
-  if (_viewer) {
-    _viewer->togglePan(true, event->pos());
-    event->accept();
-  }
+
+	_controller->TogglePan(true, event->pos());
+	event->accept();
 }
 
 void PanTool::mouseReleaseEvent(QMouseEvent *event) {
-  if (_viewer) {
-    _viewer->togglePan(false);
-    event->accept();
-  }
+  _controller->TogglePan(false);
+  event->accept();
 }
 
 QAction* PanTool::getToolButton() {

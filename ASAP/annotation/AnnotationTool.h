@@ -12,7 +12,7 @@ class ANNOTATIONPLUGIN_EXPORT AnnotationTool : public  ToolPluginInterface {
   Q_OBJECT
 
 public :
-  AnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, PathologyViewer* viewer);
+  AnnotationTool(AnnotationWorkstationExtensionPlugin* annotationPlugin, ASAP::PathologyViewController& controller);
   virtual std::string name() = 0;
   virtual void mouseMoveEvent(QMouseEvent *event);
   virtual void mousePressEvent(QMouseEvent *event);
