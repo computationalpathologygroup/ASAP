@@ -32,110 +32,111 @@ namespace ASAP
 
 class ImageFilterPluginInterface : public QObject
 {
+	public:
+		ImageFilterPluginInterface() : _settingsPanel()
+		{ }
 
-public:
-    ImageFilterPluginInterface() :
-      _settingsPanel()
-    {}
+		virtual ~ImageFilterPluginInterface() {
+		  _mutex.lock();
+		  if (_settingsPanel) {
+			delete _settingsPanel;
+		  }
+		  _mutex.unlock();
+		}
 
-    virtual ~ImageFilterPluginInterface() {
-      _mutex.lock();
-      if (_settingsPanel) {
-        delete _settingsPanel;
-      }
-      _mutex.unlock();
-    }
+		virtual bool initialize(const ImageSource* image) {
+		  return true;
+		};
 
-    virtual QString name() const = 0;
-    virtual bool initialize(const ImageSource* image) {
-      return true;
-    };
-    virtual QPointer<QWidget> getSettingsPanel() {
-      return _settingsPanel;
-    }
-    virtual void filter(const Patch<double>& input, QVariant& output) = 0;
-    
-    void cancel() {
-      if (_filter) {
-        _filter->cancel();
-      }
-    };
+		virtual QPointer<QWidget> getSettingsPanel() {
+		  return _settingsPanel;
+		}
 
-    void setProgressMonitor(std::shared_ptr<ProgressMonitor> monitor) {
-      if (_filter) {
-        _filter->setProgressMonitor(monitor);
-      }
-    }
-    virtual ImageFilterPluginInterface* clone() const = 0;
-    virtual QIcon icon() const {
-      return QIcon(QPixmap(256, 256));
-    }
+		void cancel() {
+		  if (_filter) {
+			_filter->cancel();
+		  }
+		};
 
-signals:
-    virtual void filterParametersChanged() = 0;
+		void setProgressMonitor(std::shared_ptr<ProgressMonitor> monitor) {
+		  if (_filter) {
+			_filter->setProgressMonitor(monitor);
+		  }
+		}
+		
+		virtual QIcon icon() const {
+		  return QIcon(QPixmap(256, 256));
+		}
 
-protected:
-    QPointer<QWidget> _settingsPanel;
-    std::unique_ptr<FilterBase> _filter;
-    QMutex _mutex;
+		virtual QString name() const = 0;
+		virtual void filter(const Patch<double>& input, QVariant& output) = 0;
+		virtual ImageFilterPluginInterface* clone() const = 0;
+
+	signals:
+		virtual void filterParametersChanged() = 0;
+
+	protected:
+		QPointer<QWidget> _settingsPanel;
+		std::unique_ptr<FilterBase> _filter;
+		QMutex _mutex;
 };
 
 class ToolPluginInterface : public QObject {
-public:
-  ToolPluginInterface() : _button(NULL), _viewer(NULL), _active(false)
-  {
-  }
+	public:
+	  ToolPluginInterface() : QObject(), _button(NULL), _controller(NULL), _active(false)
+	  { }
 
-  virtual ~ToolPluginInterface() {
-    _viewer = NULL;
-    _button = NULL;
-  }
-  
-  virtual std::string name() = 0;
-  void setController(ASAP::PathologyViewController& controller) { _controller = &controller; }
-  void setViewer(PathologyViewer* viewer) { _viewer = viewer; }
-  bool active() { return _active; }
-  virtual void setActive(bool active) {
-    _active = active;
-  }
-  virtual void mouseMoveEvent(QMouseEvent *event) { event->ignore(); };
-  virtual void mousePressEvent(QMouseEvent *event) { event->ignore(); };
-  virtual void mouseReleaseEvent(QMouseEvent *event) { event->ignore(); };
-  virtual void mouseDoubleClickEvent(QMouseEvent *event) { event->ignore(); };
-  virtual void keyPressEvent(QKeyEvent *event) { event->ignore(); };
-  virtual QAction* getToolButton() = 0;
+	  virtual ~ToolPluginInterface() {
+		_controller = NULL;
+		_button = NULL;
+	  }
+    
+	  void setController(ASAP::PathologyViewController& controller) { _controller = &controller; }
+	  bool active() { return _active; }
+	  virtual void setActive(bool active) { _active = active; }
 
-protected:
-  QPointer<ASAP::PathologyViewController> _controller;
-  QPointer<PathologyViewer> _viewer;
-  QPointer<QAction> _button;
-  bool _active;
+	  virtual void mouseMoveEvent(QMouseEvent *event) { event->ignore(); };
+	  virtual void mousePressEvent(QMouseEvent *event) { event->ignore(); };
+	  virtual void mouseReleaseEvent(QMouseEvent *event) { event->ignore(); };
+	  virtual void mouseDoubleClickEvent(QMouseEvent *event) { event->ignore(); };
+	  virtual void keyPressEvent(QKeyEvent *event) { event->ignore(); };
+
+	  virtual std::string name() = 0;
+	  virtual QAction* getToolButton() = 0;
+
+	protected:
+	  QPointer<ASAP::PathologyViewController> _controller;
+	  QPointer<QAction> _button;
+	  bool _active;
 };
 
 class WorkstationExtensionPluginInterface : public QObject {
-public :
-  WorkstationExtensionPluginInterface() : _settings(NULL) {}
-  virtual ~WorkstationExtensionPluginInterface() {}
-  virtual bool initialize(PathologyViewer* viewer) = 0;
-  virtual QToolBar* getToolBar() { return NULL;}
-  virtual QMenu* getMenu() { return NULL; }
-  virtual QDockWidget* getDockWidget() { return NULL; }
-  virtual bool canClose() { return true; }
-  virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
+	public :
+	  WorkstationExtensionPluginInterface() : QObject(), _settings(NULL) {}
+	  virtual ~WorkstationExtensionPluginInterface() {}
+	  virtual QToolBar* getToolBar() { return NULL;}
+	  virtual QMenu* getMenu() { return NULL; }
+	  virtual QDockWidget* getDockWidget() { return NULL; }
+	  virtual bool canClose() { return true; }
+	  virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
 
-protected:
-  QPointer<ASAP::PathologyViewController> _controller;
-  QPointer<PathologyViewer> _viewer;
-  QSettings* _settings;
+	  virtual bool initialize(ASAP::PathologyViewController& controller);
 
-public slots:
-  virtual void onNewImageLoaded(MultiResolutionImage* img, std::string fileName) {};
-  virtual void onImageClosed() {};
+	public slots:
+	  virtual void onViewerChangeStart(void);
+	  virtual void onViewerChangeFinished(void);
+
+	  // Explicitly request new implementations to take these into account
+	  virtual void onDocumentChange(ASAP::DocumentInstance* document) = 0;
+	  virtual void onDocumentInstanceClose(void) = 0;
+
+	protected:
+	  ASAP::PathologyViewController* _controller;
+	  QSettings* _settings;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<ImageFilterPluginInterface>)
 Q_DECLARE_INTERFACE(ImageFilterPluginInterface, "ASAP.ImageFilterPluginInterface/1.0")
 Q_DECLARE_INTERFACE(ToolPluginInterface, "ASAP.ToolPluginInterface/1.0")
 Q_DECLARE_INTERFACE(WorkstationExtensionPluginInterface, "ASAP.WorkstationExtensionPluginInterface/1.0")
-
 #endif
