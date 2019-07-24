@@ -1,12 +1,12 @@
-#include "DocumentRetainer.h"
+#include "DocumentCache.h"
 
 namespace ASAP
 {
-	DocumentRetainer::DocumentRetainer(void)
+	DocumentCache::DocumentCache(void)
 	{
 	}
 
-	size_t DocumentRetainer::LoadDocument(const boost::filesystem::path& filepath, const std::string& factory)
+	size_t DocumentCache::LoadDocument(const boost::filesystem::path& filepath, const std::string& factory)
 	{
 		auto existing_entry = m_path_to_id_.find(filepath.string());
 		if (existing_entry != m_path_to_id_.end())
@@ -22,7 +22,7 @@ namespace ASAP
 		return result.first->first;
 	}
 
-	void DocumentRetainer::UnloadDocument(const size_t id, const bool force)
+	void DocumentCache::UnloadDocument(const size_t id, const bool force)
 	{
 		if (m_ptr_map_[id].use_count() == 1 || force)
 		{
@@ -41,20 +41,20 @@ namespace ASAP
 		}
 	}
 
-	DocumentInstance DocumentRetainer::GetDocument(const size_t id)
+	DocumentInstance DocumentCache::GetDocument(const size_t id)
 	{
 		m_instance_counters_[id] += 1;
 		return DocumentInstance(m_ptr_map_[id], id, m_instance_counters_[id]);
 	}
 
-	DocumentInstance DocumentRetainer::GetDocument(const boost::filesystem::path& filepath)
+	DocumentInstance DocumentCache::GetDocument(const boost::filesystem::path& filepath)
 	{
 		size_t id = this->GetDocumentId(filepath);
 		m_instance_counters_[id] += 1;
 		return DocumentInstance(m_ptr_map_[id], id, m_instance_counters_[id]);
 	}
 
-	size_t DocumentRetainer::GetDocumentId(const boost::filesystem::path& filepath)
+	size_t DocumentCache::GetDocumentId(const boost::filesystem::path& filepath)
 	{
 		return m_path_to_id_[filepath.string()];
 	}

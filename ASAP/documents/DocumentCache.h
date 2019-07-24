@@ -1,5 +1,5 @@
-#ifndef __ASAP_DOCUMENTS_DOCUMENTRETAINER__
-#define __ASAP_DOCUMENTS_DOCUMENTRETAINER__
+#ifndef __ASAP_DOCUMENTS_DOCUMENTCACHE__
+#define __ASAP_DOCUMENTS_DOCUMENTCACHE__
 
 #include <unordered_map>
 
@@ -15,13 +15,13 @@ namespace ASAP
 	/// Holds and retains documents, passing them around as instances. Once all
 	/// instances of a document are destroyed, the document will be unloaded.
 	/// </summary>
-	class ASAPLIB_EXPORT DocumentRetainer
+	class ASAPLIB_EXPORT DocumentCache
 	{
 		public:
 			/// <summary>
 			/// Standard Constructor
 			/// </summary>
-			DocumentRetainer(void);
+			DocumentCache(void);
 
 			/// <summary>
 			/// Loads a document into the retainer.
@@ -66,4 +66,4 @@ namespace ASAP
 			size_t													m_document_counter_;
 	};
 }
-#endif // __ASAP_DOCUMENTS_DOCUMENTRETAINER__
+#endif // __ASAP_DOCUMENTS_DOCUMENTCACHE__

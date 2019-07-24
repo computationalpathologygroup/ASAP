@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include "PathologyViewController.h"
-#include "documents/DocumentRetainer.h"
+#include "documents/DocumentCache.h"
 #include "documents/DocumentWindow.h"
 #include "documents/DocumentWindowController.h"
 
@@ -68,7 +68,7 @@ private:
   void closeEvent(QCloseEvent *event);
   
   // Documents
-  ASAP::DocumentRetainer			m_documents_;
+  ASAP::DocumentCache				m_documents_;
   ASAP::DocumentWindowController	m_document_window_controller_;
   ASAP::PathologyViewController		m_view_controller_;
 
