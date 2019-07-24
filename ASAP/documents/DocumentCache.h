@@ -59,8 +59,7 @@ namespace ASAP
 			size_t GetDocumentId(const boost::filesystem::path& filepath);
 
 		private:
-			std::unordered_map<size_t, Document>					m_documents_;
-			std::unordered_map <size_t, std::shared_ptr<Document>>	m_ptr_map_;
+			std::unordered_map<size_t, std::shared_ptr<Document>>	m_documents_;
 			std::unordered_map<size_t, uint16_t>					m_instance_counters_;
 			std::unordered_map<std::string, size_t>					m_path_to_id_;
 			size_t													m_document_counter_;

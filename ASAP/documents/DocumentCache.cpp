@@ -14,8 +14,7 @@ namespace ASAP
 			return existing_entry->second;
 		}
 
-		auto result = m_documents_.insert({ m_document_counter_, Document(filepath, factory) });
-		m_ptr_map_.insert({ result.first->first, std::shared_ptr<Document>(&result.first->second) });
+		auto result = m_documents_.insert({ m_document_counter_, std::shared_ptr<Document>(new Document(filepath, factory)) });
 		m_instance_counters_.insert({ result.first->first, 0 });
 		m_path_to_id_.insert({ filepath.string(), result.first->first });
 		++m_document_counter_;
@@ -24,9 +23,8 @@ namespace ASAP
 
 	void DocumentCache::UnloadDocument(const size_t id, const bool force)
 	{
-		if (m_ptr_map_[id].use_count() == 1 || force)
+		if (m_documents_[id].use_count() == 1 || force)
 		{
-			m_ptr_map_.erase(id);
 			m_instance_counters_.erase(id);
 			m_documents_.erase(id);
 
@@ -44,14 +42,14 @@ namespace ASAP
 	DocumentInstance DocumentCache::GetDocument(const size_t id)
 	{
 		m_instance_counters_[id] += 1;
-		return DocumentInstance(m_ptr_map_[id], id, m_instance_counters_[id]);
+		return DocumentInstance(m_documents_[id], id, m_instance_counters_[id]);
 	}
 
 	DocumentInstance DocumentCache::GetDocument(const boost::filesystem::path& filepath)
 	{
 		size_t id = this->GetDocumentId(filepath);
 		m_instance_counters_[id] += 1;
-		return DocumentInstance(m_ptr_map_[id], id, m_instance_counters_[id]);
+		return DocumentInstance(m_documents_[id], id, m_instance_counters_[id]);
 	}
 
 	size_t DocumentCache::GetDocumentId(const boost::filesystem::path& filepath)
