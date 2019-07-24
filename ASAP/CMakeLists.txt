@@ -37,6 +37,7 @@ set(SOURCE
     TileManager.cpp
     WSITileGraphicsItem.cpp
     ScaleBar.cpp
+	interfaces/interfaces.cpp
     UtilityFunctions.cpp
     QtProgressMonitor.cpp
 	documents/Document.cpp
