@@ -32,11 +32,6 @@ using std::vector;
 
 PathologyViewer::PathologyViewer(WSITileGraphicsItemCache& cache, QWidget* parent) :
 	QGraphicsView(parent),
-	//_zoomSensitivity(0.5),
-	//_panSensitivity(0.5),
-	//_numScheduledScalings(0),
-	//_pan(false),
-	//_cacheSize(1000 * 512 * 512 * 3),
 	_sceneScale(1.0f),
 	_renderthread(nullptr),
 	_prefetchthread(nullptr),
@@ -52,7 +47,6 @@ PathologyViewer::PathologyViewer(WSITileGraphicsItemCache& cache, QWidget* paren
   setDragMode(QGraphicsView::DragMode::NoDrag);
   setContentsMargins(0,0,0,0);
   setAutoFillBackground(true);
-  //setViewport(new QGLWidget());
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
   setInteractive(false);
   this->setScene(new QGraphicsScene(this)); //Memleak!
@@ -85,22 +79,6 @@ PathologyViewer::~PathologyViewer()
 {
   close();
 }
-/*
-unsigned long long PathologyViewer::getCacheSize(void) const {
-  if (_cache) {
-    return _cache->getMaxCacheSize();
-  }
-  else {
-    return 0;
-  }
-}
-
-void PathologyViewer::setCacheSize(unsigned long long& maxCacheSize) {
-  if (_cache) {
-    _cache->setMaxCacheSize(maxCacheSize);
-  }
-}
-*/
 
 void PathologyViewer::resizeEvent(QResizeEvent *event) {
 	QGraphicsView::resizeEvent(event);
@@ -109,64 +87,11 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
 		this->refreshView();
 	}
 }
-/*
-void PathologyViewer::wheelEvent(QWheelEvent *event) {
-  int numDegrees = event->delta() / 8;
-  int numSteps	 = numDegrees / 15;  // see QWheelEvent documentation
-  zoom(numSteps, event->pos(), this->mapToScene(event->pos()));
-}
-
-void PathologyViewer::zoom(float numSteps, QPointF center_view, QPointF center_scene) {
-  if (m_instance_)
-  {
-	  this->zoom_view_center	= center_view;
-	  this->zoom_scene_center	= center_scene;
-
-	  _numScheduledScalings += numSteps;
-	  if (_numScheduledScalings * numSteps < 0) {
-		  _numScheduledScalings = numSteps;
-	  }
-
-	  QTimeLine *anim = new QTimeLine(300, this);
-	  anim->setUpdateInterval(5);
-
-	  connect(anim, SIGNAL(valueChanged(qreal)), SLOT(scalingTime(qreal)));
-	  connect(anim, SIGNAL(finished()), SLOT(zoomFinished()));
-	  anim->start();
-  }
-}
-
-void PathologyViewer::scalingTime(qreal x)
-{
-  qreal factor = 1.0 + qreal(_numScheduledScalings) * x / 300.;
-  float maxDownsample = 1. / _sceneScale;
-  QRectF FOV = this->mapToScene(this->rect()).boundingRect();
-  QRectF FOVImage = QRectF(FOV.left() / _sceneScale, FOV.top() / _sceneScale, FOV.width() / _sceneScale, FOV.height() / _sceneScale);
-  float scaleX = static_cast<float>(m_instance_->document->image().getDimensions()[0]) / FOVImage.width();
-  float scaleY = static_cast<float>(m_instance_->document->image().getDimensions()[1]) / FOVImage.height();
-  float minScale = scaleX > scaleY ? scaleY : scaleX;
-  float maxScale = scaleX > scaleY ? scaleX : scaleY;
-  if ((factor < 1.0 && maxScale < 0.5) || (factor > 1.0 && minScale > 2*maxDownsample)) {
-    return;
-  }
-
-  this->modifyZoom(this->zoom_view_center, this->zoom_scene_center, factor);
-}
-*/
 
 float PathologyViewer::getSceneScale(void) const
 {
 	return _sceneScale;
 }
-/*
-void PathologyViewer::zoomFinished()
-{
-  if (_numScheduledScalings > 0)
-    _numScheduledScalings--;
-  else
-    _numScheduledScalings++;
-  sender()->~QObject();
-}*/
 
 void PathologyViewer::moveTo(const QPointF& pos) {
   this->centerOn(pos);
@@ -403,52 +328,6 @@ void PathologyViewer::showContextMenu(const QPoint& pos)
     }
   }
 }
-/*
-void PathologyViewer::addTool(std::shared_ptr<ToolPluginInterface> tool) {
-	if (tool) {
-		_tools[tool->name()] = tool;
-	}
-}
-
-bool PathologyViewer::hasTool(const std::string& toolName) const {
-	if (_tools.find(toolName) != _tools.end()) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-void PathologyViewer::setActiveTool(const std::string& toolName) {
-	if (_tools.find(toolName) != _tools.end()) {
-		if (_activeTool) {
-			_activeTool->setActive(false);
-		}
-		_activeTool = _tools[toolName];
-		_activeTool->setActive(true);
-	}
-}
-
-std::shared_ptr<ToolPluginInterface> PathologyViewer::getActiveTool() {
-	return _activeTool;
-}
-
-void PathologyViewer::changeActiveTool() {
-	if (sender()) {
-		QAction* button = qobject_cast<QAction*>(sender());
-		std::shared_ptr<ToolPluginInterface> newActiveTool = _tools[button->objectName().toStdString()];
-		if (_activeTool && newActiveTool && _activeTool != newActiveTool) {
-			_activeTool->setActive(false);
-		}
-		if (newActiveTool) {
-			_activeTool = newActiveTool;
-			_activeTool->setActive(true);
-		}
-		else {
-			_activeTool = NULL;
-		}
-	}
-}*/
 
 void PathologyViewer::close() {
   if (this->window())
@@ -565,15 +444,6 @@ void PathologyViewer::refreshView(void)
 	}
 }
 
-bool PathologyViewer::eventFilter(QObject *object, QEvent *event)
-{
-	if (event->type() == QEvent::FocusIn)
-	{
-		emit receivedFocus(this);
-	}
-	return false;
-}
-
 void PathologyViewer::setPan_(const QPoint& pan_to_point)
 {
 	if (m_instance_)
@@ -635,110 +505,3 @@ void PathologyViewer::wheelEvent(QWheelEvent* event)
 {
 	emit wheelOccured(event);
 }
-
-
-/*
-void PathologyViewer::mousePressEvent(QMouseEvent *event)
-{
-  if (event->button() == Qt::MiddleButton)
-  {
-    togglePan(true, event->pos());
-    event->accept();
-    return;
-  }
-  else if (_activeTool && event->button() == Qt::LeftButton) {
-    _activeTool->mousePressEvent(event);
-    if (event->isAccepted()) {
-      return;
-    }
-  }
-  else
-  {
-	  event->ignore();
-  }
-}
-
-void PathologyViewer::mouseReleaseEvent(QMouseEvent *event)
-{
-  if (event->button() == Qt::MiddleButton)
-  {
-    togglePan(false);
-    event->accept();
-    return;
-  }
-  if (_activeTool && event->button() == Qt::LeftButton) {
-    _activeTool->mouseReleaseEvent(event);
-    if (event->isAccepted()) {
-      return;
-    }
-  }
-  event->ignore();
-}
-
-void PathologyViewer::mouseMoveEvent(QMouseEvent *event)
-{
-	auto test = this->mapToScene(event->pos());
-
-  QPointF imgLoc = this->mapToScene(event->pos()) / _sceneScale;
-	// TODO: Clean this up or implement a more elegant selection method.
-  qobject_cast<QMainWindow*>(this->parentWidget()->parentWidget()->parentWidget())->statusBar()->showMessage(QString("Current position in image coordinates: (") + QString::number(imgLoc.x()) + QString(", ") + QString::number(imgLoc.y()) + QString(")"), 1000);
-  if (this->_pan) {
-    //pan(event->pos());
-	  this->modifyPan(event->pos());
-    event->accept();
-    return;
-  }
-  if (_activeTool) {
-    _activeTool->mouseMoveEvent(event);
-    if (event->isAccepted()) {
-      return;
-    }
-  }
-  event->ignore();
-}
-
-void PathologyViewer::mouseDoubleClickEvent(QMouseEvent *event) {
-  event->ignore();
-  if (_activeTool) {
-    _activeTool->mouseDoubleClickEvent(event);
-  }
-}
-
-void PathologyViewer::keyPressEvent(QKeyEvent *event) {
-  event->ignore();
-  if (_activeTool) {
-    _activeTool->keyPressEvent(event);
-  }
-}
-
-bool PathologyViewer::isPanning() {
-  return _pan;
-}
-
-void PathologyViewer::setPanSensitivity(float panSensitivity) {
-      if (panSensitivity > 1) {
-        _panSensitivity = 1;
-      } else if (panSensitivity < 0.01) {
-        _panSensitivity = 0.01;
-      } else {
-        _panSensitivity = panSensitivity;
-      }
-    };
-
-float PathologyViewer::getPanSensitivity() const {
-  return _panSensitivity;
-};
-
-void PathologyViewer::setZoomSensitivity(float zoomSensitivity) {
-      if (zoomSensitivity > 1) {
-        _zoomSensitivity = 1;
-      } else if (zoomSensitivity < 0.01) {
-        _zoomSensitivity = 0.01;
-      } else {
-        _zoomSensitivity = zoomSensitivity;
-      }
-    };
-
-float PathologyViewer::getZoomSensitivity() const {
-  return _zoomSensitivity;
-};*/
