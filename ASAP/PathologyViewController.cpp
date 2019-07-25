@@ -19,6 +19,8 @@ namespace ASAP
 		m_modification_mutex_.lock();
 		if (m_master_ != viewer)
 		{
+			emit MasterChangeStarted();
+
 			if (m_master_)
 			{
 				DisconnectObserved_(m_master_);
@@ -29,6 +31,8 @@ namespace ASAP
 			m_master_ = viewer;
 			ConnectObserved_(m_master_);
 			ConnectObserver_(m_master_);
+			
+			emit MasterChangeFinished();
 		}
 		m_modification_mutex_.unlock();
 	}
@@ -126,7 +130,6 @@ namespace ASAP
 		{
 			m_tools_.insert({ tool->name(), tool });
 			tool->setController(*this);
-			tool->setViewer(m_master_);
 		}
 		m_modification_mutex_.unlock();
 	}
@@ -230,9 +233,26 @@ namespace ASAP
 
 	//############ Public Slots ############//
 
+	void PathologyViewController::ChangeActiveTool(bool checked)
+	{
+		if (sender())
+		{
+			QAction* button = qobject_cast<QAction*>(sender());
+			std::shared_ptr<ToolPluginInterface> new_active_tool = m_tools_[button->objectName().toStdString()];
+			if (m_active_tool_ && new_active_tool && m_active_tool_ != new_active_tool) {
+				m_active_tool_->setActive(false);
+			}
+			if (new_active_tool) {
+				m_active_tool_ = new_active_tool;
+				m_active_tool_->setActive(true);
+			}
+			else {
+				m_active_tool_ = NULL;
+			}
+		}
+	}
 
 	//############ Privates Methods ############//
-
 
 	void PathologyViewController::ConnectObserved_(PathologyViewer* viewer)
 	{

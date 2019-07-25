@@ -18,6 +18,7 @@ namespace ASAP
 {
 	class ASAPLIB_EXPORT PathologyViewController : public QObject
 	{
+		Q_OBJECT
 		public:
 			PathologyViewController(void);
 			~PathologyViewController(void);
@@ -47,6 +48,11 @@ namespace ASAP
 			void Zoom(const float steps, const QPointF& center_view, const QPointF& center_scene);
 
 		public slots:
+			void ChangeActiveTool(bool checked);
+
+		signals:
+			void MasterChangeStarted(void);
+			void MasterChangeFinished(void);
 
 		private:
 			std::mutex m_modification_mutex_;
@@ -56,7 +62,6 @@ namespace ASAP
 
 			std::shared_ptr<ToolPluginInterface>						m_active_tool_;
 			std::map<std::string, std::shared_ptr<ToolPluginInterface>> m_tools_;
-			
 
 			bool		m_is_panning_;
 			float		m_pan_sensitivity_;
