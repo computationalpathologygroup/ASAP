@@ -102,6 +102,8 @@ namespace ASAP
 		std::string tab_name(m_document_bar_->tabText(index).toStdString());
 		size_t document_id(std::stoi(m_documents_.find(tab_name)->second.document_id));
 
+		emit DocumentInstanceCloseStarted(m_documents_.find(tab_name)->second);
+
 		if (m_active_document_->name == tab_name)
 		{
 			viewer->close();
@@ -116,6 +118,6 @@ namespace ASAP
 			viewer->setEnabled(false);
 		}
 
-		emit closedDocumentInstance(document_id);
+		emit DocumentInstanceCloseFinished(document_id);
 	}
 }

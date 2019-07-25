@@ -19,7 +19,6 @@ namespace ASAP
 	class DocumentWindow : public QWidget
 	{
 		Q_OBJECT
-
 		public:
 			PathologyViewer* viewer;
 
@@ -32,9 +31,9 @@ namespace ASAP
 		signals:
 			void acquiredDocumentInstance(const DocumentInstance& instance);
 			void changedDocumentInstanceDisplay(const DocumentInstance& instance);
-			void closedDocumentInstance(const size_t document_id);
+			void DocumentInstanceCloseStarted(DocumentInstance& instance);
+			void DocumentInstanceCloseFinished(const size_t document_id);
 			void receivedFocus(DocumentWindow* window);
-			
 
 		private:
 			DocumentInstance*									m_active_document_;
