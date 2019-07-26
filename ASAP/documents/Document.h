@@ -20,7 +20,7 @@ namespace ASAP
 	/// <summary>
 	/// Describes the tile information for a Document.
 	/// </summary>
-	struct TileInformation
+	struct ASAPLIB_EXPORT TileInformation
 	{
 		uint64_t							tile_size;
 		uint64_t							top_level;
@@ -28,7 +28,7 @@ namespace ASAP
 		std::vector<std::vector<uint64_t>>	dimensions;
 	};
 
-	class Document
+	class ASAPLIB_EXPORT Document
 	{
 		public:
 			Document(const boost::filesystem::path& filepath, const std::string& factory = "default");

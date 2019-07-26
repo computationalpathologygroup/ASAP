@@ -16,7 +16,7 @@ class PathologyViewer;
 
 namespace ASAP
 {
-	class DocumentWindow : public QWidget
+	class ASAPLIB_EXPORT DocumentWindow : public QWidget
 	{
 		Q_OBJECT
 		public:

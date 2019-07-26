@@ -11,7 +11,7 @@
 
 namespace ASAP
 {
-	class DocumentInstance
+	class ASAPLIB_EXPORT DocumentInstance
 	{
 		public:
 			DocumentInstance(Document& document, const size_t document_id = 0, const uint16_t instance_id = 1);

@@ -3,13 +3,15 @@
 
 #include <memory>
 
+#include "asaplib_export.h"
+
 namespace ASAP
 {
 	/// <summary>
 	/// Represents the base plugin information, it's meant to be inherited
 	/// and expanded upon to carry the required information.
 	/// <summary>
-	struct PluginInformation
+	class ASAPLIB_EXPORT PluginInformation
 	{
 	};
 
@@ -18,7 +20,7 @@ namespace ASAP
 	/// while retaining the ability to deal with a unique pointer holding the
 	/// PluginInformation pointer.
 	/// <summary>
-	class PluginState
+	class ASAPLIB_EXPORT PluginState
 	{
 		public:
 			std::unique_ptr<PluginInformation> information;
