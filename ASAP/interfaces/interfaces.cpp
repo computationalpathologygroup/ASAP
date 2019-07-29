@@ -30,7 +30,9 @@ void WorkstationExtensionPluginInterface::onViewerChangeStart(void)
 		disconnect(window,
 			&ASAP::DocumentWindow::DocumentInstanceCloseStarted,
 			this,
-			&WorkstationExtensionPluginInterface::onDocumentInstanceClose);
+			&WorkstationExtensionPluginInterface::canClose);
+
+		prepareForViewerChange_();
 	}
 }
 
@@ -48,8 +50,9 @@ void WorkstationExtensionPluginInterface::onViewerChangeFinished(void)
 		connect(window,
 			&ASAP::DocumentWindow::DocumentInstanceCloseStarted,
 			this,
-			&WorkstationExtensionPluginInterface::onDocumentInstanceClose);
+			&WorkstationExtensionPluginInterface::canClose);
 
 		onDocumentChange(master_view->GetDocumentInstance());
+		setupNewViewer_();
 	}
 }

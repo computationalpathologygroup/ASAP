@@ -30,10 +30,11 @@ namespace ASAP
 	class PathologyViewController;
 }
 
-class ImageFilterPluginInterface : public QObject
+class ASAPLIB_EXPORT ImageFilterPluginInterface : public QObject
 {
+	Q_OBJECT
 	public:
-		ImageFilterPluginInterface() : _settingsPanel()
+		ImageFilterPluginInterface() : QObject(), _settingsPanel()
 		{ }
 
 		virtual ~ImageFilterPluginInterface() {
@@ -81,7 +82,8 @@ class ImageFilterPluginInterface : public QObject
 		QMutex _mutex;
 };
 
-class ToolPluginInterface : public QObject {
+class ASAPLIB_EXPORT ToolPluginInterface : public QObject {
+	Q_OBJECT
 	public:
 	  ToolPluginInterface() : QObject(), _button(NULL), _controller(NULL), _active(false)
 	  { }
@@ -110,29 +112,32 @@ class ToolPluginInterface : public QObject {
 	  bool _active;
 };
 
-class WorkstationExtensionPluginInterface : public QObject {
+class ASAPLIB_EXPORT WorkstationExtensionPluginInterface : public QObject {
+	Q_OBJECT
 	public :
 	  WorkstationExtensionPluginInterface() : QObject(), _settings(NULL) {}
 	  virtual ~WorkstationExtensionPluginInterface() {}
 	  virtual QToolBar* getToolBar() { return NULL;}
 	  virtual QMenu* getMenu() { return NULL; }
 	  virtual QDockWidget* getDockWidget() { return NULL; }
-	  virtual bool canClose() { return true; }
+	  virtual bool canClose(ASAP::DocumentInstance& instance) { return true; }
 	  virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
 
 	  virtual bool initialize(ASAP::PathologyViewController& controller);
 
 	public slots:
-	  virtual void onViewerChangeStart(void);
-	  virtual void onViewerChangeFinished(void);
+	  void onViewerChangeStart(void);
+	  void onViewerChangeFinished(void);
 
 	  // Explicitly request new implementations to take these into account
 	  virtual void onDocumentChange(ASAP::DocumentInstance* document) = 0;
-	  virtual void onDocumentInstanceClose(void) = 0;
 
 	protected:
 	  ASAP::PathologyViewController* _controller;
 	  QSettings* _settings;
+
+	  virtual void prepareForViewerChange_(void) = 0;
+	  virtual void setupNewViewer_(void) = 0;
 };
 
 Q_DECLARE_METATYPE(std::shared_ptr<ImageFilterPluginInterface>)
