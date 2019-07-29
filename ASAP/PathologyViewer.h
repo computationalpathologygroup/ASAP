@@ -20,7 +20,6 @@ class QSettings;
 class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 {
     Q_OBJECT
-    
 	public:
 		PathologyViewer(WSITileGraphicsItemCache& cache, QWidget* parent = 0);
 		~PathologyViewer(void);

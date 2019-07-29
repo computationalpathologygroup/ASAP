@@ -383,6 +383,7 @@ void PathologyViewer::close() {
   }
 
   setEnabled(false);
+  emit documentInstanceChanged(nullptr);
 }
 
 void PathologyViewer::togglePan(bool pan, const QPoint& startPos) {
