@@ -52,7 +52,7 @@ void WorkstationExtensionPluginInterface::onViewerChangeFinished(void)
 			this,
 			&WorkstationExtensionPluginInterface::canClose);
 
-		onDocumentChange(master_view->GetDocumentInstance());
 		setupNewViewer_();
+		onDocumentChange(master_view->GetDocumentInstance());
 	}
 }
