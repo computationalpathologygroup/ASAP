@@ -44,7 +44,8 @@ class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 		void setViewState(const PathologyViewState& state);
 		void refreshView(void);
 
-	signals:
+signals:
+		void destructorCalled(void);
 		void mouseMoveOccured(QMouseEvent* event);
 		void mousePressOccured(QMouseEvent* event);
 		void mouseReleaseOccured(QMouseEvent* event);

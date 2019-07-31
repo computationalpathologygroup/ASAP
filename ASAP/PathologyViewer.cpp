@@ -78,6 +78,7 @@ PathologyViewer::PathologyViewer(WSITileGraphicsItemCache& cache, QWidget* paren
 PathologyViewer::~PathologyViewer()
 {
   close();
+  emit destructorCalled();
 }
 
 void PathologyViewer::resizeEvent(QResizeEvent *event) {
@@ -135,6 +136,7 @@ void PathologyViewer::initialize(ASAP::DocumentInstance& instance) {
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, const unsigned int)));
 
   this->setViewState(m_instance_->view_state);
+  emit documentInstanceChanged(m_instance_);
 }
 
 void PathologyViewer::onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
