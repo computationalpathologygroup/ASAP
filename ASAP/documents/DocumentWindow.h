@@ -26,6 +26,8 @@ namespace ASAP
 			~DocumentWindow(void);
 
 			void AddDocumentInstance(DocumentInstance& instance);
+			std::vector<std::string> GetDocumentInstances(void);
+			DocumentInstance PopDocumentInstance(const std::string& id);
 			void Clear(void);
 
 		signals:

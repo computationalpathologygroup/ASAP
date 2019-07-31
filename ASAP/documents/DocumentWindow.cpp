@@ -46,6 +46,30 @@ namespace ASAP
 		}
 	}
 
+	std::vector<std::string> DocumentWindow::GetDocumentInstances(void)
+	{
+		std::vector<std::string> ids;
+		for (auto instance_pair : m_documents_)
+		{
+			ids.push_back(instance_pair.first);
+		}
+		return ids;
+	}
+
+	DocumentInstance DocumentWindow::PopDocumentInstance(const std::string& id)
+	{
+		DocumentInstance instance(m_documents_.find(id)->second);
+		for (int tab = 0; tab < m_document_bar_->count(); ++tab)
+		{
+			if (instance.name == m_document_bar_->tabText(tab).toStdString())
+			{
+				OnTabClose_(tab);
+				break;
+			}
+		}
+		return instance;
+	}
+
 	void DocumentWindow::Clear(void)
 	{
 		viewer->close();
@@ -78,6 +102,7 @@ namespace ASAP
 		m_document_bar_->setVisible(true);
 		m_document_bar_->setAcceptDrops(true);
 		m_document_bar_->setMovable(true);
+		m_document_bar_->setChangeCurrentOnDrag(true);
 
 		QBoxLayout* layout(new QBoxLayout(QBoxLayout::Direction::TopToBottom));
 		layout->addWidget(m_document_bar_);
