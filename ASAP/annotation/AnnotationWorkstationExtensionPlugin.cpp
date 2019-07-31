@@ -199,10 +199,10 @@ void AnnotationWorkstationExtensionPlugin::clearQtAnnotations(const bool delete_
 	{
 		if (delete_from_scene)
 		{
-			for (QtAnnotation* annotation : m_annotation_items_->annotations)
+			for (QList<QtAnnotation*>::iterator it = m_annotation_items_->annotations.begin(); it != m_annotation_items_->annotations.end(); ++it)
 			{
-				m_viewer_->scene()->removeItem(annotation);
-				annotation->deleteLater();
+				m_viewer_->scene()->removeItem(*it);
+				(*it)->deleteLater();
 			}
 		}
 		m_annotation_items_->annotations.clear();
@@ -1074,5 +1074,6 @@ QtAnnotation* AnnotationWorkstationExtensionPlugin::InitializeAnnotation_(std::s
 		case Annotation::Type::RECTANGLE:	qt_annotation = new PolyQtAnnotation(annotation, this, scenescale);		((PolyQtAnnotation*)qt_annotation)->setInterpolationType("linear"); break;
 	}
 
+	qt_annotation->finish();
 	return qt_annotation;
 }
