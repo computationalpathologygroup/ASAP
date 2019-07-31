@@ -259,12 +259,8 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 		_settings->setValue("currentFile", QFileInfo(fileName).fileName());
 		this->setWindowTitle(QString("ASAP - ") + QFileInfo(fileName).fileName());
 
-
 		ASAP::DocumentInstance instance = m_documents_.GetDocument(document_id);
-		m_document_window_->AddDocumentInstance(instance);
-
-		ASAP::DocumentInstance instance2 = m_documents_.GetDocument(document_id);
-		window2->AddDocumentInstance(instance2);
+		m_main_viewer_->AddDocumentInstance(instance);
 
 		emit newImageLoaded(instance.document->GetImage(), fileName.toStdString());
 	}
@@ -289,9 +285,10 @@ ASAP::DocumentWindow* ASAP_Window::openViewer(const QString name, QWidget* paren
 	dock->setWidget(window);
 	dock->setContentsMargins(0, 0, 0, 0);
 	addDockWidget(Qt::LeftDockWidgetArea, dock);
-
-	connect(window, &
-		ASAP::DocumentWindow::DocumentInstanceCloseFinished,
+	dock->setFloating(true);
+	dock->resize(600, 600);
+	connect(window, 
+		&ASAP::DocumentWindow::DocumentInstanceCloseFinished,
 		this,
 		&ASAP_Window::onDocumentClose);
 
@@ -399,10 +396,11 @@ void ASAP_Window::setupUi(void)
   horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
   horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
 
-  m_document_window_ = openViewer(tr("Viewer 1"));
-  window2 = openViewer(tr("Viewer 2"));
+  m_main_viewer_ = m_document_window_controller_.SpawnWindow(this);
+  horizontalLayout_2->addWidget(m_main_viewer_);
 
   this->setCentralWidget(centralWidget);
+  this->setDockOptions(AnimatedDocks | AllowNestedDocks);
 }
 
 void ASAP_Window::retranslateUi()

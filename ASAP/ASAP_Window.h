@@ -71,6 +71,7 @@ private:
   ASAP::DocumentCache				m_documents_;
   ASAP::DocumentWindowController	m_document_window_controller_;
   ASAP::PathologyViewController		m_view_controller_;
+  ASAP::DocumentWindow*				m_main_viewer_;
 
   // Plugins
   QDir _pluginsDir;
@@ -93,8 +94,6 @@ private:
   QMenu *menuHelp;
   QToolBar *mainToolBar;
   QStatusBar *statusBar;
-  ASAP::DocumentWindow* m_document_window_;
-  ASAP::DocumentWindow* window2;
 
   // Initialize the GUI
   void initializeDocks(void);
