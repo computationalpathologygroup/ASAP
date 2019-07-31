@@ -63,6 +63,7 @@ ASAP_Window::ASAP_Window(QWidget *parent) :
 		this,
 		&ASAP_Window::onViewerFocusChanged);
 
+	loadPlugins();
 	m_document_window_controller_.SetCacheSize(_cacheMaxByteSize);
 	if (m_view_controller_.HasTool("pan"))
 	{
@@ -111,7 +112,7 @@ void ASAP_Window::readSettings(void)
 }
 
 void ASAP_Window::loadPlugins(void) {
-	PathologyViewer* viewer(m_view_controller_.GetMasterViewer());
+	//PathologyViewer* viewer(m_view_controller_.GetMasterViewer());
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
     if (_pluginsDir.cd("tools")) {
@@ -123,7 +124,7 @@ void ASAP_Window::loadPlugins(void) {
             std::shared_ptr<ToolPluginInterface> tool(qobject_cast<ToolPluginInterface*>(plugin));
             if (tool) {
 				QAction* toolAction = tool->getToolButton();
-              connect(toolAction, SIGNAL(triggered(bool)), viewer, SLOT(changeActiveTool()));
+              connect(toolAction, SIGNAL(triggered(bool)), &m_view_controller_, SLOT(ChangeActiveTool()));
               _toolPluginFileNames.push_back(fileName.toStdString());
 
 			  m_view_controller_.AddTool(tool);
@@ -150,7 +151,7 @@ void ASAP_Window::loadPlugins(void) {
               _extensionPluginFileNames.push_back(fileName.toStdString());
               connect(this, SIGNAL(newImageLoaded(std::weak_ptr<MultiResolutionImage>, std::string)), &*extension, SLOT(onNewImageLoaded(std::weak_ptr<MultiResolutionImage>, std::string)));
               connect(this, SIGNAL(imageClosed()), &*extension, SLOT(onImageClosed()));
-              extension->initialize(viewer);
+              extension->initialize(m_view_controller_);
               if (extension->getToolBar()) {
                 this->addToolBar(extension->getToolBar());
               }
@@ -182,7 +183,10 @@ void ASAP_Window::loadPlugins(void) {
                 mainToolBar->addSeparator();
                 for (unsigned int i = 0; i < tools.size(); ++i) {
                   QAction* toolAction = tools[i]->getToolButton();
-                  connect(toolAction, SIGNAL(triggered(bool)), viewer, SLOT(changeActiveTool()));
+				  connect(toolAction,
+					  &QAction::triggered,
+					  &m_view_controller_,
+					  &ASAP::PathologyViewController::ChangeActiveTool);
 				  m_view_controller_.AddTool(tools[i]);
                   mainToolBar->addAction(toolAction);
                   toolAction->setCheckable(true);
@@ -243,24 +247,7 @@ void ASAP_Window::on_actionAbout_triggered(void) {
 
 void ASAP_Window::on_actionClose_triggered(void)
 {
-    for (std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> >::iterator it = _extensions.begin(); it != _extensions.end(); ++it) {
-      if (!(*it)->canClose()) {
-        return;
-      }
-    }
-    emit imageClosed();
-    _settings->setValue("currentFile", QString());
-    this->setWindowTitle("ASAP");
-
 	m_document_window_controller_.CleanAllWindows();
-
-	/*
-	if (!m_documents_.empty())
-	{
-		m_documents_.erase(m_documents_.begin());
-		m_document_window_->m_view_->close();
-		statusBar->showMessage("Closed file!", 5);
-	}*/
 }
 
 void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) {
@@ -304,7 +291,7 @@ ASAP::DocumentWindow* ASAP_Window::openViewer(const QString name, QWidget* paren
 	addDockWidget(Qt::LeftDockWidgetArea, dock);
 
 	connect(window, &
-		ASAP::DocumentWindow::closedDocumentInstance,
+		ASAP::DocumentWindow::DocumentInstanceCloseFinished,
 		this,
 		&ASAP_Window::onDocumentClose);
 
