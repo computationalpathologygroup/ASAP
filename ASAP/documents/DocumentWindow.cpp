@@ -49,9 +49,9 @@ namespace ASAP
 	void DocumentWindow::Clear(void)
 	{
 		viewer->close();
-		for (size_t tab = 0; tab < m_document_bar_->count(); ++tab)
+		while (!m_documents_.empty())
 		{
-			OnTabClose_(tab);
+			OnTabClose_(m_document_bar_->currentIndex());
 		}
 	}
 
