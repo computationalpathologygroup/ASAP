@@ -45,8 +45,6 @@ namespace ASAP
 			WSITileGraphicsItemCache		m_cache_;
 			std::mutex						m_active_change_mutex_;
 
-			void SetupSlots_(void);
-
 		private slots:
 			void CheckMouseOrigin_(QMouseEvent* event);
 	};

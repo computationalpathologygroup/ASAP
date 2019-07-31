@@ -2,7 +2,7 @@
 
 namespace ASAP
 {
-	DocumentWindowController::DocumentWindowController(void)
+	DocumentWindowController::DocumentWindowController(void) : m_active_(nullptr)
 	{
 	}
 
@@ -44,16 +44,11 @@ namespace ASAP
 		ASAP::DocumentWindow* window = m_windows_.back();
 
 		QObject::connect(window->viewer,
-			&PathologyViewer::mouseReleaseOccured,
+			&PathologyViewer::mouseMoveOccured,
 			this,
 			&DocumentWindowController::CheckMouseOrigin_);
 
 		return window;
-	}
-
-	void DocumentWindowController::SetupSlots_(void)
-	{
-
 	}
 
 	void DocumentWindowController::CheckMouseOrigin_(QMouseEvent* event)
