@@ -16,7 +16,7 @@ ASAP is an open source platform for visualizing, annotating and automatically an
 
 #### Installation
 
-Currently ASAP is only supported under 64-bit Windows and Linux machines. Compilation on other architectures should be relatively straightforward as no OS-specific libraries or headers are used. The easiest way to install the software is to download the binary installer or .DEB package from the release page.
+Currently ASAP is only supported under 64-bit Windows and Linux machines. Compilation on other architectures should be relatively straightforward as no OS-specific libraries or headers are used. The easiest way to install the software is to download the binary installer or .DEB package from the release page. If you install the DEB package, you can find the ASAP executable under /opt/ASAP/bin.
 
 #### Compilation
 
