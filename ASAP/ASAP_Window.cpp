@@ -29,7 +29,7 @@
 #include <QtUiTools>
 #include <QTreeWidget>
 
-#include "ASAP.h"
+#include "ASAP_Window.h"
 #include "PathologyViewer.h"
 #include "interfaces/interfaces.h"
 #include "WSITileGraphicsItemCache.h"
@@ -40,14 +40,14 @@
 #include "multiresolutionimageinterface/OpenSlideImage.h"
 
 #ifdef WIN32
-const char* ASAP::sharedLibraryExtensions = ".dll";
+const char* ASAP_Window::sharedLibraryExtensions = ".dll";
 #else
-const char* ASAP::sharedLibraryExtensions = ".so";
+const char* ASAP_Window::sharedLibraryExtensions = ".so";
 #endif
 
 using namespace std;
 
-ASAP::ASAP(QWidget *parent) :
+ASAP_Window::ASAP_Window(QWidget *parent) :
     QMainWindow(parent),
     _cacheMaxByteSize(1000*512*512*3),
     _settings(NULL)
@@ -79,7 +79,7 @@ ASAP::ASAP(QWidget *parent) :
   }
 }
 
-void ASAP::writeSettings()
+void ASAP_Window::writeSettings()
 {
   _settings->beginGroup("ASAP");
   _settings->setValue("size", size());
@@ -87,7 +87,7 @@ void ASAP::writeSettings()
   _settings->endGroup();
 }
 
-void ASAP::readSettings()
+void ASAP_Window::readSettings()
 {
   _settings->beginGroup("ASAP");
   resize(_settings->value("size", QSize(1037, 786)).toSize());
@@ -97,7 +97,7 @@ void ASAP::readSettings()
   _settings->endGroup();
 }
 
-void ASAP::loadPlugins() {
+void ASAP_Window::loadPlugins() {
   PathologyViewer* viewer = this->findChild<PathologyViewer*>("pathologyView");
   _pluginsDir = QDir(qApp->applicationDirPath());
   if (_pluginsDir.cd("plugins")) {
@@ -189,17 +189,17 @@ void ASAP::loadPlugins() {
   }
 }
 
-void ASAP::closeEvent(QCloseEvent *event) {
+void ASAP_Window::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-ASAP::~ASAP()
+ASAP_Window::~ASAP_Window()
 {
   on_actionClose_triggered();
   writeSettings();
 }
 
-void ASAP::on_actionAbout_triggered() {
+void ASAP_Window::on_actionAbout_triggered() {
   QUiLoader loader;
   QFile file(":/ASAP_ui/aboutdialog.ui");
   file.open(QFile::ReadOnly);
@@ -229,7 +229,7 @@ void ASAP::on_actionAbout_triggered() {
   file.close();
 }
 
-void ASAP::on_actionClose_triggered()
+void ASAP_Window::on_actionClose_triggered()
 {
     for (std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> >::iterator it = _extensions.begin(); it != _extensions.end(); ++it) {
       if (!(*it)->canClose()) {
@@ -247,7 +247,7 @@ void ASAP::on_actionClose_triggered()
     }
 }
 
-void ASAP::openFile(const QString& fileName, const QString& factoryName) {
+void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) {
   statusBar->clearMessage();
   if (!fileName.isEmpty()) {
     if (_img) {
@@ -276,7 +276,7 @@ void ASAP::openFile(const QString& fileName, const QString& factoryName) {
   }
 }
 
-void ASAP::on_actionOpen_triggered()
+void ASAP_Window::on_actionOpen_triggered()
 { 
   QString filterList;
   std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
@@ -302,21 +302,21 @@ void ASAP::on_actionOpen_triggered()
   openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
 }
 
-void ASAP::setCacheSize(const unsigned long long& cacheMaxByteSize) {
+void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
     view->setCacheSize(_cacheMaxByteSize);
   }
 }
     
-unsigned long long ASAP::getCacheSize() const {
+unsigned long long ASAP_Window::getCacheSize() const {
   PathologyViewer* view = this->findChild<PathologyViewer*>("pathologyView");
   if (view) {
     return view->getCacheSize();
   }
 }
 
-void ASAP::setupUi()
+void ASAP_Window::setupUi()
 {
   if (this->objectName().isEmpty()) {
       this->setObjectName(QStringLiteral("ASAP"));
@@ -381,7 +381,7 @@ void ASAP::setupUi()
   this->setCentralWidget(centralWidget);
 }
 
-void ASAP::retranslateUi()
+void ASAP_Window::retranslateUi()
 {
   this->setWindowTitle(QApplication::translate("PathologyWorkstation", "ASAP", 0));
   actionOpen->setText(QApplication::translate("PathologyWorkstation", "Open", 0));

@@ -10,7 +10,7 @@
 
 #include "interfaces/interfaces.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
-#include "ASAP.h"
+#include "ASAP_Window.h"
 #include "QtProgressMonitor.h"
 
 FilterDockWidget::FilterDockWidget(QWidget *parent, Qt::WindowFlags flags) : 

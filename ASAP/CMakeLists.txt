@@ -1,7 +1,7 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(HEADERS
-    ASAP.h
+    ASAP_Window.h
     PathologyViewer.h
     WSITileGraphicsItemCache.h
     MiniMap.h
@@ -17,7 +17,7 @@ set(HEADERS
 )
 
 set(SOURCE 
-    ASAP.cpp
+    ASAP_Window.cpp
     PathologyViewer.cpp
     WSITileGraphicsItemCache.cpp
     MiniMap.cpp

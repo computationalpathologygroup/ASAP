@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "abstractworklistdataacquisition.h"
+#include "WorklistDataAcquisitionInterface.h"
 #include "DataTable.h"
 
 class Worklist_CSV_Example : public AbstractWorklistDataAcquisition

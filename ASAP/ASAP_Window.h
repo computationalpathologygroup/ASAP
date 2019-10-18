@@ -28,17 +28,19 @@ Viewer is the owner of RenderThread, TileManager, ScaleBar, MiniMap, RenderWorke
 
 */
 
-class ASAPLIB_EXPORT ASAP : public QMainWindow
+class ASAPLIB_EXPORT ASAP_Window : public QMainWindow
 {
   Q_OBJECT
 
 public:
-  explicit ASAP(QWidget* parent = 0);
-  ~ASAP();
+  explicit ASAP_Window(QWidget* parent = 0);
+  ~ASAP_Window();
 
   void setCacheSize(const unsigned long long& cacheMaxByteSize);
 
   unsigned long long getCacheSize() const;
+
+  void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
 signals:
   void newImageLoaded(std::weak_ptr<MultiResolutionImage>, const std::string&);
@@ -84,7 +86,6 @@ private:
   void loadPlugins();
   void readSettings();
   void writeSettings();
-  void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };
