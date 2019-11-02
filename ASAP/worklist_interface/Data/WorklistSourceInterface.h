@@ -27,7 +27,7 @@ namespace ASAP
 			/// <summary>
 			/// Describes the amount of information the source can provide.
 			/// </summary>
-			enum SourceType { FILELIST, FULL_WORKLIST };
+			enum SourceType { FILELIST, DIRECTORY, FULL_WORKLIST };
 
 			/// <summary>
 			/// Returns a list of parameters required to access this source that can't be covered by the location alone.

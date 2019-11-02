@@ -2,9 +2,7 @@
 
 #include <stdexcept>
 #include <cctype>
-#include <QtConcurrent\qtconcurrentrun.h>
 
-#include "../GUI/IconCreator.h"
 #include "../GUI/WorklistWindow.h"
 #include "../Misc/StringConversions.h"
 
@@ -98,27 +96,40 @@ namespace ASAP
 		}
 	}
 
-	void WorklistModels::SetImageItems(const DataTable& items, WorklistWindow* window, bool& continue_loading)
+	std::unique_ptr<QFutureWatcher<void> > WorklistModels::SetImageItems(const DataTable& items, WorklistWindow* window)
 	{
-		continue_loading = true;
-
 		images->removeRows(0, images->rowCount());
-		QtConcurrent::run([items, images=images, window=window, continue_loading=&continue_loading, size=200]()
+
+		// Creates placeholder items
+		images->setRowCount(items.Size());
+		QImage image(200, 200, QImage::Format::Format_BGR30);
+		image.fill(Qt::white);
+		QIcon placeholder = QIcon(QPixmap::fromImage(image));
+		QList < std::pair<int, std::string> > index_locations;
+		for (size_t item = 0; item < items.Size(); ++item)
 		{
-			IconCreator creator;
+			std::vector<const std::string*> record(items.At(item, { "id", "title" , "location"}));
+			
+			QStandardItem* standard_item(new QStandardItem(placeholder, QString(record[1]->data())));
+			standard_item->setData(QVariant(QString(record[0]->data())));
+			images->setItem(item, 0, standard_item);
+			index_locations.push_back(std::pair<int, std::string>(static_cast<int>(item), *record[2]));
 
-			QObject::connect(&creator,
-					&IconCreator::RequiresItemRefresh,
-					window,
-					&WorklistWindow::UpdateImageIcons);
-
-			QObject::connect(&creator,
-					&IconCreator::RequiresStatusBarChange,
-					window,
-					&WorklistWindow::UpdateStatusBar);
-
-			creator.InsertIcons(items, images, size, *continue_loading);
-		});
+		}
+		auto icon_connection = QObject::connect(&m_creator,
+			&IconCreator::RequiresItemRefresh,
+			window,
+			&WorklistWindow::UpdateImageIcons);
+		std::function<bool(const std::pair<int, std::string> & index_location)> create_icons = [creator = &m_creator, total_size = items.Size(), window = window](const std::pair<int, std::string>& index_location) -> bool	{
+			bool valid = creator->InsertIcon(index_location);
+			return valid;
+		};
+		QFuture<bool> future = QtConcurrent::mapped(index_locations, create_icons);
+		std::unique_ptr<QFutureWatcher<void> > future_watcher(new QFutureWatcher<void>);
+		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::progressValueChanged, [=](int pv) {window->UpdateStatusBar("Loading thumbnail " + QString::fromStdString(std::to_string(pv)) + " of " + QString::fromStdString(std::to_string(items.Size()))); });
+		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::finished, [=]() {window->UpdateStatusBar("Finished loading thumbnails."); QObject::disconnect(icon_connection); });
+		future_watcher->setFuture(future);
+		return future_watcher;
 	}
 
 	void WorklistModels::UpdateHeaders(std::vector<std::pair<std::set<std::string>, QAbstractItemView*>>& header_view_couple)

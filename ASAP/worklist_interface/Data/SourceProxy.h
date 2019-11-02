@@ -54,6 +54,7 @@ namespace ASAP
 
 			std::string				m_current_source_;
 			std::deque<std::string>	m_previous_sources_;
+			unsigned int			m_number_previous_sources_;
 
 			bool CheckParameters_(const std::unordered_map<std::string, std::string> additional_params, const std::vector<std::string> required_params);
 	};

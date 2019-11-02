@@ -8,6 +8,8 @@
 #include <QDropEvent>
 #include <QtWidgets/QMainWindow>
 #include <QStandardItemModel>
+#include <QFutureWatcher>
+#include <QSettings>
 
 #include "CompositeChild.h"
 #include "ui_WorklistWindowLayout.h"
@@ -33,7 +35,7 @@ namespace ASAP
 			void SetDataSource(const std::string& source);
 
 		public slots:
-			void UpdateImageIcons(void);
+			void UpdateImageIcons(int itemRow, const QIcon& newIcon);
 			void UpdateStatusBar(const QString& message);
 
 		signals:
@@ -45,8 +47,7 @@ namespace ASAP
 		private:
 			SourceProxy									m_source_;
 			std::unique_ptr<Ui::WorklistWindowLayout>	m_ui_;
-			bool										m_continue_loading_; // Todo: Refactor into something cleaner
-			std::mutex									m_image_loading_access_; // Todo: Refactor into something cleaner
+			std::unique_ptr<QFutureWatcher<void> >      m_thumbnail_loader;
 			std::mutex									m_image_switch_access_;
 			std::mutex									m_status_bar_access_;
 			TemporaryDirectoryTracker					m_storage_directory_;
@@ -54,6 +55,7 @@ namespace ASAP
 			ASAP_Window*								m_workstation_; // Todo: Clean up or perhaps combine in struct
 			int											m_workstation_tab_id_;
 			WorklistModels								m_models_;
+			QSettings*									m_settings;
 
 			bool CheckSchema_(void);
 			void LoadSettings_(void);

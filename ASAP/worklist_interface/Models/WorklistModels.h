@@ -4,8 +4,10 @@
 #include <set>
 #include <QAbstractItemView>
 #include <QStandardItemModel>
-
 #include "../Data/DataTable.h"
+#include "../GUI/IconCreator.h"
+#include <QtConcurrent/qtconcurrentmap.h>
+#include <QFutureWatcher>
 
 namespace ASAP
 {
@@ -29,12 +31,13 @@ namespace ASAP
 			void SetWorklistItems(const DataTable& items);
 			void SetPatientsItems(const DataTable& items);
 			void SetStudyItems(const DataTable& items);
-			void SetImageItems(const DataTable& items, WorklistWindow* window, bool& continue_loading);
+			std::unique_ptr<QFutureWatcher<void> > SetImageItems(const DataTable& items, WorklistWindow* window);
 
 			void UpdateHeaders(std::vector<std::pair<std::set<std::string>, QAbstractItemView*>>& header_view_couple);
 
 		private:
 			void SetHeaders_(const std::set<std::string> headers, QStandardItemModel* model, QAbstractItemView* view);
+			IconCreator m_creator;
 	};
 }
 #endif // __ASAP_MODELS_WORKLISTMODELS__

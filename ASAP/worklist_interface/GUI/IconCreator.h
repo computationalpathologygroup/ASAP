@@ -7,10 +7,6 @@
 
 #include <QObject>
 #include <QStandardItemModel>
-#include <qlistview.h>
-#include <qstatusbar.h>
-
-#include "../Data/DataTable.h"
 
 namespace ASAP
 {
@@ -24,16 +20,20 @@ namespace ASAP
 		public:
 			IconCreator(void);
 	
-			void InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading);
+			bool InsertIcon(const std::pair<int, std::string>& index_location);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
 		
 		private:
-			QIcon CreateBlankIcon_(const size_t size);
-			QIcon CreateInvalidIcon_(const size_t size);
+			QIcon CreateBlankIcon_();
+			QIcon CreateInvalidIcon_();
+			QIcon m_placeholder_icon;
+			QIcon m_invalid_icon;
+			static int m_icon_size;
+
 
 		signals:
 			void RequiresStatusBarChange(const QString& message);
-			void RequiresItemRefresh(void);
+			void RequiresItemRefresh(int, const QIcon&);
 	};
 }
 #endif // __ASAP_GUI_ICONCREATOR__

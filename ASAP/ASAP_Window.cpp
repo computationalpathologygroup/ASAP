@@ -278,28 +278,33 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 
 void ASAP_Window::on_actionOpen_triggered()
 { 
-  QString filterList;
-  std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
-  QString defaultString = "All supported types (";
-  for (auto it = allExtensions.begin(); it != allExtensions.end(); ++it) {
-    defaultString += " *." + QString::fromStdString(*it);
-  }
-  defaultString += ")";
-  filterList += defaultString;
+	QList<QString> filename_factory = this->getFileNameAndFactory();
+	openFile(filename_factory[0], filename_factory[1] == "All supported types" ? "default": filename_factory[1]);
+}
 
-  std::vector<std::pair<std::string, std::set<std::string>> > factoriesAndExtensions = MultiResolutionImageFactory::getLoadedFactoriesAndSupportedExtensions();
-  for (auto it = factoriesAndExtensions.begin(); it != factoriesAndExtensions.end(); ++it) {
-    QString extensionString = "(*." + QString::fromStdString(*(it->second.begin()));
-    for (auto extensionIt = std::next(it->second.begin(), 1); extensionIt != it->second.end(); ++extensionIt) {
-      extensionString += " *." + QString::fromStdString(*extensionIt);
-    }
-    extensionString += ")";
-    filterList += (";;" + QString::fromStdString(it->first) + " " + extensionString);
-  }
-  QString selectedFilter;
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), filterList, &selectedFilter);
-  QString selectedFactory = selectedFilter.split("(")[0].trimmed();
-  openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
+QList<QString> ASAP_Window::getFileNameAndFactory() {
+	QString filterList;
+	std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
+	QString defaultString = "All supported types (";
+	for (auto it = allExtensions.begin(); it != allExtensions.end(); ++it) {
+		defaultString += " *." + QString::fromStdString(*it);
+	}
+	defaultString += ")";
+	filterList += defaultString;
+
+	std::vector<std::pair<std::string, std::set<std::string>> > factoriesAndExtensions = MultiResolutionImageFactory::getLoadedFactoriesAndSupportedExtensions();
+	for (auto it = factoriesAndExtensions.begin(); it != factoriesAndExtensions.end(); ++it) {
+		QString extensionString = "(*." + QString::fromStdString(*(it->second.begin()));
+		for (auto extensionIt = std::next(it->second.begin(), 1); extensionIt != it->second.end(); ++extensionIt) {
+			extensionString += " *." + QString::fromStdString(*extensionIt);
+		}
+		extensionString += ")";
+		filterList += (";;" + QString::fromStdString(it->first) + " " + extensionString);
+	}
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), filterList, &selectedFilter);
+	QString selectedFactory = selectedFilter.split("(")[0].trimmed();
+	return QList<QString>({ fileName, selectedFactory });
 }
 
 void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {

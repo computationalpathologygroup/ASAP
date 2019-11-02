@@ -40,6 +40,7 @@ public:
 
   unsigned long long getCacheSize() const;
 
+  QList<QString> getFileNameAndFactory();
   void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
 signals:

@@ -2,6 +2,8 @@ INCLUDE(CMakeDependentOption)
 
 CMAKE_DEPENDENT_OPTION(BUILD_WORKLIST_INTERFACE "Builds an additional executable of ASAP that adds Worklist support." OFF
 						"BUILD_ASAP" OFF)
+CMAKE_DEPENDENT_OPTION(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE "Adds Grand Challenge support to ASAP." OFF
+						"BUILD_WORKLIST_INTERFACE" OFF)
 
 if (BUILD_WORKLIST_INTERFACE)
 	SET(CMAKE_VERBOSE_MAKEFILE ON)
@@ -11,7 +13,9 @@ if (BUILD_WORKLIST_INTERFACE)
 
 	PROJECT(WorklistInterface)
 
-	FIND_PACKAGE(cpprestsdk REQUIRED)	
+	IF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+	FIND_PACKAGE(cpprestsdk REQUIRED)
+	ENDIF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
 
 	SET(GROUP_DATA
 		Data/DataTable.h
@@ -20,8 +24,6 @@ if (BUILD_WORKLIST_INTERFACE)
 		Data/DirectorySource.cpp
 		Data/FilelistSource.h
 		Data/FilelistSource.cpp
-		Data/GrandChallengeSource.h
-		Data/GrandChallengeSource.cpp
 		Data/SourceProxy.h
 		Data/SourceProxy.cpp
 		Data/WorklistSourceInterface.h
@@ -32,8 +34,6 @@ if (BUILD_WORKLIST_INTERFACE)
 		GUI/CompositeChild.cpp
 		GUI/CompositeWindow.h
 		GUI/CompositeWindow.cpp
-		GUI/ExternalSourceDialog.h
-		GUI/ExternalSourceDialog.cpp
 		GUI/IconCreator.h
 		GUI/IconCreator.cpp
 		GUI/WorklistWindow.h
@@ -53,54 +53,67 @@ if (BUILD_WORKLIST_INTERFACE)
 		Models/WorklistModels.h
 		Models/WorklistModels.cpp
 	)
-	SET(GROUP_NETWORKING
-		Networking/Django_Connection.h
-		Networking/Django_Connection.cpp
-		Networking/HTTP_Connection.h
-		Networking/HTTP_Connection.cpp
-		Networking/HTTP_File_Download.h
-		Networking/HTTP_File_Download.cpp
-	)
 	SET(GROUP_SERIALIZATION
 		Serialization/INI.h
 		Serialization/INI.cpp
-		Serialization/JSON.h
-		Serialization/JSON.cpp
 	)
 	SET(RESOURCE
 		resources/WorklistInterface.qrc
 	)
+
+	IF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+		SET(GROUP_GRANDCHALLENGESUPPORT
+			Data/GrandChallengeSource.h
+			Data/GrandChallengeSource.cpp
+			GUI/ExternalSourceDialog.h
+			GUI/ExternalSourceDialog.cpp
+			Networking/Django_Connection.h
+			Networking/Django_Connection.cpp
+			Networking/HTTP_Connection.h
+			Networking/HTTP_Connection.cpp
+			Networking/HTTP_File_Download.h
+			Networking/HTTP_File_Download.cpp
+			Serialization/JSON.h
+			Serialization/JSON.cpp
+		)
+		SET(GROUP_GRANDCHALLENGESUPPORT "")
+	ELSE(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+	ENDIF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
 	
 	qt5_add_resources(RESOURCE_ADDED ${RESOURCE}) 
 	
-	ADD_EXECUTABLE(ASAP_Worklist WIN32
+	ADD_EXECUTABLE(ASAP_Worklist 
 		main.cpp
 		${GROUP_DATA}
 		${GROUP_GUI}
 		${GROUP_MISC}
 		${GROUP_MODELS}
-		${GROUP_NETWORKING}
 		${GROUP_SERIALIZATION}
+		${GROUP_GRANDCHALLENGESUPPORT}
 		${RESOURCE_ADDED}
 	)
+	set_target_properties(ASAP_Worklist PROPERTIES FOLDER ASAP)
+	set_target_properties(ASAP_Worklist PROPERTIES DEBUG_POSTFIX _d)
+
+	if(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+	    target_compile_definitions(ASAP_Worklist PRIVATE BUILD_GRANDCHALLENGE_INTERFACE)
+	endif(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
 
 	SOURCE_GROUP("Data"				FILES ${GROUP_DATA})
 	SOURCE_GROUP("GUI"				FILES ${GROUP_GUI})
 	SOURCE_GROUP("Misc"				FILES ${GROUP_MISC})
 	SOURCE_GROUP("Models"			FILES ${GROUP_MODELS})
-	SOURCE_GROUP("Networking"		FILES ${GROUP_NETWORKING})
 	SOURCE_GROUP("Serialization"	FILES ${GROUP_SERIALIZATION})
+	SOURCE_GROUP("GrandChallenge"   FILES ${GROUP_GRANDCHALLENGESUPPORT})
 
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC ASAPLib core multiresolutionimageinterface)
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC cpprestsdk::cpprest)
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC ${Boost_LIBRARIES})	
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PUBLIC Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools)
-	
-	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-	LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
-	
-	add_definitions(-DBOOST_ALL_DYN_LINK)
-	
+	TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE ASAPLib core multiresolutionimageinterface)
+	TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools Qt5::Concurrent)
+	TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE Boost::disable_autolinking Boost::filesystem)	
+
+	IF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+	    TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE cpprestsdk::cpprest)
+	ENDIF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+		
 	install(TARGETS ASAP_Worklist
         EXPORT worklist-targets
         RUNTIME DESTINATION bin

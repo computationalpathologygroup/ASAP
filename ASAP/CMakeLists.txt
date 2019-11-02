@@ -32,7 +32,7 @@ set(SOURCE
     QtProgressMonitor.cpp
 )
 
-find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools)
+find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools Concurrent)
 set(RESOURCE
     resources/ASAP_resources.qrc
 )
