@@ -129,7 +129,7 @@
        <bool>true</bool>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DragOnly</enum>
+       <enum>QAbstractItemView::DragDrop</enum>
       </property>
       <property name="defaultDropAction">
        <enum>Qt::IgnoreAction</enum>
@@ -258,7 +258,7 @@
      <x>0</x>
      <y>0</y>
      <width>1113</width>
-     <height>24</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_start">
@@ -291,6 +291,12 @@
   <action name="action_open_external">
    <property name="text">
     <string>Open External</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

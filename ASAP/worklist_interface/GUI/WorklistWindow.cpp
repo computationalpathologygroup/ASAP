@@ -12,9 +12,11 @@
 #include <QMimeData>
 #include <QtConcurrent\qtconcurrentrun.h>
 
+#ifdef BUILD_GRANDCHALLENGE_INTERFACE
 #include "ExternalSourceDialog.h"
+#endif 
+
 #include "IconCreator.h"
-#include "../Serialization/INI.h"
 #include "../Misc/StringManipulation.h"
 
 namespace ASAP
@@ -26,16 +28,20 @@ namespace ASAP
 		m_source_(m_storage_directory_)
 	{
 		m_ui_->setupUi(this);
+#ifdef BUILD_GRANDCHALLENGE_INTERFACE
+		m_ui_->action_open_external->setVisible(true);
+#endif
+		m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
 		SetSlots_();
 		SetModels_();
 		LoadSettings_();
 		UpdatePreviousSources_();
-
-		SetDataSource(m_source_.GetCurrentSource());
+		UpdateSourceViews_();
 	}
 
 	WorklistWindow::~WorklistWindow(void)
 	{
+		StopThumbnailLoading_();
 		StoreSettings_();
 	}
 
@@ -77,6 +83,10 @@ namespace ASAP
 
 				UpdatePreviousSources_();
 				UpdateSourceViews_();
+				if (m_source_.GetSourceType() == WorklistSourceInterface::SourceType::FILELIST) {
+					m_workstation_->openFile(QString::fromStdString(SourceProxy::DeserializeSource(m_source_.GetCurrentSource()).first), "default");
+					RequiresTabSwitch(m_workstation_tab_id_);
+				}
 				m_ui_->status_bar->showMessage("Succesfully loaded source: " + QString(deserialized_source.first.data()));
 			}
 			catch (const std::exception& e)
@@ -174,64 +184,43 @@ namespace ASAP
 
 	void WorklistWindow::LoadSettings_(void)
 	{
-		try
-		{
-			std::unordered_map<std::string, std::string> values(INI::ParseINI("worklist_config.ini"));
-
-			// Acquires the last known source.
-			auto source_value(values.find("source"));
-			std::string current_source;
-			if (source_value != values.end())
-			{
-				current_source = source_value->second;
-			}
-
-			// Acquires the five most recent sources.
-			auto previous_sources_value(values.find("previous_sources"));
-			std::vector<std::string> previous_sources;
-			if (previous_sources_value != values.end() && !previous_sources_value->second.empty())
-			{
-				std::vector<std::string> split_sources(Misc::Split(previous_sources_value->second));
-				for (const std::string& source : split_sources)
-				{
-					previous_sources.push_back(source);
-				}
-			}
-
-			m_source_.SetSourceInformation(current_source, previous_sources);
+		std::vector<std::string> sources;
+		m_settings->beginGroup("WorklistInterface");
+		int sourcesSize = m_settings->beginReadArray("sources");
+		for (int i = 0; i < sourcesSize; ++i) {
+			m_settings->setArrayIndex(i);
+			sources.push_back(m_settings->value("source").toString().toStdString());
 		}
-		catch (const std::runtime_error& e)
-		{
-			// Creates an INI file with standard settings.
-			std::unordered_map<std::string, std::string> values;
-			values.insert({ "source", "" });
-			values.insert({ "previous_sources", "" });
-			INI::WriteINI("worklist_config.ini", values);
+		m_settings->endArray();
+		m_settings->endGroup();
+		if (!sources.empty()) {
+			m_source_.SetSourceInformation(sources[0], sources);
+		}
+		else {
+			m_source_.SetSourceInformation("", std::vector<std::string>());
 		}
 	}
 	
 	void WorklistWindow::StoreSettings_(void)
 	{
-		std::unordered_map<std::string, std::string> values;
-		values.insert({ "source", m_source_.GetCurrentSource() });
-		
-		std::string previous_sources;
-		for (const std::string& source : m_source_.GetPreviousSources())
+		m_settings->beginGroup("WorklistInterface");
+		m_settings->beginWriteArray("sources");
+		std::deque<std::string> sources = m_source_.GetPreviousSources();
+		for (unsigned int i = 0; i < sources.size(); ++i)
 		{
-			previous_sources += "\"" + source + "\",";
+			m_settings->setArrayIndex(i);
+			m_settings->setValue("source", QString::fromStdString(sources[i]));
 		}
-
-		// Removes the last comma and then inserts.
-		values.insert({ "previous_sources", previous_sources.substr(0, previous_sources.size() - 1)});
-
-		INI::WriteINI("worklist_config.ini", values);
+		m_settings->endArray();
+		m_settings->endGroup();
 	}
 
 	void WorklistWindow::StopThumbnailLoading_(void)
 	{
-		m_continue_loading_ = false;
-		m_image_loading_access_.lock();
-		m_image_loading_access_.unlock();
+		if (m_thumbnail_loader) {
+			m_thumbnail_loader->cancel();
+			m_thumbnail_loader->waitForFinished();
+		}
 	}
 
 	void WorklistWindow::UpdatePreviousSources_(void)
@@ -266,7 +255,7 @@ namespace ASAP
 		m_models_.SetWorklistItems(DataTable());
 		m_models_.SetPatientsItems(DataTable());
 		m_models_.SetStudyItems(DataTable());
-		m_models_.SetImageItems(DataTable(), this, m_continue_loading_);
+		m_models_.SetImageItems(DataTable(), this);
 
 		// Resets the view to the Filelist standard.
 		WorklistSourceInterface::SourceType type = WorklistSourceInterface::SourceType::FILELIST;
@@ -276,13 +265,13 @@ namespace ASAP
 		{
 			type = m_source_.GetSourceType();
 
-			if (type == WorklistSourceInterface::SourceType::FILELIST)
+			if (type == WorklistSourceInterface::SourceType::DIRECTORY)
 			{
-				m_source_.GetImageRecords(std::string(), std::string(), [this, models=&m_models_, continue_loading=&m_continue_loading_](DataTable& table, int error)
+				m_source_.GetImageRecords(std::string(), std::string(), [this, models=&m_models_](DataTable& table, int error)
 				{
 					if (error == 0)
 					{
-						models->SetImageItems(table, this, *continue_loading);
+						m_thumbnail_loader = models->SetImageItems(table, this);
 					}
 				});
 			}
@@ -484,12 +473,12 @@ namespace ASAP
 			&QAction::triggered,
 			this,
 			&WorklistWindow::OnSelectFolderSource_);
-
+#ifdef BUILD_GRANDCHALLENGE_INTERFACE
 		connect(m_ui_->action_open_external,
 			&QAction::triggered,
 			this,
 			&WorklistWindow::OnSelectExternalSource_);
-
+#endif
 		connect(this,
 			&WorklistWindow::RequestStatusBarUpdate,
 			this,
@@ -513,9 +502,14 @@ namespace ASAP
 		QCoreApplication::instance()->installEventFilter(this);
 	}
 
-	void WorklistWindow::UpdateImageIcons(void)
+	void WorklistWindow::UpdateImageIcons(int itemRow, const QIcon& newIcon)
 	{
-		m_models_.images->layoutChanged();
+		if (itemRow >= 0) {
+			m_models_.images->item(itemRow)->setIcon(newIcon);
+		}
+		else {
+			m_models_.images->layoutChanged();
+		}
 	}
 
 	void WorklistWindow::UpdateStatusBar(const QString& message)
@@ -619,11 +613,12 @@ namespace ASAP
 		std::string study_id(study_item->data().toString().toStdString());
 		std::string worklist_id = !worklist_item->data().isNull() ? worklist_item->data().toList()[0].toString().toStdString() : std::string();
 
-		m_source_.GetImageRecords(worklist_id, study_id, [this, models=&m_models_, continue_loading=&m_continue_loading_, image_view=m_ui_->view_images](DataTable table, int error)
+		m_source_.GetImageRecords(worklist_id, study_id, [this, models=&m_models_, image_view=m_ui_->view_images](DataTable table, int error)
 		{
 			if (error == 0)
 			{
-				models->SetImageItems(table, this, *continue_loading);
+				StopThumbnailLoading_();
+				m_thumbnail_loader = models->SetImageItems(table, this);
 				image_view->update();
 			}
 		});
@@ -668,15 +663,10 @@ namespace ASAP
 
 	void WorklistWindow::OnSelectFileSource_(bool checked)
 	{
-		QFileDialog* dialog = new QFileDialog(this);
-		dialog->setFileMode(QFileDialog::AnyFile);
-		dialog->setNameFilter({ "*.txt" });
-		dialog->exec();
-		QStringList names = dialog->selectedFiles();
-		
-		if (names.size() > 0)
+		QList<QString> filename_and_factory = m_workstation_->getFileNameAndFactory();
+		if (!filename_and_factory.isEmpty() && !filename_and_factory[0].isEmpty())
 		{
-			SetDataSource(dialog->selectedFiles()[0].toStdString(), std::unordered_map<std::string, std::string>());
+			SetDataSource(filename_and_factory[0].toStdString(), std::unordered_map<std::string, std::string>());
 		}
 	}
 	
@@ -695,6 +685,7 @@ namespace ASAP
 
 	void WorklistWindow::OnSelectExternalSource_(bool checked)
 	{
+#ifdef BUILD_GRANDCHALLENGE_INTERFACE
 		ExternalSourceDialog* dialog = new ExternalSourceDialog(this);
 		dialog->exec();
 
@@ -708,6 +699,7 @@ namespace ASAP
 
 			SetDataSource(std::string(results.location.toStdString()), params);
 		}
+#endif
 	}
 
 	void WorklistWindow::OnOpenImage_(QString path)

@@ -7,7 +7,6 @@ namespace ASAP
 	CompositeWindow::CompositeWindow(QWidget* parent) : QMainWindow(parent), m_ui_(new Ui::CompositeWindowLayout), m_current_child_(-1)
 	{
 		m_ui_->setupUi(this);
-		m_ui_->menu_bar->deleteLater();
 
 		SetSlots_();
 	}
@@ -15,6 +14,19 @@ namespace ASAP
 	int CompositeWindow::AddTab(QMainWindow* window, const std::string tab_name)
 	{
 		m_children_.push_back(window);
+		if (!this->menuBar()->children().isEmpty()) {
+			this->menuBar()->addSeparator();
+		}
+		QMenuBar* cur_menu_bar = window->menuBar();
+		for (auto child : cur_menu_bar->children()) {
+			if (auto child_action = qobject_cast<QAction*>(child)) {
+				menuBar()->addAction(child_action);
+			}
+			else if (auto child_menu = qobject_cast<QMenu*>(child)) {
+				menuBar()->addMenu(child_menu);
+			}
+		}
+		window->menuBar()->hide();
 		m_mapped_children_.insert({tab_name, m_children_.size() - 1});
 		int id = m_ui_->tabWidget->addTab(window, QString(tab_name.data()));
 
@@ -60,18 +72,6 @@ namespace ASAP
 		// Ensures the object still exists.
 		if (this)
 		{
-			// Stores the menu bar back into the originating child.
-			if (m_current_child_ > -1 && index > -1)
-			{
-				m_children_[m_current_child_]->setMenuBar(this->menuBar());
-			}
-
-			// Acquires the menu bar from the current child.
-			if (index > -1)
-			{
-				this->setMenuBar(m_children_[index]->menuBar());
-			}
-
 			m_current_child_ = index;
 		}
 	}

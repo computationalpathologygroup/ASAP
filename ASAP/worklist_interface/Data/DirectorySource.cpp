@@ -10,7 +10,7 @@ namespace ASAP
 
 	WorklistSourceInterface::SourceType DirectorySource::GetSourceType(void)
 	{
-		return WorklistSourceInterface::SourceType::FILELIST;
+		return WorklistSourceInterface::SourceType::DIRECTORY;
 	}
 
 	size_t DirectorySource::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)

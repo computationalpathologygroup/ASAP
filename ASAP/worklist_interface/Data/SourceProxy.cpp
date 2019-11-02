@@ -2,10 +2,14 @@
 
 #include <codecvt>
 #include <stdexcept>
+#include <sstream>
 
 #include <boost/filesystem.hpp>
 
+#ifdef BUILD_GRANDCHALLENGE_INTERFACE
 #include "GrandChallengeSource.h"
+#endif 
+
 #include "DirectorySource.h"
 #include "FilelistSource.h"
 #include "../Misc/StringManipulation.h"
@@ -13,7 +17,7 @@
 
 namespace ASAP
 {
-	SourceProxy::SourceProxy(TemporaryDirectoryTracker& temp_dir) : m_source_(nullptr), m_temporary_directory_(temp_dir)
+	SourceProxy::SourceProxy(TemporaryDirectoryTracker& temp_dir) : m_source_(nullptr), m_temporary_directory_(temp_dir), m_number_previous_sources_(5)
 	{
 	}
 
@@ -44,6 +48,7 @@ namespace ASAP
 			{
 				m_source_ = std::unique_ptr<DirectorySource>(new DirectorySource(source_path));
 			}
+#ifdef BUILD_GRANDCHALLENGE_INTERFACE
 			else if (CheckParameters_(parameters, GrandChallengeSource::GetRequiredParameterFields()))
 			{
 				web::http::client::http_client_config config;
@@ -53,7 +58,7 @@ namespace ASAP
 				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(Misc::StringToWideString(parameters.find("token")->second), L""));
 				m_source_ = std::unique_ptr<WorklistSourceInterface>(new GrandChallengeSource(uri_info, m_temporary_directory_, credentials, config));
 			}
-
+#endif
 			// Adds the new source to the previous sources.
 			m_current_source_ = source;
 
@@ -62,7 +67,7 @@ namespace ASAP
 			{
 				m_previous_sources_.erase(already_added);
 			}
-			else if (m_previous_sources_.size() == 5)
+			else if (m_previous_sources_.size() == m_number_previous_sources_)
 			{
 				m_previous_sources_.pop_back();
 			}
@@ -93,9 +98,10 @@ namespace ASAP
 	{
 		m_current_source_ = current_source;
 
-		for (const std::string& source : previous_sources)
+		unsigned int total_previous_sources = this->m_number_previous_sources_ > previous_sources.size() ? previous_sources.size() : this->m_number_previous_sources_;
+		for (unsigned int i = 0; i < total_previous_sources; ++i) 
 		{
-			m_previous_sources_.push_back(source);
+			m_previous_sources_.push_back(previous_sources[i]);
 		}
 	}
 

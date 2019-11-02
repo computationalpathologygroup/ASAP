@@ -1,4 +1,4 @@
-#include "UnitTest++.h"
+#include "UnitTest++/UnitTest++.h"
 #include "MultiResolutionImage.h"
 #include "MultiResolutionImageReader.h"
 #include "MultiResolutionImageWriter.h"

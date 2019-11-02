@@ -1,6 +1,6 @@
-#include "UnitTest++.h"
-#include "XmlTestReporter.h"
-#include "TestReporterStdout.h"
+#include "UnitTest++/UnitTest++.h"
+#include "UnitTest++/XmlTestReporter.h"
+#include "UnitTest++/TestReporterStdout.h"
 #include "TestData.h"
 #include <iostream>
 #include <fstream>
