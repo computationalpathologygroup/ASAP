@@ -11,6 +11,7 @@
 #include <qmessagebox.h>
 #include <QMimeData>
 #include <QtConcurrent\qtconcurrentrun.h>
+#include <QDebug>
 
 #ifdef BUILD_GRANDCHALLENGE_INTERFACE
 #include "ExternalSourceDialog.h"
@@ -632,33 +633,38 @@ namespace ASAP
 
 			for (QModelIndex& index : selected)
 			{
-				QStandardItem* image(m_models_.images->itemFromIndex(index));
-				std::string image_index(image->data().toString().toStdString());
-
-				m_ui_->status_bar->showMessage("Loading image: 0%");
-				auto image_loading([this](const boost::filesystem::path& filepath)
-				{
-					if (filepath.has_filename())
-					{
-						this->RequestOpenImage(QString::fromStdString(filepath.string()));
-					}
-					else
-					{
-						this->UpdateStatusBar("Failed to load image.");
-					}
-				});
-
-				auto acquisition_tracking([this, bar = m_ui_->status_bar](const uint8_t progress)
-				{
-					if (bar->currentMessage().endsWith("%"))
-					{
-						this->UpdateStatusBar("Loading image: " + QString(std::to_string(progress).data()) + "%");
-					}
-				});
-
-				m_source_.GetImageFile(image_index, image_loading, acquisition_tracking);
+				GetImageFromIndex(index);
 			}
 		}
+	}
+
+	void WorklistWindow::GetImageFromIndex(const QModelIndex& index)
+	{
+		QStandardItem* image(m_models_.images->itemFromIndex(index));
+		std::string image_index(image->data().toString().toStdString());
+
+		m_ui_->status_bar->showMessage("Loading image: 0%");
+		auto image_loading([this](const boost::filesystem::path& filepath)
+			{
+				if (filepath.has_filename())
+				{
+					this->RequestOpenImage(QString::fromStdString(filepath.string()));
+				}
+				else
+				{
+					this->UpdateStatusBar("Failed to load image.");
+				}
+			});
+
+		auto acquisition_tracking([this, bar = m_ui_->status_bar](const uint8_t progress)
+		{
+			if (bar->currentMessage().endsWith("%"))
+			{
+				this->UpdateStatusBar("Loading image: " + QString(std::to_string(progress).data()) + "%");
+			}
+		});
+
+		m_source_.GetImageFile(image_index, image_loading, acquisition_tracking);
 	}
 
 	void WorklistWindow::OnSelectFileSource_(bool checked)
@@ -707,6 +713,11 @@ namespace ASAP
 		this->UpdateStatusBar("Loaded file: " + path);
 		m_workstation_->openFile(path);
 		RequiresTabSwitch(m_workstation_tab_id_);
+	}
+
+	void ASAP::WorklistWindow::OnIconDoubleClicked(const QModelIndex& index)
+	{
+		GetImageFromIndex(index);
 	}
 
 	void WorklistWindow::OnCreateWorklist_(void)

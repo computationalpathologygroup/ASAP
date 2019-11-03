@@ -1,5 +1,5 @@
 #include "CompositeWindow.h"
-
+#include <QDebug>
 #include <qshortcut.h>
 
 namespace ASAP
@@ -23,7 +23,9 @@ namespace ASAP
 				menuBar()->addAction(child_action);
 			}
 			else if (auto child_menu = qobject_cast<QMenu*>(child)) {
-				menuBar()->addMenu(child_menu);
+				if (child_menu->objectName() != "menuFile") {
+					menuBar()->addMenu(child_menu);
+				}
 			}
 		}
 		window->menuBar()->hide();

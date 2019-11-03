@@ -258,12 +258,12 @@
      <x>0</x>
      <y>0</y>
      <width>1113</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_start">
+   <widget class="QMenu" name="menu_source">
     <property name="title">
-     <string>Start</string>
+     <string>Source</string>
     </property>
     <addaction name="action_open_file"/>
     <addaction name="action_open_folder"/>
@@ -274,7 +274,7 @@
      <string>History</string>
     </property>
    </widget>
-   <addaction name="menu_start"/>
+   <addaction name="menu_source"/>
    <addaction name="menu_history"/>
   </widget>
   <widget class="QStatusBar" name="status_bar"/>

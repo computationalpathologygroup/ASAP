@@ -73,6 +73,8 @@ namespace ASAP
 
 			void keyPressEvent(QKeyEvent* event);
 			bool eventFilter(QObject* obj, QEvent* event);
+			void GetImageFromIndex(const QModelIndex& index);
+
 
 		private slots:
 			void OnWorklistClear_(QModelIndex index, int row, int column);
@@ -83,7 +85,6 @@ namespace ASAP
 			void OnPatientSelect_(QModelIndex index);
 			void OnStudySelect_(QModelIndex index);
 			void OnImageSelect_(const bool checked);
-
 			void OnSelectFileSource_(bool checked);
 			void OnSelectFolderSource_(bool checked);
 			void OnSelectExternalSource_(bool checked);
@@ -92,6 +93,7 @@ namespace ASAP
 			void OnShowMessageBox_(const QString message);
 			void OnImageDrop_(QDropEvent* drop_event);
 			void OnOpenImage_(QString path);
+			void OnIconDoubleClicked(const QModelIndex& index);
 			void OnCreateWorklist_(void);
 			void OnWorklistNameChange_(QStandardItem* item);
 			void OnWorklistRefresh_(void);
