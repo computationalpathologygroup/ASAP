@@ -7,8 +7,14 @@ namespace ASAP
 	CompositeWindow::CompositeWindow(QWidget* parent) : QMainWindow(parent), m_ui_(new Ui::CompositeWindowLayout), m_current_child_(-1)
 	{
 		m_ui_->setupUi(this);
-
+		m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
 		SetSlots_();
+		this->readSettings();
+	}
+
+	CompositeWindow::~CompositeWindow()
+	{
+		writeSettings();
 	}
 
 	int CompositeWindow::AddTab(QMainWindow* window, const std::string tab_name)
@@ -41,7 +47,6 @@ namespace ASAP
 					this,
 					&CompositeWindow::OnTabRequest_);
 		}
-
 		return id;
 	}
 
@@ -67,6 +72,24 @@ namespace ASAP
 			SIGNAL(currentChanged(int)),
 			this,
 			SLOT(OnTabChange_(int)));
+	}
+
+	void CompositeWindow::readSettings()
+	{
+		m_settings->beginGroup("ASAP_Composite");
+		resize(m_settings->value("size", QSize(1037, 786)).toSize());
+		if (m_settings->value("maximized", false).toBool()) {
+			this->setWindowState(Qt::WindowMaximized);
+		}
+		m_settings->endGroup();
+	}
+
+	void CompositeWindow::writeSettings()
+	{
+		m_settings->beginGroup("ASAP_Composite");
+		m_settings->setValue("size", size());
+		m_settings->setValue("maximized", isMaximized());
+		m_settings->endGroup();
 	}
 
 	void CompositeWindow::OnTabChange_(int index)

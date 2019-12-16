@@ -455,6 +455,11 @@ namespace ASAP
 			this,
 			SLOT(OnStudySelect_(QModelIndex)));
 
+		connect(m_ui_->view_images,
+			SIGNAL(doubleClicked(QModelIndex)),
+			this,
+			SLOT(OnImageDoubleClicked_(QModelIndex)));
+
 		connect(m_ui_->button_open_image,
 			&QPushButton::clicked,
 			this,
@@ -623,6 +628,14 @@ namespace ASAP
 				image_view->update();
 			}
 		});
+	}
+
+	void WorklistWindow::OnImageDoubleClicked_(QModelIndex index)
+	{
+		if (m_workstation_)
+		{
+			GetImageFromIndex(index);
+		}
 	}
 
 	void WorklistWindow::OnImageSelect_(const bool checked)

@@ -84,6 +84,7 @@ namespace ASAP
 			void OnWorklistSelect_(QModelIndex index);
 			void OnPatientSelect_(QModelIndex index);
 			void OnStudySelect_(QModelIndex index);
+			void OnImageDoubleClicked_(QModelIndex index);
 			void OnImageSelect_(const bool checked);
 			void OnSelectFileSource_(bool checked);
 			void OnSelectFolderSource_(bool checked);
