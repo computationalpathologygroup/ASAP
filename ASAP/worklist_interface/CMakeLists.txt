@@ -38,6 +38,8 @@ if (BUILD_WORKLIST_INTERFACE)
 		GUI/IconCreator.cpp
 		GUI/WorklistWindow.h
 		GUI/WorklistWindow.cpp
+		GUI/ThumbnailCache.h
+		GUI/ThumbnailCache.cpp
 		GUI/CompositeWindowLayout.ui
 		GUI/WorklistWindowLayout.ui
 	)

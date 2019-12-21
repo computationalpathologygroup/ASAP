@@ -1,5 +1,7 @@
 #include "IconCreator.h"
 
+#include <QStandardPaths>
+
 #include <functional>
 #include <stdexcept>
 
@@ -13,8 +15,13 @@ namespace ASAP
 
 	IconCreator::IconCreator(void) : m_placeholder_icon(IconCreator::CreateBlankIcon_()), m_invalid_icon(IconCreator::CreateInvalidIcon_())
 	{
-		
-		
+		m_thumbnail_cache = new ThumbnailCache(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::CacheLocation));		
+	}
+
+	IconCreator::~IconCreator() {
+		if (m_thumbnail_cache) {
+			delete m_thumbnail_cache;
+		}
 	}
 
 	bool IconCreator::InsertIcon(const std::pair<int, std::string>& index_location)
@@ -36,78 +43,87 @@ namespace ASAP
 
 	QIcon IconCreator::CreateIcon_(const std::string& filepath, const size_t size)
 	{
-		MultiResolutionImageReader reader;
-		std::unique_ptr<MultiResolutionImage> image(reader.open(filepath));
-			
-		if (image)
-		{
-			unsigned char* data(nullptr);
-			std::vector<unsigned long long> dimensions;
+		QImage scaled_image = m_thumbnail_cache->getThumbnailFromCache(QString::fromStdString(filepath));
+		if (scaled_image.isNull()) {
+			MultiResolutionImageReader reader;
+			std::unique_ptr<MultiResolutionImage> image(reader.open(filepath));
 
-			if (image->getNumberOfLevels() > 1)
+			if (image)
 			{
-				dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);
-				image->getRawRegion(0, 0, dimensions[0], dimensions[1], image->getNumberOfLevels() - 1, data);
+				unsigned char* data(nullptr);
+				std::vector<unsigned long long> dimensions;
+
+				if (image->getNumberOfLevels() > 1)
+				{
+					dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);
+					image->getRawRegion(0, 0, dimensions[0], dimensions[1], image->getNumberOfLevels() - 1, data);
+				}
+				else
+				{
+					dimensions = image->getDimensions();
+					if (dimensions[0] * dimensions[1] < (1024 * 1024)) {
+						image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
+					}
+					else {
+						return m_invalid_icon;
+					}
+				}
+
+				// Gets the largest dimension and creates an offset for the smallest.
+				unsigned long long max_dim = std::max(dimensions[0], dimensions[1]);
+				size_t offset_x = dimensions[0] == max_dim ? 0 : (dimensions[1] - dimensions[0]) / 2;
+				size_t offset_y = dimensions[1] == max_dim ? 0 : (dimensions[0] - dimensions[1]) / 2;
+
+				QImage qimage(max_dim, max_dim, QImage::Format::Format_RGB888);
+				qimage.fill(Qt::white);
+
+				// Writes the multiresolution pixel data into the image.
+				size_t base_index = 0;
+				if (image->getColorType() == pathology::ColorType::Monochrome) {
+					for (size_t y = 0; y < dimensions[1]; ++y)
+					{
+						for (size_t x = 0; x < dimensions[0]; ++x)
+						{
+							qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index], data[base_index]));
+							base_index += 1;
+						}
+					}
+				}
+				else if (image->getColorType() == pathology::ColorType::RGB) {
+					for (size_t y = 0; y < dimensions[1]; ++y)
+					{
+						for (size_t x = 0; x < dimensions[0]; ++x)
+						{
+							qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index + 1], data[base_index + 2]));
+							base_index += 3;
+						}
+					}
+				}
+				else if (image->getColorType() == pathology::ColorType::ARGB) {
+					for (size_t y = 0; y < dimensions[1]; ++y)
+					{
+						for (size_t x = 0; x < dimensions[0]; ++x)
+						{
+							qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index + 1], data[base_index + 2]));
+							base_index += 4;
+						}
+					}
+				}
+
+				delete data;
+				scaled_image = qimage.scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio);
+				m_thumbnail_cache->addThumbnailToCache(QString::fromStdString(filepath), scaled_image);
+				QPixmap pixmap(QPixmap::fromImage(scaled_image));
+				return QIcon(pixmap);
 			}
 			else
 			{
-				dimensions = image->getDimensions();
-				if (dimensions[0] * dimensions[1] < (1024 * 1024)) {
-					image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
-				}
-				else {
-					return m_invalid_icon;
-				}
+				return QIcon();
 			}
-
-			// Gets the largest dimension and creates an offset for the smallest.
-			unsigned long long max_dim	= std::max(dimensions[0], dimensions[1]);
-			size_t offset_x				= dimensions[0] == max_dim ? 0 : (dimensions[1] - dimensions[0]) / 2;
-			size_t offset_y				= dimensions[1] == max_dim ? 0 : (dimensions[0] - dimensions[1]) / 2;
-
-			QImage qimage(max_dim, max_dim, QImage::Format::Format_RGB888);
-			qimage.fill(Qt::white);
-
-			// Writes the multiresolution pixel data into the image.
-			size_t base_index = 0;
-			if (image->getColorType() == pathology::ColorType::Monochrome) {
-				for (size_t y = 0; y < dimensions[1]; ++y)
-				{
-					for (size_t x = 0; x < dimensions[0]; ++x)
-					{
-						qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index], data[base_index]));
-						base_index += 1;
-					}
-				}
-			}
-			else if (image->getColorType() == pathology::ColorType::RGB) {
-				for (size_t y = 0; y < dimensions[1]; ++y)
-				{
-					for (size_t x = 0; x < dimensions[0]; ++x)
-					{
-						qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index + 1], data[base_index + 2]));
-						base_index += 3;
-					}
-				}
-			}
-			else if (image->getColorType() == pathology::ColorType::ARGB) {
-				for (size_t y = 0; y < dimensions[1]; ++y)
-				{
-					for (size_t x = 0; x < dimensions[0]; ++x)
-					{
-						qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index + 1], data[base_index + 2]));
-						base_index += 4;
-					}
-				}
-			}
-
-			delete data;
-			QPixmap pixmap(QPixmap::fromImage(qimage).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
-			return QIcon(pixmap);
 		}
-		else
-		{
-			return QIcon();
+		else {
+			QPixmap pixmap(QPixmap::fromImage(scaled_image));
+			return QIcon(pixmap);
 		}
 	}
 

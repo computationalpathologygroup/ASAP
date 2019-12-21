@@ -7,6 +7,7 @@
 
 #include <QObject>
 #include <QStandardItemModel>
+#include "ThumbnailCache.h"
 
 namespace ASAP
 {
@@ -19,6 +20,7 @@ namespace ASAP
 
 		public:
 			IconCreator(void);
+			~IconCreator(void);
 	
 			bool InsertIcon(const std::pair<int, std::string>& index_location);
 			QIcon CreateIcon_(const std::string& filepath, const size_t size);
@@ -28,6 +30,7 @@ namespace ASAP
 			QIcon CreateInvalidIcon_();
 			QIcon m_placeholder_icon;
 			QIcon m_invalid_icon;
+			ThumbnailCache* m_thumbnail_cache;
 			static int m_icon_size;
 
 

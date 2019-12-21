@@ -17,6 +17,7 @@
 #include "../Data/SourceProxy.h"
 #include "../Misc/TemporaryDirectoryTracker.h"
 #include "../Models/WorklistModels.h"
+#include "../GUI/ThumbnailCache.h"
 
 namespace ASAP
 {
