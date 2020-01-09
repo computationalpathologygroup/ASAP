@@ -222,6 +222,7 @@ namespace ASAP
 			m_thumbnail_loader->cancel();
 			m_thumbnail_loader->waitForFinished();
 		}
+		QApplication::processEvents();
 	}
 
 	void WorklistWindow::UpdatePreviousSources_(void)
