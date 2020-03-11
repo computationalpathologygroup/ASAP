@@ -19,7 +19,7 @@ namespace po = boost::program_options;
 using namespace std;
 using namespace pathology;
 
-void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std::string compression = "LZW", double quality = 70., double spacingX = -1.0, double spacingY = -1.0, unsigned int tileSize = 512) {
+void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std::string compression = "LZW", double quality = 70., double spacingX = -1.0, double spacingY = -1.0, unsigned int tileSize = 512, int maxPyramidLevels = -1, int downsamplePerLevel =2) {
   MultiResolutionImageReader read;
   MultiResolutionImageWriter* writer;
   if (svs) {
@@ -59,6 +59,9 @@ void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std
           writer->setJPEGQuality(quality);
         }
 
+        writer->setDownsamplePerLevel(downsamplePerLevel);
+        writer->setMaxNumberOfPyramidLevels(maxPyramidLevels);
+
         if (spacingX > 0.0 && spacingY > 0.0) {
           std::vector<double> overrideSpacing;
           overrideSpacing.push_back(spacingX);
@@ -90,6 +93,8 @@ int main(int argc, char *argv[]) {
     std::string inputPth, outputPth, codec;
     double rate, spacingX, spacingY;
     unsigned int tileSize;
+    int pyramidLevels;
+    unsigned int downsamplePerLevel;
     po::options_description desc("Options");
     desc.add_options()
       ("help,h", "Displays this message")
@@ -99,6 +104,8 @@ int main(int argc, char *argv[]) {
       ("spacingX,x", po::value<double>(&spacingX)->default_value(-1.0), "Set the pixel spacing of the x-dimension")
       ("spacingY,y", po::value<double>(&spacingY)->default_value(-1.0), "Set the pixel spacing of the y-dimension")
       ("tileSize,t", po::value<unsigned int>(&tileSize)->default_value(512), "Sets the tile size for the TIF")
+      ("pyramidLevels,p", po::value<int>(&pyramidLevels)->default_value(-1), "Sets the maximum number of pyramid levels; -1 indicates that the number of levels is automatically determined")
+      ("downsample,d", po::value<unsigned int>(&downsamplePerLevel)->default_value(2), "Sets the downsample factor between each pyramid level")
       ;
   
     po::positional_options_description positionalOptions;
@@ -143,10 +150,10 @@ int main(int argc, char *argv[]) {
 
     if (core::fileExists(inputPth) && !core::dirExists(outputPth)) {
       if (!vm["spacingX"].defaulted() || !vm["spacingY"].defaulted()) {
-        convertImage(inputPth, outputPth, svs, codec, rate, spacingX, spacingY, tileSize);
+        convertImage(inputPth, outputPth, svs, codec, rate, spacingX, spacingY, tileSize, pyramidLevels, downsamplePerLevel);
       }
       else {
-        convertImage(inputPth, outputPth, svs, codec, rate, -1., -1., tileSize);
+        convertImage(inputPth, outputPth, svs, codec, rate, -1., -1., tileSize, pyramidLevels, downsamplePerLevel);
       }
     } 
     else if (core::dirExists(outputPth)) { //Could be wildcards and output dir 
@@ -164,10 +171,10 @@ int main(int argc, char *argv[]) {
           core::changeExtension(outPth, "tif");
         }
         if (!vm["spacingX"].defaulted() || !vm["spacingY"].defaulted()) {
-          convertImage(fls[i], outPth, svs, codec, rate, spacingX, spacingY, tileSize);
+          convertImage(fls[i], outPth, svs, codec, rate, spacingX, spacingY, tileSize, pyramidLevels, downsamplePerLevel);
         }
         else {
-          convertImage(fls[i], outPth, svs, codec, rate, -1., -1., tileSize);
+          convertImage(fls[i], outPth, svs, codec, rate, -1., -1., tileSize, pyramidLevels, downsamplePerLevel);
         }
       }
     }
