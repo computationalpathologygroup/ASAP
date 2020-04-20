@@ -66,6 +66,12 @@ protected:
   //! Color type;
   pathology::ColorType _cType;
 
+  //! Maximum number of pyramid levels
+  int _maxPyramidLevels;
+
+  //! Downsample per level
+  int _downsamplePerLevel;
+
   //! Pixel spacing (normally taken from original image, but can be overwritten or provided when not specified)
   std::vector<double> _overrideSpacing;
 
@@ -132,6 +138,26 @@ public:
   //! Gets the interpolation
   const pathology::Interpolation getInterpolation() const 
   {return _interpolation;}
+
+  //! Get the maximum number of pyramid levels (-1 means determine automatically)
+  const int getMaxNumberOfPyramidLevels() const {
+      return _maxPyramidLevels;
+  }
+
+  //! Set the maximum number of pyramid levels (-1 means determine automatically)
+  void setMaxNumberOfPyramidLevels(const int maxNrPyramidLevels) {
+      _maxPyramidLevels = maxNrPyramidLevels;
+  }
+
+  //! Get the maximum number of pyramid levels (-1 means determine automatically)
+  const int getDownsamplePerLevel() const {
+      return _downsamplePerLevel;
+  }
+
+  //! Set the maximum number of pyramid levels (-1 means determine automatically)
+  void setDownsamplePerLevel(const int downsamplePerLevel) {
+      _downsamplePerLevel = downsamplePerLevel;
+  }
 
   //! Sets the datatype
   void setDataType(const pathology::DataType& dType) 
