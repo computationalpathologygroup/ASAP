@@ -315,31 +315,48 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 	}
 }
 
-int MultiResolutionImageWriter::finishImage() {
-	TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
-	TIFFSetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &_min_vals[0]);
-	TIFFSetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &_max_vals[0]);
-	/* Reset to default behavior, if needed. */
-	TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MERGED);
-	delete[] _min_vals;
-	delete[] _max_vals;
-	_min_vals = NULL;
-	_max_vals = NULL;
+int MultiResolutionImageWriter::finishImage() {	
+	if (TIFFGetField(_tiff, TIFFTAG_TILEOFFSETS) == 0) {
+		std::cout << "No valid tiles have been written to the base image, cannot finish image." << std::endl;
+		return -1;
+	}
+	if (_min_vals != NULL && _max_vals != NULL) {
+		TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
+		TIFFSetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &_min_vals[0]);
+		TIFFSetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &_max_vals[0]);
+		/* Reset to default behavior, if needed. */
+		TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MERGED);
+		delete[] _min_vals;
+		delete[] _max_vals;
+		_min_vals = NULL;
+		_max_vals = NULL;
+	}
 	auto startPyramidTime = std::chrono::steady_clock::now();
 	if (getDataType() == UInt32) {
-		writePyramidToDisk<unsigned int>();
+		if (writePyramidToDisk<unsigned int>() < 0) {
+			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+			return -1;
+		}
 		incorporatePyramid<unsigned int>();
 	}
 	else if (getDataType() == UInt16) {
-		writePyramidToDisk<unsigned short>();
-		incorporatePyramid<unsigned short>();
+	if (writePyramidToDisk<unsigned short>() < 0) {
+		std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+		return -1;
+	}		incorporatePyramid<unsigned short>();
 	}
 	else if (getDataType() == UChar) {
-		writePyramidToDisk<unsigned char>();
+		if (writePyramidToDisk<unsigned char>() < 0) {
+			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+			return -1;
+		}
 		incorporatePyramid<unsigned char>();
 	}
 	else {
-		writePyramidToDisk<float>();
+		if (writePyramidToDisk<float>() < 0) {
+			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+			return -1;
+		}
 		incorporatePyramid<float>();
 	}
 	auto endPyramidTime = std::chrono::steady_clock::now();

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="VisualizationWorkstationExtensionPlugin_ui">
     <file>VisualizationWorkstationExtensionPlugin.ui</file>
+    <file>LUTEditor.ui</file>
   </qresource>
 </RCC>

@@ -1,4 +1,5 @@
 #include "VisualizationWorkstationExtensionPlugin.h"
+#include <iostream>
 #include "../PathologyViewer.h"
 #include <QDockWidget>
 #include <QtUiTools>
@@ -6,12 +7,14 @@
 #include <QDoubleSpinBox>
 #include <QGraphicsPolygonItem>
 #include <QPolygonF>
+#include <QDialog>
 #include <QPushButton>
 #include <QFrame>
 #include <QGroupBox>
 #include <QComboBox>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QToolButton>
 #include "multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "core/filetools.h"
@@ -23,17 +26,14 @@
 VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin() :
   WorkstationExtensionPluginInterface(),
   _dockWidget(NULL),
+  _LUTEditor(NULL),
   _likelihoodCheckBox(NULL),
   _foreground(NULL),
   _foregroundScale(1.),
   _opacity(1.0),
-  _window(1.0),
-  _level(0.5),
   _foregroundChannel(0),
   _renderingEnabled(false)
 {
-  _lst = std::make_shared<AnnotationList>();
-  _xmlRepo = std::make_shared<XmlRepository>(_lst);
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
 }
 
@@ -55,41 +55,190 @@ bool VisualizationWorkstationExtensionPlugin::initialize(PathologyViewer* viewer
 QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   _dockWidget = new QDockWidget("Overlays");
   QUiLoader loader;
-  QFile file(":/VisualizationWorkstationExtensionPlugin_ui/VisualizationWorkstationExtensionPlugin.ui");
-  file.open(QFile::ReadOnly);
-  QWidget* content = loader.load(&file, _dockWidget);
-  file.close();
+  QFile mainGUIFile(":/VisualizationWorkstationExtensionPlugin_ui/VisualizationWorkstationExtensionPlugin.ui");
+  mainGUIFile.open(QFile::ReadOnly);
+  QWidget* content = loader.load(&mainGUIFile, _dockWidget);
+  mainGUIFile.close();
+  QFile LUTEditorFile(":/VisualizationWorkstationExtensionPlugin_ui/LUTEditor.ui");
+  LUTEditorFile.open(QFile::ReadOnly);
+  _LUTEditor = qobject_cast<QDialog*>(loader.load(&LUTEditorFile, NULL));
+  LUTEditorFile.close();
   _likelihoodCheckBox = content->findChild<QCheckBox*>("LikelihoodCheckBox");
   QDoubleSpinBox* spinBox = content->findChild<QDoubleSpinBox*>("OpacitySpinBox");
   spinBox->setValue(_opacity);
-  QDoubleSpinBox* windowSpinBox = content->findChild<QDoubleSpinBox*>("WindowSpinBox");
-  windowSpinBox->setValue(_window);
-  QDoubleSpinBox* levelSpinBox = content->findChild<QDoubleSpinBox*>("LevelSpinBox");
-  levelSpinBox->setValue(_level);
   QSpinBox* channelSpinBox = content->findChild<QSpinBox*>("ChannelSpinBox");
   channelSpinBox->setValue(_foregroundChannel);
-  _segmentationCheckBox = content->findChild<QCheckBox*>("SegmentationCheckBox");
   QPushButton* openResultButton = content->findChild<QPushButton*>("OpenResultPushButton");
   QComboBox* LUTBox = content->findChild<QComboBox*>("LUTComboBox");
+  QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
   LUTBox->setEditable(false);
   for (std::map<std::string, pathology::LUT>::const_iterator it = pathology::ColorLookupTables.begin(); it != pathology::ColorLookupTables.end(); ++it) {
     LUTBox->addItem(QString::fromStdString(it->first));
+    LUTEditorBox->addItem(QString::fromStdString(it->first));
   }
   LUTBox->setCurrentText("Normal");
+  LUTEditorBox->setCurrentText("Normal");
+  QToolButton* openLUTEditorButton = content->findChild<QToolButton*>("LUTEditorButton");
   connect(_likelihoodCheckBox, SIGNAL(toggled(bool)), this, SLOT(onEnableLikelihoodToggled(bool)));
-  connect(_segmentationCheckBox, SIGNAL(toggled(bool)), this, SLOT(onEnableSegmentationToggled(bool)));
   connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(onOpacityChanged(double)));
-  connect(windowSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onWindowValueChanged(double)));
-  connect(levelSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onLevelValueChanged(double)));
   connect(channelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onChannelChanged(int)));
   connect(openResultButton, SIGNAL(clicked()), this, SLOT(onOpenResultImageClicked()));
   connect(LUTBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onLUTChanged(const QString&)));
+  connect(openLUTEditorButton, SIGNAL(clicked()), _LUTEditor, SLOT(open()));
+  connect(LUTEditorBox, SIGNAL(currentTextChanged(QString)), this, SLOT(generateLUTEditingWidgets(QString)));
   _dockWidget->setEnabled(false);
 
-  // Not used for know
-  QGroupBox* segmentationGroupBox = content->findChild<QGroupBox*>("SegmentationGroupBox");
-  segmentationGroupBox->setVisible(false);
   return _dockWidget;
+}
+
+void VisualizationWorkstationExtensionPlugin::generateLUTEditingWidgets(const QString& currentLUTName) {
+  pathology::LUT currentLUT = pathology::ColorLookupTables[currentLUTName.toStdString()];
+  QScrollArea* scrollArea = _LUTEditor->findChild<QScrollArea*>("LUTEditorScrollArea");
+  _LUTEditingArea = scrollArea->widget();
+  delete _LUTEditingArea;
+  _LUTEditingArea = new QWidget(_LUTEditor);
+  _LUTEditingArea->setObjectName(QString("editingArea"));
+  QVBoxLayout* vlayout = new QVBoxLayout;
+  vlayout->setObjectName("vboxLUTLayout");
+  _LUTEditingArea->setLayout(vlayout);
+  for (int i = 0; i < currentLUT.indices.size(); ++i) {
+    qobject_cast<QVBoxLayout*>(_LUTEditingArea->layout())->addLayout(createLUTEntry(currentLUT, i));
+  }
+  qobject_cast<QVBoxLayout*>(_LUTEditingArea->layout())->addStretch(1);
+  scrollArea->setWidget(_LUTEditingArea);
+}
+
+QHBoxLayout* VisualizationWorkstationExtensionPlugin::createLUTEntry(const pathology::LUT& currentLUT, int index) {
+  QHBoxLayout* editingEntry = new QHBoxLayout();
+  editingEntry->setObjectName(QString("editingEntry_") + QString::number(index));
+  QToolButton* colorSquare = new QToolButton();
+  QDoubleSpinBox* value = new QDoubleSpinBox();
+  value->setMinimum(-1000);
+  value->setMaximum(1000);
+  QToolButton* removeEntry = new QToolButton();;
+  removeEntry->setObjectName(QString("removeButton_") + QString::number(index));
+  connect(removeEntry, SIGNAL(clicked()), this, SLOT(removeLUTEntry()));
+  QToolButton* addEntry = new QToolButton();;
+  addEntry->setObjectName(QString("addButton_") + QString::number(index));
+  connect(addEntry, SIGNAL(clicked()), this, SLOT(addLUTEntry()));
+  colorSquare->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  colorSquare->setGeometry(QRect(0, 0, 25, 25));
+  colorSquare->setObjectName(QString("color_") + QString::number(index));
+  QPixmap square(25, 25);
+  const std::array<unsigned char, 4>& rgba = currentLUT.colors[index];
+  square.fill(QColor(rgba[0], rgba[1], rgba[2], rgba[3]));
+  colorSquare->setIcon(square);
+  connect(colorSquare, SIGNAL(clicked()), this, SLOT(pickLUTColor()));
+  value->setValue(currentLUT.indices[index]);
+  removeEntry->setText("X");
+  addEntry->setText("+");
+  editingEntry->addWidget(colorSquare);
+  editingEntry->addWidget(value);
+  editingEntry->addWidget(removeEntry);
+  editingEntry->addWidget(addEntry);
+  return editingEntry;
+}
+
+void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
+  QToolButton* colorSquare = qobject_cast<QToolButton*>(sender());
+  QPixmap old = colorSquare->icon().pixmap(25,25);
+  QPixmap square(25, 25);
+  QColor newColor = QColorDialog::getColor(old.toImage().pixelColor(0, 0), NULL, QString("Select a color"));
+  square.fill(newColor);
+  int red = newColor.red();
+  int green = newColor.green();
+  int blue = newColor.blue();
+  int alpha = newColor.alpha();
+  QString squareName = colorSquare->objectName();
+  QStringList nameList = squareName.split("_");
+  int colorIndex = nameList[1].toInt();
+  std::array<unsigned char, 4> newRGBA = { red, green, blue, alpha };
+  pathology::ColorLookupTables[_currentLUT.toStdString()].colors[colorIndex] = newRGBA;
+  _viewer->setForegroundLUT(_currentLUT.toStdString());
+  colorSquare->setIcon(square);
+}
+
+void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
+  QToolButton* addButton = qobject_cast<QToolButton*>(sender());
+  QString addName = addButton->objectName();
+  QStringList nameList = addName.split("_");
+  int addIndex = nameList[1].toInt();
+
+  float newValue = 999.;
+  if (pathology::ColorLookupTables[_currentLUT.toStdString()].indices.size() > (addIndex + 1)) {
+    newValue = (pathology::ColorLookupTables[_currentLUT.toStdString()].indices[addIndex] + pathology::ColorLookupTables[_currentLUT.toStdString()].indices[addIndex + 1]) / 2;
+  }
+  pathology::ColorLookupTables[_currentLUT.toStdString()].indices.insert(pathology::ColorLookupTables[_currentLUT.toStdString()].indices.begin() + addIndex + 1, newValue);
+
+  QVBoxLayout* parentLayout = qobject_cast<QVBoxLayout*>(qobject_cast<QWidget*>(addButton->parent())->layout());
+  for (auto editEnty : parentLayout->children()) {
+    QHBoxLayout* hLayout = qobject_cast<QHBoxLayout*>(editEnty);
+    if (hLayout) {
+      QString hlayoutName = hLayout->objectName();
+      QStringList nameAndIndex = hlayoutName.split("_");
+      int layoutIndex = nameAndIndex[1].toInt();
+      if (layoutIndex == addIndex) {
+        QHBoxLayout* newEntry = createLUTEntry(pathology::ColorLookupTables[_currentLUT.toStdString()], addIndex + 1);
+        qobject_cast<QDoubleSpinBox*>(newEntry->itemAt(1)->widget())->setValue(newValue);
+        newEntry->setObjectName("NEWNEWNEWN");
+        parentLayout->insertLayout(addIndex + 1, newEntry);
+      }
+    }
+  }    
+  parentLayout->update();
+
+  pathology::ColorLookupTables[_currentLUT.toStdString()].colors.insert(pathology::ColorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, pathology::ColorLookupTables[_currentLUT.toStdString()].colors[addIndex]);
+  this->updateObjectNames();
+  _viewer->setForegroundLUT(_currentLUT.toStdString());
+}
+
+void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
+  QToolButton* removeButton = qobject_cast<QToolButton*>(sender());
+  QString removeName = removeButton->objectName();
+  QStringList nameList = removeName.split("_");
+  int removeIndex = nameList[1].toInt();
+  pathology::ColorLookupTables[_currentLUT.toStdString()].colors.erase(pathology::ColorLookupTables[_currentLUT.toStdString()].colors.begin() + removeIndex);
+  pathology::ColorLookupTables[_currentLUT.toStdString()].indices.erase(pathology::ColorLookupTables[_currentLUT.toStdString()].indices.begin() + removeIndex);
+
+  QLayout* parentLayout = qobject_cast<QWidget*>(removeButton->parent())->layout();
+  for (auto editEnty : parentLayout->children()) {
+    QHBoxLayout* hLayout = qobject_cast<QHBoxLayout*>(editEnty);
+    if (hLayout) {
+      QString hlayoutName = hLayout->objectName();
+      QStringList nameAndIndex = hlayoutName.split("_");
+      int layoutIndex = nameAndIndex[1].toInt();
+      if (layoutIndex == removeIndex) {
+        while (auto child = hLayout->takeAt(0)) {
+          if (child->widget()) {
+            child->widget()->deleteLater();
+          }
+        }
+        delete hLayout;
+      }
+    }
+  }
+  parentLayout->update();
+  this->updateObjectNames();
+  _viewer->setForegroundLUT(_currentLUT.toStdString());
+}
+
+void VisualizationWorkstationExtensionPlugin::updateObjectNames() {
+  if (this->_LUTEditingArea) {
+    int objectIndex = 0;
+    this->_LUTEditingArea->layout()->dumpObjectTree();
+    for (auto editEntry : this->_LUTEditingArea->layout()->children()) {
+      if (QHBoxLayout* hLayout = qobject_cast<QHBoxLayout*>(editEntry)) {
+        hLayout->setObjectName(QString("editingEntry_") + QString::number(objectIndex));
+        for (unsigned int i = 0; i < hLayout->count(); ++i) {
+          QWidget* entryWidget = hLayout->itemAt(i)->widget();
+          QString entryWidgetName = entryWidget->objectName();
+          QString nameWithoutIndex = entryWidgetName.split("_")[0];
+          entryWidget->setObjectName(nameWithoutIndex + QString("_") + QString::number(objectIndex));
+        }
+        objectIndex++;
+      }
+    }
+  }
 }
 
 void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName) {
@@ -103,13 +252,6 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<Mul
     std::string likImgPth = core::completePath(base + "_likelihood_map.tif", core::extractFilePath(fileName));
     std::string segmXMLPth = core::completePath(base + "_detections.xml", core::extractFilePath(fileName));
     this->loadNewForegroundImage(likImgPth);
-    if (core::fileExists(segmXMLPth)) {
-      _xmlRepo->setSource(segmXMLPth);
-      _xmlRepo->load();
-      if (_segmentationCheckBox && _segmentationCheckBox->isChecked()) {
-        addSegmentationsToViewer();
-      }
-    }
   }
 }
 
@@ -126,8 +268,6 @@ void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::
     emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
     _foreground.reset();
   }
-  QGroupBox* segmentationGroupBox = _dockWidget->findChild<QGroupBox*>("SegmentationGroupBox");
-  segmentationGroupBox->setEnabled(false);
   QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
   visualizationGroupBox->setEnabled(false);
   if (core::fileExists(resultImagePth)) {
@@ -157,8 +297,6 @@ void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::
           }
         }
       }
-      QGroupBox* segmentationGroupBox = _dockWidget->findChild<QGroupBox*>("SegmentationGroupBox");
-      segmentationGroupBox->setEnabled(true);
       QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
       visualizationGroupBox->setEnabled(true);
     }
@@ -189,8 +327,6 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
       if (_foregroundChannel >= img->getSamplesPerPixel()) {
         _foregroundChannel = 0;
       }
-      _window = _settings->value("window", maxValue - minValue).toDouble();
-      _level = _settings->value("level", (maxValue + minValue) / 2).toDouble();
       if (dtype == pathology::Float) {
         _currentLUT = _settings->value("lut", "Traffic Light").toString();
       }
@@ -204,8 +340,6 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     else {
       _opacity = 0.5;
       _foregroundChannel = 0;
-      _window = maxValue - minValue;
-      _level = (maxValue + minValue) / 2;
       if (img->getDataType() == pathology::UChar || img->getDataType() == pathology::UInt32 || img->getDataType() == pathology::UInt16) {
         _currentLUT = "Label";
       }
@@ -220,12 +354,6 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     channelSpinBox->setMaximum(_foreground->getSamplesPerPixel() - 1);
     channelSpinBox->setValue(_foregroundChannel);
     _viewer->setForegroundChannel(_foregroundChannel);
-
-    QDoubleSpinBox* windowSpinBox = _dockWidget->findChild<QDoubleSpinBox*>("WindowSpinBox");
-    windowSpinBox->setValue(_window);
-    QDoubleSpinBox* levelSpinBox = _dockWidget->findChild<QDoubleSpinBox*>("LevelSpinBox");
-    levelSpinBox->setValue(_level);
-    _viewer->setForegroundWindowAndLevel(_window, _level);
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
     LUTBox->setCurrentText(_currentLUT);
     _viewer->setForegroundLUT(_currentLUT.toStdString());
@@ -251,15 +379,10 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
     }
     _settings->setValue("opacity", _opacity);
     _settings->setValue("foregroundchannel", _foregroundChannel);
-    _settings->setValue("window", _window);
-    _settings->setValue("level", _level);
     _settings->setValue("lut", _currentLUT);
     _settings->setValue("visible", _renderingEnabled);
     _settings->endGroup();
     _settings->endGroup();
-  }
-  if (!_polygons.empty()) {
-    removeSegmentationsFromViewer();
   }
   if (_foreground) {
     _foregroundScale = 1;
@@ -268,8 +391,6 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
   }
   if (_dockWidget) {
     _dockWidget->setEnabled(false);
-    QGroupBox* segmentationGroupBox = _dockWidget->findChild<QGroupBox*>("SegmentationGroupBox");
-    segmentationGroupBox->setEnabled(false);
     QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
     visualizationGroupBox->setEnabled(false);
   }
@@ -296,63 +417,14 @@ void VisualizationWorkstationExtensionPlugin::onOpacityChanged(double opacity) {
 void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTname) {
   if (_viewer && LUTname != _currentLUT) {
     _currentLUT = LUTname;
+    QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+    LUTEditorBox->setCurrentText(LUTname);
     _viewer->setForegroundLUT(LUTname.toStdString());
-  }
-}
-void VisualizationWorkstationExtensionPlugin::onWindowValueChanged(double window) {
-  if (_viewer && window != _window) {
-    _window = window;
-    _viewer->setForegroundWindowAndLevel(_window, _level);
-  }
-}
-void VisualizationWorkstationExtensionPlugin::onLevelValueChanged(double level) {
-  if (_viewer && level != _level) {
-    _level = level;
-    _viewer->setForegroundWindowAndLevel(_window, _level);
   }
 }
 void VisualizationWorkstationExtensionPlugin::onChannelChanged(int channel) {
   if (_viewer && channel != _foregroundChannel) {
     _foregroundChannel = channel;
     _viewer->setForegroundChannel(_foregroundChannel);
-  }
-}
-
-void VisualizationWorkstationExtensionPlugin::onEnableSegmentationToggled(bool toggled) {
-  if (!toggled) {
-    removeSegmentationsFromViewer();
-  }
-  else {
-    addSegmentationsToViewer();
-  }
-}
-
-void VisualizationWorkstationExtensionPlugin::addSegmentationsToViewer() {
-  if (_lst) {
-    std::vector<std::shared_ptr<Annotation> > tmp = _lst->getAnnotations();
-    float scl = _viewer->getSceneScale();
-    for (std::vector<std::shared_ptr<Annotation> >::iterator it = tmp.begin(); it != tmp.end(); ++it) {
-      QPolygonF poly;
-      std::vector<Point> coords = (*it)->getCoordinates();
-      for (std::vector<Point>::iterator pt = coords.begin(); pt != coords.end(); ++pt) {
-        poly.append(QPointF(pt->getX()*scl, pt->getY()*scl));
-      }
-      QGraphicsPolygonItem* cur = new QGraphicsPolygonItem(poly);
-      cur->setBrush(QBrush());
-      cur->setPen(QPen(QBrush(QColor("red")), 1.));
-      _viewer->scene()->addItem(cur);
-      cur->setZValue(std::numeric_limits<float>::max());
-      _polygons.append(cur);
-    }
-  }
-}
-
-void VisualizationWorkstationExtensionPlugin::removeSegmentationsFromViewer() {
-  if (!_polygons.empty()) {
-    for (QList<QGraphicsPolygonItem*>::iterator it = _polygons.begin(); it != _polygons.end(); ++it) {
-      _viewer->scene()->removeItem(*it);
-      delete (*it);
-    }
-    _polygons.clear();
   }
 }

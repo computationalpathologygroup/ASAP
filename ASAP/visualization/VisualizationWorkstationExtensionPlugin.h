@@ -5,9 +5,11 @@
 #include "interfaces/interfaces.h"
 
 class QCheckBox;
+class QDialog;
 class XmlRepository;
 class QGraphicsPolygonItem;
 class AnnotationList;
+class QHBoxLayout;
 
 class VisualizationWorkstationExtensionPlugin : public WorkstationExtensionPluginInterface
 {
@@ -17,26 +19,22 @@ class VisualizationWorkstationExtensionPlugin : public WorkstationExtensionPlugi
 
 private :
 
-  void addSegmentationsToViewer();
-  void removeSegmentationsFromViewer();
-
   std::shared_ptr<MultiResolutionImage> _foreground;
   QDockWidget* _dockWidget;
   QCheckBox* _likelihoodCheckBox;
   QCheckBox* _segmentationCheckBox;
+  QDialog*  _LUTEditor;
+  QWidget* _LUTEditingArea;
   float _opacity;
-  float _window;
-  float _level;
   float _foregroundChannel;
   bool  _renderingEnabled;
   float _foregroundScale;
   QString _currentLUT;
-  std::shared_ptr<XmlRepository> _xmlRepo;
-  std::shared_ptr<AnnotationList> _lst;
-  QList<QGraphicsPolygonItem*> _polygons;
   std::vector<unsigned long long> _backgroundDimensions;
   void loadNewForegroundImage(const std::string& resultImagePth);
   void setDefaultVisualizationParameters(std::shared_ptr<MultiResolutionImage> img);
+  void updateObjectNames();
+  QHBoxLayout* createLUTEntry(const pathology::LUT& currentLUT, int index);
 
 public :
     bool initialize(PathologyViewer* viewer);
@@ -49,15 +47,18 @@ public slots:
     void onImageClosed();
     void onEnableLikelihoodToggled(bool toggled);
     void onOpacityChanged(double opacity);
-    void onEnableSegmentationToggled(bool toggled);
     void onOpenResultImageClicked();
     void onLUTChanged(const QString& LUTname);
-    void onWindowValueChanged(double window);
-    void onLevelValueChanged(double level);
     void onChannelChanged(int channel);
 
 signals: 
     void changeForegroundImage(std::weak_ptr<MultiResolutionImage>, float scale);
+
+private slots:
+  void generateLUTEditingWidgets(const QString& currentLUTName);
+  void pickLUTColor();
+  void removeLUTEntry();
+  void addLUTEntry();
 };
 
 #endif

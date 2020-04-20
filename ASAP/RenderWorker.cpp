@@ -170,8 +170,8 @@ QPixmap RenderWorker::renderForegroundImage(std::shared_ptr<MultiResolutionImage
   unsigned int samplesPerPixel = local_for_img->getSamplesPerPixel();
   float fgLevelDownsample = local_for_img->getLevelDownsample(fgImageLevel);
   T *imgBuf = new T[correctedTileSize*correctedTileSize*samplesPerPixel];
-  local_for_img->getRawRegion(currentJob._imgPosX * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, currentJob._imgPosY * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, correctedTileSize, correctedTileSize, fgImageLevel, imgBuf);
-  QImage renderedImage = convertMonochromeToRGB(imgBuf, correctedTileSize, correctedTileSize, _foregroundChannel, samplesPerPixel, _level - _window / 2, _level + _window / 2, _LUTname);
+  local_for_img->getRawRegion(currentJob._imgPosX * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, currentJob._imgPosY * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, correctedTileSize, correctedTileSize, fgImageLevel, imgBuf);  
+  QImage renderedImage = convertMonochromeToRGB(imgBuf, correctedTileSize, correctedTileSize, _foregroundChannel, samplesPerPixel, 0, 255, _LUTname);
 
   if (_foregroundImageScale != 1) {
     renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);

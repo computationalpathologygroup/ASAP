@@ -3,16 +3,19 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <array>
 #include "core_export.h"
 
 namespace pathology {
 
   struct LUT {
-    unsigned char colors[256][4];
+    std::vector<float> indices;
+    std::vector<std::array<unsigned char, 4> > colors;
     bool wrapAround;
   };
 
-  extern CORE_EXPORT const std::map<std::string, LUT> ColorLookupTables;
+  extern CORE_EXPORT std::map<std::string, LUT> ColorLookupTables;
 
   enum ColorType : int {
     InvalidColorType,
