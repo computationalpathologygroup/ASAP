@@ -84,8 +84,9 @@ if (BUILD_WORKLIST_INTERFACE)
 	
 	qt5_add_resources(RESOURCE_ADDED ${RESOURCE}) 
 	
-	ADD_EXECUTABLE(ASAP_Worklist 
-		main.cpp
+	ADD_EXECUTABLE(ASAP_browser 
+		ASAP_browser.cpp
+		ASAP_browser.rc
 		${GROUP_DATA}
 		${GROUP_GUI}
 		${GROUP_MISC}
@@ -94,11 +95,11 @@ if (BUILD_WORKLIST_INTERFACE)
 		${GROUP_GRANDCHALLENGESUPPORT}
 		${RESOURCE_ADDED}
 	)
-	set_target_properties(ASAP_Worklist PROPERTIES FOLDER ASAP)
-	set_target_properties(ASAP_Worklist PROPERTIES DEBUG_POSTFIX _d)
+	set_target_properties(ASAP_browser PROPERTIES FOLDER ASAP)
+	set_target_properties(ASAP_browser PROPERTIES DEBUG_POSTFIX _d)
 
 	if(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
-	    target_compile_definitions(ASAP_Worklist PRIVATE BUILD_GRANDCHALLENGE_INTERFACE)
+	    target_compile_definitions(ASAP_browser PRIVATE BUILD_GRANDCHALLENGE_INTERFACE)
 	endif(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
 
 	SOURCE_GROUP("Data"				FILES ${GROUP_DATA})
@@ -108,15 +109,15 @@ if (BUILD_WORKLIST_INTERFACE)
 	SOURCE_GROUP("Serialization"	FILES ${GROUP_SERIALIZATION})
 	SOURCE_GROUP("GrandChallenge"   FILES ${GROUP_GRANDCHALLENGESUPPORT})
 
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE ASAPLib core multiresolutionimageinterface)
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools Qt5::Concurrent)
-	TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE Boost::disable_autolinking Boost::filesystem)	
+	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE ASAPLib core multiresolutionimageinterface)
+	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools Qt5::Concurrent)
+	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE Boost::disable_autolinking Boost::filesystem)	
 
 	IF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
-	    TARGET_LINK_LIBRARIES(ASAP_Worklist PRIVATE cpprestsdk::cpprest)
+	    TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE cpprestsdk::cpprest)
 	ENDIF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
 		
-	install(TARGETS ASAP_Worklist
+	install(TARGETS ASAP_browser
         EXPORT worklist-targets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
