@@ -70,10 +70,10 @@ void RenderThread::onWindowAndLevelChanged(float window, float level) {
   _jobListMutex.unlock();
 }
 
-void RenderThread::onLUTChanged(std::string LUTname) {
+void RenderThread::onLUTChanged(const pathology::LUT& LUT) {
   _jobListMutex.lock();
   for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setLUT(LUTname);
+    _workers[i]->setLUT(LUT);
   }
   _jobListMutex.unlock();
 }

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "interfaces/interfaces.h"
+#include "core/PathologyEnums.h"
 
 class QCheckBox;
 class QDialog;
@@ -29,7 +30,11 @@ private :
   float _foregroundChannel;
   bool  _renderingEnabled;
   float _foregroundScale;
+  bool _editingLUT;
+  bool _previewingLUT;
+  std::map<std::string, pathology::LUT> _LUTsBeforeEdit;
   QString _currentLUT;
+  QString _currentLUTBeforeEdit;
   std::vector<unsigned long long> _backgroundDimensions;
   void loadNewForegroundImage(const std::string& resultImagePth);
   void setDefaultVisualizationParameters(std::shared_ptr<MultiResolutionImage> img);
@@ -59,6 +64,8 @@ private slots:
   void pickLUTColor();
   void removeLUTEntry();
   void addLUTEntry();
+  void handleEditLUTRequest();
+  void updateLUTPreviewStatus(int newCheckedState);
 };
 
 #endif

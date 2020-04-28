@@ -446,16 +446,6 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
               std::copy(tmp_row, tmp_row + tileW*nrSamples, tile + (tileH*tileW*nrSamples) - (rev_y + 1)*tileW*nrSamples);
             }
             delete[] tmp_row;
-            for (unsigned int pos = 0; pos < tileW*tileH*nrSamples; pos += 4) {
-              unsigned char r = tile[pos + 0];
-              unsigned char g = tile[pos + 1];
-              unsigned char b = tile[pos + 2];
-              unsigned char a = tile[pos + 3];
-              tile[pos + 0] = b;
-              tile[pos + 1] = g;
-              tile[pos + 2] = r;
-              tile[pos + 3] = a;
-            }
           }
           else {
             TIFFReadTile(_tiff, tile, ix, iy, 0, 0);

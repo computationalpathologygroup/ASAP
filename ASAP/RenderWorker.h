@@ -24,7 +24,7 @@ public:
   void setBackgroundChannel(int channel);
   void setForegroundChannel(int channel);
   void setWindowAndLevel(float window, float level);
-  void setLUT(const std::string& LUTname);
+  void setLUT(const pathology::LUT& LUTname);
 
   void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
   void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
@@ -48,7 +48,7 @@ private :
 
   //! Foreground images can only be the same size or smaller than the background images, thus this value ranges from 1 to +inf
   float _foregroundImageScale;
-  std::string _LUTname;
+  pathology::LUT _LUT;
 
   template <typename T>
   QPixmap renderBackgroundImage(std::shared_ptr<MultiResolutionImage> local_bck_img, const RenderJob& currentJob, pathology::ColorType colorType);

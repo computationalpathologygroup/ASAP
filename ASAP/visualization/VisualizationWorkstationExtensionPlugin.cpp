@@ -32,7 +32,9 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _foregroundScale(1.),
   _opacity(1.0),
   _foregroundChannel(0),
-  _renderingEnabled(false)
+  _renderingEnabled(false),
+  _editingLUT(false),
+  _previewingLUT(false)
 {
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
 }
@@ -71,6 +73,8 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   QPushButton* openResultButton = content->findChild<QPushButton*>("OpenResultPushButton");
   QComboBox* LUTBox = content->findChild<QComboBox*>("LUTComboBox");
   QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+  QCheckBox* previewCheckBox = _LUTEditor->findChild<QCheckBox*>("previewCheckBox");
+  previewCheckBox->setCheckState(Qt::Unchecked);
   LUTBox->setEditable(false);
   for (std::map<std::string, pathology::LUT>::const_iterator it = pathology::ColorLookupTables.begin(); it != pathology::ColorLookupTables.end(); ++it) {
     LUTBox->addItem(QString::fromStdString(it->first));
@@ -78,14 +82,16 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   }
   LUTBox->setCurrentText("Normal");
   LUTEditorBox->setCurrentText("Normal");
+  this->generateLUTEditingWidgets("Normal");
   QToolButton* openLUTEditorButton = content->findChild<QToolButton*>("LUTEditorButton");
   connect(_likelihoodCheckBox, SIGNAL(toggled(bool)), this, SLOT(onEnableLikelihoodToggled(bool)));
   connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(onOpacityChanged(double)));
   connect(channelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onChannelChanged(int)));
   connect(openResultButton, SIGNAL(clicked()), this, SLOT(onOpenResultImageClicked()));
   connect(LUTBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onLUTChanged(const QString&)));
-  connect(openLUTEditorButton, SIGNAL(clicked()), _LUTEditor, SLOT(open()));
-  connect(LUTEditorBox, SIGNAL(currentTextChanged(QString)), this, SLOT(generateLUTEditingWidgets(QString)));
+  connect(LUTEditorBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onLUTChanged(const QString&)));
+  connect(openLUTEditorButton, SIGNAL(clicked()), this, SLOT(handleEditLUTRequest()));
+  connect(previewCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateLUTPreviewStatus(int)));
   _dockWidget->setEnabled(false);
 
   return _dockWidget;
@@ -154,8 +160,16 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   int colorIndex = nameList[1].toInt();
   std::array<unsigned char, 4> newRGBA = { red, green, blue, alpha };
   pathology::ColorLookupTables[_currentLUT.toStdString()].colors[colorIndex] = newRGBA;
-  _viewer->setForegroundLUT(_currentLUT.toStdString());
   colorSquare->setIcon(square);
+  if (_editingLUT && _previewingLUT) {
+    onLUTChanged(_currentLUT);
+  }
+  else if (_editingLUT && !_previewingLUT) {
+    onLUTChanged(_currentLUTBeforeEdit);
+  }
+  else {
+    onLUTChanged(_currentLUT);
+  }
 }
 
 void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
@@ -180,7 +194,6 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
       if (layoutIndex == addIndex) {
         QHBoxLayout* newEntry = createLUTEntry(pathology::ColorLookupTables[_currentLUT.toStdString()], addIndex + 1);
         qobject_cast<QDoubleSpinBox*>(newEntry->itemAt(1)->widget())->setValue(newValue);
-        newEntry->setObjectName("NEWNEWNEWN");
         parentLayout->insertLayout(addIndex + 1, newEntry);
       }
     }
@@ -189,7 +202,39 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
 
   pathology::ColorLookupTables[_currentLUT.toStdString()].colors.insert(pathology::ColorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, pathology::ColorLookupTables[_currentLUT.toStdString()].colors[addIndex]);
   this->updateObjectNames();
-  _viewer->setForegroundLUT(_currentLUT.toStdString());
+  if (_editingLUT && _previewingLUT) {
+    onLUTChanged(_currentLUT);
+  }
+  else if (_editingLUT && !_previewingLUT) {
+    onLUTChanged(_currentLUTBeforeEdit);
+  }
+  else {
+    onLUTChanged(_currentLUT);
+  }
+}
+
+void VisualizationWorkstationExtensionPlugin::handleEditLUTRequest()
+{
+  if (_LUTEditor) {
+    _editingLUT = true;
+    _LUTsBeforeEdit = pathology::ColorLookupTables;
+    _currentLUTBeforeEdit = _currentLUT;
+    int result = _LUTEditor->exec();
+    _editingLUT = false;
+    if (!result) {
+      pathology::ColorLookupTables = _LUTsBeforeEdit;
+      onLUTChanged(_currentLUTBeforeEdit);
+      _currentLUTBeforeEdit = "";
+      _LUTsBeforeEdit.clear();
+    }
+  }
+}
+
+void VisualizationWorkstationExtensionPlugin::updateLUTPreviewStatus(int newCheckedState) {
+  _previewingLUT = (newCheckedState == Qt::Checked);
+  if (_previewingLUT) {
+    onLUTChanged(_currentLUT);
+  }
 }
 
 void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
@@ -219,15 +264,22 @@ void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
   }
   parentLayout->update();
   this->updateObjectNames();
-  _viewer->setForegroundLUT(_currentLUT.toStdString());
+  if (_editingLUT && _previewingLUT) {
+    onLUTChanged(_currentLUT);
+  }
+  else if (_editingLUT && !_previewingLUT) {
+    onLUTChanged(_currentLUTBeforeEdit);
+  }
+  else {
+    onLUTChanged(_currentLUT);
+  }
 }
 
 void VisualizationWorkstationExtensionPlugin::updateObjectNames() {
   if (this->_LUTEditingArea) {
     int objectIndex = 0;
-    this->_LUTEditingArea->layout()->dumpObjectTree();
-    for (auto editEntry : this->_LUTEditingArea->layout()->children()) {
-      if (QHBoxLayout* hLayout = qobject_cast<QHBoxLayout*>(editEntry)) {
+    for (int i = 0; i < this->_LUTEditingArea->layout()->count(); ++i) {
+      if (QHBoxLayout* hLayout = qobject_cast<QHBoxLayout*>(this->_LUTEditingArea->layout()->itemAt(i)->layout())) {
         hLayout->setObjectName(QString("editingEntry_") + QString::number(objectIndex));
         for (unsigned int i = 0; i < hLayout->count(); ++i) {
           QWidget* entryWidget = hLayout->itemAt(i)->widget();
@@ -250,7 +302,6 @@ void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<Mul
   if (!fileName.empty()) {
     std::string base = core::extractBaseName(fileName);
     std::string likImgPth = core::completePath(base + "_likelihood_map.tif", core::extractFilePath(fileName));
-    std::string segmXMLPth = core::completePath(base + "_detections.xml", core::extractFilePath(fileName));
     this->loadNewForegroundImage(likImgPth);
   }
 }
@@ -356,7 +407,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     _viewer->setForegroundChannel(_foregroundChannel);
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
     LUTBox->setCurrentText(_currentLUT);
-    _viewer->setForegroundLUT(_currentLUT.toStdString());
+    _viewer->setForegroundLUT(pathology::ColorLookupTables[_currentLUT.toStdString()]);
   }
 }
 
@@ -415,11 +466,17 @@ void VisualizationWorkstationExtensionPlugin::onOpacityChanged(double opacity) {
 }
 
 void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTname) {
-  if (_viewer && LUTname != _currentLUT) {
+  if (_viewer) {
     _currentLUT = LUTname;
+    QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
+    LUTBox->setCurrentText(LUTname);
     QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
     LUTEditorBox->setCurrentText(LUTname);
-    _viewer->setForegroundLUT(LUTname.toStdString());
+    this->generateLUTEditingWidgets(_currentLUT);
+    if (_editingLUT && !_previewingLUT) {
+      _viewer->setForegroundLUT(_LUTsBeforeEdit[_currentLUTBeforeEdit.toStdString()]);
+    }
+    _viewer->setForegroundLUT(pathology::ColorLookupTables[_currentLUT.toStdString()]);
   }
 }
 void VisualizationWorkstationExtensionPlugin::onChannelChanged(int channel) {

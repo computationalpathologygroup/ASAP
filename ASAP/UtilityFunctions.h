@@ -105,12 +105,11 @@ inline std::tuple<float, float, float> hsv2rgb(std::tuple<float, float, float> h
     return out;
 }
 
-inline unsigned int applyLUT(const float& val, const std::string& LUTname) {
-  const pathology::LUT& currentLUT = pathology::ColorLookupTables.at(LUTname);
-  const std::vector<float> LUTindices = currentLUT.indices;
-  const std::vector<std::array<unsigned char, 4> > LUTcolors = currentLUT.colors;
+inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
+  const std::vector<float> LUTindices = LUT.indices;
+  const std::vector<std::array<unsigned char, 4> > LUTcolors = LUT.colors;
   float ind = val;
-  if (currentLUT.wrapAround) {
+  if (LUT.wrapAround) {
       ind = fmod(val, LUTindices.back());
   }
   auto larger = std::upper_bound(LUTindices.begin(), LUTindices.end(), ind); //  
@@ -150,7 +149,7 @@ inline unsigned int applyLUT(const float& val, const std::string& LUTname) {
 }
 
 template<typename T>
-QImage convertMonochromeToRGB(T* data, unsigned int width, unsigned int height, unsigned int channel, unsigned int numberOfChannels, double channelMin, double channelMax, const std::string& LUTname) {
+QImage convertMonochromeToRGB(T* data, unsigned int width, unsigned int height, unsigned int channel, unsigned int numberOfChannels, double channelMin, double channelMax, const pathology::LUT& LUT) {
   QImage img(width, height, QImage::Format_ARGB32_Premultiplied);
 
   // Access the image at low level.  From the manual, a 32-bit RGB image is just a
@@ -159,7 +158,7 @@ QImage convertMonochromeToRGB(T* data, unsigned int width, unsigned int height, 
 
   for (unsigned int i = channel, j = 0; i < width*height*numberOfChannels; i += numberOfChannels, ++j)
   {
-     pixels[j] = applyLUT(data[i], LUTname);
+     pixels[j] = applyLUT(data[i], LUT);
   }
   return img;
 }

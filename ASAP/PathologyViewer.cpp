@@ -273,9 +273,9 @@ void PathologyViewer::onForegroundImageChanged(std::weak_ptr<MultiResolutionImag
   }
 }
 
-void PathologyViewer::setForegroundLUT(const std::string& LUTname) {
+void PathologyViewer::setForegroundLUT(const pathology::LUT& LUT) {
   if (_renderthread) {
-    _renderthread->onLUTChanged(LUTname);
+    _renderthread->onLUTChanged(LUT);
     if (_for_img.lock()) {
       _manager->refresh();
     }

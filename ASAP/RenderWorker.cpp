@@ -17,7 +17,7 @@ RenderWorker::RenderWorker(RenderThread* thread) :
   _level(0.5),
   _opacity(1.0),
   _foregroundImageScale(1.),
-  _LUTname("Normal")
+  _LUT()
 {
 }
 
@@ -49,9 +49,9 @@ void RenderWorker::setWindowAndLevel(float window, float level) {
   mutex.unlock();
 }
 
-void RenderWorker::setLUT(const std::string& LUTname) {
+void RenderWorker::setLUT(const pathology::LUT& LUT) {
   mutex.lock();
-  _LUTname = LUTname;
+  _LUT = LUT;
   mutex.unlock();
 }
 
@@ -139,10 +139,10 @@ QPixmap RenderWorker::renderBackgroundImage(std::shared_ptr<MultiResolutionImage
     renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 3, QImage::Format_RGB888);
   }
   else if (colorType == pathology::ColorType::ARGB) {
-    renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 4, QImage::Format_ARGB32);
+    renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 4, QImage::Format::Format_RGBA8888);
   }
   else {
-    renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _backgroundChannel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue(), "Normal");
+    renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _backgroundChannel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue(), pathology::ColorLookupTables["Normal"]);
   }
   QPixmap renderedPixmap = QPixmap::fromImage(renderedImg);
   delete[] imgBuf;
@@ -171,7 +171,7 @@ QPixmap RenderWorker::renderForegroundImage(std::shared_ptr<MultiResolutionImage
   float fgLevelDownsample = local_for_img->getLevelDownsample(fgImageLevel);
   T *imgBuf = new T[correctedTileSize*correctedTileSize*samplesPerPixel];
   local_for_img->getRawRegion(currentJob._imgPosX * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, currentJob._imgPosY * fgLevelDownsample * foregroundExtraScaling * currentJob._tileSize, correctedTileSize, correctedTileSize, fgImageLevel, imgBuf);  
-  QImage renderedImage = convertMonochromeToRGB(imgBuf, correctedTileSize, correctedTileSize, _foregroundChannel, samplesPerPixel, 0, 255, _LUTname);
+  QImage renderedImage = convertMonochromeToRGB(imgBuf, correctedTileSize, correctedTileSize, _foregroundChannel, samplesPerPixel, 0, 255, _LUT);
 
   if (_foregroundImageScale != 1) {
     renderedImage = renderedImage.scaled(currentJob._tileSize, currentJob._tileSize);

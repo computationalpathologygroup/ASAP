@@ -15,6 +15,10 @@ class TileManager;
 class ScaleBar;
 class QSettings;
 
+namespace pathology {
+  struct LUT;
+}
+
 class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 {
     Q_OBJECT
@@ -39,7 +43,7 @@ public:
     void  setForegroundOpacity(const float& opacity);
 
     void setForegroundWindowAndLevel(const float& window, const float& level);
-    void setForegroundLUT(const std::string& LUTname);
+    void setForegroundLUT(const pathology::LUT& LUT);
     void setForegroundChannel(unsigned int channel);
 
     void togglePan(bool pan, const QPoint& startPos = QPoint());

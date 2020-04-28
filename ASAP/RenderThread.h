@@ -48,7 +48,7 @@ public:
   void onBackgroundChannelChanged(int channel);
   void onForegroundChannelChanged(int channel);
   void onWindowAndLevelChanged(float window, float level);
-  void onLUTChanged(std::string LUTname);
+  void onLUTChanged(const pathology::LUT& LUTname);
 
 protected :
   void run();
