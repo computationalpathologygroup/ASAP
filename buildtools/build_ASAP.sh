@@ -10,7 +10,7 @@ else
     build_gui="false"
 fi
 echo "Building ASAP with Python ${python_ver}; building GUI = ${build_gui}"
-if [ "${build_gui}" = "false" ] ; then \
+if [ "${build_gui}" = "true" ] ; then \
         cmake ../src -DPugiXML_INCLUDE_DIR=/root/pugixml-1.9/src/ -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
                     -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE -DBUILD_TESTS=TRUE -DCMAKE_BUILD_TYPE=Release \
