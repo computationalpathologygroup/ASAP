@@ -1,6 +1,4 @@
 FROM ubuntu:18.04
-ARG python_version=3.7
-ARG only_multiresolutionimageinterface=false
 
 ENV TZ=Europe/Amsterdam
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -24,26 +22,34 @@ RUN apt-get update \
         libopenslide-dev \
         wget \
         swig \
-        libunittest++-dev
+        libunittest++-dev \
+        ca-certificates \
+        nano
 
-RUN apt-get install -y -qq --no-install-recommends \
-        python${python_version} \
-        python${python_version}-dev \
-        python3-pip \
-        python3-setuptools
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    mkdir /root/.conda &&\
+    bash Miniconda3-latest-Linux-x86_64.sh -b &&\
+    rm -f Miniconda3-latest-Linux-x86_64.sh
 
-RUN rm /usr/bin/python3 
-RUN ln -s /usr/bin/python${python_version} /usr/bin/python3    
-        
-RUN python3 -m pip install numpy==1.16.1
+RUN /root/miniconda3/bin/conda update -n base -c defaults conda && \
+    /root/miniconda3/bin/conda create --name build_python3.6m python=3.6 && \
+    /root/miniconda3/bin/conda install -n build_python3.6m numpy nomkl &&\
+    /root/miniconda3/bin/conda create --name build_python3.7m python=3.7 && \
+    /root/miniconda3/bin/conda install -n build_python3.7m numpy nomkl && \
+    /root/miniconda3/bin/conda create --name build_python3.8 python=3.8 && \
+    /root/miniconda3/bin/conda install -n build_python3.8 numpy nomkl
+
+RUN ln -sd /root/miniconda3/envs/build_python3.7m/lib/python3.7 /root/miniconda3/envs/build_python3.7m/lib/python3.7m && \
+    ln -sd /root/miniconda3/envs/build_python3.7m/lib/python3.6 /root/miniconda3/envs/build_python3.7m/lib/python3.6m
+
 WORKDIR /root
-RUN wget https://github.com/zeux/pugixml/archive/v1.9.tar.gz && tar xzf v1.9.tar.gz && rm v1.9.tar.gz
-RUN wget ftp://dicom.offis.de/pub/dicom/offis/software/dcmtk/dcmtk364/dcmtk-3.6.4.tar.gz && tar xzf dcmtk-3.6.4.tar.gz && mv dcmtk-3.6.4 dcmtk && rm dcmtk-3.6.4.tar.gz
-RUN git clone https://github.com/computationalpathologygroup/ASAP src
-RUN mkdir build
+RUN wget https://github.com/zeux/pugixml/archive/v1.9.tar.gz && tar xzf v1.9.tar.gz && rm v1.9.tar.gz && \
+    wget ftp://dicom.offis.de/pub/dicom/offis/software/dcmtk/dcmtk364/dcmtk-3.6.4.tar.gz && tar xzf dcmtk-3.6.4.tar.gz && mv dcmtk-3.6.4 dcmtk && rm dcmtk-3.6.4.tar.gz
+RUN git clone https://github.com/computationalpathologygroup/ASAP src &&\
+    mkdir build
+
 WORKDIR /root/build      
 COPY build_ASAP.sh /root/build/build_ASAP.sh
-ENV BUILD_GUI=${only_multiresolutionimageinterface}
-ENV BUILD_PYTHON_VERSION=${python_version}
 RUN chmod a+rxwX ./build_ASAP.sh
+
 CMD ./build_ASAP.sh
