@@ -37,8 +37,14 @@ if [ "${build_gui}" = "true" ] ; then \
     ; fi
 export LD_LIBRARY_PATH=/root/miniconda3/envs/build_python${python_ver}/lib
 make package
-if [ "${build_gui}" = "true" ] ; then \
-        for file in *.deb; do mv $file /artifacts/$(basename $file .deb)-py${python_ver}.deb; done \
-; else \
-        for file in *.deb; do mv $file /artifacts/$(basename $file .deb)-nogui-py${python_ver}.deb; done \
-; fi
+if [ "${build_gui}" = "true" ] ; then
+        for file in *.deb; do
+          set outbasename="$(cut -d'-' -f1,2 <<<"$file")"
+          mv $file /artifacts/${outbasename}-py${python_ver}-Linux.deb;
+        done;
+else
+        for file in *.deb; do
+          set outbasename="$(cut -d'-' -f1,2 <<<"$file")";
+          mv $file /artifacts/${outbasename}-nogui-py${python_ver}-Linux.deb;
+done;
+fi
