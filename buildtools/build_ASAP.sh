@@ -4,8 +4,15 @@ if [ "$1" != "" ]; then
 else
     python_ver="3.8"
 fi
+
 if [ "$2" != "" ]; then
-    build_gui="$2"
+    python_ver_no_dot="$2"
+else
+    python_ver_no_dot="38"
+fi
+
+if [ "$3" != "" ]; then
+    build_gui="$3"
 else
     build_gui="false"
 fi
@@ -39,12 +46,12 @@ export LD_LIBRARY_PATH=/root/miniconda3/envs/build_python${python_ver}/lib
 make package
 if [ "${build_gui}" = "true" ] ; then
         for file in *.deb; do
-          set outbasename="$(cut -d'-' -f1,2 <<<"$file")"
-          mv $file /artifacts/${outbasename}-py${python_ver}-Linux.deb
+          outbasename="$(cut -d'-' -f1,2 <<<"$file")"
+          mv $file /artifacts/${outbasename}-py${python_ver_no_dot}-Linux.deb
         done;
 else
         for file in *.deb; do
-          set outbasename="$(cut -d'-' -f1,2 <<<"$file")"
-          mv $file /artifacts/${outbasename}-nogui-py${python_ver}-Linux.deb
+          outbasename="$(cut -d'-' -f1,2 <<<"$file")"
+          mv $file /artifacts/${outbasename}-nogui-py${python_ver_no_dot}-Linux.deb
         done;
 fi
