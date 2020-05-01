@@ -40,11 +40,11 @@ make package
 if [ "${build_gui}" = "true" ] ; then
         for file in *.deb; do
           set outbasename="$(cut -d'-' -f1,2 <<<"$file")"
-          mv $file /artifacts/${outbasename}-py${python_ver}-Linux.deb;
+          mv $file /artifacts/${outbasename}-py${python_ver}-Linux.deb
         done;
 else
         for file in *.deb; do
-          set outbasename="$(cut -d'-' -f1,2 <<<"$file")";
-          mv $file /artifacts/${outbasename}-nogui-py${python_ver}-Linux.deb;
-done;
+          set outbasename="$(cut -d'-' -f1,2 <<<"$file")"
+          mv $file /artifacts/${outbasename}-nogui-py${python_ver}-Linux.deb
+        done;
 fi
