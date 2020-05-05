@@ -42,8 +42,10 @@ RUN /root/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
     /root/miniconda3/bin/conda install --quiet -n build_python3.8 numpy nomkl
 
 RUN ln -sd /root/miniconda3/envs/build_python3.7m/lib/python3.7 /root/miniconda3/envs/build_python3.7m/lib/python3.7m && \
-    ln -sd /root/miniconda3/envs/build_python3.6m/lib/python3.6 /root/miniconda3/envs/build_python3.6m/lib/python3.6m && \
-    ln -sf /usr/lib/x86_64-linux-gnu/libijg8.so /usr/lib/libijg8.so
+    ln -sd /root/miniconda3/envs/build_python3.6m/lib/python3.6 /root/miniconda3/envs/build_python3.6m/lib/python3.6m
+
+# Small hack to as libijg8 is installed in a different locations in Ubuntu 20.04
+RUN ln -s /usr/lib/x86_64-linux-gnu/libijg8.so /usr/lib/libijg8.so; exit 0;
 
 WORKDIR /root
 RUN wget -q https://github.com/zeux/pugixml/archive/v1.9.tar.gz && tar xzf v1.9.tar.gz && rm v1.9.tar.gz && \
