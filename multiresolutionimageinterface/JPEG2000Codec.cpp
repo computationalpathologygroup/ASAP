@@ -222,7 +222,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
   else if (dataType == pathology::DataType::UInt16) {
     depth = 16;
   }
-  else if (dataType == pathology::DataType::UInt32 && colorSpace != pathology::ColorType::ARGB) {
+  else if (dataType == pathology::DataType::UInt32 && colorSpace != pathology::ColorType::RGBA) {
     depth = 32;
   }
   
@@ -256,7 +256,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
   }
   // Also set the colorspace
   OPJ_COLOR_SPACE jpegColorSpace = OPJ_CLRSPC_GRAY;// Set the default.
-  if (colorSpace == pathology::ColorType::RGB || colorSpace == pathology::ColorType::ARGB) {
+  if (colorSpace == pathology::ColorType::RGB || colorSpace == pathology::ColorType::RGBA) {
     jpegColorSpace = OPJ_CLRSPC_SRGB;
   }
 

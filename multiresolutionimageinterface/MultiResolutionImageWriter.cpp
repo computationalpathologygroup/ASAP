@@ -63,7 +63,7 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
 	if (_cType == RGB) {
 		cDepth = 3;
 	}
-	else if (_cType == ARGB) {
+	else if (_cType == RGBA) {
 		cDepth = 4;
 	}
 	else if (_cType == Indexed) {
@@ -138,7 +138,7 @@ int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& 
 		if (_cType == RGB) {
 			cDepth = 3;
 		}
-		else if (_cType == ARGB) {
+		else if (_cType == RGBA) {
 			cDepth = 4;
 		}
 		else if (_cType == Indexed) {
@@ -188,7 +188,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 	if (_cType == RGB) {
 		cDepth = 3;
 	}
-	else if (_cType == ARGB) {
+	else if (_cType == RGBA) {
 		cDepth = 4;
 	}
 	else if (_cType == Indexed) {
@@ -273,7 +273,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 		}
 
 		unsigned int nrComponents = 3;
-		if (getColorType() == ARGB) {
+		if (getColorType() == RGBA) {
 			nrComponents = 4;
 		}
 		else if (getColorType() == Monochrome) {
@@ -583,7 +583,7 @@ void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
 	if (_cType == Monochrome || _cType == Indexed) {
 		TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 	}
-	else if (_cType == ARGB || _cType == RGB) {
+	else if (_cType == RGBA || _cType == RGB) {
 		TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	}
 
@@ -609,7 +609,7 @@ void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
 	else if (_cType == RGB) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 3);
 	}
-	else if (_cType == ARGB) {
+	else if (_cType == RGBA) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 4);
 	}
 	else if (_cType == Indexed) {
@@ -687,13 +687,13 @@ template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* l
 	if (getCompression() == JPEG2000) {
 		int depth = 8;
 		unsigned int size = npixels * sizeof(unsigned char);
-		if (getDataType() == UInt32 && getColorType() != pathology::ColorType::ARGB) {
+		if (getDataType() == UInt32 && getColorType() != pathology::ColorType::RGBA) {
 			depth = 32;
 			size = npixels * sizeof(T);
 		}
 
 		unsigned int nrComponents = 3;
-		if (getColorType() == ARGB) {
+		if (getColorType() == RGBA) {
 			nrComponents = 4;
 		}
 		else if (getColorType() == Monochrome) {

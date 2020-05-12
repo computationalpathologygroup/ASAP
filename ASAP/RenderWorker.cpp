@@ -138,8 +138,8 @@ QPixmap RenderWorker::renderBackgroundImage(std::shared_ptr<MultiResolutionImage
   if (colorType == pathology::ColorType::RGB) {
     renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 3, QImage::Format_RGB888);
   }
-  else if (colorType == pathology::ColorType::ARGB) {
-    renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 4, QImage::Format_ARGB32);
+  else if (colorType == pathology::ColorType::RGBA) {
+    renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (currentJob._tileSize), (currentJob._tileSize), (currentJob._tileSize) * 4, QImage::Format_RGBA8888);
   }
   else {
     renderedImg = convertMonochromeToRGB(imgBuf, currentJob._tileSize, currentJob._tileSize, _backgroundChannel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue(), "Normal");

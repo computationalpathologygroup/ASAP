@@ -18,7 +18,7 @@ namespace pathology {
     InvalidColorType,
     Monochrome,
     RGB,
-    ARGB,
+    RGBA,
     Indexed
   };
 
