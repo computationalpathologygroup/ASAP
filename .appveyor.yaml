@@ -1,0 +1,147 @@
+image:
+ - Visual Studio 2019
+ - Ubuntu
+
+services:
+- docker
+
+environment:
+  GIT_REDIRECT_STDERR: '2>&1'
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
+  
+  matrix:
+    - python_version:        3.6
+      python_version_linux:  3.6m
+      python_version_no_dot: 36
+      ubuntu_version:        18.04 
+    - python_version:        3.7
+      python_version_linux:  3.7m
+      python_version_no_dot: 37
+      ubuntu_version:        18.04      
+    - python_version:        3.8
+      python_version_linux:  3.8
+      python_version_no_dot: 38 
+      ubuntu_version:        18.04      
+    - python_version:        3.6
+      python_version_linux:  3.6m
+      python_version_no_dot: 36
+      ubuntu_version:        20.04    
+    - python_version:        3.7
+      python_version_linux:  3.7m
+      python_version_no_dot: 37
+      ubuntu_version:        20.04      
+    - python_version:        3.8
+      python_version_linux:  3.8
+      python_version_no_dot: 38 
+      ubuntu_version:        20.04      
+
+matrix:
+  exclude:
+    - image: Visual Studio 2019
+      ubuntu_version: 20.04
+
+install:
+  - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
+  - ps: $env:asap_minor_version=findstr "set(CURRENT_MINOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
+  - ps: $env:asap_patch_version=findstr "set(CURRENT_PATCH_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
+  - cmd: echo ASAP version %asap_major_version%.%asap_minor_version%.%asap_patch_version%-%APPVEYOR_BUILD_NUMBER%
+  - sh: export ASAP_MAJOR_VERSION="$(grep set\(CURRENT_MAJOR_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
+  - sh: export ASAP_MINOR_VERSION="$(grep set\(CURRENT_MINOR_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
+  - sh: export ASAP_PATCH_VERSION="$(grep set\(CURRENT_PATCH_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
+  - sh: echo ASAP version $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION.$ASAP_PATCH_VERSION-$APPVEYOR_BUILD_NUMBER
+  - ps: Update-AppveyorBuild -Version "$env:asap_major_version.$env:asap_minor_version.$env:asap_patch_version-$env:APPVEYOR_BUILD_NUMBER"
+
+for:
+-
+  matrix:
+    only:
+      - image: Visual Studio 2019      
+  
+  before_build:
+  - cmd: set python_location=C:/Python%python_version_no_dot%-x64
+  - cmd: set python_library=python%python_version_no_dot%.lib
+  - cmd: set python_pip=C:\Python%python_version_no_dot%-x64\Scripts\pip
+  - cmd: set artefact_name=ASAP-1.9-py%python_version_no_dot%-win64.exe
+  - ps: >-
+      If (!(Test-Path -Path 'C:\projects\pugixml')) {
+        git clone https://github.com/zeux/pugixml c:\projects\pugixml
+      }
+  - ps: >-
+      If (!(Test-Path -Path 'c:\projects\openslide')) {
+        Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/1.9/custom_openslide.zip'
+        7z x custom_openslide.zip -oc:\projects\openslide
+      }
+  - ps: >-
+      If (!(Test-Path -Path 'c:\projects\other_dependencies')) {
+        Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/1.9/other_dependencies.zip'
+        7z x other_dependencies.zip -oc:\projects\other_dependencies
+      }
+  - ps: >-
+      If (!(Test-Path -Path 'c:\projects\swig')) {
+        Start-FileDownload 'https://downloads.sourceforge.net/project/swig/swigwin/swigwin-4.0.1/swigwin-4.0.1.zip?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fswig%2Ffiles%2Fswigwin%2Fswigwin-4.0.1%2Fswigwin-4.0.1.zip%2Fdownload%3Fuse_mirror%3Dnetix&ts=1588101486'
+        7z x swigwin-4.0.1.zip -oc:\projects\swig
+      }
+  - ps: >-
+      If (!(Test-Path -Path $env:python_location\Lib\site-packages\numpy)) {
+         Invoke-Expression "$env:python_pip install numpy"
+      } 
+  - ps: >-
+      If (!(Test-Path -Path 'C:\tools\opencv')) {
+        choco install opencv
+      } 
+
+  build_script:
+  - cmd: cmake -B ./ASAP_build -DBOOST_ROOT=C:/Libraries/boost_1_71_0 -DJPEG_INCLUDE_DIR=C:\projects\openslide\artefacts\include -DJPEG_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DJPEG_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DOpenJPEG_DIR=c:/projects/openslide/artefacts/lib/openjpeg-2.3 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide/lib/libopenslide.lib -DDCMTKJPEG_INCLUDE_DIR=C:/Code/thirdparty/dcmtk-3.6.5-win64-dynamic/install/include -DDCMTKJPEG_LIBRARY=C:/Code/thirdparty/dcmtk-3.6.5-win64-dynamic/install/lib/ijg8.lib -DTIFF_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DTIFF_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DTIFF_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DZLIB_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DZLIB_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libz.dll.a -DZLIB_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libz.dll.a -DPugiXML_INCLUDE_DIR=c:/projects/pugixml/src -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_TESTS=TRUE -DQt5_DIR=C:/Qt/5.14.2/msvc2017_64/lib/cmake/Qt5 -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DUNITTEST_INCLUDE_DIR=C:/projects/other_dependencies/unittest-cpp/include/UnitTest++ -DUNITTEST_LIBRARY=C:/projects/other_dependencies/unittest-cpp/lib/UnitTest++.lib -DUNITTEST_LIBRARY_DEBUG=C:/projects/other_dependencies/unittest-cpp/lib/UnitTest++_d.lib -DUnitTest++_DIR:PATH=C:/projects/other_dependencies/unittest-cpp/lib/cmake/UnitTest++ -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPYTHON_DEBUG_LIBRARY=%python_location%/libs/%python_library% -DPYTHON_LIBRARY=%python_location%/libs//%python_library% -DPYTHON_LIBRARY_DEBUG=%python_location%/libs//%python_library% -DPYTHON_INCLUDE_DIR=%python_location%/include -DPYTHON_EXECUTABLE=%python_location%/python.exe -DPYTHON_NUMPY_INCLUDE_DIR=%python_location%/Lib/site-packages/numpy/core/include -DDCMTKJPEG_INCLUDE_DIR=C:/projects/other_dependencies/dcmtk-libjpeg/include -DDCMTKJPEG_LIBRARY=C:/projects/other_dependencies/dcmtk-libjpeg/lib/ijg8.lib -DSWIG_EXECUTABLE=c:/projects/swig/swigwin-4.0.1/swig.exe
+  - cmd: cd ./ASAP_build
+  - cmd: cmake --build . --config Release
+  - cmd: cpack
+  - ps: mv ASAP-1.9-win64.exe $env:artefact_name
+
+  cache:
+    - C:\tools\opencv -> appveyor.yml
+    - C:\projects\openslide -> appveyor.yml
+    - C:\projects\swig -> appveyor.yml
+    - C:\projects\other_dependencies -> appveyor.yml
+    - C:\projects\pugixml -> appveyor.yml
+    - 'C:\Python%python_version_no_dot%-x64\Lib\site-packages\numpy -> appveyor.yml'
+
+  artifacts:
+    - path: ./ASAP_build/*.exe
+      name: ASAP_Installer
+      
+  deploy:
+    release: ASAP $(asap_major_version).$(asap_minor_version)
+    provider: GitHub
+    auth_token:
+      secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+    artifact: ASAP_Installer
+    draft: true
+    force_update: true
+    on:
+      branch: develop                # release from master branch only
+      APPVEYOR_REPO_TAG: false       # deploy on tag push only
+      
+- 
+  matrix:
+    only:
+      - image: Ubuntu
+  build_script:
+    - sh: cd buildtools
+    - sh: docker build --tag asap_build:${ubuntu_version} --build-arg UBUNTU_VERSION=${ubuntu_version} .
+    - sh: docker run -v ${PWD}:/artifacts asap_build:${ubuntu_version} /root/build/build_ASAP.sh $python_version_linux $python_version_no_dot true
+
+  artifacts:
+    - path: ./buildtools/*.deb
+      name: ASAP_DEB_Package
+
+  deploy:
+    release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
+    provider: GitHub
+    auth_token:
+      secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+    artifact: ASAP_DEB_Package
+    draft: true
+    force_update: true
+    on:
+      branch: develop                # release from master branch only
+      APPVEYOR_REPO_TAG: false       # deploy on tag push only

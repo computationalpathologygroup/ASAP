@@ -1,5 +1,7 @@
 # ASAP - Automated Slide Analysis Platform
 
+[![Build status](https://ci.appveyor.com/api/projects/status/gy0rv4vos88aiq53?svg=true)](https://ci.appveyor.com/project/GeertLitjens/asap)
+
 ASAP is an open source platform for visualizing, annotating and automatically analyzing whole-slide histopathology images. It consists of several key-components (slide input/output, image processing, viewer) which can be used seperately. It is built on top of several well-developed open source packages like OpenSlide, Qt and OpenCV but also tries to extend them in several meaningful ways.
 
 #### Features
@@ -16,7 +18,7 @@ ASAP is an open source platform for visualizing, annotating and automatically an
 
 #### Installation
 
-Currently ASAP is only supported under 64-bit Windows and Linux machines. Compilation on other architectures should be relatively straightforward as no OS-specific libraries or headers are used. The easiest way to install the software is to download the binary installer or .DEB package from the release page. If you install the DEB package, you can find the ASAP executable under /opt/ASAP/bin.
+Currently ASAP is only supported under 64-bit Windows and Linux machines. Compilation on other architectures should be relatively straightforward as no OS-specific libraries or headers are used. The easiest way to install the software is to download the binary installer or .DEB package from the release page. **If you install the DEB package, you can find the ASAP executable under /opt/ASAP/bin**.
 
 #### Compilation
 
@@ -35,9 +37,7 @@ To compile the code yourself, some prerequesites are required. First, we use CMa
 - zlib (http://www.zlib.net/)
 - unittest++ (https://github.com/unittest-cpp/unittest-cpp)
 
-To help developers compile this software themselves we provide the necesarry binaries (Visual Studio 2013, 64-bit) for all third party libraries on Windows except Boost, OpenCV and Qt (due to size constraints). If you want to provide the packages yourself, there are no are no strict version requirements, except for libtiff (4.0.1 and higher), Boost (1.55 or higher), Qt (5.1 or higher) and OpenCV (3.1). On Linux all packages except OpenCV 3.1 can be installed through the package manager on Ubuntu-derived systems (tested on Ubuntu and Kubuntu 16.04 LTS). OpenCV 3.1 can easily be compile yourself.
-
-To compile the source code yourself, first make sure all third-party libraries are installed. If you download the Boost-binaries for Windows (http://sourceforge.net/projects/boost/files/boost-binaries/), you need to rename the folder containing the .lib and .dll files to lib (otherwise the CMake-modules provided by CMake will not be able to find the libraries).
+To help developers compile this software themselves we provide the necesarry binaries (Visual Studio 2013, 64-bit) for all third party libraries on Windows except Boost, OpenCV and Qt (due to size constraints). See the Release page for binaries. If you want to provide the packages yourself, there are no are no strict version requirements, except for libtiff (4.0.1 and higher), Boost (1.55 or higher), Qt (5.1 or higher) and OpenCV (3.1). On Linux all packages can be installed through the package manager on Ubuntu-derived systems (tested on Ubuntu and Kubuntu 18.04 LTS). You can also use the provided Dockerfile for Linux builds (under buildtools).
 
 Subsequently, fire up CMake, point it to a source and build directory and hit Configure. Select your compiler of preference and hit ok. This will start the iterative process of CMake trying to find a third party dependency and you specifiying its location. The first one to provide will be Boost. To allow CMake to find Boost add a BOOST\_ROOT variable pointing to for example C:/libs/boost\_1\_57\_0. Then press Configure again and CMake will ask for the next library. These should be pretty straightforward to fill in (e.g. TIFF\_LIBRRARY should point to tiff.lib, TIFF\_INCLUDE\_DIRECTORY to |folder to libtiff|\include. If more steps are unclear, please open a ticket on the Github issue-tracker.
 

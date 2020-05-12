@@ -4,12 +4,21 @@ if [ "$1" != "" ]; then
 else
     python_ver="3.8"
 fi
+
 if [ "$2" != "" ]; then
-    build_gui="$2"
+    python_ver_no_dot="$2"
+else
+    python_ver_no_dot="38"
+fi
+
+if [ "$3" != "" ]; then
+    build_gui="$3"
 else
     build_gui="false"
 fi
-echo "Building ASAP with Python ${python_ver}; building GUI = ${build_gui}"
+ubuntu_version=$(grep 'DISTRIB_RELEASE' /etc/lsb-release | cut -d'=' -f2)
+ubuntu_version_no_dots=$(echo ${ubuntu_version} | tr -d ".")
+echo "Building ASAP with Python ${python_ver}; building GUI = ${build_gui}; on Ubuntu ${ubuntu_version}"
 if [ "${build_gui}" = "true" ] ; then \
         cmake ../src -DPugiXML_INCLUDE_DIR=/root/pugixml-1.9/src/ -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
@@ -37,14 +46,15 @@ if [ "${build_gui}" = "true" ] ; then \
     ; fi
 export LD_LIBRARY_PATH=/root/miniconda3/envs/build_python${python_ver}/lib
 make package
+
 if [ "${build_gui}" = "true" ] ; then
         for file in *.deb; do
-          set outbasename="$(cut -d'-' -f1,2 <<<"$file")"
-          mv $file /artifacts/${outbasename}-py${python_ver}-Linux.deb;
+          outbasename="$(cut -d'-' -f1,2 <<<"$file")"
+          mv $file /artifacts/${outbasename}-py${python_ver_no_dot}-Ubuntu${ubuntu_version_no_dots}.deb
         done;
 else
         for file in *.deb; do
-          set outbasename="$(cut -d'-' -f1,2 <<<"$file")";
-          mv $file /artifacts/${outbasename}-nogui-py${python_ver}-Linux.deb;
-done;
+          outbasename="$(cut -d'-' -f1,2 <<<"$file")"
+          mv $file /artifacts/${outbasename}-nogui-py${python_ver_no_dot}-Ubuntu${ubuntu_version_no_dots}.deb
+        done;
 fi
