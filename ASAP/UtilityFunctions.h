@@ -107,13 +107,13 @@ inline std::tuple<float, float, float> hsv2rgb(std::tuple<float, float, float> h
 
 inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
   const std::vector<float> LUTindices = LUT.indices;
-  const std::vector<std::array<unsigned char, 4> > LUTcolors = LUT.colors;
+  const std::vector<rgbaArray > LUTcolors = LUT.colors;
   float ind = val;
   if (LUT.wrapAround) {
       ind = fmod(val, LUTindices.back());
   }
   auto larger = std::upper_bound(LUTindices.begin(), LUTindices.end(), ind); //  
-  std::array<unsigned char, 4> currentColor;
+  rgbaArray currentColor;
   if (larger == LUTindices.begin()) {
           currentColor = LUTcolors[0];
   }
@@ -129,8 +129,8 @@ inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
       float index_prev_val = *(larger - 1);
       float index_range = index_next_val - index_prev_val;
       float val_normalized = (val - index_prev_val) / index_range;
-      std::array<unsigned char, 4> rgba_prev = LUTcolors[index_next - 1];
-      std::array<unsigned char, 4> rgba_next = LUTcolors[index_next];
+      rgbaArray rgba_prev = LUTcolors[index_next - 1];
+      rgbaArray rgba_next = LUTcolors[index_next];
       std::tuple<float, float, float> rgb_prev = std::make_tuple(rgba_prev[0]/255., rgba_prev[1] / 255., rgba_prev[2] / 255.);
       std::tuple<float, float, float> rgb_next = std::make_tuple(rgba_next[0] / 255., rgba_next[1] / 255., rgba_next[2] / 255.);
       std::tuple<float, float, float> hsv_prev = rgb2hsv(rgb_prev);

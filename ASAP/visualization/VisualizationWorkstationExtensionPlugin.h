@@ -19,23 +19,31 @@ class VisualizationWorkstationExtensionPlugin : public WorkstationExtensionPlugi
     Q_INTERFACES(WorkstationExtensionPluginInterface)
 
 private :
-
+  // Images
   std::shared_ptr<MultiResolutionImage> _foreground;
+  std::vector<unsigned long long> _backgroundDimensions;
+
+  // GUI Components
   QDockWidget* _dockWidget;
   QCheckBox* _likelihoodCheckBox;
   QCheckBox* _segmentationCheckBox;
   QDialog*  _LUTEditor;
   QWidget* _LUTEditingArea;
-  float _opacity;
-  float _foregroundChannel;
-  bool  _renderingEnabled;
-  float _foregroundScale;
-  bool _editingLUT;
-  bool _previewingLUT;
+
+  // Visualization parameters
+  std::map<std::string, pathology::LUT> _colorLookupTables;
   std::map<std::string, pathology::LUT> _LUTsBeforeEdit;
   QString _currentLUT;
   QString _currentLUTBeforeEdit;
-  std::vector<unsigned long long> _backgroundDimensions;
+  float _opacity;
+  float _foregroundChannel;
+
+  // State parameters
+  bool  _renderingEnabled;
+  float _foregroundScale;
+  bool  _editingLUT;
+  bool  _previewingLUT;
+
   void loadNewForegroundImage(const std::string& resultImagePth);
   void setDefaultVisualizationParameters(std::shared_ptr<MultiResolutionImage> img);
   void updateObjectNames();

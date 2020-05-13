@@ -23,6 +23,8 @@
 #include "annotation/Annotation.h"
 #include "annotation/AnnotationList.h"
 
+Q_DECLARE_METATYPE(rgbaArray)
+
 VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin() :
   WorkstationExtensionPluginInterface(),
   _dockWidget(NULL),
@@ -36,10 +38,56 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _editingLUT(false),
   _previewingLUT(false)
 {
+  qRegisterMetaTypeStreamOperators<QList<float>>("QListFloat");
+  qRegisterMetaTypeStreamOperators<QList<QList<float>>>("QListRGBAArray");
+
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
+  _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
+  int nrLUTs = _settings->beginReadArray("LUTs");
+  if (nrLUTs > 0) {
+    for (int i = 0; i < nrLUTs; ++i) {
+      _settings->setArrayIndex(i);
+      std::string lutName = _settings->value("lutName").value<QString>().toStdString();
+      std::vector<float> lutIndices = _settings->value("lutIndices").value<QList<float>>().toVector().toStdVector();
+      QList<QList<float>> qtLUTColors = _settings->value("lutColors").value<QList<QList<float>>>();
+      std::vector<rgbaArray> lutColors;;
+      for (auto color : qtLUTColors) {
+        lutColors.push_back({ color[0], color[1], color[2], color[3] });
+      }
+      bool lutWrapAround = _settings->value("lutWrapAround").toBool();
+      pathology::LUT lut = { lutIndices, lutColors, lutWrapAround };
+      _colorLookupTables[lutName] = lut;
+    }
+  }
+  else {
+    _colorLookupTables = pathology::DefaultColorLookupTables;
+  }
+  _settings->endArray();
+  _settings->endGroup();
 }
 
 VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugin() { 
+  if (_settings) {
+    _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
+    _settings->beginWriteArray("LUTs");
+    int arrayIndex = 0;
+    for (auto lut : _colorLookupTables) {
+      _settings->setArrayIndex(arrayIndex);
+      _settings->setValue("lutName", QString::fromStdString(lut.first));
+      QList<float> indices = QList<float>::fromVector(QVector<float>::fromStdVector(lut.second.indices));
+      const std::vector<rgbaArray>& colors = lut.second.colors;
+      QList<QList<float>> qtColors;
+      for (auto color : colors) {
+        qtColors.append({ color[0], color[1], color[2], color[3] });
+      }
+      _settings->setValue("lutIndices", QVariant::fromValue<QList<float> >(indices));
+      _settings->setValue("lutColors", QVariant::fromValue<QList<QList<float>>>(qtColors));
+      _settings->setValue("lutWrapAround", lut.second.wrapAround);
+      arrayIndex++;
+    }
+    _settings->endArray();
+    _settings->endGroup();
+  }
   if (_foreground) {
     _foregroundScale = 1.;
     emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
@@ -76,7 +124,7 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   QCheckBox* previewCheckBox = _LUTEditor->findChild<QCheckBox*>("previewCheckBox");
   previewCheckBox->setCheckState(Qt::Unchecked);
   LUTBox->setEditable(false);
-  for (std::map<std::string, pathology::LUT>::const_iterator it = pathology::ColorLookupTables.begin(); it != pathology::ColorLookupTables.end(); ++it) {
+  for (std::map<std::string, pathology::LUT>::const_iterator it = _colorLookupTables.begin(); it != _colorLookupTables.end(); ++it) {
     LUTBox->addItem(QString::fromStdString(it->first));
     LUTEditorBox->addItem(QString::fromStdString(it->first));
   }
@@ -98,7 +146,7 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
 }
 
 void VisualizationWorkstationExtensionPlugin::generateLUTEditingWidgets(const QString& currentLUTName) {
-  pathology::LUT currentLUT = pathology::ColorLookupTables[currentLUTName.toStdString()];
+  pathology::LUT currentLUT = _colorLookupTables[currentLUTName.toStdString()];
   QScrollArea* scrollArea = _LUTEditor->findChild<QScrollArea*>("LUTEditorScrollArea");
   _LUTEditingArea = scrollArea->widget();
   delete _LUTEditingArea;
@@ -131,7 +179,7 @@ QHBoxLayout* VisualizationWorkstationExtensionPlugin::createLUTEntry(const patho
   colorSquare->setGeometry(QRect(0, 0, 25, 25));
   colorSquare->setObjectName(QString("color_") + QString::number(index));
   QPixmap square(25, 25);
-  const std::array<unsigned char, 4>& rgba = currentLUT.colors[index];
+  const rgbaArray& rgba = currentLUT.colors[index];
   square.fill(QColor(rgba[0], rgba[1], rgba[2], rgba[3]));
   colorSquare->setIcon(square);
   connect(colorSquare, SIGNAL(clicked()), this, SLOT(pickLUTColor()));
@@ -158,8 +206,8 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   QString squareName = colorSquare->objectName();
   QStringList nameList = squareName.split("_");
   int colorIndex = nameList[1].toInt();
-  std::array<unsigned char, 4> newRGBA = { red, green, blue, alpha };
-  pathology::ColorLookupTables[_currentLUT.toStdString()].colors[colorIndex] = newRGBA;
+  rgbaArray newRGBA = { red, green, blue, alpha };
+  _colorLookupTables[_currentLUT.toStdString()].colors[colorIndex] = newRGBA;
   colorSquare->setIcon(square);
   if (_editingLUT && _previewingLUT) {
     onLUTChanged(_currentLUT);
@@ -179,10 +227,10 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
   int addIndex = nameList[1].toInt();
 
   float newValue = 999.;
-  if (pathology::ColorLookupTables[_currentLUT.toStdString()].indices.size() > (addIndex + 1)) {
-    newValue = (pathology::ColorLookupTables[_currentLUT.toStdString()].indices[addIndex] + pathology::ColorLookupTables[_currentLUT.toStdString()].indices[addIndex + 1]) / 2;
+  if (_colorLookupTables[_currentLUT.toStdString()].indices.size() > (addIndex + 1)) {
+    newValue = (_colorLookupTables[_currentLUT.toStdString()].indices[addIndex] + _colorLookupTables[_currentLUT.toStdString()].indices[addIndex + 1]) / 2;
   }
-  pathology::ColorLookupTables[_currentLUT.toStdString()].indices.insert(pathology::ColorLookupTables[_currentLUT.toStdString()].indices.begin() + addIndex + 1, newValue);
+  _colorLookupTables[_currentLUT.toStdString()].indices.insert(_colorLookupTables[_currentLUT.toStdString()].indices.begin() + addIndex + 1, newValue);
 
   QVBoxLayout* parentLayout = qobject_cast<QVBoxLayout*>(qobject_cast<QWidget*>(addButton->parent())->layout());
   for (auto editEnty : parentLayout->children()) {
@@ -192,7 +240,7 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
       QStringList nameAndIndex = hlayoutName.split("_");
       int layoutIndex = nameAndIndex[1].toInt();
       if (layoutIndex == addIndex) {
-        QHBoxLayout* newEntry = createLUTEntry(pathology::ColorLookupTables[_currentLUT.toStdString()], addIndex + 1);
+        QHBoxLayout* newEntry = createLUTEntry(_colorLookupTables[_currentLUT.toStdString()], addIndex + 1);
         qobject_cast<QDoubleSpinBox*>(newEntry->itemAt(1)->widget())->setValue(newValue);
         parentLayout->insertLayout(addIndex + 1, newEntry);
       }
@@ -200,7 +248,7 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
   }    
   parentLayout->update();
 
-  pathology::ColorLookupTables[_currentLUT.toStdString()].colors.insert(pathology::ColorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, pathology::ColorLookupTables[_currentLUT.toStdString()].colors[addIndex]);
+  _colorLookupTables[_currentLUT.toStdString()].colors.insert(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, _colorLookupTables[_currentLUT.toStdString()].colors[addIndex]);
   this->updateObjectNames();
   if (_editingLUT && _previewingLUT) {
     onLUTChanged(_currentLUT);
@@ -217,12 +265,12 @@ void VisualizationWorkstationExtensionPlugin::handleEditLUTRequest()
 {
   if (_LUTEditor) {
     _editingLUT = true;
-    _LUTsBeforeEdit = pathology::ColorLookupTables;
+    _LUTsBeforeEdit = _colorLookupTables;
     _currentLUTBeforeEdit = _currentLUT;
     int result = _LUTEditor->exec();
     _editingLUT = false;
     if (!result) {
-      pathology::ColorLookupTables = _LUTsBeforeEdit;
+      _colorLookupTables = _LUTsBeforeEdit;
       onLUTChanged(_currentLUTBeforeEdit);
       _currentLUTBeforeEdit = "";
       _LUTsBeforeEdit.clear();
@@ -242,8 +290,8 @@ void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
   QString removeName = removeButton->objectName();
   QStringList nameList = removeName.split("_");
   int removeIndex = nameList[1].toInt();
-  pathology::ColorLookupTables[_currentLUT.toStdString()].colors.erase(pathology::ColorLookupTables[_currentLUT.toStdString()].colors.begin() + removeIndex);
-  pathology::ColorLookupTables[_currentLUT.toStdString()].indices.erase(pathology::ColorLookupTables[_currentLUT.toStdString()].indices.begin() + removeIndex);
+  _colorLookupTables[_currentLUT.toStdString()].colors.erase(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + removeIndex);
+  _colorLookupTables[_currentLUT.toStdString()].indices.erase(_colorLookupTables[_currentLUT.toStdString()].indices.begin() + removeIndex);
 
   QLayout* parentLayout = qobject_cast<QWidget*>(removeButton->parent())->layout();
   for (auto editEnty : parentLayout->children()) {
@@ -407,7 +455,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     _viewer->setForegroundChannel(_foregroundChannel);
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
     LUTBox->setCurrentText(_currentLUT);
-    _viewer->setForegroundLUT(pathology::ColorLookupTables[_currentLUT.toStdString()]);
+    _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
   }
 }
 
@@ -476,7 +524,7 @@ void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTnam
     if (_editingLUT && !_previewingLUT) {
       _viewer->setForegroundLUT(_LUTsBeforeEdit[_currentLUTBeforeEdit.toStdString()]);
     }
-    _viewer->setForegroundLUT(pathology::ColorLookupTables[_currentLUT.toStdString()]);
+    _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
   }
 }
 void VisualizationWorkstationExtensionPlugin::onChannelChanged(int channel) {

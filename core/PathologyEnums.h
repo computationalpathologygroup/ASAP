@@ -7,15 +7,17 @@
 #include <array>
 #include "core_export.h"
 
+typedef std::array<float, 4> rgbaArray;
+
 namespace pathology {
 
   struct LUT {
     std::vector<float> indices;
-    std::vector<std::array<unsigned char, 4> > colors;
+    std::vector<rgbaArray> colors;
     bool wrapAround;
   };
 
-  extern CORE_EXPORT std::map<std::string, LUT> ColorLookupTables;
+  extern CORE_EXPORT std::map<std::string, LUT> DefaultColorLookupTables;
 
   enum ColorType : int {
     InvalidColorType,
