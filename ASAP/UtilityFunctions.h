@@ -108,6 +108,9 @@ inline std::tuple<float, float, float> hsv2rgb(std::tuple<float, float, float> h
 inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
   const std::vector<float> LUTindices = LUT.indices;
   const std::vector<rgbaArray > LUTcolors = LUT.colors;
+  if (LUTcolors.size() == 0 || LUTindices.size() == 0) {
+    return qRgba(0,0,0,0);
+  }
   float ind = val;
   if (LUT.wrapAround) {
       ind = fmod(val, LUTindices.back());

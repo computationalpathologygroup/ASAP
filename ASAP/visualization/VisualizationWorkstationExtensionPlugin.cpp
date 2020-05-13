@@ -12,7 +12,9 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QPushButton>
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QToolButton>
 #include "multiresolutionimageinterface/MultiResolutionImageReader.h"
@@ -22,8 +24,6 @@
 #include "annotation/XmlRepository.h"
 #include "annotation/Annotation.h"
 #include "annotation/AnnotationList.h"
-
-Q_DECLARE_METATYPE(rgbaArray)
 
 VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin() :
   WorkstationExtensionPluginInterface(),
@@ -122,6 +122,10 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   QComboBox* LUTBox = content->findChild<QComboBox*>("LUTComboBox");
   QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
   QCheckBox* previewCheckBox = _LUTEditor->findChild<QCheckBox*>("previewCheckBox");
+  QPushButton* addLUTButton = _LUTEditor->findChild<QPushButton*>("addLUTButton");
+  QPushButton* removeLUTButton = _LUTEditor->findChild<QPushButton*>("removeLUTButton");
+  QPushButton* duplicateLUTButton = _LUTEditor->findChild<QPushButton*>("duplicateLUTButton");
+  QPushButton* resetAllLUTButton = _LUTEditor->findChild<QPushButton*>("resetAllLUTButton");
   previewCheckBox->setCheckState(Qt::Unchecked);
   LUTBox->setEditable(false);
   for (std::map<std::string, pathology::LUT>::const_iterator it = _colorLookupTables.begin(); it != _colorLookupTables.end(); ++it) {
@@ -136,6 +140,10 @@ QDockWidget* VisualizationWorkstationExtensionPlugin::getDockWidget() {
   connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(onOpacityChanged(double)));
   connect(channelSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onChannelChanged(int)));
   connect(openResultButton, SIGNAL(clicked()), this, SLOT(onOpenResultImageClicked()));
+  connect(addLUTButton, SIGNAL(clicked()), this, SLOT(addLUT()));
+  connect(removeLUTButton, SIGNAL(clicked()), this, SLOT(removeLUT()));
+  connect(duplicateLUTButton, SIGNAL(clicked()), this, SLOT(duplicateLUT()));
+  connect(resetAllLUTButton, SIGNAL(clicked()), this, SLOT(resetAllLUTs()));
   connect(LUTBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onLUTChanged(const QString&)));
   connect(LUTEditorBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(onLUTChanged(const QString&)));
   connect(openLUTEditorButton, SIGNAL(clicked()), this, SLOT(handleEditLUTRequest()));
@@ -212,12 +220,6 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   if (_editingLUT && _previewingLUT) {
     onLUTChanged(_currentLUT);
   }
-  else if (_editingLUT && !_previewingLUT) {
-    onLUTChanged(_currentLUTBeforeEdit);
-  }
-  else {
-    onLUTChanged(_currentLUT);
-  }
 }
 
 void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
@@ -231,6 +233,7 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
     newValue = (_colorLookupTables[_currentLUT.toStdString()].indices[addIndex] + _colorLookupTables[_currentLUT.toStdString()].indices[addIndex + 1]) / 2;
   }
   _colorLookupTables[_currentLUT.toStdString()].indices.insert(_colorLookupTables[_currentLUT.toStdString()].indices.begin() + addIndex + 1, newValue);
+  _colorLookupTables[_currentLUT.toStdString()].colors.insert(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, *(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex));
 
   QVBoxLayout* parentLayout = qobject_cast<QVBoxLayout*>(qobject_cast<QWidget*>(addButton->parent())->layout());
   for (auto editEnty : parentLayout->children()) {
@@ -251,36 +254,6 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
   _colorLookupTables[_currentLUT.toStdString()].colors.insert(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, _colorLookupTables[_currentLUT.toStdString()].colors[addIndex]);
   this->updateObjectNames();
   if (_editingLUT && _previewingLUT) {
-    onLUTChanged(_currentLUT);
-  }
-  else if (_editingLUT && !_previewingLUT) {
-    onLUTChanged(_currentLUTBeforeEdit);
-  }
-  else {
-    onLUTChanged(_currentLUT);
-  }
-}
-
-void VisualizationWorkstationExtensionPlugin::handleEditLUTRequest()
-{
-  if (_LUTEditor) {
-    _editingLUT = true;
-    _LUTsBeforeEdit = _colorLookupTables;
-    _currentLUTBeforeEdit = _currentLUT;
-    int result = _LUTEditor->exec();
-    _editingLUT = false;
-    if (!result) {
-      _colorLookupTables = _LUTsBeforeEdit;
-      onLUTChanged(_currentLUTBeforeEdit);
-      _currentLUTBeforeEdit = "";
-      _LUTsBeforeEdit.clear();
-    }
-  }
-}
-
-void VisualizationWorkstationExtensionPlugin::updateLUTPreviewStatus(int newCheckedState) {
-  _previewingLUT = (newCheckedState == Qt::Checked);
-  if (_previewingLUT) {
     onLUTChanged(_currentLUT);
   }
 }
@@ -315,10 +288,114 @@ void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
   if (_editingLUT && _previewingLUT) {
     onLUTChanged(_currentLUT);
   }
-  else if (_editingLUT && !_previewingLUT) {
-    onLUTChanged(_currentLUTBeforeEdit);
+}
+
+void VisualizationWorkstationExtensionPlugin::resetAllLUTs() {
+  QMessageBox::StandardButton reply = QMessageBox::question(_dockWidget, "Reset all LUTs", "Are you sure you want to reset all LUTs to the default? You might lose custom LUTs.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+  if (reply == QMessageBox::Yes) {
+    _colorLookupTables = pathology::DefaultColorLookupTables;
+    QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
+    QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+    LUTBox->blockSignals(true);
+    LUTBox->clear();
+    LUTEditorBox->blockSignals(true);
+    LUTEditorBox->clear();
+    for (std::map<std::string, pathology::LUT>::const_iterator it = _colorLookupTables.begin(); it != _colorLookupTables.end(); ++it) {
+      LUTBox->addItem(QString::fromStdString(it->first));
+      LUTEditorBox->addItem(QString::fromStdString(it->first));
+    }
+    LUTBox->blockSignals(false);
+    LUTEditorBox->blockSignals(false);
+    _editingLUT = false;
+    onLUTChanged(QString::fromStdString(_colorLookupTables.begin()->first));
+    _editingLUT = true;
   }
-  else {
+}
+
+void VisualizationWorkstationExtensionPlugin::addLUT() {
+  bool ok;
+  QString text = QInputDialog::getText(_dockWidget, "Enter LUT name", "Provide a name for the new LUT:", QLineEdit::EchoMode::Normal, "", &ok);
+  if (ok && !text.isEmpty()) {
+    if (_colorLookupTables.find(text.toStdString()) == _colorLookupTables.end()) {
+      std::vector<float> indices = { 0., 1. };
+      std::vector<rgbaArray> colors = { {0,0,0,0}, {1,1,1,1} };
+      pathology::LUT newLUT = { indices, colors, false };
+      _colorLookupTables[text.toStdString()] = newLUT;
+      QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
+      QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+      LUTBox->addItem(text);
+      LUTEditorBox->addItem(text);
+    }
+    else {
+      QMessageBox::warning(_dockWidget, "LUT not created!", "The name you specified already exists, LUT was not created.", QMessageBox::Ok, QMessageBox::Ok);
+    }
+  }
+}
+
+void VisualizationWorkstationExtensionPlugin::removeLUT() {
+  QMessageBox::StandardButton reply = QMessageBox::question(_dockWidget, "Remove LUT", "Are you sure you want to remove this LUT? This cannot be undone.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+  if (reply == QMessageBox::Yes) {
+    if (_colorLookupTables.size() > 1) {
+      std::string LUTToRemove = _currentLUT.toStdString();
+      QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
+      QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+      LUTBox->blockSignals(true);
+      LUTBox->removeItem(LUTBox->currentIndex());
+      LUTEditorBox->blockSignals(true);
+      LUTEditorBox->removeItem(LUTEditorBox->currentIndex());
+      LUTBox->blockSignals(false);
+      LUTEditorBox->blockSignals(false);
+      _editingLUT = false;
+      _colorLookupTables.erase(LUTToRemove);
+      onLUTChanged(QString::fromStdString(_colorLookupTables.begin()->first));
+      _editingLUT = true;
+    }
+    else {
+      QMessageBox::warning(_dockWidget, "LUT not removed!", "You cannot remove the last LUT from ASAP.", QMessageBox::Ok, QMessageBox::Ok);
+    }
+  }
+}
+
+void VisualizationWorkstationExtensionPlugin::duplicateLUT() {
+  bool ok;
+  QString text = QInputDialog::getText(_dockWidget, "Enter LUT name", "Provide a name for the new LUT:", QLineEdit::EchoMode::Normal, _currentLUT + QString("_duplicate"), &ok);
+  if (ok && !text.isEmpty()) {
+    if (_colorLookupTables.find(text.toStdString()) == _colorLookupTables.end()) {
+      _colorLookupTables[text.toStdString()] = _colorLookupTables[_currentLUT.toStdString()];
+      QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
+      QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+      LUTBox->addItem(text);
+      LUTEditorBox->addItem(text);
+    }
+    else {
+      QMessageBox::warning(_dockWidget, "LUT not created!",   "The name you specified already exists, LUT was not created.",  QMessageBox::Ok, QMessageBox::Ok);
+    }
+  }
+}
+
+void VisualizationWorkstationExtensionPlugin::handleEditLUTRequest()
+{
+  if (_LUTEditor) {
+    _editingLUT = true;
+    _LUTsBeforeEdit = _colorLookupTables;
+    _currentLUTBeforeEdit = _currentLUT;
+    int result = _LUTEditor->exec();
+    _editingLUT = false;
+    if (result) {
+      onLUTChanged(_currentLUT);
+    }
+    else {
+      _colorLookupTables = _LUTsBeforeEdit;
+      onLUTChanged(_currentLUTBeforeEdit);
+      _currentLUTBeforeEdit = "";
+      _LUTsBeforeEdit.clear();
+    }
+  }
+}
+
+void VisualizationWorkstationExtensionPlugin::updateLUTPreviewStatus(int newCheckedState) {
+  _previewingLUT = (newCheckedState == Qt::Checked);
+  if (_previewingLUT) {
     onLUTChanged(_currentLUT);
   }
 }
@@ -521,10 +598,12 @@ void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTnam
     QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
     LUTEditorBox->setCurrentText(LUTname);
     this->generateLUTEditingWidgets(_currentLUT);
-    if (_editingLUT && !_previewingLUT) {
-      _viewer->setForegroundLUT(_LUTsBeforeEdit[_currentLUTBeforeEdit.toStdString()]);
+    if (_editingLUT && _previewingLUT) {
+      _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
     }
-    _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
+    else if (!_editingLUT) {
+      _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
+    }
   }
 }
 void VisualizationWorkstationExtensionPlugin::onChannelChanged(int channel) {

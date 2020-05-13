@@ -74,6 +74,10 @@ private slots:
   void addLUTEntry();
   void handleEditLUTRequest();
   void updateLUTPreviewStatus(int newCheckedState);
+  void resetAllLUTs();
+  void addLUT();
+  void removeLUT();
+  void duplicateLUT();
 };
 
 #endif
