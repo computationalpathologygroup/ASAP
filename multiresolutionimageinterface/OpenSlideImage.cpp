@@ -5,7 +5,7 @@
 
 using namespace pathology;
 
-OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _bg_r(255), _bg_g(255), _bg_b(255) {
+OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _bg_r(255), _bg_g(255), _bg_b(255), _offsetLeft(-1), _offsetTop(-1), _offsetRight(-1), _offsetBottom(-1) {
 }
 
 OpenSlideImage::~OpenSlideImage() {
@@ -47,14 +47,42 @@ bool OpenSlideImage::initializeType(const std::string& imagePath) {
       _dataType = UChar;
       _samplesPerPixel = 3;
       _colorType = RGB;
-      for (int i = 0; i < _numberOfLevels; ++i) {
-        int64_t x, y;
-        openslide_get_level_dimensions(_slide, i, &x, &y);
-        std::vector<unsigned long long> tmp;
-        tmp.push_back(x);
-        tmp.push_back(y);
-        _levelDimensions.push_back(tmp);
+
+      // Try to get offsets if present (MRXS only)
+      const char* offset_left = openslide_get_property_value(_slide, "mirax.NONHIERLAYER_0_LEVEL_0_SECTION.COMPRESSED_STITCHING_ORIG_SLIDE_SCANNED_AREA_IN_PIXELS__LEFT");
+      if (offset_left) {
+          _offsetLeft = std::stoll(offset_left);
+          _offsetTop = std::stoll(openslide_get_property_value(_slide, "mirax.NONHIERLAYER_0_LEVEL_0_SECTION.COMPRESSED_STITCHING_ORIG_SLIDE_SCANNED_AREA_IN_PIXELS__TOP"));
+          _offsetRight = std::stoll(openslide_get_property_value(_slide, "mirax.NONHIERLAYER_0_LEVEL_0_SECTION.COMPRESSED_STITCHING_ORIG_SLIDE_SCANNED_AREA_IN_PIXELS__RIGHT"));
+          _offsetBottom = std::stoll(openslide_get_property_value(_slide, "mirax.NONHIERLAYER_0_LEVEL_0_SECTION.COMPRESSED_STITCHING_ORIG_SLIDE_SCANNED_AREA_IN_PIXELS__BOTTOM"));
+          std::vector<unsigned long long> base_level;
+          base_level.push_back(_offsetRight - _offsetLeft);
+          base_level.push_back(_offsetBottom - _offsetTop);
+          _levelDimensions.push_back(base_level);
+          for (int i = 1; i < _numberOfLevels; ++i) {
+              std::vector<unsigned long long> tmp;
+              tmp.push_back(_levelDimensions[i-1][0] / 2);
+              tmp.push_back(_levelDimensions[i-1][1] / 2);
+              _levelDimensions.push_back(tmp);
+          }
+
       }
+      else {
+          for (int i = 0; i < _numberOfLevels; ++i) {
+              int64_t x, y;
+              openslide_get_level_dimensions(_slide, i, &x, &y);
+              std::vector<unsigned long long> tmp;
+              tmp.push_back(x);
+              tmp.push_back(y);
+              _levelDimensions.push_back(tmp);
+          }
+
+          _offsetLeft = 0;
+          _offsetTop = 0;
+          _offsetRight = _levelDimensions[0][0];
+          _offsetBottom = _levelDimensions[0][1];
+      }
+
       std::stringstream ssm;
       if (openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X)) {
         ssm << openslide_get_property_value(_slide, OPENSLIDE_PROPERTY_NAME_MPP_X);
@@ -80,6 +108,7 @@ bool OpenSlideImage::initializeType(const std::string& imagePath) {
         _bg_g = ((bg_color >> 8) & 0xff);
         _bg_b = (bg_color & 0xff);
       }
+
       _isValid = true;
     }
     else {
@@ -110,7 +139,7 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
 
   boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
   unsigned int* temp = new unsigned int[width*height];
-  openslide_read_region(_slide, temp, startX, startY, level, width, height);
+  openslide_read_region(_slide, temp, startX + _offsetLeft, startY + _offsetTop, level, width, height);
 
   unsigned char* rgb = new unsigned char[width*height*3];
   unsigned char* bgra = (unsigned char*)temp;

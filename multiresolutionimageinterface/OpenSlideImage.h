@@ -38,6 +38,11 @@ private:
   unsigned char _bg_g;
   unsigned char _bg_b;
 
+  long long _offsetLeft;
+  long long _offsetTop;
+  long long _offsetRight;
+  long long _offsetBottom;
+
 };
 
 #endif
