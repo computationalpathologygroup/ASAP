@@ -205,7 +205,7 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   QToolButton* colorSquare = qobject_cast<QToolButton*>(sender());
   QPixmap old = colorSquare->icon().pixmap(25,25);
   QPixmap square(25, 25);
-  QColor newColor = QColorDialog::getColor(old.toImage().pixelColor(0, 0), NULL, QString("Select a color"));
+  QColor newColor = QColorDialog::getColor(old.toImage().pixelColor(0, 0), NULL, QString("Select a color"), QColorDialog::ShowAlphaChannel);
   square.fill(newColor);
   int red = newColor.red();
   int green = newColor.green();
@@ -218,7 +218,7 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   _colorLookupTables[_currentLUT.toStdString()].colors[colorIndex] = newRGBA;
   colorSquare->setIcon(square);
   if (_editingLUT && _previewingLUT) {
-    onLUTChanged(_currentLUT);
+    onLUTEntryChanged();
   }
 }
 
@@ -229,7 +229,7 @@ void VisualizationWorkstationExtensionPlugin::onLUTIndexChanged(double newIndex)
   int indexIndex = nameList[1].toInt();
   _colorLookupTables[_currentLUT.toStdString()].indices[indexIndex] = newIndex;
   if (_editingLUT && _previewingLUT) {
-    onLUTChanged(_currentLUT);
+    onLUTEntryChanged();
   }
 }
 
@@ -268,7 +268,7 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
 
   this->updateObjectNames();
   if (_editingLUT && _previewingLUT) {
-    onLUTChanged(_currentLUT);
+    onLUTEntryChanged();
   }
 }
 
@@ -300,7 +300,7 @@ void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
   parentLayout->update();
   this->updateObjectNames();
   if (_editingLUT && _previewingLUT) {
-    onLUTChanged(_currentLUT);
+    onLUTEntryChanged();
   }
 }
 
@@ -339,6 +339,7 @@ void VisualizationWorkstationExtensionPlugin::addLUT() {
       QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
       LUTBox->addItem(text);
       LUTEditorBox->addItem(text);
+      onLUTChanged(text);
     }
     else {
       QMessageBox::warning(_LUTEditor, "LUT not created!", "The name you specified already exists, LUT was not created.", QMessageBox::Ok, QMessageBox::Ok);
@@ -380,6 +381,7 @@ void VisualizationWorkstationExtensionPlugin::duplicateLUT() {
       QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
       LUTBox->addItem(text);
       LUTEditorBox->addItem(text);
+      onLUTChanged(text);
     }
     else {
       QMessageBox::warning(_LUTEditor, "LUT not created!",   "The name you specified already exists, LUT was not created.",  QMessageBox::Ok, QMessageBox::Ok);
@@ -518,7 +520,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
         _foregroundChannel = 0;
       }
       if (dtype == pathology::Float) {
-        _currentLUT = _settings->value("lut", "Traffic Light").toString();
+        _currentLUT = _settings->value("lut", "Traffic Light (0 - 1)").toString();
       }
       else {
         _currentLUT = _settings->value("lut", "Label").toString();
@@ -534,7 +536,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
         _currentLUT = "Label";
       }
       else {
-        _currentLUT = "Traffic Light";
+        _currentLUT = "Traffic Light (0 - 1)";
       }
     }
     QDoubleSpinBox* spinBox = _dockWidget->findChild<QDoubleSpinBox*>("OpacitySpinBox");
