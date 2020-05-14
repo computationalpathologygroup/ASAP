@@ -644,6 +644,10 @@ void MultiResolutionImageWriter::setPyramidTags(TIFF* levelTiff, const unsigned 
 	else if (_codec == JPEG) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
 		TIFFSetField(levelTiff, TIFFTAG_JPEGQUALITY, (unsigned int)_quality);
+		if (_codec == JPEG && _quality < 90) {
+			TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_YCBCR);
+			TIFFSetField(levelTiff, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
+		}
 	}
 	else if (_codec == RAW) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);

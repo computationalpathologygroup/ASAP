@@ -620,6 +620,18 @@ void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTnam
     }
   }
 }
+
+void VisualizationWorkstationExtensionPlugin::onLUTEntryChanged() {
+  if (_viewer) {
+    if (_editingLUT && _previewingLUT) {
+      _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
+    }
+    else if (!_editingLUT) {
+      _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
+    }
+  }
+}
+
 void VisualizationWorkstationExtensionPlugin::onChannelChanged(int channel) {
   if (_viewer && channel != _foregroundChannel) {
     _foregroundChannel = channel;

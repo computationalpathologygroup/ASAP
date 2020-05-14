@@ -62,6 +62,7 @@ public slots:
     void onOpacityChanged(double opacity);
     void onOpenResultImageClicked();
     void onLUTChanged(const QString& LUTname);
+    void onLUTEntryChanged();
     void onChannelChanged(int channel);
 
 signals: 
