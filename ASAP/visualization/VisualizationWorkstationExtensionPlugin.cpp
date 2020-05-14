@@ -497,8 +497,6 @@ void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::
 
 void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(std::shared_ptr<MultiResolutionImage> img) {
   if (_dockWidget) {
-    double maxValue = img->getMaxValue(_foregroundChannel);
-    double minValue = img->getMinValue(_foregroundChannel);
     if (_settings) {
       _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
       pathology::DataType dtype = img->getDataType();
@@ -546,9 +544,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     channelSpinBox->setMaximum(_foreground->getSamplesPerPixel() - 1);
     channelSpinBox->setValue(_foregroundChannel);
     _viewer->setForegroundChannel(_foregroundChannel);
-    QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
-    LUTBox->setCurrentText(_currentLUT);
-    _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
+    onLUTChanged(_currentLUT);
   }
 }
 
