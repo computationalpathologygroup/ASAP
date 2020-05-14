@@ -112,9 +112,6 @@ inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
     return qRgba(0,0,0,0);
   }
   float ind = val;
-  if (LUT.wrapAround) {
-      ind = fmod(val, LUTindices.back());
-  }
   auto larger = std::upper_bound(LUTindices.begin(), LUTindices.end(), ind); //  
   rgbaArray currentColor;
   if (larger == LUTindices.begin()) {

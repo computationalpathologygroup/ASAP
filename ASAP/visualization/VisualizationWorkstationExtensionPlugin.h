@@ -70,6 +70,7 @@ signals:
 private slots:
   void generateLUTEditingWidgets(const QString& currentLUTName);
   void pickLUTColor();
+  void onLUTIndexChanged(double newIndex);
   void removeLUTEntry();
   void addLUTEntry();
   void handleEditLUTRequest();

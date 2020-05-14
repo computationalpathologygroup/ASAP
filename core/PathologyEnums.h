@@ -14,7 +14,6 @@ namespace pathology {
   struct LUT {
     std::vector<float> indices;
     std::vector<rgbaArray> colors;
-    bool wrapAround;
   };
 
   extern CORE_EXPORT std::map<std::string, LUT> DefaultColorLookupTables;

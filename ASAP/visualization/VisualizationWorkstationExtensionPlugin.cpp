@@ -54,8 +54,7 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
       for (auto color : qtLUTColors) {
         lutColors.push_back({ color[0], color[1], color[2], color[3] });
       }
-      bool lutWrapAround = _settings->value("lutWrapAround").toBool();
-      pathology::LUT lut = { lutIndices, lutColors, lutWrapAround };
+      pathology::LUT lut = { lutIndices, lutColors };
       _colorLookupTables[lutName] = lut;
     }
   }
@@ -82,7 +81,6 @@ VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugi
       }
       _settings->setValue("lutIndices", QVariant::fromValue<QList<float> >(indices));
       _settings->setValue("lutColors", QVariant::fromValue<QList<QList<float>>>(qtColors));
-      _settings->setValue("lutWrapAround", lut.second.wrapAround);
       arrayIndex++;
     }
     _settings->endArray();
@@ -177,6 +175,7 @@ QHBoxLayout* VisualizationWorkstationExtensionPlugin::createLUTEntry(const patho
   QDoubleSpinBox* value = new QDoubleSpinBox();
   value->setMinimum(-1000);
   value->setMaximum(1000);
+  value->setObjectName(QString("value_") + QString::number(index));
   QToolButton* removeEntry = new QToolButton();;
   removeEntry->setObjectName(QString("removeButton_") + QString::number(index));
   connect(removeEntry, SIGNAL(clicked()), this, SLOT(removeLUTEntry()));
@@ -192,6 +191,7 @@ QHBoxLayout* VisualizationWorkstationExtensionPlugin::createLUTEntry(const patho
   colorSquare->setIcon(square);
   connect(colorSquare, SIGNAL(clicked()), this, SLOT(pickLUTColor()));
   value->setValue(currentLUT.indices[index]);
+  connect(value, SIGNAL(valueChanged(double)), this, SLOT(onLUTIndexChanged(double)));
   removeEntry->setText("X");
   addEntry->setText("+");
   editingEntry->addWidget(colorSquare);
@@ -222,6 +222,17 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   }
 }
 
+void VisualizationWorkstationExtensionPlugin::onLUTIndexChanged(double newIndex) {
+  QDoubleSpinBox* valueSpinBox = qobject_cast<QDoubleSpinBox*>(sender());
+  QString spinBoxName = valueSpinBox->objectName();
+  QStringList nameList = spinBoxName.split("_");
+  int indexIndex = nameList[1].toInt();
+  _colorLookupTables[_currentLUT.toStdString()].indices[indexIndex] = newIndex;
+  if (_editingLUT && _previewingLUT) {
+    onLUTChanged(_currentLUT);
+  }
+}
+
 void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
   QToolButton* addButton = qobject_cast<QToolButton*>(sender());
   QString addName = addButton->objectName();
@@ -233,7 +244,8 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
     newValue = (_colorLookupTables[_currentLUT.toStdString()].indices[addIndex] + _colorLookupTables[_currentLUT.toStdString()].indices[addIndex + 1]) / 2;
   }
   _colorLookupTables[_currentLUT.toStdString()].indices.insert(_colorLookupTables[_currentLUT.toStdString()].indices.begin() + addIndex + 1, newValue);
-  _colorLookupTables[_currentLUT.toStdString()].colors.insert(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, *(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex));
+  rgbaArray newEntryColor = _colorLookupTables[_currentLUT.toStdString()].colors[addIndex];
+  _colorLookupTables[_currentLUT.toStdString()].colors.insert(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, newEntryColor);
 
   QVBoxLayout* parentLayout = qobject_cast<QVBoxLayout*>(qobject_cast<QWidget*>(addButton->parent())->layout());
   for (auto editEnty : parentLayout->children()) {
@@ -245,13 +257,15 @@ void VisualizationWorkstationExtensionPlugin::addLUTEntry() {
       if (layoutIndex == addIndex) {
         QHBoxLayout* newEntry = createLUTEntry(_colorLookupTables[_currentLUT.toStdString()], addIndex + 1);
         qobject_cast<QDoubleSpinBox*>(newEntry->itemAt(1)->widget())->setValue(newValue);
+        QPixmap square(25, 25);        
+        square.fill(QColor(newEntryColor[0], newEntryColor[1], newEntryColor[2], newEntryColor[3]));
+        qobject_cast<QToolButton*>(newEntry->itemAt(0)->widget())->setIcon(square);
         parentLayout->insertLayout(addIndex + 1, newEntry);
       }
     }
   }    
   parentLayout->update();
 
-  _colorLookupTables[_currentLUT.toStdString()].colors.insert(_colorLookupTables[_currentLUT.toStdString()].colors.begin() + addIndex + 1, _colorLookupTables[_currentLUT.toStdString()].colors[addIndex]);
   this->updateObjectNames();
   if (_editingLUT && _previewingLUT) {
     onLUTChanged(_currentLUT);
@@ -291,7 +305,7 @@ void VisualizationWorkstationExtensionPlugin::removeLUTEntry() {
 }
 
 void VisualizationWorkstationExtensionPlugin::resetAllLUTs() {
-  QMessageBox::StandardButton reply = QMessageBox::question(_dockWidget, "Reset all LUTs", "Are you sure you want to reset all LUTs to the default? You might lose custom LUTs.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+  QMessageBox::StandardButton reply = QMessageBox::question(_LUTEditor, "Reset all LUTs", "Are you sure you want to reset all LUTs to the default? You might lose custom LUTs.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     _colorLookupTables = pathology::DefaultColorLookupTables;
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
@@ -314,12 +328,12 @@ void VisualizationWorkstationExtensionPlugin::resetAllLUTs() {
 
 void VisualizationWorkstationExtensionPlugin::addLUT() {
   bool ok;
-  QString text = QInputDialog::getText(_dockWidget, "Enter LUT name", "Provide a name for the new LUT:", QLineEdit::EchoMode::Normal, "", &ok);
+  QString text = QInputDialog::getText(_LUTEditor, "Enter LUT name", "Provide a name for the new LUT:", QLineEdit::EchoMode::Normal, "", &ok);
   if (ok && !text.isEmpty()) {
     if (_colorLookupTables.find(text.toStdString()) == _colorLookupTables.end()) {
       std::vector<float> indices = { 0., 1. };
-      std::vector<rgbaArray> colors = { {0,0,0,0}, {1,1,1,1} };
-      pathology::LUT newLUT = { indices, colors, false };
+      std::vector<rgbaArray> colors = { {0,0,0,255}, {255,255,255,255} };
+      pathology::LUT newLUT = { indices, colors };
       _colorLookupTables[text.toStdString()] = newLUT;
       QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
       QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
@@ -327,13 +341,13 @@ void VisualizationWorkstationExtensionPlugin::addLUT() {
       LUTEditorBox->addItem(text);
     }
     else {
-      QMessageBox::warning(_dockWidget, "LUT not created!", "The name you specified already exists, LUT was not created.", QMessageBox::Ok, QMessageBox::Ok);
+      QMessageBox::warning(_LUTEditor, "LUT not created!", "The name you specified already exists, LUT was not created.", QMessageBox::Ok, QMessageBox::Ok);
     }
   }
 }
 
 void VisualizationWorkstationExtensionPlugin::removeLUT() {
-  QMessageBox::StandardButton reply = QMessageBox::question(_dockWidget, "Remove LUT", "Are you sure you want to remove this LUT? This cannot be undone.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+  QMessageBox::StandardButton reply = QMessageBox::question(_LUTEditor, "Remove LUT", "Are you sure you want to remove this LUT? This cannot be undone.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     if (_colorLookupTables.size() > 1) {
       std::string LUTToRemove = _currentLUT.toStdString();
@@ -351,14 +365,14 @@ void VisualizationWorkstationExtensionPlugin::removeLUT() {
       _editingLUT = true;
     }
     else {
-      QMessageBox::warning(_dockWidget, "LUT not removed!", "You cannot remove the last LUT from ASAP.", QMessageBox::Ok, QMessageBox::Ok);
+      QMessageBox::warning(_LUTEditor, "LUT not removed!", "You cannot remove the last LUT from ASAP.", QMessageBox::Ok, QMessageBox::Ok);
     }
   }
 }
 
 void VisualizationWorkstationExtensionPlugin::duplicateLUT() {
   bool ok;
-  QString text = QInputDialog::getText(_dockWidget, "Enter LUT name", "Provide a name for the new LUT:", QLineEdit::EchoMode::Normal, _currentLUT + QString("_duplicate"), &ok);
+  QString text = QInputDialog::getText(_LUTEditor, "Enter LUT name", "Provide a name for the new LUT:", QLineEdit::EchoMode::Normal, _currentLUT + QString("_duplicate"), &ok);
   if (ok && !text.isEmpty()) {
     if (_colorLookupTables.find(text.toStdString()) == _colorLookupTables.end()) {
       _colorLookupTables[text.toStdString()] = _colorLookupTables[_currentLUT.toStdString()];
@@ -368,7 +382,7 @@ void VisualizationWorkstationExtensionPlugin::duplicateLUT() {
       LUTEditorBox->addItem(text);
     }
     else {
-      QMessageBox::warning(_dockWidget, "LUT not created!",   "The name you specified already exists, LUT was not created.",  QMessageBox::Ok, QMessageBox::Ok);
+      QMessageBox::warning(_LUTEditor, "LUT not created!",   "The name you specified already exists, LUT was not created.",  QMessageBox::Ok, QMessageBox::Ok);
     }
   }
 }
