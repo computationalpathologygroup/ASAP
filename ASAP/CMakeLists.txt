@@ -5,8 +5,8 @@ set(HEADERS
     PathologyViewer.h
     WSITileGraphicsItemCache.h
     MiniMap.h
-    RenderThread.h
-    RenderWorker.h
+    IOThread.h
+    IOWorker.h
     TileManager.h
     PrefetchThread.h
     WSITileGraphicsItem.h
@@ -21,8 +21,8 @@ set(SOURCE
     PathologyViewer.cpp
     WSITileGraphicsItemCache.cpp
     MiniMap.cpp
-    RenderThread.cpp
-    RenderWorker.cpp
+    IOThread.cpp
+    IOWorker.cpp
     PrefetchThread.cpp
     TileManager.cpp
     WSITileGraphicsItem.cpp

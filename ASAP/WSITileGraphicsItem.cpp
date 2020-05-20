@@ -6,14 +6,13 @@
 #include <QGraphicsScene>
 #include <QTransform>
 #include "WSITileGraphicsItem.h"
-#include "RenderThread.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "WSITileGraphicsItemCache.h"
 #include "TileManager.h"
 #include <QElapsedTimer>
 
 
-WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int itemLevel, unsigned int lastRenderLevel, const std::vector<float>& imgDownsamples, TileManager* manager) :
+WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int itemLevel, unsigned int lastRenderLevel, const std::vector<float>& imgDownsamples, TileManager* manager, QPixmap* foregroundPixmap, ImageSource* foregroundTile, float foregroundOpacity) :
   QGraphicsItem(),
   _item(NULL),
   _manager(NULL),
@@ -22,7 +21,10 @@ WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsi
   _tileSize(tileSize),
   _tileByteSize(tileByteSize),
   _itemLevel(itemLevel),
-  _lastRenderLevel(lastRenderLevel)
+  _lastRenderLevel(lastRenderLevel),
+  _foregroundPixmap(NULL),
+  _foregroundTile(NULL),
+  _foregroundOpacity(1.0)
 {
   if (item) {
     _item = item;
@@ -56,6 +58,14 @@ WSITileGraphicsItem::~WSITileGraphicsItem() {
     delete _item;
     _item = NULL;
   }
+  if (_foregroundPixmap) {
+    delete _foregroundPixmap;
+    _foregroundPixmap = NULL
+  }
+  if (_foregroundTile) {
+    delete _foregroundTile;
+    _foregroundTile = NULL;
+  }
   if (_manager) {
     _manager = NULL;
   }
@@ -81,35 +91,10 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
       if (draw) {
         QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
         painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
-        /*
-        if (_itemLevel == 0) {
-        painter->setPen(QPen(QColor("white")));
+        if (_foregroundPixmap) {
+          painter->setOpacity(_foregroundOpacity);
+          painter->drawPixmap(option->exposedRect, *_foregroundPixmap, pixmapArea);
         }
-        else if (_itemLevel == 1) {
-        painter->setPen(QPen(QColor("red")));
-        }
-        else if (_itemLevel == 2) {
-        painter->setPen(QPen(QColor("blue")));
-        }
-        else if (_itemLevel == 3) {
-        painter->setPen(QPen(QColor("green")));
-        }
-        else if (_itemLevel == 4) {
-        painter->setPen(QPen(QColor("purple")));
-        }
-        else if (_itemLevel == 5) {
-        painter->setPen(QPen(QColor("orange")));
-        }
-        else if (_itemLevel == 6) {
-        painter->setPen(QPen(QColor("black")));
-        }
-        painter->drawRect(QRectF(this->boundingRect().left(), this->boundingRect().top(), _physicalSize, _physicalSize));
-        QString location = QString("%1_%2_%3").arg(_tileX).arg(_tileY).arg(_itemLevel);
-        QFont font = painter->font();
-        font.setPointSizeF(2 * font.pointSizeF() * (_physicalSize / _tileSize));
-        painter->setFont(font);
-        painter->drawText(QPointF(0, 0), location);
-        */
       }
     }
   }

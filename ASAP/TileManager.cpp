@@ -1,7 +1,7 @@
 #include <sstream>
 #include "TileManager.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
-#include "RenderThread.h"
+#include "IOThread.h"
 #include "WSITileGraphicsItem.h"
 #include "WSITileGraphicsItemCache.h"
 #include <QGraphicsScene>
@@ -9,8 +9,8 @@
 #include <QCoreApplication>
 #include <cmath>
 
-TileManager::TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
-_renderThread(renderThread),
+TileManager::TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, IOThread* ioThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
+_ioThread(ioThread),
 _tileSize(tileSize),
 _lastRenderLevel(lastRenderLevel),
 _lastFOV(),
@@ -28,7 +28,7 @@ _coverageMapCacheMode(false)
 }
 
 TileManager::~TileManager() {
-  _renderThread = NULL;
+  _ioThread = NULL;
   _cache = NULL;
   _scene = NULL;
 }
@@ -69,7 +69,7 @@ QPoint TileManager::getLevelTiles(unsigned int level) {
 }
 
 void TileManager::loadAllTilesForLevel(unsigned int level) {
-  if (_renderThread) {
+  if (_ioThread) {
     if (level < _levelDownsamples.size()) {
       std::vector<unsigned long long> baseLevelDims = _levelDimensions[0];
       this->loadTilesForFieldOfView(QRectF(0, 0, baseLevelDims[0], baseLevelDims[1]), level);
@@ -81,7 +81,7 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
   if (level > _lastRenderLevel) {
     return;
   }
-  if (_renderThread) {
+  if (_ioThread) {
     QPoint topLeftTile = this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
     QPoint bottomRightTile = this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
     QRect FOVTile = QRect(topLeftTile, bottomRightTile);
@@ -96,12 +96,24 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
             if (y >= 0 && y <= nrTiles.y()) {
               if (providesCoverage(level, x, y) < 1) {
                 setCoverage(level, x, y, 1);
-                _renderThread->addJob(_tileSize, x, y, level);
+                _ioThread->addJob(_tileSize, x, y, level);
               }
             }
           }
         }
       }
+    }
+  }
+}
+
+void TileManager::updateTileForegounds() {
+  if (_cache) {
+    std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
+    for (auto item : cachedTiles) {
+      unsigned int tileLevel = item->getTileLevel();
+      unsigned int tileX = item->getTileX();
+      unsigned int tileY = item->getTileY();
+      this->setCoverage(tileLevel, tileX, tileY, 1);
     }
   }
 }
@@ -209,8 +221,8 @@ std::vector<QPainterPath> TileManager::getCoverageMaps() {
 }
 
 void TileManager::clear() {
-  _renderThread->clearJobs();
-  while (_renderThread->getWaitingThreads() != _renderThread->getWorkers().size()) {
+  _ioThread->clearJobs();
+  while (_ioThread->getWaitingThreads() != _ioThread->getWorkers().size()) {
   }
   QCoreApplication::processEvents();
   if (_cache) {

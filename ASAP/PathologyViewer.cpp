@@ -18,7 +18,7 @@
 
 #include "MiniMap.h"
 #include "ScaleBar.h"
-#include "RenderThread.h"
+#include "IOThread.h"
 #include "PrefetchThread.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "interfaces/interfaces.h"
@@ -26,13 +26,13 @@
 #include "WSITileGraphicsItem.h"
 #include "WSITileGraphicsItemCache.h"
 #include "TileManager.h"
-#include "RenderWorker.h"
+#include "IOWorker.h"
 
 using std::vector;
 
 PathologyViewer::PathologyViewer(QWidget *parent):
   QGraphicsView(parent),
-  _renderthread(NULL),
+  _ioThread(NULL),
   _prefetchthread(NULL),
   _zoomSensitivity(0.5),
   _panSensitivity(0.5),
@@ -247,17 +247,17 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
   }
   _cache = new WSITileGraphicsItemCache();
   _cache->setMaxCacheSize(_cacheSize);
-  _renderthread = new RenderThread(this);
-  _renderthread->setBackgroundImage(img);
-  _manager = new TileManager(_img, tileSize, lastLevel, _renderthread, _cache, scene());
+  _ioThread = new IOThread(this);
+  _ioThread->setBackgroundImage(img);
+  _manager = new TileManager(_img, tileSize, lastLevel, _ioThread, _cache, scene());
   setMouseTracking(true);
-  std::vector<RenderWorker*> workers = _renderthread->getWorkers();
+  std::vector<IOWorker*> workers = _ioThread->getWorkers();
   for (int i = 0; i < workers.size(); ++i) {
     QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)));
   }
   initializeImage(scene(), tileSize, lastLevel);
   initializeGUIComponents(lastLevel);
-  QObject::connect(this, SIGNAL(backgroundChannelChanged(int)), _renderthread, SLOT(onBackgroundChannelChanged(int)));
+  QObject::connect(this, SIGNAL(backgroundChannelChanged(int)), _ioThread, SLOT(onBackgroundChannelChanged(int)));
   QObject::connect(_cache, SIGNAL(itemEvicted(WSITileGraphicsItem*)), _manager, SLOT(onTileRemoved(WSITileGraphicsItem*)));
   QObject::connect(this, SIGNAL(fieldOfViewChanged(const QRectF, const unsigned int)), this, SLOT(onFieldOfViewChanged(const QRectF, const unsigned int)));
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
@@ -267,15 +267,15 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
 
 void PathologyViewer::onForegroundImageChanged(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
   _for_img = for_img;
-  if (_renderthread) {
-    _renderthread->setForegroundImage(_for_img, scale);
+  if (_ioThread) {
+    _ioThread->setForegroundImage(_for_img, scale);
     _manager->refresh();
   }
 }
 
 void PathologyViewer::setForegroundLUT(const pathology::LUT& LUT) {
-  if (_renderthread) {
-    _renderthread->onLUTChanged(LUT);
+  if (_ioThread) {
+    _ioThread->onLUTChanged(LUT);
     if (_for_img.lock()) {
       _manager->refresh();
     }
@@ -283,8 +283,8 @@ void PathologyViewer::setForegroundLUT(const pathology::LUT& LUT) {
 }
 
 void PathologyViewer::setForegroundWindowAndLevel(const float& window, const float& level) {
-  if (_renderthread) {
-    _renderthread->onWindowAndLevelChanged(window, level);
+  if (_ioThread) {
+    _ioThread->onWindowAndLevelChanged(window, level);
     if (_for_img.lock()) {
       _manager->refresh();
     }
@@ -292,8 +292,8 @@ void PathologyViewer::setForegroundWindowAndLevel(const float& window, const flo
 }
 
 void PathologyViewer::setForegroundChannel(unsigned int channel) {
-  if (_renderthread) {
-    _renderthread->onForegroundChannelChanged(channel);
+  if (_ioThread) {
+    _ioThread->onForegroundChannelChanged(channel);
     if (_for_img.lock()) {
       _manager->refresh();
     }
@@ -302,8 +302,8 @@ void PathologyViewer::setForegroundChannel(unsigned int channel) {
 
 
 void PathologyViewer::setForegroundOpacity(const float& opacity) {
-  if (_renderthread) {
-    _renderthread->setForegroundOpacity(opacity);
+  if (_ioThread) {
+    _ioThread->setForegroundOpacity(opacity);
     if (_for_img.lock()) {
       _manager->refresh();
     }
@@ -331,7 +331,7 @@ void PathologyViewer::initializeImage(QGraphicsScene* scn, unsigned int tileSize
   QRectF FOV = this->mapToScene(this->rect()).boundingRect();
   QRectF FOVImage = QRectF(FOV.left() / this->_sceneScale, FOV.top() / this->_sceneScale, FOV.width() / this->_sceneScale, FOV.height() / this->_sceneScale);
   emit fieldOfViewChanged(FOVImage, _img->getBestLevelForDownSample(maxDownsample / this->transform().m11()));
-  while (_renderthread->numberOfJobs() > 0) {
+  while (_ioThread->numberOfJobs() > 0) {
   }
 }
 
@@ -494,10 +494,10 @@ void PathologyViewer::close() {
     _cache = NULL;
   }  
   _img = NULL;
-  if (_renderthread) {
-    _renderthread->shutdown();
-    _renderthread->deleteLater();
-    _renderthread = NULL;
+  if (_ioThread) {
+    _ioThread->shutdown();
+    _ioThread->deleteLater();
+    _ioThread = NULL;
   }
   if (_map) {
     _map->setHidden(true);

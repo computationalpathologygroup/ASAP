@@ -9,7 +9,7 @@
 #include <memory>
 
 class MultiResolutionImage;
-class RenderThread;
+class IOThread;
 class WSITileGraphicsItemCache;
 class WSITileGraphicsItem;
 class QGraphicsScene;
@@ -26,7 +26,7 @@ private:
   unsigned int _lastLevel;
   unsigned int _lastRenderLevel;
   std::map<unsigned int, std::map<int, std::map<int, unsigned char> > > _coverage;
-  QPointer<RenderThread> _renderThread;
+  QPointer<IOThread> _ioThread;
   QPointer<WSITileGraphicsItemCache> _cache;
   QPointer<QGraphicsScene> _scene;
   std::vector<QPainterPath> _coverageMaps;
@@ -43,11 +43,13 @@ signals:
 
 public:
   // make sure to set `item` to NULL in the constructor
-  TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
+  TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, IOThread* renderThread, WSITileGraphicsItemCache* _cache, QGraphicsScene* scene);
   ~TileManager();
 
   void loadAllTilesForLevel(unsigned int level);
   void loadTilesForFieldOfView(const QRectF& FOV, const unsigned int level);
+
+  void updateTileForegounds();
 
   void resetCoverage(unsigned int level);
   unsigned char providesCoverage(unsigned int level, int tile_x = -1, int tile_y = -1);

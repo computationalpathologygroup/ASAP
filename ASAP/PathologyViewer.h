@@ -6,7 +6,7 @@
 #include <memory>
 
 class MultiResolutionImage;
-class RenderThread;
+class IOThread;
 class PrefetchThread;
 class ToolPluginInterface;
 class MiniMap;
@@ -118,7 +118,7 @@ private :
     QPoint _prevPan;
 
     // Members related to rendering
-    RenderThread* _renderthread;
+    IOThread* _ioThread;
     int _backgroundChannel;
     int _foregroundChannel;
     float _opacity;

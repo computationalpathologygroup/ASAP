@@ -6,19 +6,19 @@
 #include <QPixmap>
 #include <memory>
 #include "core/PathologyEnums.h"
-#include "RenderThread.h"
+#include "IOThread.h"
 
 class MultiResolutionImage;
 class FilterInterface;
 class WSITileGraphicsItem;
 
-class RenderWorker : public QThread
+class IOWorker : public QThread
 {
   Q_OBJECT
     
 public:
-  RenderWorker(RenderThread* thread);
-  ~RenderWorker();
+  IOWorker(IOThread* thread);
+  ~IOWorker();
   void abort();
 
   void setBackgroundChannel(int channel);
@@ -51,13 +51,16 @@ private :
   pathology::LUT _LUT;
 
   template <typename T>
-  QPixmap renderBackgroundImage(std::shared_ptr<MultiResolutionImage> local_bck_img, const RenderJob& currentJob, pathology::ColorType colorType);
+  QPixmap renderBackgroundImage(std::shared_ptr<MultiResolutionImage> local_bck_img, const IOJob& currentJob, pathology::ColorType colorType);
+
+  template<typename T>
+  Patch<T>* getForegroundTile(std::shared_ptr<MultiResolutionImage> local_for_img, const IOJob& currentJob);
 
   template <typename T>
-  QPixmap renderForegroundImage(std::shared_ptr<MultiResolutionImage> local_for_img, const RenderJob& currentJob, pathology::ColorType colorType);
+  QPixmap* renderForegroundImage(Patch<T>* foregroundTile);
 
 signals:
-  void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);
+  void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile = NULL, QPixmap* foregroundPixmap = NULL);
 
 };
   
