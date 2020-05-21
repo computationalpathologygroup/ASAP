@@ -22,9 +22,9 @@ WSITileGraphicsItem::WSITileGraphicsItem(QPixmap* item, unsigned int tileX, unsi
   _tileByteSize(tileByteSize),
   _itemLevel(itemLevel),
   _lastRenderLevel(lastRenderLevel),
-  _foregroundPixmap(NULL),
-  _foregroundTile(NULL),
-  _foregroundOpacity(1.0)
+  _foregroundPixmap(foregroundPixmap),
+  _foregroundTile(foregroundTile),
+  _foregroundOpacity(foregroundOpacity)
 {
   if (item) {
     _item = item;
@@ -60,7 +60,7 @@ WSITileGraphicsItem::~WSITileGraphicsItem() {
   }
   if (_foregroundPixmap) {
     delete _foregroundPixmap;
-    _foregroundPixmap = NULL
+    _foregroundPixmap = NULL;
   }
   if (_foregroundTile) {
     delete _foregroundTile;

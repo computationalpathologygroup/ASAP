@@ -13,11 +13,42 @@ class MultiResolutionImage;
 class WSITileGraphicsItem;
 class IOWorker;
 
-struct IOJob {
+class ThreadJob {
+public: 
   unsigned int _tileSize;
   long long _imgPosX;
   long long _imgPosY;
   unsigned int _level;
+  
+  ThreadJob(unsigned int tileSize, long long imgPosX, long long imgPosY, unsigned int level) :
+    _tileSize(tileSize), _imgPosX(imgPosX), _imgPosY(imgPosY), _level(level)
+  {
+  }
+
+  virtual ~ThreadJob()
+  {}
+
+};
+
+class IOJob : public ThreadJob {
+public:
+  IOJob(unsigned int tileSize, long long imgPosX, long long imgPosY, unsigned int level) :
+    ThreadJob(tileSize, imgPosX, imgPosY, level)
+  {
+  }
+
+};
+
+class RenderJob : public ThreadJob {
+public:
+  ImageSource* _foregroundTile;
+
+  RenderJob(unsigned int tileSize, long long imgPosX, long long imgPosY, unsigned int level, ImageSource* foregroundTile) :
+    ThreadJob(tileSize, imgPosX, imgPosY, level),
+    _foregroundTile(foregroundTile)
+  {
+  }
+
 };
 
 class IOThread : public QObject
@@ -28,14 +59,14 @@ public:
   IOThread(QObject *parent, unsigned int nrThreads = 2);
   ~IOThread();
 
-  void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level);
+  void addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level, ImageSource* foregroundTile = NULL);
   void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
   void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
   
   void setForegroundOpacity(const float& opacity);
   float getForegroundOpacity() const;
 
-  IOJob getJob();
+  ThreadJob* getJob();
   void clearJobs();
   unsigned int numberOfJobs();
   void shutdown();
@@ -59,7 +90,7 @@ private :
   QWaitCondition _condition;
   std::weak_ptr<MultiResolutionImage> _bck_img;
   std::weak_ptr<MultiResolutionImage> _for_img;
-  std::list<IOJob> _jobList;
+  std::list<ThreadJob*> _jobList;
   std::vector<IOWorker*> _workers;
   unsigned int _threadsWaiting;
 };

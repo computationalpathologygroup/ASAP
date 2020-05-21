@@ -71,14 +71,6 @@ public :
     return 0;
   }
 
-  std::vector<T> getAllItems() {
-    std::vector<T> allItems;
-    for (auto it = _cache.begin(); it != _cache.end(); ++it) {
-      allItems.push_back(it->second.first.first);
-    }
-    return allItems;
-  }
-
   unsigned long long currentCacheSize() const {return _cacheCurrentByteSize;}
   unsigned long long maxCacheSize() const {return _cacheMaxByteSize;}
   void setMaxCacheSize(const unsigned long long& cacheMaxByteSize) {

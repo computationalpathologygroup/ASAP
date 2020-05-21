@@ -14,6 +14,7 @@ public :
   void clear();
   void get(const keyType& k, WSITileGraphicsItem* tile, unsigned int& size);
   int set(const keyType& k, WSITileGraphicsItem* v, unsigned int size, bool topLevel = false);
+  std::vector<WSITileGraphicsItem*> getAllItems();
 
 protected:
   void evict();

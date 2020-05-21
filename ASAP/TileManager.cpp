@@ -1,4 +1,5 @@
 #include <sstream>
+#include "core/ImageSource.h"
 #include "TileManager.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "IOThread.h"
@@ -110,16 +111,35 @@ void TileManager::updateTileForegounds() {
   if (_cache) {
     std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
     for (auto item : cachedTiles) {
+      unsigned int tileSize = item->getTileSize();
       unsigned int tileLevel = item->getTileLevel();
       unsigned int tileX = item->getTileX();
       unsigned int tileY = item->getTileY();
+      ImageSource* foregroundTile = item->getForegroundTile(); // Needs a fix, tile can be evicted before job is completed.
       this->setCoverage(tileLevel, tileX, tileY, 1);
+      _ioThread->addJob(tileSize, tileX, tileY, tileLevel, foregroundTile);
     }
   }
 }
 
-void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel) {
-  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this);
+void TileManager::onForegroundTileRendered(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileLevel) {
+  if (_cache) {
+    std::stringstream ss;
+    ss << tileX << "_" << tileY << "_" << tileLevel;
+    std::string key;
+    ss >> key;
+
+    WSITileGraphicsItem* item = NULL;
+    unsigned int size = 0;
+    _cache->get(key, item, size);
+    if (item) {
+      item->setForegroundPixmap(tile);
+    }
+  }
+}
+
+void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile, QPixmap* foregroundPixmap) {
+  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this, foregroundPixmap, foregroundTile);
   std::stringstream ss;
   ss << tileX << "_" << tileY << "_" << tileLevel;
   std::string key;
@@ -143,6 +163,14 @@ void TileManager::onTileRemoved(WSITileGraphicsItem* tile) {
   _scene->removeItem(tile);
   setCoverage(tile->getTileLevel(), tile->getTileX(), tile->getTileY(), 0);
   delete tile;
+}
+
+void TileManager::onForegroundOpacityChanged(float opacity) {
+  _foregroundOpacity = opacity;
+  std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
+  for (auto item : cachedTiles) {
+    item->setForegroundOpacity(opacity);
+  }
 }
 
 void TileManager::setCoverageMapModeToCache() {

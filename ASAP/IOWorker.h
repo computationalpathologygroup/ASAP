@@ -50,17 +50,21 @@ private :
   float _foregroundImageScale;
   pathology::LUT _LUT;
 
+  bool executeIOJob(IOJob* job);
+  bool executeRenderJob(RenderJob* job);
+
   template <typename T>
-  QPixmap renderBackgroundImage(std::shared_ptr<MultiResolutionImage> local_bck_img, const IOJob& currentJob, pathology::ColorType colorType);
+  QPixmap* renderBackgroundImage(std::shared_ptr<MultiResolutionImage> local_bck_img, const IOJob* currentJob, pathology::ColorType colorType);
 
   template<typename T>
-  Patch<T>* getForegroundTile(std::shared_ptr<MultiResolutionImage> local_for_img, const IOJob& currentJob);
-
-  template <typename T>
-  QPixmap* renderForegroundImage(Patch<T>* foregroundTile);
+  Patch<T>* getForegroundTile(std::shared_ptr<MultiResolutionImage> local_for_img, const IOJob* currentJob);
+  
+  template<typename T>
+  QPixmap* renderForegroundImage(Patch<T>* foregroundTile, unsigned int backgroundTileSize);
 
 signals:
   void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile = NULL, QPixmap* foregroundPixmap = NULL);
+  void foregroundTileRendered(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileLevel);
 
 };
   

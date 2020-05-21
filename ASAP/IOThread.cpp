@@ -82,13 +82,18 @@ std::vector<IOWorker*> IOThread::getWorkers() {
   return _workers;
 }
 
-void IOThread::addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level) 
+void IOThread::addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level, ImageSource* foregroundTile) 
 {
-    IOJob job = {tileSize, imgPosX, imgPosY, level};
-
-    QMutexLocker locker(&_jobListMutex);
-    _jobList.push_front(job);
-    _condition.wakeOne();
+  ThreadJob* job = NULL;
+  if (foregroundTile) {
+    job = new RenderJob(tileSize, imgPosX, imgPosY, level, foregroundTile);
+  }
+  else {
+    job = new IOJob(tileSize, imgPosX, imgPosY, level);
+  }
+  QMutexLocker locker(&_jobListMutex);
+  _jobList.push_front(job);
+  _condition.wakeOne();
 }
 
 void IOThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
@@ -111,7 +116,7 @@ unsigned int IOThread::getWaitingThreads() {
   return _threadsWaiting;
 }
 
-IOJob IOThread::getJob() {
+ThreadJob* IOThread::getJob() {
   _jobListMutex.lock();
   while (_jobList.empty() && !_abort) {
     _threadsWaiting++;
@@ -120,9 +125,9 @@ IOJob IOThread::getJob() {
   }
   if (_abort) {
     _jobListMutex.unlock();
-    return IOJob();
+    return NULL;
   }
-  IOJob job = _jobList.front();
+  ThreadJob* job = _jobList.front();
   _jobList.pop_front();
   _jobListMutex.unlock();
   return job;
@@ -130,6 +135,9 @@ IOJob IOThread::getJob() {
 
 void IOThread::clearJobs() {
   QMutexLocker locker(&_jobListMutex);
+  for (auto job : _jobList) {
+    delete job;
+  }
   _jobList.clear();
 }
 

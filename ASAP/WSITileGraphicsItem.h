@@ -31,11 +31,21 @@ public:
   unsigned int getTileSize() { return _tileSize; }
   
   void setForegroundPixmap(QPixmap* foregroundPixmap) {
+    QPixmap* oldPixmap = _foregroundPixmap;
     _foregroundPixmap = foregroundPixmap;
+    delete oldPixmap;
   }
 
   ImageSource* getForegroundTile() {
     return _foregroundTile;
+  }
+
+  void setForegroundOpacity(float opacity) {
+    _foregroundOpacity = opacity;
+  }
+
+  float getForegroundOpacity() {
+    return _foregroundOpacity;
   }
 
 private:
@@ -59,4 +69,4 @@ private:
 
 };
 
-#endif
+#endif 

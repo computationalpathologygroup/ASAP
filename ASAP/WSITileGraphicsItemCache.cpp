@@ -45,6 +45,14 @@ void WSITileGraphicsItemCache::get(const keyType& k, WSITileGraphicsItem* tile, 
   }
 }
 
+std::vector<WSITileGraphicsItem*> WSITileGraphicsItemCache::getAllItems() {
+  std::vector<WSITileGraphicsItem*> allItems;
+  for (auto it = _cache.begin(); it != _cache.end(); ++it) {
+    allItems.push_back(it->second.first.first);
+  }
+  return allItems;
+}
+
 int WSITileGraphicsItemCache::set(const keyType& k, WSITileGraphicsItem* v, unsigned int size, bool topLevel) {
   if (_cache.find(k) != _cache.end()) {
     return 1;

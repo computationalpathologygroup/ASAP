@@ -253,7 +253,8 @@ void PathologyViewer::initialize(std::shared_ptr<MultiResolutionImage> img) {
   setMouseTracking(true);
   std::vector<IOWorker*> workers = _ioThread->getWorkers();
   for (int i = 0; i < workers.size(); ++i) {
-    QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)));
+    QObject::connect(workers[i], SIGNAL(tileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ImageSource*, QPixmap*)), _manager, SLOT(onTileLoaded(QPixmap*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, ImageSource*, QPixmap*)));
+    QObject::connect(workers[i], SIGNAL(foregroundTileRendered(QPixmap*, unsigned int, unsigned int, unsigned int)), _manager, SLOT(onForegroundTileRendered(QPixmap*, unsigned int, unsigned int, unsigned int)));
   }
   initializeImage(scene(), tileSize, lastLevel);
   initializeGUIComponents(lastLevel);
@@ -277,16 +278,7 @@ void PathologyViewer::setForegroundLUT(const pathology::LUT& LUT) {
   if (_ioThread) {
     _ioThread->onLUTChanged(LUT);
     if (_for_img.lock()) {
-      _manager->refresh();
-    }
-  }
-}
-
-void PathologyViewer::setForegroundWindowAndLevel(const float& window, const float& level) {
-  if (_ioThread) {
-    _ioThread->onWindowAndLevelChanged(window, level);
-    if (_for_img.lock()) {
-      _manager->refresh();
+      _manager->updateTileForegounds();
     }
   }
 }
@@ -295,7 +287,7 @@ void PathologyViewer::setForegroundChannel(unsigned int channel) {
   if (_ioThread) {
     _ioThread->onForegroundChannelChanged(channel);
     if (_for_img.lock()) {
-      _manager->refresh();
+      _manager->updateTileForegounds();
     }
   }
 }
@@ -305,7 +297,7 @@ void PathologyViewer::setForegroundOpacity(const float& opacity) {
   if (_ioThread) {
     _ioThread->setForegroundOpacity(opacity);
     if (_for_img.lock()) {
-      _manager->refresh();
+      _manager->onForegroundOpacityChanged(opacity);
     }
   }
 }

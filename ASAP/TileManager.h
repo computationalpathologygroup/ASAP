@@ -14,6 +14,8 @@ class WSITileGraphicsItemCache;
 class WSITileGraphicsItem;
 class QGraphicsScene;
 class QPainterPath;
+class ImageSource;
+class QPixmap;
 
 class TileManager : public QObject {
   Q_OBJECT
@@ -31,6 +33,7 @@ private:
   QPointer<QGraphicsScene> _scene;
   std::vector<QPainterPath> _coverageMaps;
   bool _coverageMapCacheMode;
+  float _foregroundOpacity;
   
   QPoint pixelCoordinatesToTileCoordinates(QPointF coordinate, unsigned int level);
   QPointF tileCoordinatesToPixelCoordinates(QPoint coordinate, unsigned int level);
@@ -63,8 +66,10 @@ public:
   void refresh();
 
 public slots:
-  void onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel);
+  void onForegroundTileRendered(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileLevel);
+  void onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile, QPixmap* foregroundPixmap);
   void onTileRemoved(WSITileGraphicsItem* tile);
+  void onForegroundOpacityChanged(float opacity);
 
 };
 
