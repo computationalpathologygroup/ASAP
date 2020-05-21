@@ -23,7 +23,7 @@ void WSITileGraphicsItemCache::clear() {
   _cacheCurrentByteSize = 0;
 }
 
-void WSITileGraphicsItemCache::get(const keyType& k, WSITileGraphicsItem* tile, unsigned int& size) {
+void WSITileGraphicsItemCache::get(const keyType& k, WSITileGraphicsItem*& tile, unsigned int& size) {
 
   std::map<keyType, std::pair<std::pair<WSITileGraphicsItem*, unsigned int>, keyTypeList::iterator> >::iterator it = _cache.find(k);
 

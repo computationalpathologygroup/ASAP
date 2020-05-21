@@ -214,7 +214,7 @@ Patch<T>* IOWorker::getForegroundTile(std::shared_ptr<MultiResolutionImage> loca
     minValues.push_back(local_for_img->getMinValue(i));
     maxValues.push_back(local_for_img->getMaxValue(i));
   }
-  Patch<T>* foregroundTile = new Patch<T>({ static_cast<unsigned long long>(correctedTileSize), static_cast<unsigned long long>(correctedTileSize) }, local_for_img->getColorType(), imgBuf, true, minValues, maxValues);
+  Patch<T>* foregroundTile = new Patch<T>({ static_cast<unsigned long long>(correctedTileSize), static_cast<unsigned long long>(correctedTileSize), 1 }, local_for_img->getColorType(), imgBuf, true, minValues, maxValues);
   return foregroundTile;
 }
 

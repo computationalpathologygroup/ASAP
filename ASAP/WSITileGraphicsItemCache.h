@@ -12,7 +12,7 @@ class WSITileGraphicsItemCache : public QObject, public TileCache<WSITileGraphic
 public :
   ~WSITileGraphicsItemCache();
   void clear();
-  void get(const keyType& k, WSITileGraphicsItem* tile, unsigned int& size);
+  void get(const keyType& k, WSITileGraphicsItem*& tile, unsigned int& size);
   int set(const keyType& k, WSITileGraphicsItem* v, unsigned int size, bool topLevel = false);
   std::vector<WSITileGraphicsItem*> getAllItems();
 

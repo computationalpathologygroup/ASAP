@@ -34,6 +34,7 @@ public:
     QPixmap* oldPixmap = _foregroundPixmap;
     _foregroundPixmap = foregroundPixmap;
     delete oldPixmap;
+    this->update();
   }
 
   ImageSource* getForegroundTile() {
@@ -42,6 +43,7 @@ public:
 
   void setForegroundOpacity(float opacity) {
     _foregroundOpacity = opacity;
+    this->update();
   }
 
   float getForegroundOpacity() {

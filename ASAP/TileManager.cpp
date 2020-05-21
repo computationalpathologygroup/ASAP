@@ -134,6 +134,7 @@ void TileManager::onForegroundTileRendered(QPixmap* tile, unsigned int tileX, un
     _cache->get(key, item, size);
     if (item) {
       item->setForegroundPixmap(tile);
+      setCoverage(tileLevel, tileX, tileY, 2);
     }
   }
 }
