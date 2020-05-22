@@ -18,6 +18,7 @@ class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage : public ImageSo
 public :
   MultiResolutionImage();
   virtual ~MultiResolutionImage();
+  ImageSource* clone();
 
   //! Load the image, returns whether a valid image is obtained
   bool initialize(const std::string& imagePath);

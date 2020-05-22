@@ -221,6 +221,11 @@ Patch<T>& Patch<T>::operator=(Patch<T> rhs) {
 }
 
 template<typename T>
+ImageSource* Patch<T>::clone() {
+  return new Patch<T>(*this);
+}
+
+template<typename T>
 const std::vector<unsigned long long> Patch<T>::getDimensions() const {
   return _dimensions;
 }

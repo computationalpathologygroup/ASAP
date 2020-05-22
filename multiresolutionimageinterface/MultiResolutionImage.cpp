@@ -216,6 +216,11 @@ MultiResolutionImage::~MultiResolutionImage() {
   cleanup();
 }
 
+ImageSource* MultiResolutionImage::clone()
+{
+    return nullptr;
+}
+
 void MultiResolutionImage::cleanup() {
   _levelDimensions.clear();
   _spacing.clear();

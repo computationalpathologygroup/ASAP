@@ -109,13 +109,14 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 
 void TileManager::updateTileForegounds() {
   if (_cache) {
+    // Think how to cancel jobs
     std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
     for (auto item : cachedTiles) {
       unsigned int tileSize = item->getTileSize();
       unsigned int tileLevel = item->getTileLevel();
       unsigned int tileX = item->getTileX();
       unsigned int tileY = item->getTileY();
-      ImageSource* foregroundTile = item->getForegroundTile(); // Needs a fix, tile can be evicted before job is completed.
+      ImageSource* foregroundTile = item->getForegroundTile()->clone(); //We need to add a copy to prevent accessing a deleted tile if it is removed from cache.
       this->setCoverage(tileLevel, tileX, tileY, 1);
       _ioThread->addJob(tileSize, tileX, tileY, tileLevel, foregroundTile);
     }
@@ -140,7 +141,7 @@ void TileManager::onForegroundTileRendered(QPixmap* tile, unsigned int tileX, un
 }
 
 void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile, QPixmap* foregroundPixmap) {
-  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this, foregroundPixmap, foregroundTile);
+  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this, foregroundPixmap, foregroundTile, _foregroundOpacity, _renderForeground);
   std::stringstream ss;
   ss << tileX << "_" << tileY << "_" << tileLevel;
   std::string key;
@@ -171,6 +172,14 @@ void TileManager::onForegroundOpacityChanged(float opacity) {
   std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
   for (auto item : cachedTiles) {
     item->setForegroundOpacity(opacity);
+  }
+}
+
+void TileManager::onRenderForegroundChanged(bool renderForeground) {
+  _renderForeground = renderForeground;
+  std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
+  for (auto item : cachedTiles) {
+    item->setRenderForeground(renderForeground);
   }
 }
 
@@ -272,6 +281,10 @@ void TileManager::clear() {
 
 void TileManager::refresh() {
   clear();
+  this->reloadLastFOV();
+}
+
+void TileManager::reloadLastFOV() {
   QRect FOV = _lastFOV;
   QPoint topLeft = FOV.topLeft();
   QPoint bottomRight = FOV.bottomRight();

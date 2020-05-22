@@ -47,6 +47,7 @@ private :
   void loadNewForegroundImage(const std::string& resultImagePth);
   void setDefaultVisualizationParameters(std::shared_ptr<MultiResolutionImage> img);
   void updateObjectNames();
+  void clearForegroundImage();
   QHBoxLayout* createLUTEntry(const pathology::LUT& currentLUT, int index);
 
 public :

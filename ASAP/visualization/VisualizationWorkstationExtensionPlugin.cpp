@@ -86,11 +86,7 @@ VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugi
     _settings->endArray();
     _settings->endGroup();
   }
-  if (_foreground) {
-    _foregroundScale = 1.;
-    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
-    _foreground.reset();
-  }
+  this->clearForegroundImage();
   _dockWidget = NULL;
 }
 
@@ -434,6 +430,15 @@ void VisualizationWorkstationExtensionPlugin::updateObjectNames() {
   }
 }
 
+void VisualizationWorkstationExtensionPlugin::clearForegroundImage()
+{
+  if (_foreground) {
+    _foregroundScale = 1;
+    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
+    _foreground.reset();
+  }
+}
+
 void VisualizationWorkstationExtensionPlugin::onNewImageLoaded(std::weak_ptr<MultiResolutionImage> img, std::string fileName) {
   std::shared_ptr<MultiResolutionImage> local_img = img.lock();
   _backgroundDimensions = local_img->getDimensions();
@@ -455,11 +460,7 @@ void VisualizationWorkstationExtensionPlugin::onOpenResultImageClicked() {
 }
 
 void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::string& resultImagePth) {
-  if (_foreground) {
-    _foregroundScale = 1;
-    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
-    _foreground.reset();
-  }
+  this->clearForegroundImage();
   QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
   visualizationGroupBox->setEnabled(false);
   if (core::fileExists(resultImagePth)) {
@@ -572,11 +573,7 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
     _settings->endGroup();
     _settings->endGroup();
   }
-  if (_foreground) {
-    _foregroundScale = 1;
-    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
-    _foreground.reset();
-  }
+  this->clearForegroundImage();
   if (_dockWidget) {
     _dockWidget->setEnabled(false);
     QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
@@ -584,6 +581,7 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
   }
 }
 
+// FIX: Just disable rendering
 void VisualizationWorkstationExtensionPlugin::onEnableLikelihoodToggled(bool toggled) {
   if (!toggled) {
     emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
