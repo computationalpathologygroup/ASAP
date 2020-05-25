@@ -106,13 +106,13 @@ inline std::tuple<float, float, float> hsv2rgb(std::tuple<float, float, float> h
 }
 
 inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
-  const std::vector<float> LUTindices = LUT.indices;
-  const std::vector<rgbaArray > LUTcolors = LUT.colors;
+  const std::vector<float>& LUTindices = LUT.indices;
+  const std::vector<rgbaArray >& LUTcolors = LUT.colors;
   if (LUTcolors.size() == 0 || LUTindices.size() == 0) {
     return qRgba(0,0,0,0);
   }
   float ind = val;
-  auto larger = std::upper_bound(LUTindices.begin(), LUTindices.end(), ind); //  
+  auto larger = std::upper_bound(LUTindices.begin(), LUTindices.end(), ind); 
   rgbaArray currentColor;
   if (larger == LUTindices.begin()) {
           currentColor = LUTcolors[0];
@@ -120,7 +120,7 @@ inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
   else if (larger == LUTindices.end()) {
       currentColor = LUTcolors.back();
   }
-  else if (*(larger - 1) >= val - 0.0001 && *(larger - 1) <= val + 0.0001) {
+  else if (val - 0.0001 <= *(larger - 1) && *(larger - 1) <= val + 0.0001) {
       currentColor = LUTcolors[(larger - LUTindices.begin()) - 1];
   }
   else {
@@ -144,8 +144,9 @@ inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
       currentColor[1] = std::get<1>(rgb_interp) * 255;
       currentColor[2] = std::get<2>(rgb_interp) * 255;
       currentColor[3] = rgba_prev[3] * (1 - val_normalized) + rgba_next[3] * val_normalized;
-    }    
-  return qRgba(currentColor[0], currentColor[1], currentColor[2], currentColor[3]);
+    }
+  float* currentColorBuffer = currentColor.data();  
+  return qRgba(*currentColorBuffer, *(currentColorBuffer + 1), *(currentColorBuffer + 2), *(currentColorBuffer + 3));
 }
 
 template<typename T>
@@ -154,11 +155,20 @@ QImage convertMonochromeToRGB(T* data, unsigned int width, unsigned int height, 
 
   // Access the image at low level.  From the manual, a 32-bit RGB image is just a
   // vector of QRgb (which is really just some integer typedef)
+  std::map<T, QRgb> valToQrgb;
   QRgb *pixels = reinterpret_cast<QRgb*>(img.bits());
-
   for (unsigned int i = channel, j = 0; i < width*height*numberOfChannels; i += numberOfChannels, ++j)
   {
-     pixels[j] = applyLUT(data[i], LUT);
+    T pixelValue = data[i];
+    auto it = valToQrgb.find(pixelValue);
+    if (it == valToQrgb.end()) {
+      QRgb colorForVal = applyLUT(pixelValue, LUT);
+      pixels[j] = colorForVal;
+      valToQrgb[pixelValue] = colorForVal;
+    }
+    else {
+      pixels[j] = it->second;
+    }
   }
   return img;
 }

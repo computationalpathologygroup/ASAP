@@ -459,7 +459,7 @@ void VisualizationWorkstationExtensionPlugin::onOpenResultImageClicked() {
   }
 }
 
-void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::string& resultImagePth) {
+void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::string& resultImagePth) { // Change this to use the new _renderingEnabled flag
   this->clearForegroundImage();
   QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
   visualizationGroupBox->setEnabled(false);
@@ -471,24 +471,7 @@ void VisualizationWorkstationExtensionPlugin::loadNewForegroundImage(const std::
       std::vector<unsigned long long> dimsFG = _foreground->getDimensions();
       if (_backgroundDimensions[0] / dimsFG[0] == _backgroundDimensions[1] / dimsFG[1]) {
         _foregroundScale = _backgroundDimensions[0] / dimsFG[0];
-        if (_likelihoodCheckBox) {
-          if (_renderingEnabled) {
-            if (_likelihoodCheckBox->isChecked()) {
-              emit changeForegroundImage(_foreground, _foregroundScale);
-            }
-            else {
-              _likelihoodCheckBox->setChecked(true);
-            }
-          }
-          else {
-            if (_likelihoodCheckBox->isChecked()) {
-              _likelihoodCheckBox->setChecked(false);
-            }
-            else {
-              emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
-            }
-          }
-        }
+        emit changeForegroundImage(_foreground, _foregroundScale);
       }
       QGroupBox* visualizationGroupBox = _dockWidget->findChild<QGroupBox*>("VisualizationGroupBox");
       visualizationGroupBox->setEnabled(true);
@@ -538,12 +521,21 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
         _currentLUT = "Traffic Light (0 - 1)";
       }
     }
+    QCheckBox* likelihoodCheckBox = _dockWidget->findChild<QCheckBox*>("LikelihoodCheckBox");
+    likelihoodCheckBox->blockSignals(true);
+    likelihoodCheckBox->setChecked(_renderingEnabled);
+    _viewer->setEnableForegroundRendering(_renderingEnabled);
+    likelihoodCheckBox->blockSignals(false);
     QDoubleSpinBox* spinBox = _dockWidget->findChild<QDoubleSpinBox*>("OpacitySpinBox");
+    spinBox->blockSignals(true);
     spinBox->setValue(_opacity);
+    spinBox->blockSignals(false);
     _viewer->setForegroundOpacity(_opacity);
     QSpinBox* channelSpinBox = _dockWidget->findChild<QSpinBox*>("ChannelSpinBox");
+    channelSpinBox->blockSignals(true);
     channelSpinBox->setMaximum(_foreground->getSamplesPerPixel() - 1);
     channelSpinBox->setValue(_foregroundChannel);
+    channelSpinBox->blockSignals(false);
     _viewer->setForegroundChannel(_foregroundChannel);
     onLUTChanged(_currentLUT);
   }
@@ -584,12 +576,13 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
 // FIX: Just disable rendering
 void VisualizationWorkstationExtensionPlugin::onEnableLikelihoodToggled(bool toggled) {
   if (!toggled) {
-    emit changeForegroundImage(std::weak_ptr<MultiResolutionImage>(), _foregroundScale);
-    _renderingEnabled = false;
+    _renderingEnabled = false;    
   }
   else {
-    emit changeForegroundImage(_foreground, _foregroundScale);
     _renderingEnabled = true;
+  }
+  if (_viewer) {
+    _viewer->setEnableForegroundRendering(_renderingEnabled);
   }
 }
 
@@ -604,8 +597,10 @@ void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTnam
   if (_viewer) {
     _currentLUT = LUTname;
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
+    LUTBox->blockSignals(true);
     LUTBox->setCurrentText(LUTname);
     QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
+    LUTEditorBox->blockSignals(true);
     LUTEditorBox->setCurrentText(LUTname);
     this->generateLUTEditingWidgets(_currentLUT);
     if (_editingLUT && _previewingLUT) {
@@ -614,6 +609,8 @@ void VisualizationWorkstationExtensionPlugin::onLUTChanged(const QString& LUTnam
     else if (!_editingLUT) {
       _viewer->setForegroundLUT(_colorLookupTables[_currentLUT.toStdString()]);
     }
+    LUTBox->blockSignals(false);
+    LUTEditorBox->blockSignals(false);
   }
 }
 

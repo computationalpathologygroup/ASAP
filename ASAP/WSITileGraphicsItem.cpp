@@ -92,7 +92,7 @@ void WSITileGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
       if (draw) {
         QRectF pixmapArea = QRectF((option->exposedRect.left() + (_physicalSize / 2))*(_tileSize / _physicalSize), (option->exposedRect.top() + (_physicalSize / 2))*(_tileSize / _physicalSize), option->exposedRect.width()*(_tileSize / _physicalSize), option->exposedRect.height()*(_tileSize / _physicalSize));
         painter->drawPixmap(option->exposedRect, *_item, pixmapArea);
-        if (_foregroundPixmap && _renderForeground) {
+        if (_foregroundPixmap && _renderForeground && _foregroundOpacity > 0.0001) {
           painter->setOpacity(_foregroundOpacity);
           painter->drawPixmap(option->exposedRect, *_foregroundPixmap, pixmapArea);
         }
@@ -116,7 +116,7 @@ void WSITileGraphicsItem::setForegroundPixmap(QPixmap* foregroundPixmap) {
   this->update();
 }
 
-inline ImageSource* WSITileGraphicsItem::getForegroundTile() {
+ImageSource* WSITileGraphicsItem::getForegroundTile() {
   return _foregroundTile;
 }
 
@@ -132,6 +132,7 @@ float WSITileGraphicsItem::getForegroundOpacity() {
 void WSITileGraphicsItem::setRenderForeground(bool renderForeground)
 {
   _renderForeground = renderForeground;
+  this->update();
 }
 
 bool WSITileGraphicsItem::getRenderForeground()

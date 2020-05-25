@@ -20,7 +20,8 @@ _coverage(),
 _cache(cache),
 _scene(scene),
 _coverageMaps(),
-_coverageMapCacheMode(false)
+_coverageMapCacheMode(false),
+_renderForeground(true)
 {
   for (unsigned int i = 0; i < img->getNumberOfLevels(); ++i) {
     _levelDownsamples.push_back(img->getLevelDownsample(i));
@@ -108,17 +109,21 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
 }
 
 void TileManager::updateTileForegounds() {
+  _ioThread->clearJobs();
+  while (_ioThread->getWaitingThreads() != _ioThread->getWorkers().size()) {
+  }
+  QCoreApplication::processEvents();
   if (_cache) {
-    // Think how to cancel jobs
     std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
     for (auto item : cachedTiles) {
       unsigned int tileSize = item->getTileSize();
       unsigned int tileLevel = item->getTileLevel();
       unsigned int tileX = item->getTileX();
       unsigned int tileY = item->getTileY();
-      ImageSource* foregroundTile = item->getForegroundTile()->clone(); //We need to add a copy to prevent accessing a deleted tile if it is removed from cache.
-      this->setCoverage(tileLevel, tileX, tileY, 1);
-      _ioThread->addJob(tileSize, tileX, tileY, tileLevel, foregroundTile);
+      if (providesCoverage(tileLevel, tileX, tileY) == 2) {
+        ImageSource* foregroundTile = item->getForegroundTile()->clone();
+        _ioThread->addJob(tileSize, tileX, tileY, tileLevel, foregroundTile);
+      }
     }
   }
 }
@@ -134,30 +139,40 @@ void TileManager::onForegroundTileRendered(QPixmap* tile, unsigned int tileX, un
     unsigned int size = 0;
     _cache->get(key, item, size);
     if (item) {
-      item->setForegroundPixmap(tile);
+      if (tile) {
+        item->setForegroundPixmap(tile);
+      }
       setCoverage(tileLevel, tileX, tileY, 2);
+    }
+    else {
+      setCoverage(tileLevel, tileX, tileY, 0);
     }
   }
 }
 
 void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile, QPixmap* foregroundPixmap) {
-  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this, foregroundPixmap, foregroundTile, _foregroundOpacity, _renderForeground);
-  std::stringstream ss;
-  ss << tileX << "_" << tileY << "_" << tileLevel;
-  std::string key;
-  ss >> key;
-  if (_scene) {
-    setCoverage(tileLevel, tileX, tileY, 2);
-    float tileDownsample = _levelDownsamples[tileLevel];
-    float maxDownsample = _levelDownsamples[_lastRenderLevel];
-    float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
-    float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
-    _scene->addItem(item);
-    item->setPos(posX, posY);
-    item->setZValue(1. / ((float)tileLevel + 1.));
+  if (tile) {
+    WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this, foregroundPixmap, foregroundTile, _foregroundOpacity, _renderForeground);
+    std::stringstream ss;
+    ss << tileX << "_" << tileY << "_" << tileLevel;
+    std::string key;
+    ss >> key;
+    if (_scene) {
+      setCoverage(tileLevel, tileX, tileY, 2);
+      float tileDownsample = _levelDownsamples[tileLevel];
+      float maxDownsample = _levelDownsamples[_lastRenderLevel];
+      float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
+      float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
+      _scene->addItem(item);
+      item->setPos(posX, posY);
+      item->setZValue(1. / ((float)tileLevel + 1.));
+    }
+    if (_cache) {
+      _cache->set(key, item, tileByteSize, tileLevel == _lastRenderLevel);
+    }
   }
-  if (_cache) {
-    _cache->set(key, item, tileByteSize, tileLevel == _lastRenderLevel);
+  else {
+    setCoverage(tileLevel, tileX, tileY, 0);
   }
 }
 

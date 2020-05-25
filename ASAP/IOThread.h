@@ -63,9 +63,6 @@ public:
   void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
   void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
   
-  void setForegroundOpacity(const float& opacity);
-  float getForegroundOpacity() const;
-
   ThreadJob* getJob();
   void clearJobs();
   unsigned int numberOfJobs();
@@ -78,7 +75,6 @@ public:
 
   void onBackgroundChannelChanged(int channel);
   void onForegroundChannelChanged(int channel);
-  void onWindowAndLevelChanged(float window, float level);
   void onLUTChanged(const pathology::LUT& LUTname);
 
 protected :

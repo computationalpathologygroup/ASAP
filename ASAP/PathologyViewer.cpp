@@ -45,7 +45,8 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   _activeTool(NULL),
   _sceneScale(1.),
   _manager(NULL),
-  _scaleBar(NULL)
+  _scaleBar(NULL),
+  _renderForeground(true)
 {
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -53,7 +54,7 @@ PathologyViewer::PathologyViewer(QWidget *parent):
   setDragMode(QGraphicsView::DragMode::NoDrag);
   setContentsMargins(0,0,0,0);
   setAutoFillBackground(true);
-  //setViewport(new QGLWidget());
+//  setViewport(new QGLWidget());
   setViewportUpdateMode(ViewportUpdateMode::FullViewportUpdate);
   setInteractive(false);
   this->setScene(new QGraphicsScene); //Memleak!
@@ -292,14 +293,16 @@ void PathologyViewer::setForegroundChannel(unsigned int channel) {
   }
 }
 
+void PathologyViewer::setEnableForegroundRendering(bool enableForegroundRendering)
+{
+  _renderForeground = enableForegroundRendering;
+  _manager->onRenderForegroundChanged(enableForegroundRendering);
+}
+
 
 void PathologyViewer::setForegroundOpacity(const float& opacity) {
-  if (_ioThread) {
-    _ioThread->setForegroundOpacity(opacity);
-    if (_for_img.lock()) {
-      _manager->onForegroundOpacityChanged(opacity);
-    }
-  }
+  _opacity = opacity;
+  _manager->onForegroundOpacityChanged(opacity);
 }
 
 

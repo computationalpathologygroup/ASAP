@@ -42,9 +42,9 @@ public:
     float getForegroundOpacity() const;
     void  setForegroundOpacity(const float& opacity);
 
-    void setForegroundWindowAndLevel(const float& window, const float& level);
     void setForegroundLUT(const pathology::LUT& LUT);
     void setForegroundChannel(unsigned int channel);
+    void setEnableForegroundRendering(bool enableForegroundRendering);
 
     void togglePan(bool pan, const QPoint& startPos = QPoint());
     void pan(const QPoint& panTo);
@@ -122,10 +122,9 @@ private :
     int _backgroundChannel;
     int _foregroundChannel;
     float _opacity;
-    float _window;
-    float _level;
     std::string _LUTname;
     float _foregroundImageScale;
+    bool _renderForeground;
 
     PrefetchThread* _prefetchthread;
 

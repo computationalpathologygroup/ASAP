@@ -38,14 +38,6 @@ void IOThread::shutdown() {
   _workers.clear();
 }
 
-void IOThread::setForegroundOpacity(const float& opacity) {
-  _jobListMutex.lock();
-  for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setForegroundOpacity(opacity);
-  }
-  _jobListMutex.unlock();
-}
-
 void IOThread::onBackgroundChannelChanged(int channel) {
   _jobListMutex.lock();
   for (unsigned int i = 0; i < _workers.size(); ++i) {
@@ -58,14 +50,6 @@ void IOThread::onForegroundChannelChanged(int channel) {
   _jobListMutex.lock();
   for (unsigned int i = 0; i < _workers.size(); ++i) {
     _workers[i]->setForegroundChannel(channel);
-  }
-  _jobListMutex.unlock();
-}
-
-void IOThread::onWindowAndLevelChanged(float window, float level) {
-  _jobListMutex.lock();
-  for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setWindowAndLevel(window, level);
   }
   _jobListMutex.unlock();
 }
@@ -136,6 +120,14 @@ ThreadJob* IOThread::getJob() {
 void IOThread::clearJobs() {
   QMutexLocker locker(&_jobListMutex);
   for (auto job : _jobList) {
+    if (_workers.size() > 0) {
+      if (dynamic_cast<IOJob*>(job)) {
+        emit _workers[0]->tileLoaded(nullptr, job->_imgPosX, job->_imgPosY, job->_tileSize, 0, job->_level, nullptr, nullptr);
+      }
+      else {
+        emit _workers[0]->foregroundTileRendered(nullptr, job->_imgPosX, job->_imgPosY, job->_level);
+      }
+    }
     delete job;
   }
   _jobList.clear();

@@ -23,13 +23,14 @@ public:
 
   void setBackgroundChannel(int channel);
   void setForegroundChannel(int channel);
-  void setWindowAndLevel(float window, float level);
   void setLUT(const pathology::LUT& LUTname);
 
   void setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img);
   void setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale = 1.);
-  void setForegroundOpacity(const float& opacity);
-  float getForegroundOpacity() const;
+
+signals:
+  void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile = NULL, QPixmap* foregroundPixmap = NULL);
+  void foregroundTileRendered(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileLevel);
 
 protected :
   void run();
@@ -42,9 +43,6 @@ private :
   bool _abort;
   int _backgroundChannel;
   int _foregroundChannel;
-  float _window;
-  float _level;
-  float _opacity;
 
   //! Foreground images can only be the same size or smaller than the background images, thus this value ranges from 1 to +inf
   float _foregroundImageScale;
@@ -61,10 +59,6 @@ private :
   
   template<typename T>
   QPixmap* renderForegroundImage(Patch<T>* foregroundTile, unsigned int backgroundTileSize);
-
-signals:
-  void tileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile = NULL, QPixmap* foregroundPixmap = NULL);
-  void foregroundTileRendered(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileLevel);
 
 };
   

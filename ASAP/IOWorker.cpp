@@ -13,9 +13,6 @@ IOWorker::IOWorker(IOThread* thread) :
   _abort(false),
   _backgroundChannel(0),
   _foregroundChannel(0),
-  _window(1.),
-  _level(0.5),
-  _opacity(1.0),
   _foregroundImageScale(1.),
   _LUT()
 {
@@ -42,13 +39,6 @@ void IOWorker::setForegroundChannel(int channel) {
   mutex.unlock();
 }
 
-void IOWorker::setWindowAndLevel(float window, float level) {
-  mutex.lock();
-  _window = window;
-  _level = level;
-  mutex.unlock();
-}
-
 void IOWorker::setLUT(const pathology::LUT& LUT) {
   mutex.lock();
   _LUT = LUT;
@@ -66,16 +56,6 @@ void IOWorker::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, f
   _for_img = for_img;
   _foregroundImageScale = scale;
   mutex.unlock();
-}
-
-void IOWorker::setForegroundOpacity(const float& opacity) {
-  mutex.lock();
-  _opacity = opacity;
-  mutex.unlock();
-}
-
-float IOWorker::getForegroundOpacity() const {
-  return _opacity;
 }
 
 void IOWorker::run()
