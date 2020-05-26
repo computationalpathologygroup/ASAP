@@ -13,7 +13,7 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
   bool checkInputImageRequirements(const Patch<inType>& input) const {
     bool validInput = true;
     validInput &= (input.getDimensions().size() == 3);
-    validInput &= (input.getColorType() == pathology::ColorType::RGB || input.getColorType() == pathology::ColorType::ARGB);
+    validInput &= (input.getColorType() == pathology::ColorType::RGB || input.getColorType() == pathology::ColorType::RGBA);
     return validInput;
   }
 
@@ -28,12 +28,11 @@ class ColorDeconvolutionFilter :  public ImageFilter<inType, double> {
     for (unsigned int y = 0; y < dims[0]; ++y) {
       for (unsigned int x = 0; x < dims[1]; ++x) {
         std::vector<double> rgb(3);
-        if (input.getColorType() == pathology::ColorType::ARGB) {
-          inPtr += 2;
-          for (unsigned int c = 0; c < 3; ++c, --inPtr) {
+        if (input.getColorType() == pathology::ColorType::RGBA) {
+          for (unsigned int c = 0; c < 3; ++c, ++inPtr) {
             rgb[c] = *inPtr;
           }
-          inPtr += 5;
+          ++inPtr; // Skip alpha
         }
         else {
           for (unsigned int c = 0; c < 3; ++c, ++inPtr) {

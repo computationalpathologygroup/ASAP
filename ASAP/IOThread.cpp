@@ -1,5 +1,5 @@
-#include "RenderThread.h" 
-#include "RenderWorker.h" 
+#include "IOThread.h" 
+#include "IOWorker.h" 
 
 #include <limits>
 
@@ -9,26 +9,26 @@
 
 using namespace pathology;
 
-RenderThread::RenderThread(QObject *parent, unsigned int nrThreads) :
+IOThread::IOThread(QObject *parent, unsigned int nrThreads) :
   QObject(parent),
   _abort(false),
   _threadsWaiting(0)
 {
   for (int i = 0; i < nrThreads; ++i) {
-    RenderWorker* worker = new RenderWorker(this);
+    IOWorker* worker = new IOWorker(this);
     worker->start(QThread::HighPriority);
     _workers.push_back(worker);
   }
 }
 
-RenderThread::~RenderThread() 
+IOThread::~IOThread() 
 {
   shutdown();
 }
 
-void RenderThread::shutdown() {
+void IOThread::shutdown() {
   _abort = true;
-  for (std::vector<RenderWorker*>::iterator it = _workers.begin(); it != _workers.end(); ++it) {
+  for (std::vector<IOWorker*>::iterator it = _workers.begin(); it != _workers.end(); ++it) {
     (*it)->abort();
     while ((*it)->isRunning()) {
       _condition.wakeOne();
@@ -38,15 +38,7 @@ void RenderThread::shutdown() {
   _workers.clear();
 }
 
-void RenderThread::setForegroundOpacity(const float& opacity) {
-  _jobListMutex.lock();
-  for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setForegroundOpacity(opacity);
-  }
-  _jobListMutex.unlock();
-}
-
-void RenderThread::onBackgroundChannelChanged(int channel) {
+void IOThread::onBackgroundChannelChanged(int channel) {
   _jobListMutex.lock();
   for (unsigned int i = 0; i < _workers.size(); ++i) {
     _workers[i]->setBackgroundChannel(channel);
@@ -54,7 +46,7 @@ void RenderThread::onBackgroundChannelChanged(int channel) {
   _jobListMutex.unlock();
 }
 
-void RenderThread::onForegroundChannelChanged(int channel) {
+void IOThread::onForegroundChannelChanged(int channel) {
   _jobListMutex.lock();
   for (unsigned int i = 0; i < _workers.size(); ++i) {
     _workers[i]->setForegroundChannel(channel);
@@ -62,36 +54,33 @@ void RenderThread::onForegroundChannelChanged(int channel) {
   _jobListMutex.unlock();
 }
 
-void RenderThread::onWindowAndLevelChanged(float window, float level) {
+void IOThread::onLUTChanged(const pathology::LUT& LUT) {
   _jobListMutex.lock();
   for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setWindowAndLevel(window, level);
+    _workers[i]->setLUT(LUT);
   }
   _jobListMutex.unlock();
 }
 
-void RenderThread::onLUTChanged(std::string LUTname) {
-  _jobListMutex.lock();
-  for (unsigned int i = 0; i < _workers.size(); ++i) {
-    _workers[i]->setLUT(LUTname);
-  }
-  _jobListMutex.unlock();
-}
-
-std::vector<RenderWorker*> RenderThread::getWorkers() {
+std::vector<IOWorker*> IOThread::getWorkers() {
   return _workers;
 }
 
-void RenderThread::addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level) 
+void IOThread::addJob(const unsigned int tileSize, const long long imgPosX, const long long imgPosY, const unsigned int level, ImageSource* foregroundTile) 
 {
-    RenderJob job = {tileSize, imgPosX, imgPosY, level};
-
-    QMutexLocker locker(&_jobListMutex);
-    _jobList.push_front(job);
-    _condition.wakeOne();
+  ThreadJob* job = NULL;
+  if (foregroundTile) {
+    job = new RenderJob(tileSize, imgPosX, imgPosY, level, foregroundTile);
+  }
+  else {
+    job = new IOJob(tileSize, imgPosX, imgPosY, level);
+  }
+  QMutexLocker locker(&_jobListMutex);
+  _jobList.push_front(job);
+  _condition.wakeOne();
 }
 
-void RenderThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
+void IOThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_img, float scale) {
   QMutexLocker locker(&_jobListMutex);
   _for_img = for_img;
   for (unsigned int i = 0; i < _workers.size(); ++i) {
@@ -99,7 +88,7 @@ void RenderThread::setForegroundImage(std::weak_ptr<MultiResolutionImage> for_im
   }
 }
 
-void RenderThread::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img) {
+void IOThread::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_img) {
   QMutexLocker locker(&_jobListMutex);
   _bck_img = bck_img;
   for (unsigned int i = 0; i < _workers.size(); ++i) {
@@ -107,11 +96,11 @@ void RenderThread::setBackgroundImage(std::weak_ptr<MultiResolutionImage> bck_im
   }
 }
 
-unsigned int RenderThread::getWaitingThreads() {
+unsigned int IOThread::getWaitingThreads() {
   return _threadsWaiting;
 }
 
-RenderJob RenderThread::getJob() {
+ThreadJob* IOThread::getJob() {
   _jobListMutex.lock();
   while (_jobList.empty() && !_abort) {
     _threadsWaiting++;
@@ -120,20 +109,31 @@ RenderJob RenderThread::getJob() {
   }
   if (_abort) {
     _jobListMutex.unlock();
-    return RenderJob();
+    return NULL;
   }
-  RenderJob job = _jobList.front();
+  ThreadJob* job = _jobList.front();
   _jobList.pop_front();
   _jobListMutex.unlock();
   return job;
 }
 
-void RenderThread::clearJobs() {
+void IOThread::clearJobs() {
   QMutexLocker locker(&_jobListMutex);
+  for (auto job : _jobList) {
+    if (_workers.size() > 0) {
+      if (dynamic_cast<IOJob*>(job)) {
+        emit _workers[0]->tileLoaded(nullptr, job->_imgPosX, job->_imgPosY, job->_tileSize, 0, job->_level, nullptr, nullptr);
+      }
+      else {
+        emit _workers[0]->foregroundTileRendered(nullptr, job->_imgPosX, job->_imgPosY, job->_level);
+      }
+    }
+    delete job;
+  }
   _jobList.clear();
 }
 
-unsigned int RenderThread::numberOfJobs() {
+unsigned int IOThread::numberOfJobs() {
   _jobListMutex.lock();
   unsigned int nrJobs = _jobList.size();
   _jobListMutex.unlock();
