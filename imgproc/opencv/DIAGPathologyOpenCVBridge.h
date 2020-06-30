@@ -13,7 +13,7 @@ Patch<T> matToPatch(const cv::Mat& mat, bool copyData = false) {
   dims.push_back(mat.channels());  
   pathology::ColorType ctype = pathology::ColorType::RGB;
   if (mat.channels() == 4) {
-    ctype = pathology::ColorType::ARGB;
+    ctype = pathology::ColorType::RGBA;
   }
   else if (mat.channels() == 1) {
     ctype = pathology::ColorType::Monochrome;
