@@ -8,7 +8,7 @@ namespace ASAP
 	{
 		m_ui_->setupUi(this);
 		m_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
-		SetSlots_();
+		setSlots_();
 		this->readSettings();
 	}
 
@@ -17,7 +17,7 @@ namespace ASAP
 		writeSettings();
 	}
 
-	int CompositeWindow::AddTab(QMainWindow* window, const std::string tab_name)
+	int CompositeWindow::addTab(QMainWindow* window, const std::string tab_name)
 	{
 		m_children_.push_back(window);
 		if (!this->menuBar()->children().isEmpty()) {
@@ -43,30 +43,30 @@ namespace ASAP
 		if (child)
 		{
 			connect(child,
-					&CompositeChild::RequiresTabSwitch,
+					&CompositeChild::requiresTabSwitch,
 					this,
-					&CompositeWindow::OnTabRequest_);
+					&CompositeWindow::onTabRequest);
 		}
 		return id;
 	}
 
-	int CompositeWindow::AddTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts)
+	int CompositeWindow::addTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts)
 	{
 		for (ShortcutAction& shortcut : shortcuts)
 		{
-			RegisterKeySequence_(shortcut);
+			registerKeySequence_(shortcut);
 		}
 	
-		return AddTab(window, tab_name);
+		return addTab(window, tab_name);
 	}
 
-	void CompositeWindow::RegisterKeySequence_(const ShortcutAction& shortcut)
+	void CompositeWindow::registerKeySequence_(const ShortcutAction& shortcut)
 	{
 		QShortcut* new_shortcut(new QShortcut(shortcut.sequence, this));
 		connect(new_shortcut, &QShortcut::activated, shortcut.action);
 	}
 
-	void CompositeWindow::SetSlots_(void)
+	void CompositeWindow::setSlots_(void)
 	{
 		connect(m_ui_->tabWidget,
 			SIGNAL(currentChanged(int)),
@@ -92,7 +92,7 @@ namespace ASAP
 		m_settings->endGroup();
 	}
 
-	void CompositeWindow::OnTabChange_(int index)
+	void CompositeWindow::onTabChange(int index)
 	{
 		// Ensures the object still exists.
 		if (this)
@@ -101,7 +101,7 @@ namespace ASAP
 		}
 	}
 
-	void CompositeWindow::OnTabRequest_(int tab_id)
+	void CompositeWindow::onTabRequest(int tab_id)
 	{
 		m_ui_->tabWidget->setCurrentIndex(tab_id);
 	}

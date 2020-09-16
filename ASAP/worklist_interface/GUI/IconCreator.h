@@ -22,12 +22,12 @@ namespace ASAP
 			IconCreator(void);
 			~IconCreator(void);
 	
-			bool InsertIcon(const std::pair<int, std::string>& index_location);
-			QIcon CreateIcon_(const std::string& filepath, const size_t size);
+			bool insertIcon(const std::pair<int, std::string>& index_location);
+			QIcon createIcon(const std::string& filepath, const size_t size);
 		
 		private:
-			QIcon CreateBlankIcon_();
-			QIcon CreateInvalidIcon_();
+			QIcon createBlankIcon();
+			QIcon createInvalidIcon();
 			QIcon m_placeholder_icon;
 			QIcon m_invalid_icon;
 			ThumbnailCache* m_thumbnail_cache;
@@ -35,8 +35,8 @@ namespace ASAP
 
 
 		signals:
-			void RequiresStatusBarChange(const QString& message);
-			void RequiresItemRefresh(int, const QIcon&);
+			void requiresStatusBarChange(const QString& message);
+			void requiresItemRefresh(int, const QIcon&);
 	};
 }
 #endif // __ASAP_GUI_ICONCREATOR__

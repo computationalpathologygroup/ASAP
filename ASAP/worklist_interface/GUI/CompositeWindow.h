@@ -37,8 +37,8 @@ namespace ASAP
 
 			~CompositeWindow();
 
-			int AddTab(QMainWindow* window, const std::string tab_name);
-			int AddTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts);
+			int addTab(QMainWindow* window, const std::string tab_name);
+			int addTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts);
 
 		private:
 			int											m_current_child_;
@@ -47,14 +47,14 @@ namespace ASAP
 			std::unique_ptr<Ui::CompositeWindowLayout>	m_ui_;
 			QSettings*									m_settings;
 
-			void RegisterKeySequence_(const ShortcutAction& shortcut);
-			void SetSlots_(void);
+			void registerKeySequence_(const ShortcutAction& shortcut);
+			void setSlots_(void);
 			void readSettings();
 			void writeSettings();
 			
 		private slots:
-			void OnTabChange_(int index);
-			void OnTabRequest_(int tab_id);
+			void onTabChange(int index);
+			void onTabRequest(int tab_id);
 	};
 }
 #endif // __ASAP_GUI_COMPOSITEWINDOW__

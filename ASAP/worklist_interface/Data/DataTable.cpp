@@ -11,22 +11,22 @@ namespace ASAP
 
 	DataTable::DataTable(std::vector<std::string> columns)
 	{
-		ConvertColumnsToLower_(columns);
+		convertColumnsToLower(columns);
 
 		for (size_t column = 0; column < columns.size(); ++column)
 		{
-			m_column_order_.insert({ columns[column], column });
+			m_column_order.insert({ columns[column], column });
 		}
 
-		for (auto it = m_column_order_.begin(); it != m_column_order_.end(); ++it)
+		for (auto it = m_column_order.begin(); it != m_column_order.end(); ++it)
 		{
-			m_visible_columns_.push_back(it);
+			m_visible_columns.push_back(it);
 		}
 	}
 
 	DataTable::DataTable(std::vector<std::string> columns, const std::vector<bool>& visibility)
 	{
-		ConvertColumnsToLower_(columns);
+		convertColumnsToLower(columns);
 
 		if (columns.size() != visibility.size())
 		{
@@ -35,142 +35,142 @@ namespace ASAP
 
 		for (size_t column = 0; column < columns.size(); ++column)
 		{
-			std::map<std::string, size_t>::iterator column_entry = m_column_order_.insert({ columns[column], column }).first;
+			std::map<std::string, size_t>::iterator column_entry = m_column_order.insert({ columns[column], column }).first;
 			if (visibility[column])
 			{
-				m_visible_columns_.push_back(column_entry);
+				m_visible_columns.push_back(column_entry);
 			}
 			else
 			{
-				m_invisible_columns_.push_back(column_entry);
+				m_invisible_columns.push_back(column_entry);
 			}
 		}
 	}
 
 	DataTable::DataTable(const DataTable& other)
-		: m_column_order_(other.m_column_order_), m_data_(other.m_data_)
+		: m_column_order(other.m_column_order), m_data(other.m_data)
 	{
-		for (auto& it : other.m_visible_columns_)
+		for (auto& it : other.m_visible_columns)
 		{
-			m_visible_columns_.push_back(m_column_order_.find(it->first));
+			m_visible_columns.push_back(m_column_order.find(it->first));
 		}
 
-		for (auto& it : other.m_invisible_columns_)
+		for (auto& it : other.m_invisible_columns)
 		{
-			m_invisible_columns_.push_back(m_column_order_.find(it->first));
+			m_invisible_columns.push_back(m_column_order.find(it->first));
 		}
 	}
 
-	DataTable::DataTable(DataTable&& other)
-		: m_column_order_(std::move(other.m_column_order_)), m_data_(std::move(other.m_data_)), m_visible_columns_(std::move(other.m_visible_columns_)), m_invisible_columns_(std::move(other.m_invisible_columns_))
+	DataTable::DataTable(DataTable&& other) noexcept
+		: m_column_order(std::move(other.m_column_order)), m_data(std::move(other.m_data)), m_visible_columns(std::move(other.m_visible_columns)), m_invisible_columns(std::move(other.m_invisible_columns)) 
 	{
 	}
 
 	DataTable& DataTable::operator=(const DataTable& other)
 	{
-		m_column_order_ = other.m_column_order_;
-		m_data_ = other.m_data_;
+		m_column_order = other.m_column_order;
+		m_data = other.m_data;
 
-		for (auto& it : other.m_visible_columns_)
+		for (auto& it : other.m_visible_columns)
 		{
-			m_visible_columns_.push_back(m_column_order_.find(it->first));
+			m_visible_columns.push_back(m_column_order.find(it->first));
 		}
 
-		for (auto& it : other.m_invisible_columns_)
+		for (auto& it : other.m_invisible_columns)
 		{
-			m_invisible_columns_.push_back(m_column_order_.find(it->first));
+			m_invisible_columns.push_back(m_column_order.find(it->first));
 		}
 		return *this;
 	}
 
 	DataTable& DataTable::operator=(DataTable&& other)
 	{
-		m_column_order_ = std::move(other.m_column_order_);
-		m_data_ = std::move(other.m_data_);
-		m_visible_columns_ = std::move(other.m_visible_columns_);
-		m_invisible_columns_ = std::move(other.m_invisible_columns_);
+		m_column_order = std::move(other.m_column_order);
+		m_data = std::move(other.m_data);
+		m_visible_columns = std::move(other.m_visible_columns);
+		m_invisible_columns = std::move(other.m_invisible_columns);
 		return *this;
 	}
 
-	void DataTable::Clear(void)
+	void DataTable::clear(void)
 	{
-		m_data_.clear();
+		m_data.clear();
 	}
 
-	bool DataTable::IsInitialized(void)
+	bool DataTable::isInitialized(void)
 	{
-		return m_column_order_.size() > 0 && (m_visible_columns_.size() > 0 || m_invisible_columns_.size() > 0);
+		return m_column_order.size() > 0 && (m_visible_columns.size() > 0 || m_invisible_columns.size() > 0);
 	}
 
-	std::vector<const std::string*> DataTable::At(const size_t index, const FIELD_SELECTION field_selection) const
+	std::vector<const std::string*> DataTable::at(const size_t index, const FIELD_SELECTION field_selection) const
 	{
 		std::vector<const std::string*> record;
 		if (field_selection == FIELD_SELECTION::ALL)
 		{
-			record.resize((m_column_order_.size()));
-			for (size_t column = 0; column < m_column_order_.size(); ++column)
+			record.resize((m_column_order.size()));
+			for (size_t column = 0; column < m_column_order.size(); ++column)
 			{
-				record[column] = &m_data_[(m_column_order_.size() * index) + column];
+				record[column] = &m_data[(m_column_order.size() * index) + column];
 			}
 		}
 		else if (field_selection == FIELD_SELECTION::VISIBLE)
 		{
-			record.resize((m_visible_columns_.size()));
-			for (size_t column = 0; column < m_visible_columns_.size(); ++column)
+			record.resize((m_visible_columns.size()));
+			for (size_t column = 0; column < m_visible_columns.size(); ++column)
 			{
-				record[column] = &m_data_[(m_column_order_.size() * index) + m_visible_columns_[column]->second];
+				record[column] = &m_data[(m_column_order.size() * index) + m_visible_columns[column]->second];
 			}
 		}
 		else
 		{
-			record.resize((m_invisible_columns_.size()));
-			for (size_t column = 0; column < m_invisible_columns_.size(); ++column)
+			record.resize((m_invisible_columns.size()));
+			for (size_t column = 0; column < m_invisible_columns.size(); ++column)
 			{
-				record[column] = &m_data_[(m_column_order_.size() * index) + m_invisible_columns_[column]->second];
+				record[column] = &m_data[(m_column_order.size() * index) + m_invisible_columns[column]->second];
 			}
 		}
 		return record;
 	}
 
-	std::vector<const std::string*> DataTable::At(const size_t index, const std::vector<std::string> fields) const
+	std::vector<const std::string*> DataTable::at(const size_t index, const std::vector<std::string> fields) const
 	{
 		std::vector<const std::string *> record(fields.size());
 		for (size_t field = 0; field < fields.size(); ++field)
 		{
-			auto entry = m_column_order_.find(fields[field]);
-			if (entry == m_column_order_.end())
+			auto entry = m_column_order.find(fields[field]);
+			if (entry == m_column_order.end())
 			{
 				throw std::runtime_error("Requested field isn't present within the table.");
 			}
-			record[field] = &m_data_[(m_column_order_.size() * index) + entry->second];
+			record[field] = &m_data[(m_column_order.size() * index) + entry->second];
 		}
 		return record;
 	}
 
-	void DataTable::Insert(const std::vector<std::string>& record)
+	void DataTable::insert(const std::vector<std::string>& record)
 	{
-		if (record.size() != m_column_order_.size())
+		if (record.size() != m_column_order.size())
 		{
 			throw std::runtime_error("Size mismatch.");
 		}
 
-		m_data_.insert(m_data_.end(), record.begin(), record.end());
+		m_data.insert(m_data_.end(), record.begin(), record.end());
 	}
 
-	size_t DataTable::GetRecordCount(void) const
+	size_t DataTable::getRecordCount(void) const
 	{
-		return Size();
+		return size();
 	}
 
-	size_t DataTable::GetColumnCount(void) const
+	size_t DataTable::getColumnCount(void) const
 	{
-		return m_column_order_.size();
+		return m_column_order.size();
 	}
 
-	size_t DataTable::GetColumnIndex(const std::string column) const
+	size_t DataTable::getColumnIndex(const std::string column) const
 	{
-		auto iterator = m_column_order_.find(column);
-		if (iterator != m_column_order_.end())
+		auto iterator = m_column_order.find(column);
+		if (iterator != m_column_order.end())
 		{
 			return iterator->second;
 		}
@@ -180,73 +180,73 @@ namespace ASAP
 		}
 	}
 
-	size_t DataTable::GetVisibleColumnCount(void) const
+	size_t DataTable::getVisibleColumnCount(void) const
 	{
-		return m_visible_columns_.size();
+		return m_visible_columns.size();
 	}
 
-	size_t DataTable::GetInvisibleColumnCount(void) const
+	size_t DataTable::getInvisibleColumnCount(void) const
 	{
-		return m_invisible_columns_.size();
+		return m_invisible_columns.size();
 	}
 
-	std::set<std::string> DataTable::GetColumnNames(const FIELD_SELECTION selection) const
+	std::set<std::string> DataTable::getColumnNames(const FIELD_SELECTION selection) const
 	{
 		std::set<std::string> header;
 		if (selection == FIELD_SELECTION::ALL)
 		{
-			for (const auto& entry : m_column_order_)
+			for (const auto& entry : m_column_order)
 			{
 				header.insert(entry.first);
 			}
 		}
 		else if (selection == FIELD_SELECTION::INVISIBLE)
 		{
-			for (const std::map<std::string, size_t>::iterator& it : m_invisible_columns_)
+			for (const std::map<std::string, size_t>::iterator& it : m_invisible_columns)
 			{
 				header.insert(it->first);
 			}
 		}
 		else
 		{
-			for (size_t column = 0; column < m_visible_columns_.size(); ++column)
+			for (size_t column = 0; column < m_visible_columns.size(); ++column)
 			{
-				header.insert(m_visible_columns_[column]->first);
+				header.insert(m_visible_columns[column]->first);
 			}
 		}
 		return header;
 	}
 
-	void DataTable::SetColumnAsInvisible(const std::string column)
+	void DataTable::setColumnAsInvisible(const std::string column)
 	{
-		for (size_t col = 0; col < m_visible_columns_.size(); ++col)
+		for (size_t col = 0; col < m_visible_columns.size(); ++col)
 		{
-			if (m_visible_columns_[col]->first == column)
+			if (m_visible_columns[col]->first == column)
 			{
-				m_invisible_columns_.push_back(m_column_order_.find(column));
-				m_visible_columns_.erase(m_visible_columns_.begin() + col);
+				m_invisible_columns.push_back(m_column_order.find(column));
+				m_visible_columns.erase(m_visible_columns.begin() + col);
 			}
 		}
 	}
 
-	void DataTable::SetColumnAsVisible(const std::string column)
+	void DataTable::setColumnAsVisible(const std::string column)
 	{
-		for (size_t col = 0; col < m_invisible_columns_.size(); ++col)
+		for (size_t col = 0; col < m_invisible_columns.size(); ++col)
 		{
-			if (m_invisible_columns_[col]->first == column)
+			if (m_invisible_columns[col]->first == column)
 			{
-				m_visible_columns_.push_back(m_column_order_.find(column));
-				m_invisible_columns_.erase(m_invisible_columns_.begin() + col);
+				m_visible_columns.push_back(m_column_order.find(column));
+				m_invisible_columns.erase(m_invisible_columns.begin() + col);
 			}
 		}
 	}
 
-	size_t DataTable::Size(void) const
+	size_t DataTable::size(void) const
 	{
-		return (!m_data_.empty() && !m_column_order_.empty()) ? m_data_.size() / m_column_order_.size() : 0;
+		return (!m_data.empty() && !m_column_order.empty()) ? m_data.size() / m_column_order.size() : 0;
 	}
 
-	void DataTable::ConvertColumnsToLower_(std::vector<std::string>& columns)
+	void DataTable::convertColumnsToLower(std::vector<std::string>& columns)
 	{
 		for (std::string& column : columns)
 		{

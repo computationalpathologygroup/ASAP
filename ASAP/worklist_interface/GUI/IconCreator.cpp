@@ -13,7 +13,7 @@ namespace ASAP
 {
 	int IconCreator::m_icon_size = 200;
 
-	IconCreator::IconCreator(void) : m_placeholder_icon(IconCreator::CreateBlankIcon_()), m_invalid_icon(IconCreator::CreateInvalidIcon_())
+	IconCreator::IconCreator(void) : m_placeholder_icon(IconCreator::createBlankIcon_()), m_invalid_icon(IconCreator::createInvalidIcon_())
 	{
 		m_thumbnail_cache = new ThumbnailCache(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::CacheLocation));		
 	}
@@ -24,10 +24,10 @@ namespace ASAP
 		}
 	}
 
-	bool IconCreator::InsertIcon(const std::pair<int, std::string>& index_location)
+	bool IconCreator::insertIcon(const std::pair<int, std::string>& index_location)
 	{
 		bool isValid = false;
-		QIcon itemIcon = CreateIcon_(index_location.second, IconCreator::m_icon_size);	
+		QIcon itemIcon = createIcon(index_location.second, IconCreator::m_icon_size);	
 		if (itemIcon.isNull()) {
 			itemIcon = m_invalid_icon;
 		}
@@ -37,11 +37,11 @@ namespace ASAP
 		}
 			
 		// Signals the model that the item has had a certain amount of icon changes.
-		RequiresItemRefresh(index_location.first, itemIcon);		
+		requiresItemRefresh(index_location.first, itemIcon);		
 		return isValid;
 	}
 
-	QIcon IconCreator::CreateIcon_(const std::string& filepath, const size_t size)
+	QIcon IconCreator::createIcon(const std::string& filepath, const size_t size)
 	{
 		QImage scaled_image = m_thumbnail_cache->getThumbnailFromCache(QString::fromStdString(filepath));
 		if (scaled_image.isNull()) {
@@ -127,14 +127,14 @@ namespace ASAP
 		}
 	}
 
-	QIcon IconCreator::CreateBlankIcon_()
+	QIcon IconCreator::createBlankIcon()
 	{
 		QImage image(IconCreator::m_icon_size, IconCreator::m_icon_size, QImage::Format::Format_BGR30);
 		image.fill(Qt::white);
 		return QIcon(QPixmap::fromImage(image));
 	}
 
-	QIcon IconCreator::CreateInvalidIcon_()
+	QIcon IconCreator::createInvalidIcon()
 	{
 		QPixmap invalid_icon("Resources/unavailable.png");
 		return QIcon(invalid_icon.scaled(IconCreator::m_icon_size, IconCreator::m_icon_size, Qt::AspectRatioMode::KeepAspectRatio));

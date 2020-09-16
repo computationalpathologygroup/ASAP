@@ -19,9 +19,9 @@ int main(int argc, char *argv[])
 	ASAP_Window workstation;
 
 	// Adds the tabs to the composite window and then connects the viewer to the worklist
-	main_window.AddTab(&worklist, "Worklist");
-	int viewer_tab = main_window.AddTab(&workstation, "Viewer");
-	worklist.AttachWorkstation(workstation, viewer_tab);
+	main_window.addTab(&worklist, "Worklist");
+	int viewer_tab = main_window.addTab(&workstation, "Viewer");
+	worklist.attachWorkstation(workstation, viewer_tab);
 
 	return a.exec();
 }
