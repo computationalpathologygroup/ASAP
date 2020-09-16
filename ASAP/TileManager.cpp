@@ -1,7 +1,8 @@
 #include <sstream>
+#include "core/ImageSource.h"
 #include "TileManager.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
-#include "RenderThread.h"
+#include "IOThread.h"
 #include "WSITileGraphicsItem.h"
 #include "WSITileGraphicsItemCache.h"
 #include <QGraphicsScene>
@@ -9,8 +10,8 @@
 #include <QCoreApplication>
 #include <cmath>
 
-TileManager::TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, RenderThread* renderThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
-_renderThread(renderThread),
+TileManager::TileManager(std::shared_ptr<MultiResolutionImage> img, unsigned int tileSize, unsigned int lastRenderLevel, IOThread* ioThread, WSITileGraphicsItemCache* cache, QGraphicsScene* scene) :
+_ioThread(ioThread),
 _tileSize(tileSize),
 _lastRenderLevel(lastRenderLevel),
 _lastFOV(),
@@ -19,7 +20,8 @@ _coverage(),
 _cache(cache),
 _scene(scene),
 _coverageMaps(),
-_coverageMapCacheMode(false)
+_coverageMapCacheMode(false),
+_renderForeground(true)
 {
   for (unsigned int i = 0; i < img->getNumberOfLevels(); ++i) {
     _levelDownsamples.push_back(img->getLevelDownsample(i));
@@ -28,7 +30,7 @@ _coverageMapCacheMode(false)
 }
 
 TileManager::~TileManager() {
-  _renderThread = NULL;
+  _ioThread = NULL;
   _cache = NULL;
   _scene = NULL;
 }
@@ -69,7 +71,7 @@ QPoint TileManager::getLevelTiles(unsigned int level) {
 }
 
 void TileManager::loadAllTilesForLevel(unsigned int level) {
-  if (_renderThread) {
+  if (_ioThread) {
     if (level < _levelDownsamples.size()) {
       std::vector<unsigned long long> baseLevelDims = _levelDimensions[0];
       this->loadTilesForFieldOfView(QRectF(0, 0, baseLevelDims[0], baseLevelDims[1]), level);
@@ -81,7 +83,7 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
   if (level > _lastRenderLevel) {
     return;
   }
-  if (_renderThread) {
+  if (_ioThread) {
     QPoint topLeftTile = this->pixelCoordinatesToTileCoordinates(FOV.topLeft(), level);
     QPoint bottomRightTile = this->pixelCoordinatesToTileCoordinates(FOV.bottomRight(), level);
     QRect FOVTile = QRect(topLeftTile, bottomRightTile);
@@ -96,7 +98,7 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
             if (y >= 0 && y <= nrTiles.y()) {
               if (providesCoverage(level, x, y) < 1) {
                 setCoverage(level, x, y, 1);
-                _renderThread->addJob(_tileSize, x, y, level);
+                _ioThread->addJob(_tileSize, x, y, level);
               }
             }
           }
@@ -106,24 +108,71 @@ void TileManager::loadTilesForFieldOfView(const QRectF& FOV, const unsigned int 
   }
 }
 
-void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel) {
-  WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this);
-  std::stringstream ss;
-  ss << tileX << "_" << tileY << "_" << tileLevel;
-  std::string key;
-  ss >> key;
-  if (_scene) {
-    setCoverage(tileLevel, tileX, tileY, 2);
-    float tileDownsample = _levelDownsamples[tileLevel];
-    float maxDownsample = _levelDownsamples[_lastRenderLevel];
-    float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
-    float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
-    _scene->addItem(item);
-    item->setPos(posX, posY);
-    item->setZValue(1. / ((float)tileLevel + 1.));
+void TileManager::updateTileForegounds() {
+  _ioThread->clearJobs();
+  while (_ioThread->getWaitingThreads() != _ioThread->getWorkers().size()) {
   }
+  QCoreApplication::processEvents();
   if (_cache) {
-    _cache->set(key, item, tileByteSize, tileLevel == _lastRenderLevel);
+    std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
+    for (auto item : cachedTiles) {
+      unsigned int tileSize = item->getTileSize();
+      unsigned int tileLevel = item->getTileLevel();
+      unsigned int tileX = item->getTileX();
+      unsigned int tileY = item->getTileY();
+      if (providesCoverage(tileLevel, tileX, tileY) == 2) {
+        ImageSource* foregroundTile = item->getForegroundTile()->clone();
+        _ioThread->addJob(tileSize, tileX, tileY, tileLevel, foregroundTile);
+      }
+    }
+  }
+}
+
+void TileManager::onForegroundTileRendered(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileLevel) {
+  if (_cache) {
+    std::stringstream ss;
+    ss << tileX << "_" << tileY << "_" << tileLevel;
+    std::string key;
+    ss >> key;
+
+    WSITileGraphicsItem* item = NULL;
+    unsigned int size = 0;
+    _cache->get(key, item, size);
+    if (item) {
+      if (tile) {
+        item->setForegroundPixmap(tile);
+      }
+      setCoverage(tileLevel, tileX, tileY, 2);
+    }
+    else {
+      setCoverage(tileLevel, tileX, tileY, 0);
+    }
+  }
+}
+
+void TileManager::onTileLoaded(QPixmap* tile, unsigned int tileX, unsigned int tileY, unsigned int tileSize, unsigned int tileByteSize, unsigned int tileLevel, ImageSource* foregroundTile, QPixmap* foregroundPixmap) {
+  if (tile) {
+    WSITileGraphicsItem* item = new WSITileGraphicsItem(tile, tileX, tileY, tileSize, tileByteSize, tileLevel, _lastRenderLevel, _levelDownsamples, this, foregroundPixmap, foregroundTile, _foregroundOpacity, _renderForeground);
+    std::stringstream ss;
+    ss << tileX << "_" << tileY << "_" << tileLevel;
+    std::string key;
+    ss >> key;
+    if (_scene) {
+      setCoverage(tileLevel, tileX, tileY, 2);
+      float tileDownsample = _levelDownsamples[tileLevel];
+      float maxDownsample = _levelDownsamples[_lastRenderLevel];
+      float posX = (tileX * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
+      float posY = (tileY * tileDownsample * tileSize) / maxDownsample + ((tileSize * tileDownsample) / (2 * maxDownsample));
+      _scene->addItem(item);
+      item->setPos(posX, posY);
+      item->setZValue(1. / ((float)tileLevel + 1.));
+    }
+    if (_cache) {
+      _cache->set(key, item, tileByteSize, tileLevel == _lastRenderLevel);
+    }
+  }
+  else {
+    setCoverage(tileLevel, tileX, tileY, 0);
   }
 }
 
@@ -131,6 +180,22 @@ void TileManager::onTileRemoved(WSITileGraphicsItem* tile) {
   _scene->removeItem(tile);
   setCoverage(tile->getTileLevel(), tile->getTileX(), tile->getTileY(), 0);
   delete tile;
+}
+
+void TileManager::onForegroundOpacityChanged(float opacity) {
+  _foregroundOpacity = opacity;
+  std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
+  for (auto item : cachedTiles) {
+    item->setForegroundOpacity(opacity);
+  }
+}
+
+void TileManager::onRenderForegroundChanged(bool renderForeground) {
+  _renderForeground = renderForeground;
+  std::vector<WSITileGraphicsItem*> cachedTiles = _cache->getAllItems();
+  for (auto item : cachedTiles) {
+    item->setRenderForeground(renderForeground);
+  }
 }
 
 void TileManager::setCoverageMapModeToCache() {
@@ -209,8 +274,8 @@ std::vector<QPainterPath> TileManager::getCoverageMaps() {
 }
 
 void TileManager::clear() {
-  _renderThread->clearJobs();
-  while (_renderThread->getWaitingThreads() != _renderThread->getWorkers().size()) {
+  _ioThread->clearJobs();
+  while (_ioThread->getWaitingThreads() != _ioThread->getWorkers().size()) {
   }
   QCoreApplication::processEvents();
   if (_cache) {
@@ -231,6 +296,10 @@ void TileManager::clear() {
 
 void TileManager::refresh() {
   clear();
+  this->reloadLastFOV();
+}
+
+void TileManager::reloadLastFOV() {
   QRect FOV = _lastFOV;
   QPoint topLeft = FOV.topLeft();
   QPoint bottomRight = FOV.bottomRight();

@@ -23,6 +23,10 @@ public :
   {
   };
 
+  ImageSource* clone() {
+    return nullptr;
+  }
+
   virtual std::string name() const {return std::string("ImageFilter");};
 
   bool filter(const Patch<inType>& input, Patch<outType>& output) {

@@ -63,7 +63,7 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
 	if (_cType == RGB) {
 		cDepth = 3;
 	}
-	else if (_cType == ARGB) {
+	else if (_cType == RGBA) {
 		cDepth = 4;
 	}
 	else if (_cType == Indexed) {
@@ -138,7 +138,7 @@ int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& 
 		if (_cType == RGB) {
 			cDepth = 3;
 		}
-		else if (_cType == ARGB) {
+		else if (_cType == RGBA) {
 			cDepth = 4;
 		}
 		else if (_cType == Indexed) {
@@ -188,7 +188,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 	if (_cType == RGB) {
 		cDepth = 3;
 	}
-	else if (_cType == ARGB) {
+	else if (_cType == RGBA) {
 		cDepth = 4;
 	}
 	else if (_cType == Indexed) {
@@ -273,7 +273,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 		}
 
 		unsigned int nrComponents = 3;
-		if (getColorType() == ARGB) {
+		if (getColorType() == RGBA) {
 			nrComponents = 4;
 		}
 		else if (getColorType() == Monochrome) {
@@ -315,31 +315,48 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 	}
 }
 
-int MultiResolutionImageWriter::finishImage() {
-	TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
-	TIFFSetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &_min_vals[0]);
-	TIFFSetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &_max_vals[0]);
-	/* Reset to default behavior, if needed. */
-	TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MERGED);
-	delete[] _min_vals;
-	delete[] _max_vals;
-	_min_vals = NULL;
-	_max_vals = NULL;
+int MultiResolutionImageWriter::finishImage() {	
+	if (TIFFGetField(_tiff, TIFFTAG_TILEOFFSETS) == 0) {
+		std::cout << "No valid tiles have been written to the base image, cannot finish image." << std::endl;
+		return -1;
+	}
+	if (_min_vals != NULL && _max_vals != NULL) {
+		TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MULTI);
+		TIFFSetField(_tiff, TIFFTAG_SMINSAMPLEVALUE, &_min_vals[0]);
+		TIFFSetField(_tiff, TIFFTAG_SMAXSAMPLEVALUE, &_max_vals[0]);
+		/* Reset to default behavior, if needed. */
+		TIFFSetField(_tiff, TIFFTAG_PERSAMPLE, PERSAMPLE_MERGED);
+		delete[] _min_vals;
+		delete[] _max_vals;
+		_min_vals = NULL;
+		_max_vals = NULL;
+	}
 	auto startPyramidTime = std::chrono::steady_clock::now();
 	if (getDataType() == UInt32) {
-		writePyramidToDisk<unsigned int>();
+		if (writePyramidToDisk<unsigned int>() < 0) {
+			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+			return -1;
+		}
 		incorporatePyramid<unsigned int>();
 	}
 	else if (getDataType() == UInt16) {
-		writePyramidToDisk<unsigned short>();
-		incorporatePyramid<unsigned short>();
+	if (writePyramidToDisk<unsigned short>() < 0) {
+		std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+		return -1;
+	}		incorporatePyramid<unsigned short>();
 	}
 	else if (getDataType() == UChar) {
-		writePyramidToDisk<unsigned char>();
+		if (writePyramidToDisk<unsigned char>() < 0) {
+			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+			return -1;
+		}
 		incorporatePyramid<unsigned char>();
 	}
 	else {
-		writePyramidToDisk<float>();
+		if (writePyramidToDisk<float>() < 0) {
+			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
+			return -1;
+		}
 		incorporatePyramid<float>();
 	}
 	auto endPyramidTime = std::chrono::steady_clock::now();
@@ -583,7 +600,7 @@ void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
 	if (_cType == Monochrome || _cType == Indexed) {
 		TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 	}
-	else if (_cType == ARGB || _cType == RGB) {
+	else if (_cType == RGBA || _cType == RGB) {
 		TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	}
 
@@ -609,7 +626,7 @@ void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
 	else if (_cType == RGB) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 3);
 	}
-	else if (_cType == ARGB) {
+	else if (_cType == RGBA) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 4);
 	}
 	else if (_cType == Indexed) {
@@ -627,6 +644,10 @@ void MultiResolutionImageWriter::setPyramidTags(TIFF* levelTiff, const unsigned 
 	else if (_codec == JPEG) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
 		TIFFSetField(levelTiff, TIFFTAG_JPEGQUALITY, (unsigned int)_quality);
+		if (_codec == JPEG && _quality < 90) {
+			TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_YCBCR);
+			TIFFSetField(levelTiff, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
+		}
 	}
 	else if (_codec == RAW) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
@@ -687,13 +708,13 @@ template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* l
 	if (getCompression() == JPEG2000) {
 		int depth = 8;
 		unsigned int size = npixels * sizeof(unsigned char);
-		if (getDataType() == UInt32 && getColorType() != pathology::ColorType::ARGB) {
+		if (getDataType() == UInt32 && getColorType() != pathology::ColorType::RGBA) {
 			depth = 32;
 			size = npixels * sizeof(T);
 		}
 
 		unsigned int nrComponents = 3;
-		if (getColorType() == ARGB) {
+		if (getColorType() == RGBA) {
 			nrComponents = 4;
 		}
 		else if (getColorType() == Monochrome) {

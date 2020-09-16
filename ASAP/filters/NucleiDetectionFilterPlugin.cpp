@@ -57,7 +57,7 @@ QIcon NucleiDetectionFilterPlugin::icon() const {
 }
 
 bool NucleiDetectionFilterPlugin::initialize(const ImageSource* img) {
-  if (img->getColorType() == pathology::ColorType::RGB || img->getColorType() == pathology::ColorType::ARGB || img->getColorType() == pathology::ColorType::Monochrome) {
+  if (img->getColorType() == pathology::ColorType::RGB || img->getColorType() == pathology::ColorType::RGBA || img->getColorType() == pathology::ColorType::Monochrome) {
     if (img->getColorType() == pathology::ColorType::Monochrome) {
       _monochromeInput = true;
     }

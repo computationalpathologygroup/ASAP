@@ -6,7 +6,7 @@
 #include <memory>
 
 class MultiResolutionImage;
-class RenderThread;
+class IOThread;
 class PrefetchThread;
 class ToolPluginInterface;
 class MiniMap;
@@ -14,6 +14,10 @@ class WSITileGraphicsItemCache;
 class TileManager;
 class ScaleBar;
 class QSettings;
+
+namespace pathology {
+  struct LUT;
+}
 
 class ASAPLIB_EXPORT PathologyViewer : public QGraphicsView
 {
@@ -38,9 +42,9 @@ public:
     float getForegroundOpacity() const;
     void  setForegroundOpacity(const float& opacity);
 
-    void setForegroundWindowAndLevel(const float& window, const float& level);
-    void setForegroundLUT(const std::string& LUTname);
+    void setForegroundLUT(const pathology::LUT& LUT);
     void setForegroundChannel(unsigned int channel);
+    void setEnableForegroundRendering(bool enableForegroundRendering);
 
     void togglePan(bool pan, const QPoint& startPos = QPoint());
     void pan(const QPoint& panTo);
@@ -114,14 +118,13 @@ private :
     QPoint _prevPan;
 
     // Members related to rendering
-    RenderThread* _renderthread;
+    IOThread* _ioThread;
     int _backgroundChannel;
     int _foregroundChannel;
     float _opacity;
-    float _window;
-    float _level;
     std::string _LUTname;
     float _foregroundImageScale;
+    bool _renderForeground;
 
     PrefetchThread* _prefetchthread;
 

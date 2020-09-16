@@ -95,7 +95,7 @@ class NucleiDetectionFilter : public FilterBase {
   bool checkInputImageRequirements(const Patch<inType>& input) const 
   {
     bool validInput = true;
-    validInput &= ((input.getDimensions().size() == 3 && (input.getColorType() == pathology::ColorType::RGB || input.getColorType() == pathology::ColorType::ARGB || input.getColorType() == pathology::ColorType::Monochrome)));
+    validInput &= ((input.getDimensions().size() == 3 && (input.getColorType() == pathology::ColorType::RGB || input.getColorType() == pathology::ColorType::RGBA || input.getColorType() == pathology::ColorType::Monochrome)));
     return validInput;
   }
 

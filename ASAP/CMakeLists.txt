@@ -6,8 +6,8 @@ set(HEADERS
     PathologyViewer.h
     WSITileGraphicsItemCache.h
     MiniMap.h
-    RenderThread.h
-    RenderWorker.h
+    IOThread.h
+    IOWorker.h
     TileManager.h
     PrefetchThread.h
     WSITileGraphicsItem.h
@@ -22,8 +22,8 @@ set(SOURCE
     PathologyViewer.cpp
     WSITileGraphicsItemCache.cpp
     MiniMap.cpp
-    RenderThread.cpp
-    RenderWorker.cpp
+    IOThread.cpp
+    IOWorker.cpp
     PrefetchThread.cpp
     TileManager.cpp
     WSITileGraphicsItem.cpp
@@ -41,7 +41,7 @@ qt5_add_resources(RESOURCE_ADDED ${RESOURCE})
 add_library(ASAPLib SHARED ${SOURCE} ${HEADERS} ${RESOURCE_ADDED})
 generate_export_header(ASAPLib)
 
-add_executable(ASAP WIN32 main.cpp ASAP.rc ${RESOURCE_ADDED})
+add_executable(ASAP main.cpp ASAP.rc ${RESOURCE_ADDED})
 
 target_link_libraries(ASAPLib PUBLIC basicfilters PRIVATE multiresolutionimageinterface Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools)
 target_include_directories(ASAPLib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:include/ASAP> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/ASAP>)
