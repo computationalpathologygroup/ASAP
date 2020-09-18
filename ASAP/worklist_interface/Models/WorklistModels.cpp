@@ -119,15 +119,15 @@ namespace ASAP
 		auto icon_connection = QObject::connect(&m_creator,
 			&IconCreator::RequiresItemRefresh,
 			window,
-			&WorklistWindow::UpdateImageIcons);
+			&WorklistWindow::updateImageIcons);
 		std::function<bool(const std::pair<int, std::string> & index_location)> create_icons = [creator = &m_creator, total_size = items.Size(), window = window](const std::pair<int, std::string>& index_location) -> bool	{
 			bool valid = creator->InsertIcon(index_location);
 			return valid;
 		};
 		QFuture<bool> future = QtConcurrent::mapped(index_locations, create_icons);
 		std::unique_ptr<QFutureWatcher<void> > future_watcher(new QFutureWatcher<void>);
-		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::progressValueChanged, [=](int pv) {window->UpdateStatusBar("Loading thumbnail " + QString::fromStdString(std::to_string(pv)) + " of " + QString::fromStdString(std::to_string(items.Size()))); });
-		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::finished, [=]() {window->UpdateStatusBar("Finished loading thumbnails."); QObject::disconnect(icon_connection); });
+		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::progressValueChanged, [=](int pv) {window->updateStatusBar("Loading thumbnail " + QString::fromStdString(std::to_string(pv)) + " of " + QString::fromStdString(std::to_string(items.Size()))); });
+		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::finished, [=]() {window->updateStatusBar("Finished loading thumbnails."); QObject::disconnect(icon_connection); });
 		future_watcher->setFuture(future);
 		return future_watcher;
 	}

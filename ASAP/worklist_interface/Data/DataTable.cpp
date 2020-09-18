@@ -154,7 +154,7 @@ namespace ASAP
 			throw std::runtime_error("Size mismatch.");
 		}
 
-		m_data.insert(m_data_.end(), record.begin(), record.end());
+		m_data.insert(m_data.end(), record.begin(), record.end());
 	}
 
 	size_t DataTable::getRecordCount(void) const

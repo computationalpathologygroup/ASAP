@@ -99,7 +99,7 @@ namespace ASAP
 						}
 					}
 				}
-				else if (image->getColorType() == pathology::ColorType::ARGB) {
+				else if (image->getColorType() == pathology::ColorType::RGBA) {
 					for (size_t y = 0; y < dimensions[1]; ++y)
 					{
 						for (size_t x = 0; x < dimensions[0]; ++x)
