@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <deque>
 
 #include "WorklistSourceInterface.h"
 #include "../Misc/TemporaryDirectoryTracker.h"
