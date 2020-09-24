@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QSizePolicy>
 #include <QMouseEvent>
+#include <QPainterPath>
 #include "TileManager.h"
 
 const char* const MiniMap::coverageColors[] = { "red", "green", "yellow", "black", "purple", "orange" };
