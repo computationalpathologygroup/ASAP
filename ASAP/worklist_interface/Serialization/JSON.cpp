@@ -1,7 +1,5 @@
 #include "JSON.h"
 
-#include "../Misc/StringConversions.h"
-
 namespace ASAP { namespace JSON
 {
 	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json)

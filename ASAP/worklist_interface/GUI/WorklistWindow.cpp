@@ -18,14 +18,13 @@
 #endif 
 
 #include "IconCreator.h"
-#include "../Misc/StringManipulation.h"
 
 namespace ASAP
 {
 	WorklistWindow::WorklistWindow(QWidget* parent) :
 		CompositeChild(parent),
 		m_ui(new Ui::WorklistWindowLayout),
-		m_storage_directory(boost::filesystem::path("/temp/"), TemporaryDirectoryTracker::GetStandardConfiguration()),
+		m_storage_directory(boost::filesystem::path("/temp/"), TemporaryDirectoryTracker::getStandardConfiguration()),
 		m_source(m_storage_directory)
 	{
 		m_ui->setupUi(this);
@@ -54,14 +53,14 @@ namespace ASAP
 
 	void WorklistWindow::setDataSource(const std::string source_path, const std::unordered_map<std::string, std::string> parameters)
 	{
-		setDataSource(SourceProxy::SerializeSource(source_path, parameters));
+		setDataSource(SourceProxy::serializeSource(source_path, parameters));
 	}
 
 	void WorklistWindow::setDataSource(const std::string& source)
 	{
-		if (!m_source.IsInitialized() || source != m_source_.GetCurrentSource())
+		if (!m_source.isInitialized() || source != m_source.getCurrentSource())
 		{
-			std::pair<std::string, std::unordered_map<std::string, std::string>> deserialized_source(SourceProxy::DeserializeSource(source));
+			std::pair<std::string, std::unordered_map<std::string, std::string>> deserialized_source(SourceProxy::deserializeSource(source));
 
 			// Halts any leftover thumbnail loading.
 			stopThumbnailLoading();
@@ -70,25 +69,25 @@ namespace ASAP
 			{
 				// Attempts to load the data source and then confirms it has the required fields for the UI to function.
 				m_ui->status_bar->showMessage("Loading source: " + QString(deserialized_source.first.data()));
-				m_source_.LoadSource(source);
+				m_source.loadSource(source);
 
-				if (!m_source_.IsInitialized())
+				if (!m_source.isInitialized())
 				{
 					throw std::runtime_error("Unable to load source: " + deserialized_source.first);
 				}
 				if (!checkSchema())
 				{
-					m_source_.Close();
+					m_source.close();
 					throw std::runtime_error("Loaded source has schema errors or lacks Patient and Study data.");
 				}
 
 				updatePreviousSources();
 				updateSourceViews();
-				if (m_source_.GetSourceType() == WorklistSourceInterface::SourceType::FILELIST) {
-					m_workstation->openFile(QString::fromStdString(SourceProxy::DeserializeSource(m_source_.GetCurrentSource()).first), "default");
+				if (m_source.getSourceType() == WorklistSourceInterface::SourceType::FILELIST) {
+					m_workstation->openFile(QString::fromStdString(SourceProxy::deserializeSource(m_source.getCurrentSource()).first), "default");
 					requiresTabSwitch(m_workstation_tab_id);
 				}
-				m_ui_->status_bar->showMessage("Succesfully loaded source: " + QString(deserialized_source.first.data()));
+				m_ui->status_bar->showMessage("Succesfully loaded source: " + QString(deserialized_source.first.data()));
 			}
 			catch (const std::exception& e)
 			{
@@ -101,15 +100,15 @@ namespace ASAP
 	// Todo: Decouple and create abstraction of schema's
 	bool WorklistWindow::checkSchema(void)
 	{
-		if (m_source.IsInitialized())
+		if (m_source.isInitialized())
 		{
 			// No schema check is required for a filelist source.
 			if (m_source.getSourceType() == WorklistSourceInterface::FULL_WORKLIST)
 			{
-				std::set<std::string> worklist_headers(m_source_.GetWorklistHeaders());
-				std::set<std::string> patient_headers(m_source_.GetPatientHeaders());
-				std::set<std::string> study_headers(m_source_.GetStudyHeaders());
-				std::set<std::string> image_headers(m_source_.GetImageHeaders());
+				std::set<std::string> worklist_headers(m_source.getWorklistHeaders());
+				std::set<std::string> patient_headers(m_source.getPatientHeaders());
+				std::set<std::string> study_headers(m_source.getStudyHeaders());
+				std::set<std::string> image_headers(m_source.getImageHeaders());
 
 				return	(worklist_headers.find("id") != worklist_headers.end()) &&
 						(patient_headers.find("id") != patient_headers.end()) &&
@@ -148,9 +147,9 @@ namespace ASAP
 					{
 						if (error_code == 0)
 						{
-							for (size_t record = 0; record < table.Size(); ++record)
+							for (size_t record = 0; record < table.size(); ++record)
 							{
-								studies_to_acquire.push_back(*table.At(record, { "id" })[0]);
+								studies_to_acquire.push_back(*table.at(record, { "id" })[0]);
 							}
 						}
 						condition.notify_one();
@@ -169,9 +168,9 @@ namespace ASAP
 					{
 						if (error_code == 0)
 						{
-							for (size_t record = 0; record < table.Size(); ++record)
+							for (size_t record = 0; record < table.size(); ++record)
 							{
-								images.push_back(*table.At(record, { "id" })[0]);
+								images.push_back(*table.at(record, { "id" })[0]);
 							}
 						}
 						condition.notify_one();
@@ -233,18 +232,18 @@ namespace ASAP
 		}
 		m_history_actions.clear();
 
-		auto previous_source(m_source.GetPreviousSources());
+		auto previous_source(m_source.getPreviousSources());
 		for (const std::string& prev_source : previous_source)
 		{
-			std::pair<std::string, std::unordered_map<std::string, std::string>> source_parameters(SourceProxy::DeserializeSource(prev_source));
+			std::pair<std::string, std::unordered_map<std::string, std::string>> source_parameters(SourceProxy::deserializeSource(prev_source));
 
-			m_history_actions_.push_back(std::unique_ptr<QAction>(new QAction(QString(source_parameters.first.data()), this)));
-			m_ui->menu_history->addAction(m_history_actions_.back().get());
+			m_history_actions.push_back(std::unique_ptr<QAction>(new QAction(QString(source_parameters.first.data()), this)));
+			m_ui->menu_history->addAction(m_history_actions.back().get());
 
-			connect(m_history_actions_.back().get(),
+			connect(m_history_actions.back().get(),
 				&QAction::triggered,
 				this,
-				[action = m_history_actions_.back().get(), this, source_parameters](bool checked)
+				[action = m_history_actions.back().get(), this, source_parameters](bool checked)
 				{
 					this->setDataSource(source_parameters.first, source_parameters.second);
 				});
@@ -287,7 +286,7 @@ namespace ASAP
 					{ std::set<std::string>(), nullptr }
 				});
 
-				m_models.UpdateHeaders(headers);
+				m_models.updateHeaders(headers);
 				this->requestWorklistRefresh();
 			}
 		}
@@ -386,7 +385,7 @@ namespace ASAP
 
 				if (model_enum == WorklistModels::WORKLISTS && item->row() > 0)
 				{
-					m_source.DeleteWorklistRecord(item->data().toList()[0].toString().toStdString(), [this](bool succesful)
+					m_source.deleteWorklistRecord(item->data().toList()[0].toString().toStdString(), [this](bool succesful)
 					{
 						if (!succesful)
 						{
@@ -400,7 +399,7 @@ namespace ASAP
 				}
 				else
 				{
-					QStandardItem* worklist_item(m_models_.worklists->itemFromIndex(m_ui_->view_worklists->selectionModel()->selectedIndexes()[0]));
+					QStandardItem* worklist_item(m_models.worklists->itemFromIndex(m_ui->view_worklists->selectionModel()->selectedIndexes()[0]));
 					updateWorklist(worklist_item, getImagesForItem(item->data().toString().toStdString(), model_enum), true);
 				}
 			}
@@ -535,7 +534,7 @@ namespace ASAP
 	{
 		// Identifies the source of the drop event.
 		QObject* source(drop_event->source());
-		WorklistModels::ModelEnum owner = m_models.GetModelEnum((QStandardItemModel*)static_cast<QAbstractItemView*>(source)->model());
+		WorklistModels::ModelEnum owner = m_models.getModelEnum((QStandardItemModel*)static_cast<QAbstractItemView*>(source)->model());
 
 		// Acquires the additional image ID's.
 		if (owner != WorklistModels::WORKLISTS)
@@ -545,9 +544,9 @@ namespace ASAP
 			int row, column;
 			stream >> row >> column;
 
-			QStandardItemModel* model(m_models_.GetModel(owner));
+			QStandardItemModel* model(m_models.getModel(owner));
 			QStandardItem* item = model->itemFromIndex(model->index(row, column));
-			QStandardItem* worklist_item = m_models_.worklists->itemFromIndex(m_ui_->view_worklists->indexAt(drop_event->pos()));
+			QStandardItem* worklist_item = m_models.worklists->itemFromIndex(m_ui->view_worklists->indexAt(drop_event->pos()));
 
 			// Checks if the worklist item can be selected, and whether or not it's the statically created "All" entry.
 			if (worklist_item && worklist_item->row() > 0)
@@ -583,11 +582,11 @@ namespace ASAP
 
 		QStandardItemModel* patient_model	= m_models.patients;
 		QTableView* patient_view			= m_ui->view_patients;
-		m_source.GetPatientRecords(worklist_id, [this, patient_model, patient_view](DataTable table, int error)
+		m_source.getPatientRecords(worklist_id, [this, patient_model, patient_view](DataTable table, int error)
 		{
 			if (error == 0)
 			{
-				m_models.SetPatientsItems(table);
+				m_models.setPatientsItems(table);
 				patient_view->update();
 			}
 		});
@@ -604,7 +603,7 @@ namespace ASAP
 		{
 			if (error == 0)
 			{
-				m_models.SetStudyItems(table);
+				m_models.setStudyItems(table);
 				study_view->update();
 			}
 		});
@@ -620,12 +619,12 @@ namespace ASAP
 		std::string study_id(study_item->data().toString().toStdString());
 		std::string worklist_id = !worklist_item->data().isNull() ? worklist_item->data().toList()[0].toString().toStdString() : std::string();
 
-		m_source.GetImageRecords(worklist_id, study_id, [this, models=&m_models, image_view=m_ui->view_images](DataTable table, int error)
+		m_source.getImageRecords(worklist_id, study_id, [this, models=&m_models, image_view=m_ui->view_images](DataTable table, int error)
 		{
 			if (error == 0)
 			{
 				stopThumbnailLoading();
-				m_thumbnail_loader = models->SetImageItems(table, this);
+				m_thumbnail_loader = models->setImageItems(table, this);
 				image_view->update();
 			}
 		});
@@ -757,7 +756,7 @@ namespace ASAP
 
 	void WorklistWindow::onWorklistRefresh(void)
 	{
-		m_source.getWorklistRecords([models=&m_models_](DataTable& table, int error)
+		m_source.getWorklistRecords([models=&m_models](DataTable& table, int error)
 		{
 			if (error == 0)
 			{

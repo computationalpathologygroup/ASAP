@@ -7,55 +7,55 @@
 
 namespace ASAP
 {
-	TemporaryDirectoryTracker::TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration) : m_configuration_(configuration), m_continue_(true), m_directory_(directory)
+	TemporaryDirectoryTracker::TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration) : m_configuration(configuration), m_continue(true), m_directory(directory)
 	{
-		if (boost::filesystem::exists(m_directory_) && boost::filesystem::is_regular_file(m_directory_))
+		if (boost::filesystem::exists(m_directory) && boost::filesystem::is_regular_file(m_directory))
 		{
 			throw std::runtime_error("Unable to initialize a file as temporary directory.");
 		}
 		else
 		{
-			boost::filesystem::create_directories(m_directory_);
+			boost::filesystem::create_directories(m_directory);
 		}
 
-		m_update_thread_ = std::thread(&TemporaryDirectoryTracker::Update_, this);
+		m_update_thread = std::thread(&TemporaryDirectoryTracker::update, this);
 	}
 
 	TemporaryDirectoryTracker::~TemporaryDirectoryTracker(void)
 	{
-		m_continue_ = false;
-		m_update_thread_.join();
+		m_continue = false;
+		m_update_thread.join();
 
-		if (m_configuration_.clean_on_deconstruct)
+		if (m_configuration.clean_on_deconstruct)
 		{
-			boost::filesystem::remove_all(m_directory_);
+			boost::filesystem::remove_all(m_directory);
 		}
 	}
 
-	TemporaryDirectoryConfiguration TemporaryDirectoryTracker::GetStandardConfiguration(void)
+	TemporaryDirectoryConfiguration TemporaryDirectoryTracker::getStandardConfiguration(void)
 	{
 		return { true, true, 0, 5000 };
 	}
 
-	boost::filesystem::path TemporaryDirectoryTracker::GetAbsolutePath(void) const
+	boost::filesystem::path TemporaryDirectoryTracker::getAbsolutePath(void) const
 	{
-		return boost::filesystem::absolute(m_directory_);
+		return boost::filesystem::absolute(m_directory);
 	}
 
-	std::vector<boost::filesystem::path> TemporaryDirectoryTracker::GetFilepaths(void) const
+	std::vector<boost::filesystem::path> TemporaryDirectoryTracker::getFilepaths(void) const
 	{
 		std::vector<boost::filesystem::path> filepaths;
-		for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(m_directory_), { }))
+		for (auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(m_directory), { }))
 		{
 			filepaths.push_back(entry.path());
 		}
 		return filepaths;
 	}
 
-	uint64_t TemporaryDirectoryTracker::GetDirectorySizeInMb(void) const
+	uint64_t TemporaryDirectoryTracker::getDirectorySizeInMb(void) const
 	{
 		uint64_t size = 0;
-		for (boost::filesystem::recursive_directory_iterator it(m_directory_); it != boost::filesystem::recursive_directory_iterator(); ++it)
+		for (boost::filesystem::recursive_directory_iterator it(m_directory); it != boost::filesystem::recursive_directory_iterator(); ++it)
 		{
 			if (!boost::filesystem::is_directory(*it))
 			{
@@ -66,14 +66,14 @@ namespace ASAP
 		return size;
 	}
 
-	void TemporaryDirectoryTracker::Update_(void)
+	void TemporaryDirectoryTracker::update(void)
 	{
-		while (m_continue_)
+		while (m_continue)
 		{
-			size_t directory_size = GetDirectorySizeInMb();
-			if (directory_size > m_configuration_.max_size_in_mb)
+			size_t directory_size = getDirectorySizeInMb();
+			if (directory_size > m_configuration.max_size_in_mb)
 			{
-				std::vector<boost::filesystem::path> filepaths(GetFilepaths());
+				std::vector<boost::filesystem::path> filepaths(getFilepaths());
 				std::map<uint64_t, boost::filesystem::path*> date_sorted_files;
 				for (boost::filesystem::path& p : filepaths)
 				{
@@ -82,8 +82,8 @@ namespace ASAP
 
 				for (auto it = date_sorted_files.begin(); it != date_sorted_files.end(); ++it)
 				{
-					if ((directory_size <= m_configuration_.max_size_in_mb) ||
-						(it == date_sorted_files.end()-- && m_configuration_.allow_overflow))
+					if ((directory_size <= m_configuration.max_size_in_mb) ||
+						(it == date_sorted_files.end()-- && m_configuration.allow_overflow))
 					{
 						break;
 					}

@@ -13,7 +13,7 @@ namespace ASAP
 {
 	int IconCreator::m_icon_size = 200;
 
-	IconCreator::IconCreator(void) : m_placeholder_icon(IconCreator::createBlankIcon_()), m_invalid_icon(IconCreator::createInvalidIcon_())
+	IconCreator::IconCreator(void) : m_placeholder_icon(IconCreator::createBlankIcon()), m_invalid_icon(IconCreator::createInvalidIcon())
 	{
 		m_thumbnail_cache = new ThumbnailCache(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::CacheLocation));		
 	}
@@ -110,7 +110,7 @@ namespace ASAP
 					}
 				}
 
-				delete data;
+				delete[] data;
 				scaled_image = qimage.scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio);
 				m_thumbnail_cache->addThumbnailToCache(QString::fromStdString(filepath), scaled_image);
 				QPixmap pixmap(QPixmap::fromImage(scaled_image));

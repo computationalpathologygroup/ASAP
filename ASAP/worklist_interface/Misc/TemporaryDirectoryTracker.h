@@ -28,22 +28,22 @@ namespace ASAP
 	class TemporaryDirectoryTracker
 	{
 		public:
-			TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration = GetStandardConfiguration());
+			TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration = getStandardConfiguration());
 			~TemporaryDirectoryTracker(void);
 
-			static TemporaryDirectoryConfiguration GetStandardConfiguration(void);
+			static TemporaryDirectoryConfiguration getStandardConfiguration(void);
 
-			boost::filesystem::path GetAbsolutePath(void) const;
-			std::vector<boost::filesystem::path> GetFilepaths(void) const;
-			uint64_t GetDirectorySizeInMb(void) const;
+			boost::filesystem::path getAbsolutePath(void) const;
+			std::vector<boost::filesystem::path> getFilepaths(void) const;
+			uint64_t getDirectorySizeInMb(void) const;
 
 		private:
-			TemporaryDirectoryConfiguration m_configuration_;
-			bool							m_continue_;
-			boost::filesystem::path			m_directory_;
-			std::thread						m_update_thread_;
+			TemporaryDirectoryConfiguration m_configuration;
+			bool							m_continue;
+			boost::filesystem::path			m_directory;
+			std::thread						m_update_thread;
 
-			void Update_(void);
+			void update(void);
 	};
 }
 #endif // __ASAP_MISC_TEMPORARYDIRECTORYTRACKER__

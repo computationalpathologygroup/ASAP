@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <boost/filesystem.hpp>
+#include "core/stringconversion.h"
 
 #ifdef BUILD_GRANDCHALLENGE_INTERFACE
 #include "GrandChallengeSource.h"
@@ -17,61 +18,61 @@
 
 namespace ASAP
 {
-	SourceProxy::SourceProxy(TemporaryDirectoryTracker& temp_dir) : m_source_(nullptr), m_temporary_directory_(temp_dir), m_number_previous_sources_(5)
+	SourceProxy::SourceProxy(TemporaryDirectoryTracker& temp_dir) : m_source(nullptr), m_temporary_directory(temp_dir), m_max_number_previous_sources(5)
 	{
 	}
 
-	void SourceProxy::Close(void)
+	void SourceProxy::close(void)
 	{
-		m_source_.reset(nullptr);
+		m_source.reset(nullptr);
 	}
 
-	void SourceProxy::LoadSource(const std::string& source)
+	void SourceProxy::loadSource(const std::string& source)
 	{
 		if (source.empty())
 		{
 			throw std::runtime_error("No source selected.");
 		}
 
-		std::pair<std::string, std::unordered_map<std::string, std::string>> deserialized_source(DeserializeSource(source));
+		std::pair<std::string, std::unordered_map<std::string, std::string>> deserialized_source(deserializeSource(source));
 		std::string& source_path(deserialized_source.first);
 		std::unordered_map<std::string, std::string>& parameters(deserialized_source.second);
 
 		try
 		{
 			boost::filesystem::path potential_system_path(source_path);
-			if (boost::filesystem::is_regular_file(potential_system_path) && CheckParameters_(parameters, FilelistSource::GetRequiredParameterFields()))
+			if (boost::filesystem::is_regular_file(potential_system_path) && checkParameters_(parameters, FilelistSource::getRequiredParameterFields()))
 			{
-				m_source_ = std::unique_ptr<WorklistSourceInterface>(new FilelistSource(source_path));
+				m_source = std::unique_ptr<WorklistSourceInterface>(new FilelistSource(source_path));
 			}
-			else if (boost::filesystem::is_directory(potential_system_path) && CheckParameters_(parameters, DirectorySource::GetRequiredParameterFields()))
+			else if (boost::filesystem::is_directory(potential_system_path) && checkParameters_(parameters, DirectorySource::getRequiredParameterFields()))
 			{
-				m_source_ = std::unique_ptr<DirectorySource>(new DirectorySource(source_path));
+				m_source = std::unique_ptr<DirectorySource>(new DirectorySource(source_path));
 			}
 #ifdef BUILD_GRANDCHALLENGE_INTERFACE
-			else if (CheckParameters_(parameters, GrandChallengeSource::GetRequiredParameterFields()))
+			else if (checkParameters_(parameters, GrandChallengeSource::getRequiredParameterFields()))
 			{
 				web::http::client::http_client_config config;
 				config.set_validate_certificates(!static_cast<bool>(parameters.find("ignore_certificate")->second[0]));
 
 				GrandChallengeURLInfo uri_info = GrandChallengeSource::GetStandardURI(Misc::StringToWideString(source_path));
 				Django_Connection::Credentials credentials(Django_Connection::CreateCredentials(Misc::StringToWideString(parameters.find("token")->second), L""));
-				m_source_ = std::unique_ptr<WorklistSourceInterface>(new GrandChallengeSource(uri_info, m_temporary_directory_, credentials, config));
+				m_source = std::unique_ptr<WorklistSourceInterface>(new GrandChallengeSource(uri_info, m_temporary_directory, credentials, config));
 			}
 #endif
 			// Adds the new source to the previous sources.
-			m_current_source_ = source;
+			m_current_source = source;
 
-			auto already_added(std::find(m_previous_sources_.begin(), m_previous_sources_.end(), m_current_source_));
-			if (already_added != m_previous_sources_.end())
+			auto already_added(std::find(m_previous_sources.begin(), m_previous_sources.end(), m_current_source));
+			if (already_added != m_previous_sources.end())
 			{
-				m_previous_sources_.erase(already_added);
+				m_previous_sources.erase(already_added);
 			}
-			else if (m_previous_sources_.size() == m_number_previous_sources_)
+			else if (m_previous_sources.size() == m_max_number_previous_sources)
 			{
-				m_previous_sources_.pop_back();
+				m_previous_sources.pop_back();
 			}
-			m_previous_sources_.push_front(m_current_source_);
+			m_previous_sources.push_front(m_current_source);
 		}
 		catch (const std::exception& e)
 		{
@@ -79,33 +80,33 @@ namespace ASAP
 		}
 	}
 
-	bool SourceProxy::IsInitialized(void)
+	bool SourceProxy::isInitialized(void)
 	{
-		return m_source_ != nullptr;
+		return m_source != nullptr;
 	}
 
-	const std::string& SourceProxy::GetCurrentSource(void)
+	const std::string& SourceProxy::getCurrentSource(void)
 	{
-		return m_current_source_;
+		return m_current_source;
 	}
 
-	const std::deque<std::string>& SourceProxy::GetPreviousSources(void)
+	const std::deque<std::string>& SourceProxy::getPreviousSources(void)
 	{
-		return m_previous_sources_;
+		return m_previous_sources;
 	}
 
-	void SourceProxy::SetSourceInformation(const std::string& current_source, const std::vector<std::string>& previous_sources)
+	void SourceProxy::setSourceInformation(const std::string& current_source, const std::vector<std::string>& previous_sources)
 	{
-		m_current_source_ = current_source;
+		m_current_source = current_source;
 
-		unsigned int total_previous_sources = this->m_number_previous_sources_ > previous_sources.size() ? previous_sources.size() : this->m_number_previous_sources_;
+		unsigned int total_previous_sources = this->m_max_number_previous_sources > previous_sources.size() ? previous_sources.size() : this->m_max_number_previous_sources;
 		for (unsigned int i = 0; i < total_previous_sources; ++i) 
 		{
-			m_previous_sources_.push_back(previous_sources[i]);
+			m_previous_sources.push_back(previous_sources[i]);
 		}
 	}
 
-	std::string SourceProxy::SerializeSource(const std::string& location, const std::unordered_map<std::string, std::string>& parameters)
+	std::string SourceProxy::serializeSource(const std::string& location, const std::unordered_map<std::string, std::string>& parameters)
 	{
 		std::stringstream serialized_source;
 		serialized_source << location << "|";
@@ -116,18 +117,20 @@ namespace ASAP
 		return serialized_source.str();
 	}
 
-	std::pair<std::string, std::unordered_map<std::string, std::string>> SourceProxy::DeserializeSource(const std::string& source)
+	std::pair<std::string, std::unordered_map<std::string, std::string>> SourceProxy::deserializeSource(const std::string& source)
 	{
 		std::string location(source);
 		std::unordered_map<std::string, std::string> parameters;
 
-		std::vector<std::string> source_elements(Misc::Split(source, '|'));
+		std::vector<std::string> source_elements;
+		core::split(source, source_elements, "|");
 		if (source_elements.size() > 0)
 		{
 			location = source_elements[0];
 			for (size_t element = 1; element < source_elements.size(); ++element)
 			{
-				std::vector<std::string> key_value(Misc::Split(source_elements[element], '='));
+				std::vector<std::string> key_value;
+				core::split(source_elements[element], key_value, "|");
 				parameters.insert({ key_value[0], key_value[1] });
 			}
 		}
@@ -135,7 +138,7 @@ namespace ASAP
 		return { location, parameters };
 	}
 
-	bool SourceProxy::CheckParameters_(const std::unordered_map<std::string, std::string> additional_params, const std::vector<std::string> required_params)
+	bool SourceProxy::checkParameters(const std::unordered_map<std::string, std::string> additional_params, const std::vector<std::string> required_params)
 	{
 		for (const std::string& param : required_params)
 		{
@@ -149,78 +152,78 @@ namespace ASAP
 	}
 
 	/// ########################################### Proxy Calls ########################################### ///
-	void SourceProxy::CancelTask(size_t id)
+	void SourceProxy::cancelTask(size_t id)
 	{
-		m_source_->CancelTask(id);
+		m_source->cancelTask(id);
 	}
 
-	WorklistSourceInterface::SourceType SourceProxy::GetSourceType(void)
+	WorklistSourceInterface::SourceType SourceProxy::getSourceType(void)
 	{
-		return m_source_->GetSourceType();
+		return m_source->getSourceType();
 	}
 
-	size_t SourceProxy::AddWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
+	size_t SourceProxy::addWorklistRecord(const std::string& title, const std::function<void(const bool)>& observer)
 	{
-		return m_source_->AddWorklistRecord(title, observer);
+		return m_source->addWorklistRecord(title, observer);
 	}
 
-	size_t SourceProxy::UpdateWorklistRecord(const std::string& worklist_index, const std::string title, const std::set<std::string> images, const std::function<void(const bool)>& observer)
+	size_t SourceProxy::updateWorklistRecord(const std::string& worklist_index, const std::string title, const std::set<std::string> images, const std::function<void(const bool)>& observer)
 	{
-		return m_source_->UpdateWorklistRecord(worklist_index, title, images, observer);
+		return m_source->updateWorklistRecord(worklist_index, title, images, observer);
 	}
 
-	size_t SourceProxy::DeleteWorklistRecord(const std::string& worklist_index, const std::function<void(const bool)>& observer)
+	size_t SourceProxy::deleteWorklistRecord(const std::string& worklist_index, const std::function<void(const bool)>& observer)
 	{
-		return m_source_->DeleteWorklistRecord(worklist_index, observer);
+		return m_source->deleteWorklistRecord(worklist_index, observer);
 	}
 
-	size_t SourceProxy::GetWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
+	size_t SourceProxy::getWorklistRecords(const std::function<void(DataTable&, const int)>& receiver)
 	{
-		return m_source_->GetWorklistRecords(receiver);
+		return m_source->getWorklistRecords(receiver);
 	}
 
-	size_t SourceProxy::GetPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t SourceProxy::getPatientRecords(const std::string& worklist_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
-		return m_source_->GetPatientRecords(worklist_index, receiver);
+		return m_source->getPatientRecords(worklist_index, receiver);
 	}
 
-	size_t SourceProxy::GetStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t SourceProxy::getStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
-		return m_source_->GetStudyRecords(patient_index, receiver);
+		return m_source->getStudyRecords(patient_index, receiver);
 	}
 
-	size_t SourceProxy::GetImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver)
+	size_t SourceProxy::getImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver)
 	{
-		return m_source_->GetImageRecords(worklist_index, study_index, receiver);
+		return m_source->getImageRecords(worklist_index, study_index, receiver);
 	}
 
-	size_t SourceProxy::GetImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t SourceProxy::getImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		return m_source_->GetImageThumbnailFile(image_index, receiver, observer);
+		return m_source->getImageThumbnailFile(image_index, receiver, observer);
 	}
 
-	size_t SourceProxy::GetImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t SourceProxy::getImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		return m_source_->GetImageFile(image_index, receiver, observer);
+		return m_source->getImageFile(image_index, receiver, observer);
 	}
 
-	std::set<std::string> SourceProxy::GetWorklistHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> SourceProxy::getWorklistHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_source_->GetWorklistHeaders(selection);
+		return m_source->getWorklistHeaders(selection);
 	}
 
-	std::set<std::string> SourceProxy::GetPatientHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> SourceProxy::getPatientHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_source_->GetPatientHeaders(selection);
+		return m_source->getPatientHeaders(selection);
 	}
 
-	std::set<std::string> SourceProxy::GetStudyHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> SourceProxy::getStudyHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_source_->GetStudyHeaders(selection);
+		return m_source->getStudyHeaders(selection);
 	}
 
-	std::set<std::string> SourceProxy::GetImageHeaders(const DataTable::FIELD_SELECTION selection)
+	std::set<std::string> SourceProxy::getImageHeaders(const DataTable::FIELD_SELECTION selection)
 	{
-		return m_source_->GetImageHeaders(selection);
+		return m_source->getImageHeaders(selection);
 	}
 }

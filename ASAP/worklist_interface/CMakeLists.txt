@@ -44,20 +44,12 @@ if (BUILD_WORKLIST_INTERFACE)
 		GUI/WorklistWindowLayout.ui
 	)
 	SET(GROUP_MISC
-		Misc/StringConversions.h
-		Misc/StringConversions.cpp
-		Misc/StringManipulation.h
-		Misc/StringManipulation.cpp
 		Misc/TemporaryDirectoryTracker.h
 		Misc/TemporaryDirectoryTracker.cpp
 	)
 	SET(GROUP_MODELS
 		Models/WorklistModels.h
 		Models/WorklistModels.cpp
-	)
-	SET(GROUP_SERIALIZATION
-		Serialization/INI.h
-		Serialization/INI.cpp
 	)
 	SET(WORKLIST_RESOURCE
 		resources/WorklistInterface.qrc
@@ -78,8 +70,8 @@ if (BUILD_WORKLIST_INTERFACE)
 			Serialization/JSON.h
 			Serialization/JSON.cpp
 		)
-		SET(GROUP_GRANDCHALLENGESUPPORT "")
 	ELSE(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
+		SET(GROUP_GRANDCHALLENGESUPPORT "")
 	ENDIF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
 	
 	qt5_add_resources(WORKLIST_RESOURCE_ADDED ${WORKLIST_RESOURCE}) 
@@ -91,7 +83,6 @@ if (BUILD_WORKLIST_INTERFACE)
 		${GROUP_GUI}
 		${GROUP_MISC}
 		${GROUP_MODELS}
-		${GROUP_SERIALIZATION}
 		${GROUP_GRANDCHALLENGESUPPORT}
 		${WORKLIST_RESOURCE_ADDED}
 	)
@@ -106,7 +97,6 @@ if (BUILD_WORKLIST_INTERFACE)
 	SOURCE_GROUP("GUI"				FILES ${GROUP_GUI})
 	SOURCE_GROUP("Misc"				FILES ${GROUP_MISC})
 	SOURCE_GROUP("Models"			FILES ${GROUP_MODELS})
-	SOURCE_GROUP("Serialization"	FILES ${GROUP_SERIALIZATION})
 	SOURCE_GROUP("GrandChallenge"   FILES ${GROUP_GRANDCHALLENGESUPPORT})
 
 	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE ASAPLib core multiresolutionimageinterface)
