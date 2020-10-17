@@ -6,6 +6,6 @@ add_subdirectory(WSIThreshold)
 add_subdirectory(WSIArithmetic)
 
 if(BUILD_TESTS)
-  find_package(UnitTest++ REQUIRED)
+  find_package(UNITTEST REQUIRED)
   add_subdirectory(TestRunner)
 endif(BUILD_TESTS)
