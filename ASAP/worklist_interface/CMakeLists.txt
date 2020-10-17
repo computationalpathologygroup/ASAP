@@ -61,12 +61,12 @@ if (BUILD_WORKLIST_INTERFACE)
 			Data/GrandChallengeSource.cpp
 			GUI/ExternalSourceDialog.h
 			GUI/ExternalSourceDialog.cpp
-			Networking/Django_Connection.h
-			Networking/Django_Connection.cpp
-			Networking/HTTP_Connection.h
-			Networking/HTTP_Connection.cpp
-			Networking/HTTP_File_Download.h
-			Networking/HTTP_File_Download.cpp
+			Networking/DjangoConnection.h
+			Networking/DjangoConnection.cpp
+			Networking/HTTPConnection.h
+			Networking/HTTPConnection.cpp
+			Networking/HTTPFileDownload.h
+			Networking/HTTPFileDownload.cpp
 			Serialization/JSON.h
 			Serialization/JSON.cpp
 		)

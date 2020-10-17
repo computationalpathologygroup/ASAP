@@ -1,12 +1,12 @@
-#include "HTTP_File_Download.h"
+#include "HTTPFileDownload.h"
 
 #include <stdexcept>	
 
-#include "../Misc/StringConversions.h"
+#include "core/stringconversion.h"
 
 namespace ASAP
 {
-	boost::filesystem::path HTTP_File_Download(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_file, std::function<void(uint8_t)> observer)
+	boost::filesystem::path httpFileDownload(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_file, std::function<void(uint8_t)> observer)
 	{
 		// Fails if the path doesn't point towards a directory.
 		if (!boost::filesystem::is_directory(output_directory))
@@ -25,10 +25,10 @@ namespace ASAP
 				
 			// Checks if the file has already been downloaded.
 			size_t length(std::stoi(content_length->second));
-			if (FileIsUnique(output_file, length))
+			if (fileIsUnique(output_file, length))
 			{
 				// Changes filename if the binary size is unique, but the filename isn't.
-				FixFilepath(output_file);
+				fixFilepath(output_file);
 
 				// Fails if the file can't be created and opened.
 				concurrency::streams::ostream stream;
@@ -41,14 +41,14 @@ namespace ASAP
 				{
 					// Starts monitoring thread.
 					bool finished = false;
-					std::thread thread(StartMonitorThread(finished, length, stream, observer));
+					std::thread thread(startMonitorThread(finished, length, stream, observer));
 					response.body().read_to_end(stream.streambuf()).wait();
 					stream.close().wait();
 						
 					// Joins monitoring thread.
 					thread.join();
 
-					if (FileHasCorrectSize(output_file, length))
+					if (fileHasCorrectSize(output_file, length))
 					{
 						return boost::filesystem::absolute(output_file);
 					}
@@ -66,14 +66,12 @@ namespace ASAP
 		throw std::invalid_argument("HTTP Response contains no attachment.");
 	}
 
-	namespace
-	{
-		bool FileHasCorrectSize(const boost::filesystem::path& filepath, size_t size)
+		bool fileHasCorrectSize(const boost::filesystem::path& filepath, size_t size)
 		{
 			return boost::filesystem::exists(filepath) && boost::filesystem::file_size(filepath) == size;
 		}
 
-		bool FileIsUnique(const boost::filesystem::path& filepath, size_t size)
+		bool fileIsUnique(const boost::filesystem::path& filepath, size_t size)
 		{
 			if (boost::filesystem::exists(filepath) && boost::filesystem::file_size(filepath) == size)
 			{
@@ -82,7 +80,7 @@ namespace ASAP
 			return true;
 		}
 
-		void FixFilepath(boost::filesystem::path& filepath)
+		void fixFilepath(boost::filesystem::path& filepath)
 		{
 			while (boost::filesystem::exists(filepath))
 			{
@@ -113,31 +111,30 @@ namespace ASAP
 			}
 		}
 
-		std::thread StartMonitorThread(const bool& stop, const size_t length, concurrency::streams::ostream& stream, std::function<void(uint8_t)>& observer)
+		std::thread startMonitorThread(const bool& stop, const size_t length, concurrency::streams::ostream& stream, std::function<void(uint8_t)>& observer)
 		{
 			return std::thread([&stop, length, &stream, observer](void)
-			{
-				// If there is no observer, we don't need to report progress.
-				if (observer)
 				{
-					// Keeps checking progress until the stream is closed, or the download has completed.
-					try
+					// If there is no observer, we don't need to report progress.
+					if (observer)
 					{
-						size_t percentile	= (length / 100);
-						size_t progress		= stream.tell();
-						while (!stop && progress < length)
+						// Keeps checking progress until the stream is closed, or the download has completed.
+						try
 						{
-							observer(static_cast<float>(progress / percentile));
-							std::this_thread::sleep_for(std::chrono::seconds(1));
-							progress = stream.tell();
+							size_t percentile = (length / 100);
+							size_t progress = stream.tell();
+							while (!stop && progress < length)
+							{
+								observer(static_cast<float>(progress / percentile));
+								std::this_thread::sleep_for(std::chrono::seconds(1));
+								progress = stream.tell();
+							}
+						}
+						catch (...)
+						{
+							// No need to handle this. If triggered, the stream has closed, and we no longer need to provide progress.
 						}
 					}
-					catch (...)
-					{
-						// No need to handle this. If triggered, the stream has closed, and we no longer need to provide progress.
-					}
-				}
-			});
+				});
 		}
-	}
 }

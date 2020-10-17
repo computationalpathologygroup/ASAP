@@ -11,7 +11,7 @@
 #include <qmessagebox.h>
 #include <QMimeData>
 #include <QtConcurrent\qtconcurrentrun.h>
-#include <QDebug>
+#include "core/stringconversion.h"
 
 #ifdef BUILD_GRANDCHALLENGE_INTERFACE
 #include "ExternalSourceDialog.h"
@@ -322,7 +322,9 @@ namespace ASAP
 			QVariantList worklist_variants(worklist_item->data().toList());
 			std::string worklist_id(worklist_variants[0].toString().toStdString());
 			std::set<std::string> worklist_images;
-			for (const std::string& image_id : Misc::Split(worklist_variants[1].toString().toStdString()))
+			std::vector<std::string> imageIds;
+			core::split(worklist_variants[1].toString().toStdString(), imageIds, ",");
+			for (const std::string& image_id : imageIds)
 			{
 				worklist_images.insert(image_id);
 			}
@@ -433,12 +435,12 @@ namespace ASAP
 		connect(m_models.studies,
 			SIGNAL(rowsRemoved(QModelIndex, int, int)),
 			this,
-			SLOT(OnStudyClear(QModelIndex, int, int)));
+			SLOT(onStudyClear(QModelIndex, int, int)));
 
 		connect(m_ui->view_worklists,
 			SIGNAL(clicked(QModelIndex)),
 			this,
-			SLOT(OnWorklistSelect(QModelIndex)));
+			SLOT(onWorklistSelect(QModelIndex)));
 
 		connect(m_models.worklists,
 			&QStandardItemModel::itemChanged,
@@ -710,7 +712,7 @@ namespace ASAP
 
 		if (dialog->hasValidCredentials())
 		{
-			ExternalSourceDialog::SourceDialogResults results(dialog->GetLoginDetails());
+			ExternalSourceDialog::SourceDialogResults results(dialog->getLoginDetails());
 
 			std::unordered_map<std::string, std::string> params;
 			params.insert({ "token", results.token.toStdString() });

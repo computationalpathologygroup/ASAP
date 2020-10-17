@@ -9,7 +9,7 @@
 
 namespace ASAP
 {
-	FilelistSource::FilelistSource(const std::string filepath) : m_images(GetImageFilelist_(filepath))
+	FilelistSource::FilelistSource(const std::string filepath) : m_images(getImageFilelist(filepath))
 	{
 	}
 
@@ -86,7 +86,7 @@ namespace ASAP
 		return 0;
 	}
 
-	DataTable FilelistSource::getImageFilelist_(const std::string filepath)
+	DataTable FilelistSource::getImageFilelist(const std::string filepath)
 	{
 		std::ifstream stream(filepath);
 		if (stream.is_open())

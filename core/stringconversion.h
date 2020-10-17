@@ -179,6 +179,14 @@ namespace core {
     return s;
   }
 
+  std::wstring CORE_EXPORT stringToWideString(const std::string& string);
+
+  std::vector<std::wstring> CORE_EXPORT stringsToWideStrings(const std::vector<std::string>& strings);
+
+  std::string CORE_EXPORT wideStringToString(const std::wstring& string);
+
+  std::vector<std::string> CORE_EXPORT wideStringsToStrings(const std::vector<std::wstring> strings);
+
   void CORE_EXPORT lower(std::string &s);
 
   void CORE_EXPORT upper(std::string &s);

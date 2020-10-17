@@ -4,7 +4,7 @@
 #include <cctype>
 
 #include "../GUI/WorklistWindow.h"
-#include "../Misc/StringConversions.h"
+#include "core/stringconversion.h"
 
 namespace ASAP
 {

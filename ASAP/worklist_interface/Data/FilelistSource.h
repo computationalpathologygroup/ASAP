@@ -34,7 +34,7 @@ namespace ASAP
 		private:
 			DataTable m_images;
 
-			DataTable getImageFilelist_(const std::string filepath);
+			DataTable getImageFilelist(const std::string filepath);
 	};
 }
 #endif // __ASAP_DATA_FILELISTSOURCE__

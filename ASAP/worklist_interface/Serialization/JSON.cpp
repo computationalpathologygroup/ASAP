@@ -1,8 +1,10 @@
 #include "JSON.h"
 
+#include "core/stringconversion.h"
+
 namespace ASAP { namespace JSON
 {
-	web::json::object GetTagRecursive(std::wstring tag, const web::json::value& json)
+	web::json::object getTagRecursive(std::wstring tag, const web::json::value& json)
 	{
 		web::json::object object(json.as_object());
 		for (auto it = object.cbegin(); it != object.cend(); ++it)
@@ -13,28 +15,29 @@ namespace ASAP { namespace JSON
 			}
 			else if (it->second.size() > 0)
 			{
-				return GetTagRecursive(tag, it->second);
+				return getTagRecursive(tag, it->second);
 			}
 		}
 
 		throw std::runtime_error("Tag not found.");
 	}
 
-	std::vector<std::string> ParseJsonObjectToHeaderVector(const web::json::object& object)
+	std::vector<std::string> parseJsonObjectToHeaderVector(const web::json::object& object)
 	{
 		std::vector<std::string> header;
 		for (auto it = object.cbegin(); it != object.cend(); ++it)
 		{
-			std::string column(Misc::WideStringToString(it->first));
+			std::string column(core::wideStringToString(it->first));
 			column.erase(std::remove(column.begin(), column.end(), '"'), column.end());
 			header.push_back(column);
 		}
 		return header;
 	}
 
-	std::vector<std::string> ParseJsonObjectToValueVector(const web::json::object& object)
+	std::vector<std::string> parseJsonObjectToValueVector(const web::json::object& object)
 	{
 		std::vector<std::string> values;
+
 		for (auto it = object.cbegin(); it != object.cend(); ++it)
 		{
 			std::string value;
@@ -52,11 +55,11 @@ namespace ASAP { namespace JSON
 							value_stream << ',';
 						}
 					}
-					value = Misc::WideStringToString(value_stream.str());
+					value = core::wideStringToString(value_stream.str());
 				}
 				else
 				{
-					value = Misc::WideStringToString(it->second.to_string());
+					value = core::wideStringToString(it->second.to_string());
 				}
 			}
 			value.erase(std::remove(value.begin(), value.end(), '"'), value.end());
@@ -65,28 +68,28 @@ namespace ASAP { namespace JSON
 		return values;
 	}
 
-	int ResponseToFilteredTable(Django_Connection& connection, const web::http::http_response& response, DataTable& table, std::vector<std::string>& fields)
+	int responseToFilteredTable(DjangoConnection& connection, const web::http::http_response& response, DataTable& table, std::vector<std::string>& fields)
 	{
-		return ParseJsonResponse(connection, response, table, [&fields](web::json::value& json, DataTable& table)
+		return parseJsonResponse(connection, response, table, [&fields](web::json::value& json, DataTable& table)
 		{
-			std::vector<std::wstring> conv_fields(Misc::StringsToWideStrings(fields));
+			std::vector<std::wstring> conv_fields(core::stringsToWideStrings(fields));
 			for (size_t obj = 0; obj < json.size(); ++obj)
 			{
 				auto object = json[obj];
 				std::vector<std::string> record;
 				for (const std::wstring& field : conv_fields)
 				{
-					std::string field(Misc::WideStringToString(object.at(field).serialize()));
+					std::string field(core::wideStringToString(object.at(field).serialize()));
 					field.erase(std::remove(field.begin(), field.end(), '"'), field.end());
 					record.push_back(field);
 				}
-				table.Insert(record);
+				table.insert(record);
 			}
 		});
 
 	}
 
-	int OptionsResponseToTableSchema(const web::http::http_response& response, DataTable& table)
+	int optionsResponseToTableSchema(const web::http::http_response& response, DataTable& table)
 	{
 		int error_code = 0;
 		response.extract_json().then([&table, &error_code](pplx::task<web::json::value> previous_task)
@@ -96,12 +99,12 @@ namespace ASAP { namespace JSON
 				web::json::value json_object(previous_task.get());
 				try
 				{
-					web::json::object post_actions(GetTagRecursive(L"POST", json_object));
+					web::json::object post_actions(getTagRecursive(L"POST", json_object));
 
 					std::vector<std::string> columns;
 					for (auto it = post_actions.cbegin(); it != post_actions.cend(); ++it)
 					{
-						columns.push_back(Misc::WideStringToString(it->first));
+						columns.push_back(core::wideStringToString(it->first));
 					}
 
 					table = DataTable(columns);
@@ -120,32 +123,30 @@ namespace ASAP { namespace JSON
 		return error_code;
 	}
 
-	int ResponseToTable(Django_Connection& connection, const web::http::http_response& response, DataTable& table)
+	int responseToTable(DjangoConnection& connection, const web::http::http_response& response, DataTable& table)
 	{
-		return ParseJsonResponse(connection, response, table, [](web::json::value& json, DataTable& table)
+		return parseJsonResponse(connection, response, table, [](web::json::value& json, DataTable& table)
 		{
 			if (json.is_array())
 			{
-				if (table.GetColumnCount() == 0)
+				if (table.getColumnCount() == 0)
 				{
-					table = DataTable(ParseJsonObjectToHeaderVector(json[0].as_object()));
+					table = DataTable(parseJsonObjectToHeaderVector(json[0].as_object()));
 				}
 				for (size_t o = 0; o < json.size(); ++o)
 				{
-					table.Insert(ParseJsonObjectToValueVector(json[o].as_object()));
+					table.insert(parseJsonObjectToValueVector(json[o].as_object()));
 				}
 			}
 			else
 			{
-				table = DataTable(ParseJsonObjectToHeaderVector(json.as_object()));
-				table.Insert(ParseJsonObjectToValueVector(json.as_object()));
+				table = DataTable(parseJsonObjectToHeaderVector(json.as_object()));
+				table.insert(parseJsonObjectToValueVector(json.as_object()));
 			}
 		});
 	}
 
-	namespace
-	{
-		int ParseJsonResponse(Django_Connection& connection, const web::http::http_response& response, DataTable& table, std::function<void(web::json::value&, DataTable&)> parser)
+	int parseJsonResponse(DjangoConnection& connection, const web::http::http_response& response, DataTable& table, std::function<void(web::json::value&, DataTable&)> parser)
 		{
 			int error_code = 0;
 
@@ -159,7 +160,7 @@ namespace ASAP { namespace JSON
 					{
 						web::http::http_request page_request(web::http::methods::GET);
 						page_request.set_request_uri(json[L"next"].as_string());
-						json	= connection.SendRequest(page_request).get().extract_json().get();
+						json	= connection.sendRequest(page_request).get().extract_json().get();
 						parser(json[L"results"], table);
 					}
 				}
@@ -179,5 +180,4 @@ namespace ASAP { namespace JSON
 
 			return error_code;
 		}
-	}
 } }

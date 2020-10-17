@@ -71,7 +71,7 @@ namespace ASAP
 		connect(m_ui_->tabWidget,
 			SIGNAL(currentChanged(int)),
 			this,
-			SLOT(OnTabChange_(int)));
+			SLOT(onTabChange(int)));
 	}
 
 	void CompositeWindow::readSettings()
