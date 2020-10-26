@@ -21,6 +21,10 @@ ThumbnailCache::ThumbnailCache(const QString& cacheFolder) : _cacheFolder(cacheF
 	else {
 		QDir().mkpath(_cacheFolder);
 	}
+
+	// BUG: this is a workaround for a bug in QDateTime.toString() not being reentrant or thread-safe: https://bugreports.qt.io/browse/QTBUG-85692
+	QDateTime workaroundBug = QDateTime::currentDateTime();
+	workaroundBug.toString(Qt::ISODate);
 }
 
 ThumbnailCache::~ThumbnailCache()

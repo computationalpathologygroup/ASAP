@@ -105,7 +105,7 @@ namespace ASAP
 	std::string SourceProxy::serializeSource(const std::string& location, const std::unordered_map<std::string, std::string>& parameters)
 	{
 		std::stringstream serialized_source;
-		serialized_source << location << "|";
+		serialized_source << location << "&";
 		for (const auto& entry : parameters)
 		{
 			serialized_source << entry.first << "=" << entry.second << "|";
@@ -119,15 +119,21 @@ namespace ASAP
 		std::unordered_map<std::string, std::string> parameters;
 
 		std::vector<std::string> source_elements;
-		core::split(source, source_elements, "|");
+		core::split(source, source_elements, "&");
 		if (source_elements.size() > 0)
 		{
 			location = source_elements[0];
-			for (size_t element = 1; element < source_elements.size(); ++element)
-			{
-				std::vector<std::string> key_value;
-				core::split(source_elements[element], key_value, "|");
-				parameters.insert({ key_value[0], key_value[1] });
+			std::vector<std::string> keyValueList;
+			core::split(source_elements[1], keyValueList, "|");
+			if (!keyValueList.empty()) {
+				for (size_t parameter = 0; parameter < keyValueList.size(); ++parameter)
+				{
+					std::vector<std::string> key_value;
+					core::split(keyValueList[parameter], key_value, "|");
+					if (key_value.size() > 1) {
+						parameters.insert({ key_value[0], key_value[1] });
+					}
+				}
 			}
 		}
 
