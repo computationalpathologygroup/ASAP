@@ -8,12 +8,27 @@ target_include_directories(core PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_
 target_compile_features(core PRIVATE cxx_generalized_initializers)
 set_target_properties(core PROPERTIES DEBUG_POSTFIX _d)
 
-install(TARGETS core
-  EXPORT asap-targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
+if(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+
+  install(TARGETS core
+    EXPORT asap-targets
+    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+    LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+    ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+
+ELSE(APPLE)
+  install(TARGETS core
+    EXPORT asap-targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+  )
+ENDIF(APPLE)
 
 install(FILES ${CORE_HEADERS} DESTINATION include/core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/core_export.h DESTINATION include/core)

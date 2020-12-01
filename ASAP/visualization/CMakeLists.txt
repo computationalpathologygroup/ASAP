@@ -15,11 +15,28 @@ add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkst
 target_link_libraries(VisualizationWorkstationExtensionPlugin PRIVATE ASAPLib multiresolutionimageinterface annotation Qt5::Core Qt5::Widgets Qt5::UiTools)
 set_target_properties(VisualizationWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 
-install(TARGETS VisualizationWorkstationExtensionPlugin
-        RUNTIME DESTINATION bin/plugins/workstationextension
-        LIBRARY DESTINATION bin/plugins/workstationextension
-        ARCHIVE DESTINATION lib/plugins/workstationextension
-)
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+
+  install(TARGETS VisualizationWorkstationExtensionPlugin
+          BUNDLE DESTINATION . 
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/workstationextension
+          LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/workstationextension
+          ARCHIVE DESTINATION ${INSTALL_CMAKE_DIR}/plugins/workstationextension
+  )
+
+ELSE(APPLE)
+
+  install(TARGETS VisualizationWorkstationExtensionPlugin
+          RUNTIME DESTINATION bin/plugins/workstationextension
+          LIBRARY DESTINATION bin/plugins/workstationextension
+          ARCHIVE DESTINATION lib/plugins/workstationextension
+  )
+ENDIF(APPLE)
+
 
 install(FILES VisualizationWorkstationExtensionPlugin.h DESTINATION include/ASAP/plugins/workstationextension)
 

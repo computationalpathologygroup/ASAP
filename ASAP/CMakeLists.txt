@@ -41,7 +41,16 @@ qt5_add_resources(RESOURCE_ADDED ${RESOURCE})
 add_library(ASAPLib SHARED ${SOURCE} ${HEADERS} ${RESOURCE_ADDED})
 generate_export_header(ASAPLib)
 
-add_executable(ASAP main.cpp ASAP.rc ${RESOURCE_ADDED})
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  add_executable(ASAP MACOSX_BUNDLE main.cpp ASAP.rc ${RESOURCE_ADDED})
+
+ELSE(APPLE)
+  add_executable(ASAP main.cpp ASAP.rc ${RESOURCE_ADDED})
+ENDIF(APPLE)
 
 target_link_libraries(ASAPLib PUBLIC basicfilters PRIVATE multiresolutionimageinterface Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools)
 target_include_directories(ASAPLib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:include/ASAP> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/ASAP>)
@@ -49,27 +58,43 @@ target_link_libraries(ASAP PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
 set_target_properties(ASAPLib PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(ASAP PROPERTIES DEBUG_POSTFIX _d)
 
-install(TARGETS ASAP
-        EXPORT asap-targets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-)
+IF(APPLE)
+    install(TARGETS ASAP
+            BUNDLE DESTINATION . 
+            RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+            LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+            ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+    )
 
-INSTALL(TARGETS ASAPLib
-        EXPORT asap-targets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-)
+    INSTALL(TARGETS ASAPLib
+            BUNDLE DESTINATION . 
+            RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+            LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+            ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+    )
+ELSE(APPLE)
+    install(TARGETS ASAP
+            EXPORT asap-targets
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib
+    )
+
+    INSTALL(TARGETS ASAPLib
+            EXPORT asap-targets
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib
+    )
+ENDIF(APPLE)
 
 install(FILES ${HEADERS} DESTINATION include/ASAP)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/asaplib_export.h DESTINATION include/ASAP)
 
 IF(WIN32)
-  set_target_properties(ASAP PROPERTIES FOLDER ASAP)
-  target_compile_definitions(ASAPLib PRIVATE -DASAP_EXPORTS)
-  set_target_properties(ASAPLib PROPERTIES FOLDER ASAP)
+    set_target_properties(ASAP PROPERTIES FOLDER ASAP)
+    target_compile_definitions(ASAPLib PRIVATE -DASAP_EXPORTS)
+    set_target_properties(ASAPLib PROPERTIES FOLDER ASAP)
 ENDIF(WIN32)
 
 # Add the basictools, annotation, filter plugins

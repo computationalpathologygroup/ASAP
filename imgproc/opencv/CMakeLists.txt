@@ -13,8 +13,23 @@ if(WIN32)
 endif(WIN32)
 
 install(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/imgproc/opencvfilters)
-install(TARGETS opencvfilters
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-)
+
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+
+  install(TARGETS opencvfilters
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+          LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+          ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+ELSE(APPLE)
+  install(TARGETS opencvfilters
+          RUNTIME DESTINATION bin
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+  )
+
+ENDIF(APPLE)

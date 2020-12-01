@@ -34,11 +34,28 @@ add_library(FilterWorkstationExtensionPlugin SHARED ${FilterWorkstationExtension
 if(BUILD_IMAGEPROCESSING)
 	target_link_libraries(NucleiDetectionFilterPlugin PRIVATE ${OpenCV_LIBS} ASAPLib FRST basicfilters Qt5::Core Qt5::Widgets Qt5::UiTools)
     set_target_properties(NucleiDetectionFilterPlugin PROPERTIES DEBUG_POSTFIX _d)
-	install(TARGETS  NucleiDetectionFilterPlugin
-	  RUNTIME DESTINATION bin/plugins/filters
-	  LIBRARY DESTINATION bin/plugins/filters
-	  ARCHIVE DESTINATION lib/plugins/filters
-	)
+
+  IF(APPLE)
+    set(prefix "ASAP.app/Contents")
+    set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+    set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+    set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+    
+    install(TARGETS  NucleiDetectionFilterPlugin
+            BUNDLE DESTINATION . 
+            RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/filters
+            LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/filters
+            ARCHIVE DESTINATION ${INSTALL_CMAKE_DIR}/plugins/filters
+    )
+
+  ELSE(APPLE)
+    install(TARGETS  NucleiDetectionFilterPlugin
+            RUNTIME DESTINATION bin/plugins/filters
+            LIBRARY DESTINATION bin/plugins/filters
+            ARCHIVE DESTINATION lib/plugins/filters
+    )
+  ENDIF(APPLE)
+  
 	install(FILES NucleiDetectionFilterPlugin.h DESTINATION include/ASAP/plugins/filters)
 	if(WIN32)
 		set_target_properties(NucleiDetectionFilterPlugin PROPERTIES FOLDER ASAP/plugins/filters)
@@ -50,17 +67,37 @@ target_link_libraries(FilterWorkstationExtensionPlugin PRIVATE ASAPLib basicfilt
 set_target_properties(ColorDeconvolutionFilterPlugin PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(FilterWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 
-install(TARGETS ColorDeconvolutionFilterPlugin
-        RUNTIME DESTINATION bin/plugins/filters
-        LIBRARY DESTINATION bin/plugins/filters
-        ARCHIVE DESTINATION lib/plugins/filters
-)
 
-install(TARGETS FilterWorkstationExtensionPlugin
-        RUNTIME DESTINATION bin/plugins/workstationextension
-        LIBRARY DESTINATION bin/plugins/workstationextension
-        ARCHIVE DESTINATION lib/plugins/workstationextension
-)
+IF(APPLE)
+
+  install(TARGETS ColorDeconvolutionFilterPlugin
+          BUNDLE DESTINATION . 
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/filters
+          LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/filters
+          ARCHIVE DESTINATION ${INSTALL_CMAKE_DIR}/plugins/filters
+  )
+
+  install(TARGETS FilterWorkstationExtensionPlugin
+          BUNDLE DESTINATION . 
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/workstationextension
+          LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/workstationextension
+          ARCHIVE DESTINATION ${INSTALL_CMAKE_DIR}/plugins/workstationextension
+  )
+
+ELSE(APPLE)
+
+  install(TARGETS ColorDeconvolutionFilterPlugin
+          RUNTIME DESTINATION bin/plugins/filters
+          LIBRARY DESTINATION bin/plugins/filters
+          ARCHIVE DESTINATION lib/plugins/filters
+  )
+
+  install(TARGETS FilterWorkstationExtensionPlugin
+          RUNTIME DESTINATION bin/plugins/workstationextension
+          LIBRARY DESTINATION bin/plugins/workstationextension
+          ARCHIVE DESTINATION lib/plugins/workstationextension
+  )
+ENDIF(APPLE)
 
 install(FILES ColorDeconvolutionFilterPlugin.h DESTINATION include/ASAP/plugins/filters)
 install(FILES FilterThread.h FilterDockWidget.h DESTINATION include/ASAP/plugins/workstationextension)

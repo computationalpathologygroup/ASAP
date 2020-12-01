@@ -210,7 +210,7 @@ void VisualizationWorkstationExtensionPlugin::pickLUTColor() {
   QString squareName = colorSquare->objectName();
   QStringList nameList = squareName.split("_");
   int colorIndex = nameList[1].toInt();
-  rgbaArray newRGBA = { red, green, blue, alpha };
+  rgbaArray newRGBA = { static_cast<float>(red), static_cast<float>(green), static_cast<float>(blue), static_cast<float>(alpha) };
   _colorLookupTables[_currentLUT.toStdString()].colors[colorIndex] = newRGBA;
   colorSquare->setIcon(square);
   if (_editingLUT && _previewingLUT) {

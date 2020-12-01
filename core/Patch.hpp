@@ -216,7 +216,7 @@ void Patch<T>::swap(Patch<T>& first, Patch<T>& second) {
 
 template<typename T>
 Patch<T>& Patch<T>::operator=(Patch<T> rhs) {
-  this->swap(*this, rhs);
+  this->swap(*this, const_cast <Patch<T>&>(rhs));
   return *this;
 }
 

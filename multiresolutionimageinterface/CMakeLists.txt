@@ -51,6 +51,14 @@ if(WIN32)
 add_definitions(-DNOMINMAX)
 endif(WIN32)
 
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+ENDIF(APPLE)
+
+
 add_library(jpeg2kcodec SHARED JPEG2000Codec.h JPEG2000Codec.cpp)
 generate_export_header(jpeg2kcodec)
 set_target_properties(jpeg2kcodec PROPERTIES DEBUG_POSTFIX _d)
@@ -110,11 +118,11 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	if (WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON AND SWIG_FOUND)   
 	  # Set module extension, platform specific
 	  if(WIN32)
-		set(module_extension ".pyd")
+		  set(module_extension ".pyd")
+	  elseif(UNIX AND NOT APPLE)
+		  set(module_extension ".so")  
 	  elseif(APPLE)
 	    set(module_extension ".dylib")
-	  else(WIN32)
-		set(module_extension ".so")  
 	  endif(WIN32)
 	  
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
@@ -131,14 +139,29 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  
 	  # Cross-platform copying and installing instructions
-	  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
+      
+    IF(APPLE)
 
-      install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
-	  	EXPORT asap-targets
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION bin
-        ARCHIVE DESTINATION lib
-      )
+	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
+
+        install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+        EXPORT asap-targets
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+          LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}
+          ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+        )
+
+    ELSE(APPLE)
+	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
+
+        install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+        EXPORT asap-targets
+          RUNTIME DESTINATION bin
+          LIBRARY DESTINATION bin
+          ARCHIVE DESTINATION lib
+        )
+      ENDIF(APPLE)
+
 	endif(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON AND SWIG_FOUND)  
 endif(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 
@@ -149,23 +172,51 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface_export.h
 install(FILES ${EXTERNAL_OPENSLIDE_HS} DESTINATION include/multiresolutionimageinterface)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/openslidefileformat_export.h DESTINATION include/multiresolutionimageinterface)
 
-install(TARGETS multiresolutionimageinterface
-  EXPORT asap-targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
 
-install(TARGETS jpeg2kcodec
-  EXPORT asap-targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
+IF(APPLE)
 
-install(TARGETS openslidefileformat
-  EXPORT asap-targets
-  RUNTIME DESTINATION bin/formats
-  LIBRARY DESTINATION bin/formats
-  ARCHIVE DESTINATION lib
-)
+  install(TARGETS multiresolutionimageinterface
+    EXPORT asap-targets
+    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+    LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+    ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+
+  install(TARGETS jpeg2kcodec
+    EXPORT asap-targets
+    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+    LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+    ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+
+  install(TARGETS openslidefileformat
+    EXPORT asap-targets
+    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/formats
+    LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/formats
+    ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+
+ELSE(APPLE)
+
+  install(TARGETS multiresolutionimageinterface
+    EXPORT asap-targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+  )
+
+  install(TARGETS jpeg2kcodec
+    EXPORT asap-targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+  )
+
+  install(TARGETS openslidefileformat
+    EXPORT asap-targets
+    RUNTIME DESTINATION bin/formats
+    LIBRARY DESTINATION bin/formats
+    ARCHIVE DESTINATION lib
+  )
+
+ENDIF(APPLE)

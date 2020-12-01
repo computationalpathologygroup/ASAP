@@ -133,7 +133,7 @@ void MultiResolutionImageFactory::registerExternalFileFormats() {
   std::string fileFormatPluginDir = core::completePath("formats", rootDir);  
   core::getFiles(fileFormatPluginDir, "*.dll", formatPlugins);
 #elif __APPLE__
-  std::string fileFormatPluginDir = core::completePath("bin/formats", core::upOneLevel(rootDir));
+  std::string fileFormatPluginDir = core::completePath("MacOS/formats", core::upOneLevel(rootDir));
   core::getFiles(fileFormatPluginDir, "*.dylib", formatPlugins);
 #else
   std::string fileFormatPluginDir = core::completePath("bin/formats", core::upOneLevel(rootDir));  

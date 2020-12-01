@@ -297,7 +297,7 @@ void JPEG2000Codec::encode(char* data, unsigned int& size, const unsigned int& t
   unsigned int bpc = (componentParameters[0].bpp + 7) / 8 ;
   //Set the color stuff.
   unsigned char* movingDataPointer = (unsigned char*)data;
-  for (int index = 0; index < int(size / (encodedImage->numcomps * bpc)); index++) {
+  for (int index = 0; index < int(size / (encodedImage->numcomps * bpc) + 0.000001); index++) {
     for (unsigned int cmp = 0; cmp < nrComponents; cmp++) {
       for (unsigned int byteCnt = 0; byteCnt < bpc; byteCnt++)
       {
