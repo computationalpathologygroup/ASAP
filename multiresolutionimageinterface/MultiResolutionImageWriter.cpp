@@ -316,7 +316,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 }
 
 int MultiResolutionImageWriter::finishImage() {	
-	if (TIFFGetField(_tiff, TIFFTAG_TILEOFFSETS) == 0) {
+	if (TIFFIsTiled(_tiff) == 0) {
 		std::cout << "No valid tiles have been written to the base image, cannot finish image." << std::endl;
 		return -1;
 	}
