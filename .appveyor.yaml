@@ -3,8 +3,14 @@ image:
  # - Ubuntu
  - macOS
 
-services:
-- docker
+for:
+-
+  matrix:
+      except:
+        - image: macOS
+
+  services:
+  - docker
 
 environment:
   GIT_REDIRECT_STDERR: '2>&1'
