@@ -45,5 +45,5 @@ install(FILES PanTool.h ZoomTool.h DESTINATION include/ASAP/plugins/tools)
 
 IF(WIN32)
   set_target_properties(PanToolPlugin PROPERTIES FOLDER ASAP/plugins/tools)   
-  set_target_properties(ZoomToolPlugin PROPERTIES FOLDER ASAP/plugins/tools)     
+  set_target_properties(ZoomToolPlugin PROPERTIES FOLDER ASAP/plugins/tools)   
 ENDIF(WIN32)

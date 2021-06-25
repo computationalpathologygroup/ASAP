@@ -13,7 +13,6 @@ if(WIN32)
 endif(WIN32)
 
 install(FILES DIAGPathologyOpenCVBridge.h NucleiDetectionFilter.h DESTINATION include/imgproc/opencvfilters)
-
 IF(APPLE)
   set(prefix "ASAP.app/Contents")
   set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")

@@ -30,6 +30,5 @@ ELSE(APPLE)
           ARCHIVE DESTINATION lib
   )
 ENDIF(APPLE)
-
 install(FILES FRST.h DESTINATION include/imgproc/FRST)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/frst_export.h DESTINATION include/imgproc/FRST)

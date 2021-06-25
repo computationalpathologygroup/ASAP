@@ -99,7 +99,7 @@ class NucleiDetectionFilter : public FilterBase {
     return validInput;
   }
 
-  bool calculate(Patch<inType>& input, std::vector<Point>& output) {
+  bool calculate(const Patch<inType>& input, std::vector<Point>& output) {
     if (input.getDimensions().size() == 3 && input.getColorType() == pathology::ColorType::Monochrome) {
       _monochromeInput = true;
     }
@@ -263,7 +263,7 @@ public :
   bool filter(const Patch<inType>& input, std::vector<Point>& output) {
     if (checkInputImageRequirements(input)) {
       start();
-      bool result = calculate(const_cast <Patch<inType>&>(input), output);
+      bool result = calculate(input, output);
       finish();
       return result;
     }

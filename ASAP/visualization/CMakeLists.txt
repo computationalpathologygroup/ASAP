@@ -36,8 +36,6 @@ ELSE(APPLE)
           ARCHIVE DESTINATION lib/plugins/workstationextension
   )
 ENDIF(APPLE)
-
-
 install(FILES VisualizationWorkstationExtensionPlugin.h DESTINATION include/ASAP/plugins/workstationextension)
 
 IF(WIN32)

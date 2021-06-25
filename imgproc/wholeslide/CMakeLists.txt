@@ -26,7 +26,6 @@ ENDIF(WIN32)
 install(FILES ConnectedComponentsWholeSlideFilter.h DistanceTransformWholeSlideFilter.h LabelStatisticsWholeSlideFilter.h ThresholdWholeSlideFilter.h ArithmeticWholeSlideFilter.h DESTINATION include/imgproc/wholeslidefilters)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/wholeslidefilters_export.h DESTINATION include/imgproc/wholeslidefilters)
 
-
 IF(APPLE)
   set(prefix "ASAP.app/Contents")
   set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
@@ -66,11 +65,9 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	IF (WRAP_WHOLESLIDEFILTERS_PYTHON AND SWIG_FOUND)   
 	  # Set module extension, platform specific
 	  IF(WIN32)
-		  SET(module_extension ".pyd")
-    ELIF(APPLE)
-        SET(module_extention ".dylib")
-	  ELSEIF(UNIX AND NOT APPLE)
-		  SET(module_extension ".so")  
+		SET(module_extension ".pyd")
+	  ELSE(WIN32)
+		SET(module_extension ".so")  
 	  ENDIF(WIN32)
 	  
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES CPLUSPLUS ON)
@@ -84,7 +81,6 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	  set_target_properties(${SWIG_MODULE_wholeslidefilters_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  
 	  # Cross-platform copying and installing instructions
-
     IF(APPLE)
       set(prefix "ASAP.app/Contents")
       set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
@@ -110,6 +106,5 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
       )
 
     ENDIF(APPLE)
-
 	ENDIF(WRAP_WHOLESLIDEFILTERS_PYTHON AND SWIG_FOUND)  
 ENDIF(WRAP_WHOLESLIDEFILTERS_PYTHON)

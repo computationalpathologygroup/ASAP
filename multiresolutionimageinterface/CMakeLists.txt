@@ -118,11 +118,11 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	if (WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON AND SWIG_FOUND)   
 	  # Set module extension, platform specific
 	  if(WIN32)
-		  set(module_extension ".pyd")
-	  elseif(UNIX AND NOT APPLE)
-		  set(module_extension ".so")  
+		set(module_extension ".pyd")
 	  elseif(APPLE)
 	    set(module_extension ".dylib")
+	  else(WIN32)
+		set(module_extension ".so")  
 	  endif(WIN32)
 	  
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
@@ -139,7 +139,6 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 	  
 	  # Cross-platform copying and installing instructions
-      
     IF(APPLE)
 
 	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
@@ -161,7 +160,6 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
           ARCHIVE DESTINATION lib
         )
       ENDIF(APPLE)
-
 	endif(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON AND SWIG_FOUND)  
 endif(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 
@@ -171,7 +169,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface_export.h
 
 install(FILES ${EXTERNAL_OPENSLIDE_HS} DESTINATION include/multiresolutionimageinterface)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/openslidefileformat_export.h DESTINATION include/multiresolutionimageinterface)
-
 
 IF(APPLE)
 

@@ -7,7 +7,6 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
 cmake_policy(SET CMP0078 OLD)
 cmake_policy(SET CMP0086 NEW)
 endif()
-
 project(DIAGPathology)
 
 set(CURRENT_MAJOR_VERSION 1)
@@ -117,6 +116,11 @@ ELSE(APPLE)
   set(INSTALL_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 ENDIF(APPLE)
 
+set(INSTALL_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/cmake)
+set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+set(INSTALL_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+set(INSTALL_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+
 # Create the files for version configuration
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 file(RELATIVE_PATH REL_BINARY_DIR  "${INSTALL_CMAKE_DIR}" "${INSTALL_BINARY_DIR}")
@@ -127,13 +131,12 @@ configure_file(ASAPConfig.cmake.in
 configure_file(ASAPConfigVersion.cmake.in
                "${PROJECT_BINARY_DIR}/ASAPConfigVersion.cmake" @ONLY)
  
-
 # Install the files for version configuration
 install(FILES
         "${PROJECT_BINARY_DIR}/ASAPConfig.cmake"
         "${PROJECT_BINARY_DIR}/ASAPConfigVersion.cmake"
         DESTINATION cmake)
-  
+ 
 # Install the export set for use with the install-tree
 install(EXPORT asap-targets DESTINATION cmake)
 
@@ -155,16 +158,17 @@ if(WIN32)
 elseif(APPLE)
   set(CPACK_GENERATOR "DragNDrop")
   set(CPACK_BUNDLE_NAME ASAP)
-  SET(MACOSX_BUNDLE_ICON_FILE ${DIAGPathology_SOURCE_DIR}/ASAP/application.ico)
-  SET(MACOSX_GUI_ICON ${DIAGPathology_SOURCE_DIR}/ASAP/application.ico)
-  set(CPACK_PACKAGE_ICON ${DIAGPathology_SOURCE_DIR}/ASAP/application.ico)
+  SET(MACOSX_BUNDLE_ICON_FILE ${DIAGPathology_SOURCE_DIR}/ASAP/application.icns)
+  SET(MACOSX_GUI_ICON ${DIAGPathology_SOURCE_DIR}/ASAP/application.icns)
+  set(CPACK_PACKAGE_ICON ${DIAGPathology_SOURCE_DIR}/ASAP/application.icns)
   set(CPACK_PACKAGE_EXECUTABLES asap "ASAP")
+  set(CPACK_PACKAGING_INSTALL_PREFIX /Applications/ASAP)
 elseif(UNIX)
   set(CPACK_GENERATOR "DEB")
-  set(CPACK_PACKAGING_INSTALL_PREFIX /opt/ASAP)
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Geert Litjens") 
   set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
   set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "ASAP - Automated Slide Analysis Platform")
+  set(CPACK_PACKAGING_INSTALL_PREFIX /opt/ASAP)
 endif(WIN32)
 include(CPack)
 endif(PACKAGE_ON_INSTALL)

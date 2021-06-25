@@ -87,14 +87,13 @@ ELSE(APPLE)
             ARCHIVE DESTINATION lib
     )
 ENDIF(APPLE)
-
 install(FILES ${HEADERS} DESTINATION include/ASAP)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/asaplib_export.h DESTINATION include/ASAP)
 
 IF(WIN32)
-    set_target_properties(ASAP PROPERTIES FOLDER ASAP)
-    target_compile_definitions(ASAPLib PRIVATE -DASAP_EXPORTS)
-    set_target_properties(ASAPLib PROPERTIES FOLDER ASAP)
+  set_target_properties(ASAP PROPERTIES FOLDER ASAP)
+  target_compile_definitions(ASAPLib PRIVATE -DASAP_EXPORTS)
+  set_target_properties(ASAPLib PROPERTIES FOLDER ASAP)
 ENDIF(WIN32)
 
 # Add the basictools, annotation, filter plugins

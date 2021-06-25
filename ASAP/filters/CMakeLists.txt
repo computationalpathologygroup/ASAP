@@ -67,7 +67,6 @@ target_link_libraries(FilterWorkstationExtensionPlugin PRIVATE ASAPLib basicfilt
 set_target_properties(ColorDeconvolutionFilterPlugin PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(FilterWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 
-
 IF(APPLE)
 
   install(TARGETS ColorDeconvolutionFilterPlugin

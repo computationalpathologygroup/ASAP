@@ -41,6 +41,8 @@
 
 #ifdef WIN32
 const char* ASAP_Window::sharedLibraryExtensions = ".dll";
+#elif __APPLE__
+const char* ASAP_Window::sharedLibraryExtensions = ".dylib";
 #else
 const char* ASAP_Window::sharedLibraryExtensions = ".so";
 #endif

@@ -70,5 +70,5 @@ install(FILES ${ANNOTATION_HEADERS} DESTINATION include/ASAP/plugins/workstation
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/annotationplugin_export.h DESTINATION include/ASAP/plugins/workstationextension)
 
 IF(WIN32)
-  SET_TARGET_PROPERTIES(AnnotationPlugin PROPERTIES FOLDER ASAP/plugins/workstationextensions)  
+  SET_TARGET_PROPERTIES(AnnotationPlugin PROPERTIES FOLDER ASAP/plugins/workstationextensions)   
 ENDIF(WIN32)

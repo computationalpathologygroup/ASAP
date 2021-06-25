@@ -26,7 +26,6 @@ ELSE(APPLE)
           ARCHIVE DESTINATION lib
   )
 ENDIF(APPLE)
-
 if(WIN32)
   set_target_properties(WSIConnectedComponents PROPERTIES FOLDER executables)   
 endif(WIN32)
