@@ -3,14 +3,6 @@ image:
  # - Ubuntu
  - macOS
 
-for:
--
-  matrix:
-      except:
-        - image: macOS
-
-  services:
-  - docker
 
 environment:
   GIT_REDIRECT_STDERR: '2>&1'
@@ -59,6 +51,14 @@ install:
   - ps: Update-AppveyorBuild -Version "$env:asap_major_version.$env:asap_minor_version.$env:asap_patch_version-$env:APPVEYOR_BUILD_NUMBER"
 
 for:
+-
+  matrix:
+    except:
+    - image: macOS
+
+  services:
+  - docker
+
 -
   matrix:
     only:
