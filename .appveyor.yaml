@@ -1,6 +1,7 @@
 image:
- - Visual Studio 2019
- - Ubuntu
+ # - Visual Studio 2019
+ # - Ubuntu
+ - macOS
 
 services:
 - docker
@@ -145,3 +146,46 @@ for:
     on:
       branch: develop                # release from master branch only
       APPVEYOR_REPO_TAG: false       # deploy on tag push only
+- 
+  matrix:
+    only:
+      - image: macOS
+
+  build_script:
+    - sh: brew install boost openslide opencv swig qt5
+    - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
+    - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.hpp
+    - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugiconfig.hpp
+    - sh: sudo mv pugixml.cpp /usr/local/include/
+    - sh: sudo mv pugixml.hpp /usr/local/include/
+    - sh: sudo mv pugiconfig.hpp /usr/local/include/
+    - sh: cmake . \
+        -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE \
+        -DBUILD_ASAP=TRUE \
+        -DBUILD_EXECUTABLES=TRUE \
+        -DBUILD_IMAGEPROCESSING=TRUE \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPACKAGE_ON_INSTALL=TRUE \
+        -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide \
+        -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5
+    - sh: make -j4
+    - sh: cp /usr/local/ASAP.app/Contents/Frameworks/* /usr/local/lib/
+    - sh: sudo make install
+
+  artifacts:
+    - path: /usr/local/ASAP.app
+      name: ASAP_APP_Package
+
+  deploy:
+    release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
+    provider: GitHub
+    auth_token:
+      secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
+    artifact: ASAP_APP_Package
+    draft: true
+    force_update: true
+    on:
+      branch: develop                # release from master branch only
+      APPVEYOR_REPO_TAG: false       # deploy on tag push only
+
+
