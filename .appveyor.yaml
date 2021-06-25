@@ -156,6 +156,8 @@ for:
   matrix:
     only:
       - image: macOS
+  cache:
+    - /Users/appveyor/Library/Caches/Homebrew -> .appveyor.yaml
 
   build_script:
     - sh: brew install boost openslide opencv swig qt5
