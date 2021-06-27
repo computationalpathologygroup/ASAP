@@ -167,6 +167,7 @@ for:
     - sh: sudo mv pugixml.cpp /usr/local/include/
     - sh: sudo mv pugixml.hpp /usr/local/include/
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
+    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: cmake . \
         -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE \
         -DBUILD_ASAP=TRUE \
