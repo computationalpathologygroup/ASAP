@@ -169,11 +169,11 @@ for:
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
     - sh: cmake . -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5
     - sh: make -j4
+    - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
+    - sh: cp **/*.dylib /usr/local/lib/
+    - sh: sudo make install
     - sh: export APPVEYOR_VNC_BLOCK=true
     - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
-    - sh: sudo make install & exit 0
-    - sh: cp /usr/local/ASAP.app/Contents/Frameworks/* /usr/local/lib/
-    - sh: sudo make install
 
   artifacts:
     - path: /usr/local/ASAP.app
