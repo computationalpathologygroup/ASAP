@@ -8,6 +8,8 @@ for:
 -
   matrix:
     except:
+    # - image: Visual Studio 2019
+    #   ubuntu_version: 20.04
     - image: macOS
 
   environment:
@@ -39,11 +41,6 @@ for:
         python_version_linux:  3.8
         python_version_no_dot: 38 
         ubuntu_version:        20.04      
-
-  matrix:
-    exclude:
-      - image: Visual Studio 2019
-        ubuntu_version: 20.04
 
   install:
     - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
