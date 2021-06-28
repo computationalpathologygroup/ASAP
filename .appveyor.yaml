@@ -159,7 +159,7 @@ for:
   matrix:
     only:
       - image: macOS
-          my_var4: value4
+
   cache:
     - /Users/appveyor/Library/Caches/Homebrew -> .appveyor.yaml
 
