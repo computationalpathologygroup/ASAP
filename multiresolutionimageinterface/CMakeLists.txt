@@ -103,11 +103,10 @@ endif(WIN32)
 option(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON "Wrap multi-resolution image reading in Python" OFF)
 if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
   add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
-  # find_package(PythonLibs REQUIRED)
-  set(Python_FIND_ABI "ON" "ANY" "ANY")
-  find_package(Python3 COMPONENTS Interpreter Development Numpy)
+  set(Python_FIND_ABI "ANY" "ANY" "ANY")
+  find_package(Python3 COMPONENTS Interpreter Development)
   find_package(SWIG REQUIRED)
-  # find_package(NumPy REQUIRED)
+  find_package(NumPy REQUIRED)
   include (${SWIG_USE_FILE})
   if(SWIG_FOUND)
     if(NOT WIN32)
@@ -141,12 +140,13 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
 	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER multiresolutionimageinterface)
 	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
-	  target_link_libraries(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} Python3::Module)
-	  
-	  # Cross-platform copying and installing instructions
+
+    # Cross-platform copying and installing instructions
     IF(APPLE)
         # print error when python is used of library_path!
-	
+	target_link_libraries(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} Python3::Module)
+	# target_link_libraries(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} multiresolutionimageinterface annotation core) 
+
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
         install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
         EXPORT asap-targets

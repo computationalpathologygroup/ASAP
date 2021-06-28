@@ -160,6 +160,8 @@ for:
     - /Users/appveyor/Library/Caches/Homebrew -> .appveyor.yaml
 
   build_script:
+    - sh: export APPVEYOR_VNC_BLOCK=true
+    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: brew install boost openslide opencv swig qt5
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.hpp
@@ -173,8 +175,6 @@ for:
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make install
     - sh: cp -r /usr/local/ASAP.app bin/
-    # - sh: export APPVEYOR_VNC_BLOCK=true
-    # - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
 
   artifacts:
     - path: bin/ASAP.app
