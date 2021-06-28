@@ -175,9 +175,10 @@ for:
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make install
     - sh: cp -r /usr/local/ASAP.app bin/
+    - sh: zip -r ASAP.app.zip bin/ASAP.app
 
   artifacts:
-    - path: bin/ASAP.app
+    - path: ASAP.app.zip
       name: ASAP_APP_Package
 
   deploy:
