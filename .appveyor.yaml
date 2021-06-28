@@ -40,7 +40,10 @@ matrix:
       ubuntu_version: 20.04
     - image: macOS
       ubuntu_version: 20.04
+    - image: macOS
       python_version: 3.6
+    - image: macOS
+      python_version: 3.7
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
