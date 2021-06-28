@@ -143,9 +143,18 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 
     # Cross-platform copying and installing instructions
     IF(APPLE)
-        # print error when python is used of library_path!
+
+	# Relevant CMake discussion: https://gitlab.kitware.com/cmake/cmake/-/issues/17664#note_643333
+	# Use the shared Python binary to make the module compatible with other interpreters installed somewhere else.
+	# 
 	target_link_libraries(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} Python3::Module)
-	# target_link_libraries(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} multiresolutionimageinterface annotation core) 
+	#
+	# This discussion proposes to use: https://gitlab.kitware.com/cmake/cmake/-/issues/18100
+	#
+	# target_include_directories(MyModule PRIVATE ${Python3_INCLUDE_DIRS})
+	# set_target_properties(MyModule PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+	#
+	# I didn't test this yet.
 
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
         install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
