@@ -4,55 +4,56 @@ image:
  - macOS
 
 
-for:
--
+environment:
+  GIT_REDIRECT_STDERR: '2>&1'
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
+  
   matrix:
-    except:
-    # - image: Visual Studio 2019
-    #   ubuntu_version: 20.04
+    - python_version:        3.6
+      python_version_linux:  3.6m
+      python_version_no_dot: 36
+      ubuntu_version:        18.04 
+    - python_version:        3.7
+      python_version_linux:  3.7m
+      python_version_no_dot: 37
+      ubuntu_version:        18.04      
+    - python_version:        3.8
+      python_version_linux:  3.8
+      python_version_no_dot: 38 
+      ubuntu_version:        18.04      
+    - python_version:        3.6
+      python_version_linux:  3.6m
+      python_version_no_dot: 36
+      ubuntu_version:        20.04    
+    - python_version:        3.7
+      python_version_linux:  3.7m
+      python_version_no_dot: 37
+      ubuntu_version:        20.04      
+    - python_version:        3.8
+      python_version_linux:  3.8
+      python_version_no_dot: 38 
+      ubuntu_version:        20.04      
+
+matrix:
+  exclude:
+    - image: Visual Studio 2019
+      ubuntu_version: 20.04
     - image: macOS
+      ubuntu_version: 20.04
+      python_version: 3.6
 
-  environment:
-    GIT_REDIRECT_STDERR: '2>&1'
-    APPVEYOR_YML_DISABLE_PS_LINUX: true
-    
-    matrix:
-      - python_version:        3.6
-        python_version_linux:  3.6m
-        python_version_no_dot: 36
-        ubuntu_version:        18.04 
-      - python_version:        3.7
-        python_version_linux:  3.7m
-        python_version_no_dot: 37
-        ubuntu_version:        18.04      
-      - python_version:        3.8
-        python_version_linux:  3.8
-        python_version_no_dot: 38 
-        ubuntu_version:        18.04      
-      - python_version:        3.6
-        python_version_linux:  3.6m
-        python_version_no_dot: 36
-        ubuntu_version:        20.04    
-      - python_version:        3.7
-        python_version_linux:  3.7m
-        python_version_no_dot: 37
-        ubuntu_version:        20.04      
-      - python_version:        3.8
-        python_version_linux:  3.8
-        python_version_no_dot: 38 
-        ubuntu_version:        20.04      
+install:
+  - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
+  - ps: $env:asap_minor_version=findstr "set(CURRENT_MINOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
+  - ps: $env:asap_patch_version=findstr "set(CURRENT_PATCH_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
+  - cmd: echo ASAP version %asap_major_version%.%asap_minor_version%.%asap_patch_version%-%APPVEYOR_BUILD_NUMBER%
+  - sh: export ASAP_MAJOR_VERSION="$(grep set\(CURRENT_MAJOR_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
+  - sh: export ASAP_MINOR_VERSION="$(grep set\(CURRENT_MINOR_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
+  - sh: export ASAP_PATCH_VERSION="$(grep set\(CURRENT_PATCH_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
+  - sh: echo ASAP version $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION.$ASAP_PATCH_VERSION-$APPVEYOR_BUILD_NUMBER
+  - ps: Update-AppveyorBuild -Version "$env:asap_major_version.$env:asap_minor_version.$env:asap_patch_version-$env:APPVEYOR_BUILD_NUMBER"
 
-  install:
-    - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
-    - ps: $env:asap_minor_version=findstr "set(CURRENT_MINOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
-    - ps: $env:asap_patch_version=findstr "set(CURRENT_PATCH_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
-    - cmd: echo ASAP version %asap_major_version%.%asap_minor_version%.%asap_patch_version%-%APPVEYOR_BUILD_NUMBER%
-    - sh: export ASAP_MAJOR_VERSION="$(grep set\(CURRENT_MAJOR_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
-    - sh: export ASAP_MINOR_VERSION="$(grep set\(CURRENT_MINOR_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
-    - sh: export ASAP_PATCH_VERSION="$(grep set\(CURRENT_PATCH_VERSION CMakeLists.txt | cut -d " " -f2 | cut -d ")" -f1)"
-    - sh: echo ASAP version $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION.$ASAP_PATCH_VERSION-$APPVEYOR_BUILD_NUMBER
-    - ps: Update-AppveyorBuild -Version "$env:asap_major_version.$env:asap_minor_version.$env:asap_patch_version-$env:APPVEYOR_BUILD_NUMBER"
-
+for:
 -
   matrix:
     except:
@@ -158,6 +159,7 @@ for:
   matrix:
     only:
       - image: macOS
+          my_var4: value4
   cache:
     - /Users/appveyor/Library/Caches/Homebrew -> .appveyor.yaml
 
