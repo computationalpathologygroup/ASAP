@@ -172,11 +172,12 @@ for:
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make install
-    - sh: export APPVEYOR_VNC_BLOCK=true
-    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
+    - sh: cp -r /usr/local/ASAP.app bin/
+    # - sh: export APPVEYOR_VNC_BLOCK=true
+    # - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
 
   artifacts:
-    - path: /usr/local/ASAP.app
+    - path: bin/ASAP.app
       name: ASAP_APP_Package
 
   deploy:
