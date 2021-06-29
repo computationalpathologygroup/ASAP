@@ -121,7 +121,7 @@ for:
     release: ASAP $(asap_major_version).$(asap_minor_version)
     provider: GitHub
     auth_token:
-      secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
     artifact: ASAP_Installer
     draft: true
     force_update: true
@@ -150,7 +150,7 @@ for:
     release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
     provider: GitHub
     auth_token:
-      secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
     artifact: ASAP_DEB_Package
     draft: true
     force_update: true
