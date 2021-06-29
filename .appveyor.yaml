@@ -56,21 +56,15 @@ install:
   - sh: echo ASAP version $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION.$ASAP_PATCH_VERSION-$APPVEYOR_BUILD_NUMBER
   - ps: Update-AppveyorBuild -Version "$env:asap_major_version.$env:asap_minor_version.$env:asap_patch_version-$env:APPVEYOR_BUILD_NUMBER"
 
-# for:
-# -
-#   matrix:
-#     except:
-#     - image: macOS
-
-services:
-- docker
-
 for:
 -
   matrix:
     only:
       - image: Visual Studio 2019      
   
+  services:
+    - docker
+
   before_build:
   - cmd: set python_location=C:/Python%python_version_no_dot%-x64
   - cmd: set python_library=python%python_version_no_dot%.lib
@@ -139,6 +133,9 @@ for:
   matrix:
     only:
       - image: Ubuntu
+
+  services:
+    - docker
 
   build_script:
     - sh: cd buildtools
