@@ -46,7 +46,7 @@ IF(APPLE)
   set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
   set(INSTALL_CMAKE_DIR "${prefix}/Resources")
   set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
-  add_executable(ASAP MACOSX_BUNDLE main.cpp ASAP.rc ${RESOURCE_ADDED})
+  add_executable(ASAP MACOSX_BUNDLE main.cpp ASAP.rc ${RESOURCE_ADDED} ${DIAGPathology_SOURCE_DIR}/ASAP/icon.icns)
 
 ELSE(APPLE)
   add_executable(ASAP main.cpp ASAP.rc ${RESOURCE_ADDED})
