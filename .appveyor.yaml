@@ -187,6 +187,7 @@ for:
     - sh: sudo mv /usr/local/ASAP.app .
     - sh: sudo chmod -R 777 ASAP.app
     - sh: zip -r ASAP_py38.app.zip ASAP.app
+    - sh: rm -rf ASAP.app
     # Python 3.7
     - sh: source ~/venv3.7/bin/activate
     - sh: pip install numpy
@@ -198,6 +199,7 @@ for:
     - sh: sudo mv /usr/local/ASAP.app .
     - sh: sudo chmod -R 777 ASAP.app
     - sh: zip -r ASAP_py37.app.zip ASAP.app
+    - sh: rm -rf ASAP.app
     # Python 3.6
     - sh: source ~/venv3.6/bin/activate
     - sh: pip install numpy
