@@ -175,26 +175,55 @@ for:
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
     # - sh: export APPVEYOR_VNC_BLOCK=true
     # - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 
-      # -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.6/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.6/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.6/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8.6/lib/python3.8/site-packages/numpy/core/include
+    #
+    # Per python version:
+    - sh: source ~/venv3.8/bin/activate
+    - sh: pip install numpy
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.6/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.6/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.6/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8.6/lib/python3.8/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make install
     - sh: sudo mv /usr/local/ASAP.app .
     - sh: sudo chmod -R 777 ASAP.app
-    - sh: zip -r ASAP.app.zip ASAP.app
+    - sh: zip -r ASAP_py38.app.zip ASAP.app
+    # Python 3.7
+    - sh: source ~/venv3.7/bin/activate
+    - sh: pip install numpy
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.7.9/bin/python3.7 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.7.9/include/python3.7m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.7.9/lib/libpython3.7.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.7.9/lib/python3.7/site-packages/numpy/core/include
+    - sh: make
+    - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
+    - sh: cp **/*.dylib /usr/local/lib/
+    - sh: sudo make install
+    - sh: sudo mv /usr/local/ASAP.app .
+    - sh: sudo chmod -R 777 ASAP.app
+    - sh: zip -r ASAP_py37.app.zip ASAP.app
+    # Python 3.6
+    - sh: source ~/venv3.6/bin/activate
+    - sh: pip install numpy
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.6.12/bin/python3.6 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.6.12/include/python3.6m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.6.12/lib/libpython3.6.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.6.12/lib/python3.6/site-packages/numpy/core/include
+    - sh: make
+    - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
+    - sh: cp **/*.dylib /usr/local/lib/
+    - sh: sudo make install
+    - sh: sudo mv /usr/local/ASAP.app .
+    - sh: sudo chmod -R 777 ASAP.app
+    - sh: zip -r ASAP_py36.app.zip ASAP.app
 
   artifacts:
-    - path: ASAP.app.zip
-      name: ASAP_APP_Package
+    - path: ASAP_py38.app.zip
+      name: ASAP_APP_PYTHON38_Package
+    - path: ASAP_py37.app.zip
+      name: ASAP_APP_PYTHON37_Package
+    - path: ASAP_py36.app.zip
+      name: ASAP_APP_PYTHON36_Package
 
   deploy:
     release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
     provider: GitHub
     auth_token:
       secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
-    artifact: ASAP_APP_Package
+    artifact: ASAP_APP_PYTHON38_Package
     draft: true
     force_update: true
     on:
