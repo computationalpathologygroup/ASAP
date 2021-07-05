@@ -104,12 +104,12 @@ option(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON "Wrap multi-resolution image re
 if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
   add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
 
-  IF(APPLE)
-    set(Python_FIND_ABI "ANY" "ANY" "ANY")
-    find_package(Python3 COMPONENTS Interpreter Development)
-  ELSE(APPLE)
+  # IF(APPLE)
+    # set(Python_FIND_ABI "ANY" "ANY" "ANY")
+    # find_package(Python3 COMPONENTS Interpreter Development)
+  # ELSE(APPLE)
     find_package(PythonLibs REQUIRED)
-  ENDIF(APPLE)
+  # ENDIF(APPLE)
 
   find_package(SWIG REQUIRED)
   find_package(NumPy REQUIRED)
@@ -142,26 +142,35 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 
 	  swig_add_library(multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
 	  swig_link_libraries(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
-	  swig_link_libraries(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+
+	  IF(APPLE)
+	    # Relevant CMake discussions:
+	    # https://gitlab.kitware.com/cmake/cmake/-/issues/17664#note_643333
+	    # https://gitlab.kitware.com/cmake/cmake/-/issues/18100
+	    # Finally used:
+	    # https://gitlab.kitware.com/cmake/cmake/-/issues/18536
+	    # We need to weakly link to Python, otherwise the linker will add a hardlink to the python
+	    # used during compiling. This will make the library not work for other people / other Python versions.
+	    #
+	    macro( target_link_libraries_with_dynamic_lookup target )
+	      if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
+		set_target_properties( ${target} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup" )
+	      else()
+		target_link_libraries ( ${target} ${ARGN}  )
+	      endif()
+	    endmacro()
+
+	    target_link_libraries_with_dynamic_lookup(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} ${PYTHON_LIBRARIES})
+	  ELSE(APPLE)
+	    swig_link_libraries(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+	  ENDIF(APPLE)
+
 	  target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
 	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER multiresolutionimageinterface)
 	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
 
     # Cross-platform copying and installing instructions
     IF(APPLE)
-
-	# Relevant CMake discussion: https://gitlab.kitware.com/cmake/cmake/-/issues/17664#note_643333
-	# Use the shared Python binary to make the module compatible with other interpreters installed somewhere else.
-	# 
-	target_link_libraries(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} Python3::Module)
-	#
-	# This discussion proposes to use: https://gitlab.kitware.com/cmake/cmake/-/issues/18100
-	#
-	# target_include_directories(MyModule PRIVATE ${Python3_INCLUDE_DIRS})
-	# set_target_properties(MyModule PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-	#
-	# I didn't test this yet.
-
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
         install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
         EXPORT asap-targets
