@@ -43,6 +43,9 @@ ELSEIF(APPLE)
    set(INSTALL_LIB_DIR "${prefix}/Frameworks")
 
    INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqcocoa.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqminimal.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqoffscreen.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqwebgl.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
    INSTALL(FILES "${DIAGPathology_SOURCE_DIR}/ASAP/icon.icns" DESTINATION "${prefix}/Resources")  
    INSTALL(FILES "${DIAGPathology_SOURCE_DIR}/ASAP/Info.plist" DESTINATION "${prefix}")  
 
