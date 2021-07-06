@@ -80,6 +80,15 @@ ELSEIF(APPLE)
             
 
    list(APPEND DIRS "${CMAKE_BINARY_DIR}")
+   
+   # Path used for searching by FIND_XXX(), with appropriate suffixes added
+   if(CMAKE_BINARY_DIR)
+     foreach(dir ${CMAKE_BINARY_DIR})
+         list(APPEND DIRS "${dir}/bin" "${dir}/lib")
+     endforeach()
+   endif()
+
+  find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools Concurrent)
 
   # Install the plugins for each qt module
   set(REQ_QT_PLUGINS
