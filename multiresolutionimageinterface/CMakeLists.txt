@@ -123,17 +123,19 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	      set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-py3")
       endif(PYTHONLIBS_VERSION_STRING MATCHES "3.?")
 
-	  swig_add_library(multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
-	  swig_link_libraries(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
-	  swig_link_libraries(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
-      target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
-	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER multiresolutionimageinterface)
-	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
+	  swig_add_library(py_multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
+	  swig_link_libraries(py_multiresolutionimageinterface   multiresolutionimageinterface annotation core) 
+	  swig_link_libraries(py_multiresolutionimageinterface   ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+      target_include_directories(py_multiresolutionimageinterface   PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
+	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES FOLDER multiresolutionimageinterface)
+	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES OUTPUT_NAME multiresolutionimageinterface)
+ 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES ARCHIVE_OUTPUT_NAME _multiresolutionimageinterface)
+	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES DEBUG_POSTFIX _d)
 	  
 	  # Cross-platform copying and installing instructions
 	  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
 
-      install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+      install(TARGETS py_multiresolutionimageinterface  
 	  	EXPORT asap-targets
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION bin
