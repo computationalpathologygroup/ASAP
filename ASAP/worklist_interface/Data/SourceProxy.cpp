@@ -129,7 +129,7 @@ namespace ASAP
 				for (size_t parameter = 0; parameter < keyValueList.size(); ++parameter)
 				{
 					std::vector<std::string> key_value;
-					core::split(keyValueList[parameter], key_value, "|");
+					core::split(keyValueList[parameter], key_value, "=");
 					if (key_value.size() > 1) {
 						parameters.insert({ key_value[0], key_value[1] });
 					}

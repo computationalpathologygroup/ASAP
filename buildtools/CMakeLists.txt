@@ -16,7 +16,7 @@ IF(WIN32)
     
     get_filename_component(opencv_dll_directory ${opencv_dll_location} DIRECTORY)
   endif(BUILD_IMAGEPROCESSING)
-  SET(DIRS ${Qt5_DIR}/../../../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${Boost_LIBRARY_DIRS} ${Boost_LIBRARY_DIR_RELEASE}/../bin ${Boost_LIBRARY_DIR_DEBUG}/../bin ${cpprestsdk_DIR}/../../bin)
+  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt5_DIR}/../../../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${Boost_LIBRARY_DIRS} ${Boost_LIBRARY_DIR_RELEASE}/../bin ${Boost_LIBRARY_DIR_DEBUG}/../bin ${cpprestsdk_DIR}/../../bin)
   INCLUDE(InstallRequiredSystemLibraries)
   if(BUILD_ASAP)
       INSTALL(FILES ${Qt5_DIR}/../../../plugins/platforms/qwindows.dll DESTINATION bin/platforms CONFIGURATIONS Release)

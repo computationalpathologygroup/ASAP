@@ -52,7 +52,7 @@ if (BUILD_WORKLIST_INTERFACE)
 		Models/WorklistModels.cpp
 	)
 	SET(WORKLIST_RESOURCE
-		resources/WorklistInterface.qrc
+		Resources/WorklistInterface.qrc
 	)
 
 	IF(BUILD_WORKLIST_GRANDCHALLENGE_INTERFACE)
