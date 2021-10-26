@@ -26,7 +26,16 @@ RUN apt-get update \
         swig \
         libunittest++-dev \
         ca-certificates \
-        nano
+        nano \
+        software-properties-common \
+        lsb-release
+
+# Ensure latest version of CMake
+RUN apt purge -y --auto-remove cmake 
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+RUN apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+RUN apt update && \
+    apt install -y cmake
 
 RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
     mkdir /root/.conda &&\
