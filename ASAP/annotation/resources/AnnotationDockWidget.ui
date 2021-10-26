@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>328</width>
+    <width>404</width>
     <height>615</height>
    </rect>
   </property>
@@ -112,7 +112,7 @@
           <item>
            <widget class="QPushButton" name="addGroupButton">
             <property name="text">
-             <string>Add new group</string>
+             <string>New group</string>
             </property>
            </widget>
           </item>

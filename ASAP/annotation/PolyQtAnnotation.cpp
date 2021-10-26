@@ -157,10 +157,19 @@ void PolyQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsItem *
       }
     }
     if (isSelected()) {
-      painter->setPen(QPen(QBrush(_rectColor.lighter(150)), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        if (QtAnnotation::annotationColorForRects) {
+            painter->setPen(QPen(QBrush(lineColor.lighter(150)), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        }
+        else {
+            painter->setPen(QPen(QBrush(_rectColor.lighter(150)), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        }
     }
     else {
-      painter->setPen(QPen(QBrush(_rectColor), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        if (QtAnnotation::annotationColorForRects) {
+            painter->setPen(QPen(QBrush(lineColor), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        } else {
+            painter->setPen(QPen(QBrush(_rectColor), 3 * _lineThickness / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        }
     }
     for (unsigned int i = 0; i < coords.size(); ++i) {
       if (i == _activeSeedPoint) {

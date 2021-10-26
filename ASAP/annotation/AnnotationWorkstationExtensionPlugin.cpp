@@ -96,6 +96,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     QColorDialog::setCustomColor(i, customColor);
   }
   QtAnnotation::selectionSensitivity = _settings->value("annotationSelectionSensitivity", 100.).value<float>();
+  QtAnnotation::annotationColorForRects = _settings->value("annotationColorForRects", true).value<bool>();
 
   qRegisterMetaTypeStreamOperators<QtAnnotation*>("QtAnnotation*");
   qRegisterMetaTypeStreamOperators<QtAnnotationGroup*>("QtAnnotationGroup*");
@@ -128,7 +129,12 @@ void AnnotationWorkstationExtensionPlugin::onOptionsButtonPressed() {
   selSensSpinBox->setSingleStep(20);
   selSensSpinBox->setObjectName("SelectionSensitivity");
   selSensSpinBox->setToolTip("Sets the selection sensitivy for clicking individual points in an annatation. Higher means easier to click.");
+  QCheckBox* annotationColorForRects = new QCheckBox();
+  annotationColorForRects->setChecked(QtAnnotation::annotationColorForRects);
+  annotationColorForRects->setObjectName("AnnotationColorForRects");
+  annotationColorForRects->setToolTip("Set the color of the rectangles to the same color as the annotation itself.");
   optionsDialogLayout->addRow("Selection sensitivity", selSensSpinBox);
+  optionsDialogLayout->addRow("Use annotation color for coordinate indicators", annotationColorForRects);
   dialogLayout->addLayout(optionsDialogLayout);
   QPushButton* cancel = new QPushButton("Cancel");
   QPushButton* ok = new QPushButton("Ok");
@@ -142,8 +148,11 @@ void AnnotationWorkstationExtensionPlugin::onOptionsButtonPressed() {
   int rval = optionsDialog->exec();
   if (rval) {
     float newSelectionSensitivity = static_cast<float>(selSensSpinBox->value());
+    bool colorForRects = annotationColorForRects->isChecked();
     QtAnnotation::selectionSensitivity = newSelectionSensitivity;
+    QtAnnotation::annotationColorForRects = colorForRects;
     _settings->setValue("annotationSelectionSensitivity", newSelectionSensitivity);
+    _settings->setValue("annotationColorForRects", colorForRects);
   }
 }
 
