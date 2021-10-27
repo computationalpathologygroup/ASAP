@@ -110,17 +110,29 @@ for:
       name: ASAP_Installer
       
   deploy:
-    release: ASAP $(asap_major_version).$(asap_minor_version)
-    provider: GitHub
-    auth_token:
-      secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
-    artifact: ASAP_Installer
-    draft: true
-    force_update: true
-    on:
-      branch: develop                # release from master branch only
-      APPVEYOR_REPO_TAG: false       # deploy on tag push only
-      
+    - provider: GitHub
+      release: ASAP $(asap_major_version).$(asap_minor_version) (Nightly)
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_Installer
+      draft: false
+      force_update: true
+      on:
+        branch: develop
+        APPVEYOR_REPO_TAG: false
+
+    - provider: GitHub
+      release: ASAP $(asap_major_version).$(asap_minor_version)
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_Installer
+      draft: false
+      force_update: true
+      on:
+        branch: master                 # release from master branch only
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only
+
+
 - 
   matrix:
     only:
@@ -135,13 +147,24 @@ for:
       name: ASAP_DEB_Package
 
   deploy:
-    release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
-    provider: GitHub
-    auth_token:
-      secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
-    artifact: ASAP_DEB_Package
-    draft: true
-    force_update: true
-    on:
-      branch: develop                # release from master branch only
-      APPVEYOR_REPO_TAG: false       # deploy on tag push only
+    - provider: GitHub
+      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION (Nightly)    
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_DEB_Package
+      draft: false
+      force_update: true
+      on:
+        branch: develop
+        APPVEYOR_REPO_TAG: false       # deploy on tag push only
+
+    - provider: GitHub
+      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_DEB_Package
+      draft: true
+      force_update: true
+      on:
+        branch: master                 # release from master branch only
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only        
