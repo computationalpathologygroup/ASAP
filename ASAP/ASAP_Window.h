@@ -16,6 +16,7 @@ class PathologyViewer;
 class WorkstationExtensionPluginInterface;
 class QActionGroup;
 class QSettings;
+class QKeyPressEvent;
 
 /*
 
@@ -87,6 +88,8 @@ private:
   void loadPlugins();
   void readSettings();
   void writeSettings();
+
+  virtual void keyPressEvent(QKeyEvent* event);
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };

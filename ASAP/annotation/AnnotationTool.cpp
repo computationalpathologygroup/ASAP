@@ -61,6 +61,7 @@ void AnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 void AnnotationTool::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key::Key_Escape) {
     cancelAnnotation();
+    event->accept();
   }
   else if (event->key() == Qt::Key::Key_Delete && event->modifiers() == Qt::ShiftModifier) {
     if (_generating) {
@@ -72,6 +73,7 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
         _annotationPlugin->deleteAnnotation(*it);
       }
     }
+    event->accept();
   }
   else if (event->key() == Qt::Key::Key_Delete) {
     if (_generating) {
@@ -85,10 +87,12 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
           _last = Point(prev.getX() * _viewer->getSceneScale(), prev.getY() * _viewer->getSceneScale());
         }
       }
+      event->accept();
     }
     else if (_annotationPlugin->getActiveAnnotation()) {
       if (_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() <= 1) {
         _annotationPlugin->deleteAnnotation(_annotationPlugin->getActiveAnnotation());
+        event->accept();
       }
       else if (_annotationPlugin->getActiveAnnotation()->getActiveSeedPoint() > -1) {
         int activeSeedPoint = _annotationPlugin->getActiveAnnotation()->getActiveSeedPoint();
@@ -99,9 +103,11 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
         else {
           _annotationPlugin->getActiveAnnotation()->setActiveSeedPoint(_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() - 1);
         }
+        event->accept();
       }
       else if (_annotationPlugin->getActiveAnnotation()) {
         _annotationPlugin->getActiveAnnotation()->removeCoordinate(-1);
+        event->accept();
       }
     }
   }
@@ -117,6 +123,7 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
       connect(anim, SIGNAL(valueChanged(qreal)), SLOT(zoomToAnnotation(qreal)));
       connect(anim, SIGNAL(finished()), SLOT(zoomToAnnotationFinished()));
       anim->start();
+      event->accept();
     }
   }
 }
