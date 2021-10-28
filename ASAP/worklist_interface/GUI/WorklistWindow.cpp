@@ -10,7 +10,7 @@
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 #include <QMimeData>
-#include <QtConcurrent\qtconcurrentrun.h>
+#include <QtConcurrent/qtconcurrentrun.h>
 #include "core/stringconversion.h"
 
 #ifdef BUILD_GRANDCHALLENGE_INTERFACE

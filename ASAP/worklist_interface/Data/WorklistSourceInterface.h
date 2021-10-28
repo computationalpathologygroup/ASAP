@@ -5,7 +5,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "datatable.h"
+#include "DataTable.h"
 
 namespace ASAP
 {

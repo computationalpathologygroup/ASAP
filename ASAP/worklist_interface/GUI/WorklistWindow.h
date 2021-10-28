@@ -66,7 +66,7 @@ namespace ASAP
 			void updateSourceViews(void);
 
 			std::vector<std::string> getImagesForItem(const std::string& id, const WorklistModels::ModelEnum model);
-			void WorklistWindow::deleteFromWorklist(QStandardItem* item, const WorklistModels::ModelEnum model);
+			//void deleteFromWorklist(QStandardItem* item, const WorklistModels::ModelEnum model);
 			void updateWorklist(const QStandardItem* worklist_item, const std::vector<std::string>& image_list, bool remove);
 
 			void setModels(void);
