@@ -184,7 +184,7 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
     ELSE(APPLE)
 	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
 
-        install(TARGETSpy_multiresolutionimageinterface
+        install(TARGETS py_multiresolutionimageinterface
         EXPORT asap-targets
           RUNTIME DESTINATION bin
           LIBRARY DESTINATION bin
