@@ -1,6 +1,7 @@
 #ifndef __ASAP_MODELS_WORKLISTMODELS__
 #define __ASAP_MODELS_WORKLISTMODELS__
 
+#include <memory>
 #include <set>
 #include <QAbstractItemView>
 #include <QStandardItemModel>
@@ -31,7 +32,7 @@ namespace ASAP
 			void setWorklistItems(const DataTable& items);
 			void setPatientsItems(const DataTable& items);
 			void setStudyItems(const DataTable& items);
-			std::unique_ptr<QFutureWatcher<void> > setImageItems(const DataTable& items, WorklistWindow* window);
+			std::unique_ptr<QFutureWatcher<void>> setImageItems(const DataTable& items, WorklistWindow* window);
 
 			void updateHeaders(std::vector<std::pair<std::set<std::string>, QAbstractItemView*>>& header_view_couple);
 

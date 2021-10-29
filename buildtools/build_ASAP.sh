@@ -24,7 +24,7 @@ if [ "${build_gui}" = "true" ] ; then \
                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
                     -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE -DCMAKE_BUILD_TYPE=Release \
                     -DDCMTKJPEG_INCLUDE_DIR=/root -DDCMTKJPEG_LIBRARY=/usr/lib/libijg8.so -DUNITTEST_INCLUDE_DIR=/usr/include/UnitTest++ \
-                    -DPACKAGE_ON_INSTALL=TRUE \
+                    -DPACKAGE_ON_INSTALL=TRUE -DBUILD_WORKLIST_INTERFACE=TRUE \
                     -DPYTHON_DEBUG_LIBRARY=/root/miniconda3/envs/build_python${python_ver}/lib/libpython${python_ver}.so \
                     -DPYTHON_LIBRARY_DEBUG=/root/miniconda3/envs/build_python${python_ver}/lib/libpython${python_ver}.so \
                     -DPYTHON_LIBRARY=/root/miniconda3/envs/build_python${python_ver}/lib/libpython${python_ver}.so \

@@ -72,13 +72,16 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	  
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES SWIG_FLAGS "-builtin")
-	  swig_add_library(wholeslidefilters LANGUAGE python SOURCES wholeslidefilters.i)
-	  swig_link_libraries(wholeslidefilters wholeslidefilters core) 
-	  swig_link_libraries(wholeslidefilters ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
-	  target_include_directories(${SWIG_MODULE_wholeslidefilters_REAL_NAME} PRIVATE ${PYTHON_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+	  swig_add_library(py_wholeslidefilters LANGUAGE python SOURCES wholeslidefilters.i)
+	  swig_link_libraries(py_wholeslidefilters wholeslidefilters core) 
+	  swig_link_libraries(py_wholeslidefilters ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+	  target_include_directories(py_wholeslidefilters PRIVATE ${PYTHON_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 	  
-	  set_target_properties(${SWIG_MODULE_wholeslidefilters_REAL_NAME} PROPERTIES FOLDER imgproc)
-	  set_target_properties(${SWIG_MODULE_wholeslidefilters_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
+	  set_target_properties(py_wholeslidefilters PROPERTIES FOLDER imgproc)
+	  set_target_properties(py_wholeslidefilters PROPERTIES DEBUG_POSTFIX _d)
+   	  set_target_properties(py_wholeslidefilters  PROPERTIES OUTPUT_NAME wholeslidefilters)
+ 	  set_target_properties(py_wholeslidefilters  PROPERTIES ARCHIVE_OUTPUT_NAME _wholeslidefilters)
+
 	  
 	  # Cross-platform copying and installing instructions
     IF(APPLE)
@@ -98,7 +101,7 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
     ELSE(APPLE)
 	    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/wholeslidefilters.py DESTINATION bin)
 
-      INSTALL(TARGETS ${SWIG_MODULE_wholeslidefilters_REAL_NAME}
+      INSTALL(TARGETS py_wholeslidefilters
 	  	      EXPORT asap-targets
               RUNTIME DESTINATION bin
               LIBRARY DESTINATION bin

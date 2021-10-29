@@ -2,7 +2,6 @@
 #define __ASAP_GUI_WORKLISTDATAACQUISITIONINTERFACE__
 
 #include <deque>
-#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <QDropEvent>
@@ -48,7 +47,7 @@ namespace ASAP
 		private:
 			SourceProxy									m_source;
 			std::unique_ptr<Ui::WorklistWindowLayout>	m_ui;
-			std::unique_ptr<QFutureWatcher<void> >      m_thumbnail_loader;
+			std::unique_ptr<QFutureWatcher<void>>       m_thumbnail_loader;
 			std::mutex									m_image_switch_access;
 			std::mutex									m_status_bar_access;
 			TemporaryDirectoryTracker					m_storage_directory;
@@ -66,7 +65,7 @@ namespace ASAP
 			void updateSourceViews(void);
 
 			std::vector<std::string> getImagesForItem(const std::string& id, const WorklistModels::ModelEnum model);
-			void WorklistWindow::deleteFromWorklist(QStandardItem* item, const WorklistModels::ModelEnum model);
+			//void deleteFromWorklist(QStandardItem* item, const WorklistModels::ModelEnum model);
 			void updateWorklist(const QStandardItem* worklist_item, const std::vector<std::string>& image_list, bool remove);
 
 			void setModels(void);

@@ -160,7 +160,7 @@ QPixmap* IOWorker::renderBackgroundImage(std::shared_ptr<MultiResolutionImage> l
     renderedImg = QImage(reinterpret_cast<unsigned char*>(imgBuf), (job->_tileSize), (job->_tileSize), (job->_tileSize) * 4, QImage::Format_RGBA8888);
   }
   else {
-    renderedImg = convertMonochromeToRGB(imgBuf, job->_tileSize, job->_tileSize, _backgroundChannel, samplesPerPixel, local_bck_img->getMinValue(), local_bck_img->getMaxValue(), pathology::DefaultColorLookupTables["Normal"]);
+    renderedImg = convertMonochromeToRGB(imgBuf, job->_tileSize, job->_tileSize, _backgroundChannel, samplesPerPixel, local_bck_img->getMinValue(_backgroundChannel), local_bck_img->getMaxValue(_backgroundChannel), pathology::DefaultColorLookupTables["Background"]);
   }
   QPixmap* renderedPixmap = new QPixmap(QPixmap::fromImage(renderedImg));
   delete[] imgBuf;
@@ -201,7 +201,7 @@ Patch<T>* IOWorker::getForegroundTile(std::shared_ptr<MultiResolutionImage> loca
 template<typename T>
 QPixmap* IOWorker::renderForegroundImage(Patch<T>* foregroundTile, unsigned int backgroundTileSize) {
   std::vector<unsigned long long> dims = foregroundTile->getDimensions();
-  QImage renderedImage = convertMonochromeToRGB(foregroundTile->getPointer(), dims[0], dims[0], _foregroundChannel, foregroundTile->getSamplesPerPixel(), 0, 255, _LUT);
+  QImage renderedImage = convertMonochromeToRGB(foregroundTile->getPointer(), dims[0], dims[0], _foregroundChannel, foregroundTile->getSamplesPerPixel(), foregroundTile->getMinValue(_foregroundChannel), foregroundTile->getMaxValue(_foregroundChannel), _LUT);
 
   if (!renderedImage.isNull()) {
     if (backgroundTileSize != dims[0]) {

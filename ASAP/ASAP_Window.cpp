@@ -89,6 +89,12 @@ void ASAP_Window::writeSettings()
   _settings->endGroup();
 }
 
+void ASAP_Window::keyPressEvent(QKeyEvent* event)
+{
+    std::cout << "Event accepted" << std::endl;
+    event->accept();
+}
+
 void ASAP_Window::readSettings()
 {
   _settings->beginGroup("ASAP");

@@ -53,20 +53,25 @@ namespace ASAP
 				unsigned char* data(nullptr);
 				std::vector<unsigned long long> dimensions;
 
-				if (image->getNumberOfLevels() > 1)
-				{
-					dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);
-					image->getRawRegion(0, 0, dimensions[0], dimensions[1], image->getNumberOfLevels() - 1, data);
+				if (image->getDataType() == pathology::UChar) {
+					if (image->getNumberOfLevels() > 1)
+					{
+						dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);
+						image->getRawRegion(0, 0, dimensions[0], dimensions[1], image->getNumberOfLevels() - 1, data);
+					}
+					else
+					{
+						dimensions = image->getDimensions();
+						if (dimensions[0] * dimensions[1] < (1024 * 1024)) {
+							image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
+						}
+						else {
+							return m_invalid_icon;
+						}
+					}
 				}
-				else
-				{
-					dimensions = image->getDimensions();
-					if (dimensions[0] * dimensions[1] < (1024 * 1024)) {
-						image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
-					}
-					else {
-						return m_invalid_icon;
-					}
+				else {
+					return m_invalid_icon;
 				}
 
 				// Gets the largest dimension and creates an offset for the smallest.
@@ -136,7 +141,7 @@ namespace ASAP
 
 	QIcon IconCreator::createInvalidIcon()
 	{
-		QPixmap invalid_icon("Resources/unavailable.png");
+		QPixmap invalid_icon(":/ASAP_Worklist_icons/unavailable.png");
 		return QIcon(invalid_icon.scaled(IconCreator::m_icon_size, IconCreator::m_icon_size, Qt::AspectRatioMode::KeepAspectRatio));
 	}
 }

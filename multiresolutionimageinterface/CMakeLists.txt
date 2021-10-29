@@ -140,8 +140,8 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 		  set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-py3")
 	  endif(PYTHONLIBS_VERSION_STRING MATCHES "3.?")
 
-	  swig_add_library(multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
-	  swig_link_libraries(multiresolutionimageinterface multiresolutionimageinterface annotation core) 
+    swig_add_library(py_multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
+    swig_link_libraries(py_multiresolutionimageinterface   multiresolutionimageinterface annotation core) 
 
 	  IF(APPLE)
 	    # Relevant CMake discussions:
@@ -154,25 +154,27 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	    #
 	    macro( target_link_libraries_with_dynamic_lookup target )
 	      if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-		set_target_properties( ${target} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup" )
+		      set_target_properties( ${target} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup" )
 	      else()
-		target_link_libraries ( ${target} ${ARGN}  )
+		      target_link_libraries ( ${target} ${ARGN}  )
 	      endif()
 	    endmacro()
 
-	    target_link_libraries_with_dynamic_lookup(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} ${PYTHON_LIBRARIES})
+	    target_link_libraries_with_dynamic_lookup(py_multiresolutionimageinterface ${PYTHON_LIBRARIES})
 	  ELSE(APPLE)
-	    swig_link_libraries(multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+	    swig_link_libraries(py_multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
 	  ENDIF(APPLE)
 
-	  target_include_directories(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
-	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES FOLDER multiresolutionimageinterface)
-	  set_target_properties(${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME} PROPERTIES DEBUG_POSTFIX _d)
+    target_include_directories(py_multiresolutionimageinterface   PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
+	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES FOLDER multiresolutionimageinterface)
+	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES OUTPUT_NAME multiresolutionimageinterface)
+ 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES ARCHIVE_OUTPUT_NAME _multiresolutionimageinterface)
+	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES DEBUG_POSTFIX _d)
 
     # Cross-platform copying and installing instructions
     IF(APPLE)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
-        install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
+        install(TARGETS py_multiresolutionimageinterface
         EXPORT asap-targets
           RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
           LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}
@@ -182,13 +184,13 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
     ELSE(APPLE)
 	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION bin)
 
-        install(TARGETS ${SWIG_MODULE_multiresolutionimageinterface_REAL_NAME}
+        install(TARGETSpy_multiresolutionimageinterface
         EXPORT asap-targets
           RUNTIME DESTINATION bin
           LIBRARY DESTINATION bin
           ARCHIVE DESTINATION lib
         )
-      ENDIF(APPLE)
+    ENDIF(APPLE)
 	endif(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON AND SWIG_FOUND)  
 endif(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 

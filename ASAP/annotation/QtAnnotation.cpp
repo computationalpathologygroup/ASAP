@@ -5,6 +5,7 @@
 using namespace std;
 
 float QtAnnotation::selectionSensitivity = 100.;
+bool QtAnnotation::annotationColorForRects = true;
 
 QtAnnotation::QtAnnotation(const std::shared_ptr<Annotation>& annotation, QObject* parent, float scale) :
 QGraphicsItem(),

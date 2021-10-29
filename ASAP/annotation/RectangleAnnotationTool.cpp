@@ -90,6 +90,7 @@ void RectangleAnnotationTool::keyPressEvent(QKeyEvent *event) {
     if (!_generating && _annotationPlugin->getActiveAnnotation()) {
       if (_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() <= 2) {
         _annotationPlugin->deleteAnnotation(_annotationPlugin->getActiveAnnotation());
+        event->accept();
       }
     }
   }

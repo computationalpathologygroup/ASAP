@@ -114,6 +114,7 @@ public :
   virtual QDockWidget* getDockWidget() { return NULL; }
   virtual bool canClose() { return true; }
   virtual std::vector<std::shared_ptr<ToolPluginInterface> > getTools() { return std::vector<std::shared_ptr<ToolPluginInterface> >(); }
+  virtual void keyPressEvent(QKeyEvent* event) { event->ignore(); };
 
 protected:
   QPointer<PathologyViewer> _viewer;

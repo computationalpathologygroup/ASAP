@@ -145,7 +145,7 @@ inline unsigned int applyLUT(const float& val, const pathology::LUT& LUT) {
       currentColor[2] = std::get<2>(rgb_interp) * 255;
       currentColor[3] = rgba_prev[3] * (1 - val_normalized) + rgba_next[3] * val_normalized;
     }
-  float* currentColorBuffer = currentColor.data();  
+  float* currentColorBuffer = currentColor.data();
   return qRgba(*currentColorBuffer, *(currentColorBuffer + 1), *(currentColorBuffer + 2), *(currentColorBuffer + 3));
 }
 
@@ -162,7 +162,13 @@ QImage convertMonochromeToRGB(T* data, unsigned int width, unsigned int height, 
     T pixelValue = data[i];
     auto it = valToQrgb.find(pixelValue);
     if (it == valToQrgb.end()) {
-      QRgb colorForVal = applyLUT(pixelValue, LUT);
+        QRgb colorForVal;
+        if (LUT.relative) {
+            colorForVal = applyLUT((pixelValue - channelMin) / (channelMax - channelMin), LUT);
+        }
+        else {
+            colorForVal = applyLUT(pixelValue, LUT);
+        }
       pixels[j] = colorForVal;
       valToQrgb[pixelValue] = colorForVal;
     }

@@ -61,15 +61,12 @@ for:
   matrix:
     only:
       - image: Visual Studio 2019      
-  
-  services:
-    - docker
 
   before_build:
   - cmd: set python_location=C:/Python%python_version_no_dot%-x64
   - cmd: set python_library=python%python_version_no_dot%.lib
   - cmd: set python_pip=C:\Python%python_version_no_dot%-x64\Scripts\pip
-  - cmd: set artefact_name=ASAP-1.9-py%python_version_no_dot%-win64.exe
+  - cmd: set artefact_name=ASAP-2.0-py%python_version_no_dot%-win64.exe
   - ps: >-
       If (!(Test-Path -Path 'C:\projects\pugixml')) {
         git clone https://github.com/zeux/pugixml c:\projects\pugixml
@@ -99,11 +96,11 @@ for:
       } 
 
   build_script:
-    - cmd: cmake -B ./ASAP_build -DBOOST_ROOT=C:/Libraries/boost_1_71_0 -DJPEG_INCLUDE_DIR=C:\projects\openslide\artefacts\include -DJPEG_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DJPEG_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DOpenJPEG_DIR=c:/projects/openslide/artefacts/lib/openjpeg-2.3 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide/lib/libopenslide.lib -DDCMTKJPEG_INCLUDE_DIR=C:/Code/thirdparty/dcmtk-3.6.5-win64-dynamic/install/include -DDCMTKJPEG_LIBRARY=C:/Code/thirdparty/dcmtk-3.6.5-win64-dynamic/install/lib/ijg8.lib -DTIFF_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DTIFF_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DTIFF_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DZLIB_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DZLIB_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libz.dll.a -DZLIB_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libz.dll.a -DPugiXML_INCLUDE_DIR=c:/projects/pugixml/src -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt5_DIR=C:/Qt/5.14.2/msvc2017_64/lib/cmake/Qt5 -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPYTHON_DEBUG_LIBRARY=%python_location%/libs/%python_library% -DPYTHON_LIBRARY=%python_location%/libs//%python_library% -DPYTHON_LIBRARY_DEBUG=%python_location%/libs//%python_library% -DPYTHON_INCLUDE_DIR=%python_location%/include -DPYTHON_EXECUTABLE=%python_location%/python.exe -DPYTHON_NUMPY_INCLUDE_DIR=%python_location%/Lib/site-packages/numpy/core/include -DDCMTKJPEG_INCLUDE_DIR=C:/projects/other_dependencies/dcmtk-libjpeg/include -DDCMTKJPEG_LIBRARY=C:/projects/other_dependencies/dcmtk-libjpeg/lib/ijg8.lib -DSWIG_EXECUTABLE=c:/projects/swig/swigwin-4.0.1/swig.exe
+    - cmd: cmake -B ./ASAP_build -DBoost_INCLUDE_DIR=C:/Libraries/boost_1_73_0 -DJPEG_INCLUDE_DIR=C:\projects\openslide\artefacts\include -DJPEG_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DJPEG_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DOpenJPEG_DIR=c:/projects/openslide/artefacts/lib/openjpeg-2.3 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide/lib/libopenslide.lib -DDCMTKJPEG_INCLUDE_DIR=C:/Code/thirdparty/dcmtk-3.6.5-win64-dynamic/install/include -DDCMTKJPEG_LIBRARY=C:/Code/thirdparty/dcmtk-3.6.5-win64-dynamic/install/lib/ijg8.lib -DTIFF_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DTIFF_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DTIFF_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DZLIB_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DZLIB_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libz.dll.a -DZLIB_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libz.dll.a -DPugiXML_INCLUDE_DIR=c:/projects/pugixml/src -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt5_DIR=C:/Qt/5.14.2/msvc2017_64/lib/cmake/Qt5 -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPYTHON_DEBUG_LIBRARY=%python_location%/libs/%python_library% -DPYTHON_LIBRARY=%python_location%/libs//%python_library% -DPYTHON_LIBRARY_DEBUG=%python_location%/libs//%python_library% -DPYTHON_INCLUDE_DIR=%python_location%/include -DPYTHON_EXECUTABLE=%python_location%/python.exe -DPYTHON_NUMPY_INCLUDE_DIR=%python_location%/Lib/site-packages/numpy/core/include -DDCMTKJPEG_INCLUDE_DIR=C:/projects/other_dependencies/dcmtk-libjpeg/include -DDCMTKJPEG_LIBRARY=C:/projects/other_dependencies/dcmtk-libjpeg/lib/ijg8.lib -DSWIG_EXECUTABLE=c:/projects/swig/swigwin-4.0.1/swig.exe
     - cmd: cd ./ASAP_build
     - cmd: cmake --build . --config Release
     - cmd: cpack
-    - ps: mv ASAP-1.9-win64.exe $env:artefact_name
+    - ps: mv ASAP-2.0-win64.exe $env:artefact_name
 
   cache:
     - C:\tools\opencv -> appveyor.yml
@@ -118,16 +115,27 @@ for:
       name: ASAP_Installer
       
   deploy:
-    release: ASAP $(asap_major_version).$(asap_minor_version)
-    provider: GitHub
-    auth_token:
-      secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
-    artifact: ASAP_Installer
-    draft: true
-    force_update: true
-    on:
-      branch: develop                # release from master branch only
-      APPVEYOR_REPO_TAG: false       # deploy on tag push only
+    - provider: GitHub
+      release: ASAP $(asap_major_version).$(asap_minor_version) (Nightly)
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_Installer
+      draft: false
+      force_update: true
+      on:
+        branch: develop
+        APPVEYOR_REPO_TAG: false
+
+    - provider: GitHub
+      release: ASAP $(asap_major_version).$(asap_minor_version)
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_Installer
+      draft: false
+      force_update: true
+      on:
+        branch: master                 # release from master branch only
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only
       
 - 
   matrix:
@@ -147,16 +155,27 @@ for:
       name: ASAP_DEB_Package
 
   deploy:
-    release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
-    provider: GitHub
-    auth_token:
-      secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
-    artifact: ASAP_DEB_Package
-    draft: true
-    force_update: true
-    on:
-      branch: develop                # release from master branch only
-      APPVEYOR_REPO_TAG: false       # deploy on tag push only
+    - provider: GitHub
+      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION (Nightly)    
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_DEB_Package
+      draft: false
+      force_update: true
+      on:
+        branch: develop
+        APPVEYOR_REPO_TAG: false       # deploy on tag push only
+
+    - provider: GitHub
+      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_DEB_Package
+      draft: true
+      force_update: true
+      on:
+        branch: master                 # release from master branch only
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only       
 - 
   matrix:
     only:
@@ -175,8 +194,8 @@ for:
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
     # Python 3.8
     - sh: source ~/venv3.8/bin/activate
-    - sh: pip install numpy
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.6/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.6/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.6/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8.6/lib/python3.8/site-packages/numpy/core/include
+    - sh: pip install numpy==1.19
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.6/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.6/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.6/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8.6/lib/python3.8/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
@@ -187,8 +206,8 @@ for:
     - sh: rm -rf ASAP.app
     # Python 3.7
     - sh: source ~/venv3.7/bin/activate
-    - sh: pip install numpy
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.7.9/bin/python3.7 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.7.9/include/python3.7m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.7.9/lib/libpython3.7.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.7.9/lib/python3.7/site-packages/numpy/core/include
+    - sh: pip install numpy==1.19
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.7.9/bin/python3.7 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.7.9/include/python3.7m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.7.9/lib/libpython3.7.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.7.9/lib/python3.7/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/
     - sh: cp **/*.dylib /usr/local/lib/
@@ -200,7 +219,7 @@ for:
     # Python 3.6
     - sh: source ~/venv3.6/bin/activate
     - sh: pip install numpy
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.6.12/bin/python3.6 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.6.12/include/python3.6m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.6.12/lib/libpython3.6.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.6.12/lib/python3.6/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.6.12/bin/python3.6 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.6.12/include/python3.6m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.6.12/lib/libpython3.6.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.6.12/lib/python3.6/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/
     - sh: cp **/*.dylib /usr/local/lib/
@@ -218,15 +237,24 @@ for:
       name: ASAP_APP_PYTHON36_Package
 
   deploy:
-    release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
-    provider: GitHub
-    auth_token:
-      secure: Fq/WNXe04AnoRErSs2T4E4TV/r7NWL6f1w0CC0mspy+vmp8OpIy+5wUBYIEm3Pb3
-    artifact: ASAP_APP_PYTHON38_Package
-    draft: true
-    force_update: true
-    on:
-      branch: develop                # release from master branch only
-      APPVEYOR_REPO_TAG: false       # deploy on tag push only
+    - provider: GitHub
+      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_APP_PYTHON36_Package,ASAP_APP_PYTHON37_Package,ASAP_APP_PYTHON38_Package
+      draft: false
+      force_update: true
+      on:
+        branch: develop                # release from master branch only
+        APPVEYOR_REPO_TAG: false       # deploy on tag push only
 
-
+    - provider: GitHub
+      release: ASAP $(asap_major_version).$(asap_minor_version)
+      auth_token:
+        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+      artifact: ASAP_APP_PYTHON36_Package,ASAP_APP_PYTHON37_Package,ASAP_APP_PYTHON38_Package
+      draft: false
+      force_update: true
+      on:
+        branch: master                 # release from master branch only
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only

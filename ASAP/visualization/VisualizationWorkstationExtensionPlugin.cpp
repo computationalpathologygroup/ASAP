@@ -60,6 +60,7 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   }
   else {
     _colorLookupTables = pathology::DefaultColorLookupTables;
+    _colorLookupTables.erase("Background");
   }
   _settings->endArray();
   _settings->endGroup();
@@ -304,6 +305,7 @@ void VisualizationWorkstationExtensionPlugin::resetAllLUTs() {
   QMessageBox::StandardButton reply = QMessageBox::question(_LUTEditor, "Reset all LUTs", "Are you sure you want to reset all LUTs to the default? You might lose custom LUTs.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
   if (reply == QMessageBox::Yes) {
     _colorLookupTables = pathology::DefaultColorLookupTables;
+    _colorLookupTables.erase("Background");
     QComboBox* LUTBox = _dockWidget->findChild<QComboBox*>("LUTComboBox");
     QComboBox* LUTEditorBox = _LUTEditor->findChild<QComboBox*>("LUTListComboBox");
     LUTBox->blockSignals(true);

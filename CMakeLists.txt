@@ -1,16 +1,8 @@
-cmake_minimum_required(VERSION 2.8.9)
-cmake_policy(SET CMP0020 NEW)
-cmake_policy(SET CMP0043 NEW)
-cmake_policy(SET CMP0053 NEW)
-cmake_policy(SET CMP0071 NEW)
-if(${CMAKE_VERSION} VERSION_GREATER "3.12.0") 
-cmake_policy(SET CMP0078 OLD)
-cmake_policy(SET CMP0086 NEW)
-endif()
+cmake_minimum_required(VERSION 3.15.0)
 project(DIAGPathology)
 
-set(CURRENT_MAJOR_VERSION 1)
-set(CURRENT_MINOR_VERSION 9)
+set(CURRENT_MAJOR_VERSION 2)
+set(CURRENT_MINOR_VERSION 0)
 set(CURRENT_PATCH_VERSION 0)
 set(ASAP_VERSION ${CURRENT_MAJOR_VERSION}.${CURRENT_MINOR_VERSION}.${CURRENT_PATCH_VERSION})
 
@@ -29,7 +21,7 @@ if(NOT WIN32)
 	set(CMAKE_MACOSX_RPATH TRUE)
 ENDIF(NOT WIN32)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 # Set compile definitions to ignore some warnings
 if(WIN32)
