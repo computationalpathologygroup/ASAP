@@ -195,7 +195,7 @@ for:
     # Python 3.8
     - sh: source ~/venv3.8/bin/activate
     - sh: pip install numpy==1.19
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.6/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.6/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.6/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8.6/lib/python3.8/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2_1/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.6/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.6/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.6/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8.6/lib/python3.8/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
@@ -207,7 +207,7 @@ for:
     # Python 3.7
     - sh: source ~/venv3.7/bin/activate
     - sh: pip install numpy==1.19
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.7.9/bin/python3.7 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.7.9/include/python3.7m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.7.9/lib/libpython3.7.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.7.9/lib/python3.7/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2_1/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.7.9/bin/python3.7 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.7.9/include/python3.7m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.7.9/lib/libpython3.7.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.7.9/lib/python3.7/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/
     - sh: cp **/*.dylib /usr/local/lib/
@@ -219,7 +219,7 @@ for:
     # Python 3.6
     - sh: source ~/venv3.6/bin/activate
     - sh: pip install numpy
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.6.12/bin/python3.6 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.6.12/include/python3.6m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.6.12/lib/libpython3.6.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.6.12/lib/python3.6/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.2_1/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.6.12/bin/python3.6 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.6.12/include/python3.6m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.6.12/lib/libpython3.6.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.6.12/lib/python3.6/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/
     - sh: cp **/*.dylib /usr/local/lib/
