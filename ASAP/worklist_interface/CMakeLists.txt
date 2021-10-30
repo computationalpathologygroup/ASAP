@@ -81,7 +81,7 @@ if (BUILD_WORKLIST_INTERFACE)
 		set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
 		set(INSTALL_CMAKE_DIR "${prefix}/Resources")
 		set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
-		add_executable(ASAP_browser MACOSX_BUNDLE ASAP_browser.cpp ASAP_browser.rc ${GROUP_DATA} ${GROUP_GUI} ${GROUP_MISC} ${GROUP_MODELS} ${GROUP_GRANDCHALLENGESUPPORT} ${WORKLIST_RESOURCE_ADDED} ${DIAGPathology_SOURCE_DIR}/ASAP/icon.icns)
+		add_executable(ASAP_browser ASAP_browser.cpp ASAP_browser.rc ${GROUP_DATA} ${GROUP_GUI} ${GROUP_MISC} ${GROUP_MODELS} ${GROUP_GRANDCHALLENGESUPPORT} ${WORKLIST_RESOURCE_ADDED} ${DIAGPathology_SOURCE_DIR}/ASAP/icon.icns)
 	ELSE(APPLE)
 		ADD_EXECUTABLE(ASAP_browser 
 			ASAP_browser.cpp
