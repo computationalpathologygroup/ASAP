@@ -201,11 +201,8 @@ for:
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
-    - sh: sudo make install
-    - sh: sudo mv /usr/local/ASAP.app .
-    - sh: sudo chmod -R 777 ASAP.app
-    - sh: zip -r ASAP_py38.app.zip ASAP.app
-    - sh: rm -rf ASAP.app
+    - sh: sudo make package
+    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py38-Darwin.dmg
     # Python 3.7
     - sh: source ~/venv3.7/bin/activate
     - sh: pip install numpy==1.19
@@ -213,11 +210,8 @@ for:
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/
     - sh: cp **/*.dylib /usr/local/lib/
-    - sh: sudo make install
-    - sh: sudo mv /usr/local/ASAP.app .
-    - sh: sudo chmod -R 777 ASAP.app
-    - sh: zip -r ASAP_py37.app.zip ASAP.app
-    - sh: rm -rf ASAP.app
+    - sh: sudo make package
+    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py37-Darwin.dmg
     # Python 3.6
     - sh: source ~/venv3.6/bin/activate
     - sh: pip install numpy
@@ -225,18 +219,15 @@ for:
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/
     - sh: cp **/*.dylib /usr/local/lib/
-    - sh: sudo make install
-    - sh: sudo make package 
-    - sh: sudo mv /usr/local/ASAP.app .
-    - sh: sudo chmod -R 777 ASAP.app
-    - sh: zip -r ASAP_py36.app.zip ASAP.app
+    - sh: sudo make package
+    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py36-Darwin.dmg
 
   artifacts:
-    - path: ASAP_py38.app.zip
+    - path: /Users/appveyor/projects/asap/ASAP-2.0-py38-Darwin.dmg
       name: ASAP_APP_PYTHON38_Package
-    - path: ASAP_py37.app.zip
+    - path: /Users/appveyor/projects/asap/ASAP-2.0-py37-Darwin.dmg
       name: ASAP_APP_PYTHON37_Package
-    - path: ASAP_py36.app.zip
+    - path: /Users/appveyor/projects/asap/ASAP-2.0-py36-Darwin.dmg
       name: ASAP_APP_PYTHON36_Package
 
   deploy:
