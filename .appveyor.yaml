@@ -181,9 +181,6 @@ for:
     only:
       - image: macOS
 
-  cache:
-    - /Users/appveyor/Library/Caches/Homebrew -> .appveyor.yaml
-
   build_script:
     - sh: brew install boost openslide opencv swig qt5
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
@@ -223,11 +220,11 @@ for:
     - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py36-Darwin.dmg
 
   artifacts:
-    - path: /Users/appveyor/projects/asap/ASAP-2.0-py38-Darwin.dmg
+    - path: ASAP-2.0-py38-Darwin.dmg
       name: ASAP_APP_PYTHON38_Package
-    - path: /Users/appveyor/projects/asap/ASAP-2.0-py37-Darwin.dmg
+    - path: ASAP-2.0-py37-Darwin.dmg
       name: ASAP_APP_PYTHON37_Package
-    - path: /Users/appveyor/projects/asap/ASAP-2.0-py36-Darwin.dmg
+    - path: ASAP-2.0-py36-Darwin.dmg
       name: ASAP_APP_PYTHON36_Package
 
   deploy:
