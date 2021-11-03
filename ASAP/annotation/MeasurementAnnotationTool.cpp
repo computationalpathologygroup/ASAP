@@ -133,9 +133,10 @@ void MeasurementAnnotationTool::addCoordinate(const QPointF& scenePos) {
 
 QAction* MeasurementAnnotationTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("MeasurementAnnotation", this);
+    _button = new QAction("&MeasurementAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/measure.png")));
+    _button->setShortcut(QKeySequence("m"));
   }
   return _button;
 }

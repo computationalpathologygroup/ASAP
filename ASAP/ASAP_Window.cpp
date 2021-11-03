@@ -89,12 +89,6 @@ void ASAP_Window::writeSettings()
   _settings->endGroup();
 }
 
-void ASAP_Window::keyPressEvent(QKeyEvent* event)
-{
-    std::cout << "Event accepted" << std::endl;
-    event->accept();
-}
-
 void ASAP_Window::readSettings()
 {
   _settings->beginGroup("ASAP");
@@ -195,6 +189,15 @@ void ASAP_Window::loadPlugins() {
       }
     }
   }
+}
+
+
+void ASAP_Window::keyPressEvent(QKeyEvent* event)
+{
+    event->ignore();
+    for (auto const& extension : _extensions) {
+        extension->keyPressEvent(event);
+    }
 }
 
 void ASAP_Window::closeEvent(QCloseEvent *event) {

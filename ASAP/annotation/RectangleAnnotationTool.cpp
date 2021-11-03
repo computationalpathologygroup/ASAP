@@ -204,9 +204,10 @@ void RectangleAnnotationTool::addCoordinate(const QPointF& scenePos) {
 
 QAction* RectangleAnnotationTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("RectangleAnnotation", this);
+    _button = new QAction("&RectangleAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/rectangle.png")));
+    _button->setShortcut(QKeySequence("r"));
   }
   return _button;
 }

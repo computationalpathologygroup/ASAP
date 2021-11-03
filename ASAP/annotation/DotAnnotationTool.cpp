@@ -23,9 +23,10 @@ void DotAnnotationTool::mousePressEvent(QMouseEvent *event) {
 
 QAction* DotAnnotationTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("DotAnnotation", this);
+    _button = new QAction("&DotAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/dot.png")));
+    _button->setShortcut(QKeySequence("d"));
   }
   return _button;
 }

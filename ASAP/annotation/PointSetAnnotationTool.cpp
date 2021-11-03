@@ -32,6 +32,7 @@ QAction* PointSetAnnotationTool::getToolButton() {
     _button = new QAction("PointSetAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/pointset.png")));
+    _button->setShortcut(QKeySequence("i"));
   }
   return _button;
 }
