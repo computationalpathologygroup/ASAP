@@ -1,6 +1,4 @@
 #include "MultiResolutionImage.h"
-#include <mutex>
-#include <shared_mutex>
 #include <cmath>
 
 using namespace pathology;

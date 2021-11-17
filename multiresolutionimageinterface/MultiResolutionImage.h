@@ -2,16 +2,13 @@
 #define _MultiResolutionImage
 #include <string>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include "multiresolutionimageinterface_export.h"
 #include "TileCache.h"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
-
-namespace std {
-  class mutex;
-  class shared_mutex;
-}
 
 class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage : public ImageSource {
 
