@@ -28,13 +28,6 @@ namespace core {
     return s;
   }
 
-/////////////////////
-// Splits s into pieces, separated with split.
-  void CORE_EXPORT split(
-    const std::string &s,
-    std::vector<std::string> &vs,
-    const std::string &split);
-
 //////////
 // Converts a string to a vector of type T, separated at sep
   template <typename T> inline
@@ -173,14 +166,9 @@ namespace core {
 
   void CORE_EXPORT trim(std::string &s);
 
-////////////////////
-// Replace all occurrences of olds with news in s. Returns true iff
-// any replacements have been made.
-  bool CORE_EXPORT replaceAll(
-    std::string &s,
-    const std::string &olds,
-    const std::string &news
-  );
+  void CORE_EXPORT replaceAll(std::string& s, const std::string& item, const std::string& replacement);
+
+  std::vector<std::string> CORE_EXPORT split(const std::string& input, const std::string& regex);
 
   //escape 
   void CORE_EXPORT escape(std::string &str, char toEscape);

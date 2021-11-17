@@ -118,18 +118,15 @@ namespace ASAP
 		std::string location(source);
 		std::unordered_map<std::string, std::string> parameters;
 
-		std::vector<std::string> source_elements;
-		core::split(source, source_elements, "&");
+		std::vector<std::string> source_elements = core::split(source, "&");
 		if (source_elements.size() > 0)
 		{
-			location = source_elements[0];
-			std::vector<std::string> keyValueList;
-			core::split(source_elements[1], keyValueList, "|");
+			location = source_elements[0];			
+			std::vector<std::string> keyValueList = core::split(source_elements[1], "|");
 			if (!keyValueList.empty()) {
 				for (size_t parameter = 0; parameter < keyValueList.size(); ++parameter)
-				{
-					std::vector<std::string> key_value;
-					core::split(keyValueList[parameter], key_value, "=");
+				{					
+					std::vector<std::string> key_value = core::split(keyValueList[parameter], "=");
 					if (key_value.size() > 1) {
 						parameters.insert({ key_value[0], key_value[1] });
 					}

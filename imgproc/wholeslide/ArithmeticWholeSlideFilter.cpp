@@ -78,8 +78,7 @@ bool ArithmeticWholeSlideFilter::process() {
   writer.writeImageInformation(dims[0], dims[1]);
 
   std::vector<unsigned char> labels;
-  std::vector<std::string> stringLabels;
-  core::split(_expression, stringLabels, ",");
+  std::vector<std::string> stringLabels = core::split(_expression, ",");
   labels.resize(core::fromstring<unsigned int>(stringLabels.back()), 0);
   for (unsigned int i = 0; i < stringLabels.size() - 1; ++i) {
     labels[core::fromstring<unsigned int>(stringLabels[i])] = 1;

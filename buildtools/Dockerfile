@@ -5,7 +5,8 @@ FROM ubuntu:${UBUNTU_VERSION}
 ENV TZ=Europe/Amsterdam
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update \
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test \
+    && apt-get update \
     && apt-get install -y -qq --no-install-recommends \
         cmake \
         dpkg-dev \
@@ -27,7 +28,10 @@ RUN apt-get update \
         ca-certificates \
         nano \
         software-properties-common \
-        lsb-release
+        lsb-release \
+    && apt-get install -y -qq --no-install-recommends \
+        g++-10 \
+        gcc-10
 
 # Ensure latest version of CMake
 RUN apt purge -y --auto-remove cmake 

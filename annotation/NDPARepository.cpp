@@ -5,6 +5,7 @@
 #include "multiresolutionimageinterface/MultiResolutionImageReader.h"
 #include "multiresolutionimageinterface/MultiResolutionImage.h"
 #include "core/Point.h"
+#include "core/stringconversion.h"
 #include "core/filetools.h"
 #include <vector>
 #include <string>
@@ -40,8 +41,7 @@ bool NDPARepository::loadFromRepo()
 
   std::shared_ptr<MultiResolutionImage> ndpi;
   if (_ndpiSourceFile.empty()) {
-    std::vector<std::string> ndpaParts;
-    core::split(_source, ndpaParts, ".ndpa");
+    std::vector<std::string> ndpaParts = core::split(_source, ".ndpa");
     if (core::fileExists(ndpaParts[0])) {
       MultiResolutionImageReader reader;
       ndpi.reset(reader.open(ndpaParts[0]));

@@ -2,6 +2,7 @@
 
 #include "stringconversion.h"
 #include <codecvt>
+#include <regex>
 
 namespace core {
     
@@ -63,40 +64,21 @@ void trim(std::string &s)
   if (pos2 > pos1) s = std::string(s.begin() + pos1, s.begin() + pos2);
 }
 
-bool replaceAll(std::string &s, const std::string &olds, const std::string &news)
-{
-  bool replaced = false;
-  size_t oldpos = 0, pos;
-  while (oldpos < s.length())
-  {
-    pos = s.find(olds, oldpos);
-    if (pos != std::string::npos)
-    {
-      replaced = true;
-      s = std::string(s.begin(), s.begin() + pos) +
-          news +
-          std::string(s.begin() + pos + olds.length(), s.end());
-      oldpos = pos + news.length();
+void replaceAll(std::string& s, const std::string& item, const std::string& replacement) {
+    size_t pos = 0;
+    while ((pos = s.find(item, pos)) != std::string::npos) {
+        s.replace(pos, item.size(), replacement);
+        pos += replacement.size();
     }
-    else oldpos = s.length();
-  }
-  return replaced;
 }
 
-void split(const std::string &s, std::vector<std::string> &vs, const std::string &split)
-{
-  vs.clear();
-  size_t i1, i2;
-  i1 = 0;
-  do
-  {
-    i2 = s.find(split, i1);
-    if (i2 == std::string::npos) i2 = s.size();
-    //string p(s.begin()+i1,s.begin()+i2);
-    vs.push_back(s.substr(i1, i2 - i1));
-    i1 = i2 + split.size();
-  }
-  while (i2 != s.size());
+std::vector<std::string> split(const std::string& input, const std::string& regex) {
+    // passing -1 as the submatch index parameter performs splitting
+    std::regex re(regex);
+    std::sregex_token_iterator
+        first{ input.begin(), input.end(), re, -1 },
+        last;
+    return { first, last };
 }
 
 //use HTML style escaping

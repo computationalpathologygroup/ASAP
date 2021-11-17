@@ -9,6 +9,7 @@
 #pragma hdrstop
 
 #include "filetools.h"
+#include "stringconversion.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -23,7 +24,7 @@ const std::string dirsep("\\");
 #else
 #include <unistd.h>
 const std::string dirsep("/");
-#define MAX_PATH PATH_MAX
+#define MAX_PATH 4096
 #endif
 
 #include <stdio.h>
@@ -39,23 +40,6 @@ namespace fs = std::filesystem;
 
 namespace core
 {
-
-    void replaceAll(std::string& s, const std::string& item, const std::string& replacement) {
-        size_t pos = 0;
-        while ((pos = s.find(item, pos)) != std::string::npos) {
-            s.replace(pos, item.size(), replacement);
-            pos += replacement.size();
-        }
-    }
-
-    std::vector<std::string> split(const std::string& input, const std::string& regex) {
-        // passing -1 as the submatch index parameter performs splitting
-        std::regex re(regex);
-        std::sregex_token_iterator
-            first{ input.begin(), input.end(), re, -1 },
-            last;
-        return { first, last };
-    }
 
   bool fileExists(const std::string &name)
   {

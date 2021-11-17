@@ -320,9 +320,8 @@ namespace ASAP
 		{
 			QVariantList worklist_variants(worklist_item->data().toList());
 			std::string worklist_id(worklist_variants[0].toString().toStdString());
-			std::set<std::string> worklist_images;
-			std::vector<std::string> imageIds;
-			core::split(worklist_variants[1].toString().toStdString(), imageIds, ",");
+			std::set<std::string> worklist_images;			
+			std::vector<std::string> imageIds = core::split(worklist_variants[1].toString().toStdString(), ",");
 			for (const std::string& image_id : imageIds)
 			{
 				worklist_images.insert(image_id);
