@@ -1,5 +1,5 @@
 set(CORE_SRC filetools.cpp PathologyEnums.cpp ImageSource.cpp Patch.hpp Box.cpp Point.cpp ProgressMonitor.cpp CmdLineProgressMonitor.cpp stringconversion.cpp)
-set(CORE_HEADERS filetools.h PathologyEnums.h ImageSource.h Patch.h Patch.hpp Box.h Point.h ProgressMonitor.h CmdLineProgressMonitor.h stringconversion.h)
+set(CORE_HEADERS filetools.h PathologyEnums.h ImageSource.h Patch.h Patch.hpp Box.h Point.h ProgressDisplay.hpp ProgressMonitor.h CmdLineProgressMonitor.h stringconversion.h)
 
 add_library(core SHARED ${CORE_SRC} ${CORE_HEADERS})
 generate_export_header(core)

@@ -17,7 +17,6 @@ RUN apt-get update \
         qttools5-dev \
         libqt5opengl5-dev \
         git \
-        libboost-all-dev \
         libopencv-dev \
         libdcmtk-dev \
         libopenjp2-7-dev \

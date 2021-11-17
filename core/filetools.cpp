@@ -21,6 +21,7 @@ const std::string dirsep("\\");
 // Note: we now need Windows 2000 or above
 #include <windows.h>
 #else
+#include <unistd.h>
 const std::string dirsep("/");
 #define MAX_PATH PATH_MAX
 #endif
