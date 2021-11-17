@@ -36,8 +36,7 @@ namespace core {
     std::vector<T> result;
 
     //Split string
-    std::vector<std::string> vs;
-    split(s, vs, sep);
+    std::vector<std::string> vs = split(s, sep);
 
     size_t size = vs.size();
     result.resize(size);
