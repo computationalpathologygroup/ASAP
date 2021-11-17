@@ -6,10 +6,10 @@
 
 namespace ASAP
 {
-	boost::filesystem::path httpFileDownload(const web::http::http_response& response, const boost::filesystem::path& output_directory, std::string output_file, std::function<void(uint8_t)> observer)
+	fs::path httpFileDownload(const web::http::http_response& response, const fs::path& output_directory, std::string output_file, std::function<void(uint8_t)> observer)
 	{
 		// Fails if the path doesn't point towards a directory.
-		if (!boost::filesystem::is_directory(output_directory))
+		if (!fs::is_directory(output_directory))
 		{
 			// Replace with filesystem error once it has been moved out of experimental
 			throw std::runtime_error("Defined directory isn't avaible or not a directory.");
@@ -21,7 +21,7 @@ namespace ASAP
 		if (response.status_code() == web::http::status_codes::OK && content_length != headers.end())
 		{
 			// Appends the filename to the output directory.
-			boost::filesystem::path output_file(output_directory / boost::filesystem::path(output_file));
+			fs::path output_file(output_directory / fs::path(output_file));
 				
 			// Checks if the file has already been downloaded.
 			size_t length(std::stoi(content_length->second));
@@ -50,7 +50,7 @@ namespace ASAP
 
 					if (fileHasCorrectSize(output_file, length))
 					{
-						return boost::filesystem::absolute(output_file);
+						return fs::absolute(output_file);
 					}
 					throw std::runtime_error("Unable to complete download.");
 				}
@@ -60,31 +60,31 @@ namespace ASAP
 			}
 			// File has already been downloaded.
 			{
-				return boost::filesystem::absolute(output_file);
+				return fs::absolute(output_file);
 			}
 		}
 		throw std::invalid_argument("HTTP Response contains no attachment.");
 	}
 
-		bool fileHasCorrectSize(const boost::filesystem::path& filepath, size_t size)
+		bool fileHasCorrectSize(const fs::path& filepath, size_t size)
 		{
-			return boost::filesystem::exists(filepath) && boost::filesystem::file_size(filepath) == size;
+			return fs::exists(filepath) && fs::file_size(filepath) == size;
 		}
 
-		bool fileIsUnique(const boost::filesystem::path& filepath, size_t size)
+		bool fileIsUnique(const fs::path& filepath, size_t size)
 		{
-			if (boost::filesystem::exists(filepath) && boost::filesystem::file_size(filepath) == size)
+			if (fs::exists(filepath) && fs::file_size(filepath) == size)
 			{
 				return false;
 			}
 			return true;
 		}
 
-		void fixFilepath(boost::filesystem::path& filepath)
+		void fixFilepath(fs::path& filepath)
 		{
-			while (boost::filesystem::exists(filepath))
+			while (fs::exists(filepath))
 			{
-				std::string filename = filepath.leaf().string();
+				std::string filename = filepath.filename().string();
 
 				size_t version			= 1;
 				size_t version_location = filename.find('(');
@@ -107,7 +107,7 @@ namespace ASAP
 					new_filename = filename + "(" + std::to_string(version) + ")";
 				}
 				
-				filepath.remove_leaf() /= new_filename;
+				filepath.remove_filename() /= new_filename;
 			}
 		}
 

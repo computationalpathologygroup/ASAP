@@ -25,38 +25,44 @@ const std::string dirsep("/");
 #define MAX_PATH PATH_MAX
 #endif
 
-#define BOOST_FILESYSTEM_VERSION 3
-
-#include "stringconversion.h"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/convenience.hpp"
-#include "boost/version.hpp"
-#include "boost/regex.hpp"
 #include <stdio.h>
 #include <fcntl.h>
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
+#include <filesystem>
+#include <regex>
+#include <algorithm>
 
-using namespace boost::filesystem;
-using namespace std;
+namespace fs = std::filesystem;
 
 namespace core
 {
 
-// Implementation of these function uses boost filesystem library
-// when possible. The reason for providing these functions is that
-// it is easier to remember such convenience functions than the syntax
-// of the Boost filesystem library.
+    void replaceAll(std::string& s, const std::string& item, const std::string& replacement) {
+        size_t pos = 0;
+        while ((pos = s.find(item, pos)) != std::string::npos) {
+            s.replace(pos, item.size(), replacement);
+            pos += replacement.size();
+        }
+    }
+
+    std::vector<std::string> split(const std::string& input, const std::string& regex) {
+        // passing -1 as the submatch index parameter performs splitting
+        std::regex re(regex);
+        std::sregex_token_iterator
+            first{ input.begin(), input.end(), re, -1 },
+            last;
+        return { first, last };
+    }
 
   bool fileExists(const std::string &name)
   {
     try
     {
-      path p(name);
-      if (!exists(p)) return false;
-      if (is_directory(p)) return false;
+      fs::path p(name);
+      if (!fs::exists(p)) return false;
+      if (fs::is_directory(p)) return false;
       return true;
     }
     catch ( ... )
@@ -71,10 +77,10 @@ namespace core
   {
     try
     {
-      path p(name);
-      bool ex = exists(p);
+      fs::path p(name);
+      bool ex = fs::exists(p);
       if (!ex) return false;
-      ex = is_directory(p);
+      ex = fs::is_directory(p);
       return ex;
     }
     catch ( ... )
@@ -88,15 +94,7 @@ namespace core
   long int fileSize(const std::string &name)
   {
     if (!fileExists(name)) return -1;
-	long int length = static_cast<long int>(file_size(name));
-	/*
-	FILE *handle = fopen(name.c_str(), "rb");
-
-	if (handle == NULL) return -1;
-	fseek(handle, 0, SEEK_END);
-	long int length = ftell(handle); //determine filelength
-	fclose(handle);
-	*/
+	long int length = static_cast<long int>(fs::file_size(name));
     return length;
   }
 //---------------------------------------------------------------------------
@@ -105,7 +103,7 @@ namespace core
     if (!fileExists(name)) return false;
     try
     {
-      remove(path(uniformSlashes(name)));
+      remove(fs::path(uniformSlashes(name)));
     }
     catch (...)
     {
@@ -114,81 +112,31 @@ namespace core
     return true;
   }
 
-  string uniformSlashes(const string &path)
+  std::string uniformSlashes(const std::string &path)
   {
-    string localpath = path;
+    std::string localpath = path;
 #ifdef WIN32
-    replace(localpath.begin(), localpath.end(), '/', '\\');
+    std::replace(localpath.begin(), localpath.end(), '/', '\\');
 #else
-    replace(localpath.begin(), localpath.end(), '\\', '/');
+    std::replace(localpath.begin(), localpath.end(), '\\', '/');
 #endif
     return localpath;
   }
-
-//---------------------------------------------------------------------------
-
-  /*
-    #ifdef WIN32
-    #include <windows.h>
-    #include <tchar.h>
-    #include <shellapi.h>
-
-    bool deleteDir(const std::string &name, bool deleteNonEmpty)
-    {
-      if (!dirExists(name)) return false;
-      if(!deleteNonEmpty)
-        if (!emptyDir(name)) return false;
-      return DeleteDirectory(path(name).string().c_str());
-    }
-
-    bool DeleteDirectory(LPCTSTR lpszDir, bool noRecycleBin)
-    {
-      int len = _tcslen(lpszDir);
-      TCHAR *pszFrom = new TCHAR[len+2];
-      _tcscpy(pszFrom, lpszDir);
-      pszFrom[len] = 0;
-      pszFrom[len+1] = 0;
-
-      SHFILEOPSTRUCT fileop;
-      fileop.hwnd   = NULL;    // no status display
-      fileop.wFunc  = FO_DELETE;  // delete operation
-      fileop.pFrom  = pszFrom;  // source file name as double null terminated string
-      fileop.pTo    = NULL;    // no destination needed
-      fileop.fFlags = FOF_NOCONFIRMATION | FOF_SILENT;  // do not prompt the user
-
-      if (!noRecycleBin)
-        fileop.fFlags |= FOF_ALLOWUNDO;
-
-      fileop.fAnyOperationsAborted = FALSE;
-      fileop.lpszProgressTitle     = NULL;
-      fileop.hNameMappings         = NULL;
-
-      int ret = SHFileOperation(&fileop);
-      delete [] pszFrom;
-      return (ret == 0);
-    }
-
-    #else
-  */
-
 
   bool deleteDir(const std::string &name, bool deleteNonEmpty)
   {
     if (!dirExists(name)) return false;
     if (!deleteNonEmpty)
       if (!emptyDir(name)) return false;
-    return 0 != remove_all(path(uniformSlashes(name)));
-//    return remove(path(name));
+    return 0 != fs::remove_all(fs::path(uniformSlashes(name)));
   }
-//#endif
-
 
 
 //---------------------------------------------------------------------------
   bool emptyDir(const std::string &name)
   {
     if (!dirExists(name)) return false;
-    return boost::filesystem::is_empty(path(name));
+    return fs::is_empty(fs::path(name));
   }
 
 //---------------------------------------------------------------------------
@@ -230,7 +178,7 @@ namespace core
       //now we can safely copy
       //create_file( path(target));
       //this trick is needed to prevent attributes from being copied
-      ifstream ifs(source.c_str());
+      std::ifstream ifs(source.c_str());
       std::ofstream ofs(target.c_str());
       ofs << ifs.rdbuf();
       ofs.close();
@@ -238,7 +186,7 @@ namespace core
     }
     else
     {
-      copy_file(path(source), path(target));
+        fs::copy_file(fs::path(source), fs::path(target));
     }
     return fileExists(target);
   }
@@ -301,15 +249,15 @@ namespace core
   bool renameFile(const std::string &source, const std::string &target)
   {
     //checks are inserted here, because rename may throw...
-    string s(source), t(target);
+    std::string s(source), t(target);
     cleanFileName(s);
     cleanFileName(t);
     if (!fileExists(s)) return false;
     if (fileExists(t)) return false;
-    string dir = extractFilePath(t);
+    std::string dir = extractFilePath(t);
     createDirectory(dir);
     //BvG: if target is on a different drive, source will also be deleted
-    rename(path(s), path(t));
+    rename(fs::path(s), fs::path(t));
     return fileExists(t);
   }
 
@@ -319,12 +267,12 @@ namespace core
     if (isRoot(name))
       return name;
 
-    string s(name);
+    std::string s(name);
     if (isOnlyDirectory(name))
       s = stripTrailingSlash(s);
 
-    path p(s);
-    return p.branch_path().string();
+    fs::path p(s);
+    return p.parent_path().string();
   }
 
   std::string upMultipleLevels(const std::string &name, unsigned int nrOfLevels)
@@ -332,94 +280,94 @@ namespace core
     if (isRoot(name))
       return name;
 
-    string s(name);
+    std::string s(name);
     if (isOnlyDirectory(name))
       s = stripTrailingSlash(s);
 
-    path p(s);
+    fs::path p(s);
     if (nrOfLevels == 1)
-      return p.branch_path().string();
+      return p.parent_path().string();
     else
-      return upMultipleLevels(p.branch_path().string(), nrOfLevels - 1);
+      return upMultipleLevels(p.parent_path().string(), nrOfLevels - 1);
   }
 
 //---------------------------------------------------------------------------
   std::string extractFilePath(const std::string &name)
   {
-    string s(name);
+    std::string s(name);
     if (isOnlyDirectory(s))
     {
-      path p(s);
+      fs::path p(s);
       if (isRoot(name))
         return p.string();
       else
-        return stripTrailingSlash(string(p.string()));
+        return stripTrailingSlash(std::string(p.string()));
     }
     else
     {
       cleanFileName(s);
-      path p(s);
+      fs::path p(s);
       if (isRoot(name)) // CM: needed for "\\\\machine\\" see testFileTools.cpp
         return p.string();
-      return string(p.parent_path().string());
+      return std::string(p.parent_path().string());
     }
   }
 
 //---------------------------------------------------------------------------
   std::string extractFileName(const std::string &name)
   {
-    string s(name);
-    if (isOnlyDirectory(s)) return string();
+    std::string s(name);
+    if (isOnlyDirectory(s)) return std::string();
     cleanFileName(s);
-    path p(s);
-    if (isRoot(name)) return string();
-    return p.leaf().string();
+    fs::path p(s);
+    if (isRoot(name)) return std::string();
+    return p.filename().string();
   }
 
 //---------------------------------------------------------------------------
   std::string extractLowestDirName(const std::string &name)
   {
     // Note that this function now ASSUMES!! a directory is given as input
-    string s(name);
+    std::string s(name);
     // CM: if both lines below are use, it makes no sense, cleanDir adds "\\" and thus isOnlyDirectory will always succeed
 //  cleanDirName(s);
 //  if (! isOnlyDirectory(s)) return string();
     s = stripTrailingSlash(s);
-    path p(s);
-    return p.leaf().string();
+    fs::path p(s);
+    return p.filename().string();
   }
 
 
 //---------------------------------------------------------------------------
   std::string extractBaseName(const std::string &name)
   {
-    string s(name);
-    if (isOnlyDirectory(name)) return string();
+    std::string s(name);
+    if (isOnlyDirectory(name)) return std::string();
     cleanFileName(s);
-    string res = extractFileName(s);
+    std::string res = extractFileName(s);
     size_t pos = res.rfind(".");
-    if (pos != string::npos) res.resize(pos);
+    if (pos != std::string::npos) res.resize(pos);
     return res;
   }
 
 
 //---------------------------------------------------------------------------
-  string extractFileExtension(const std::string &name)
+  std::string extractFileExtension(const std::string &name)
   {
-    string s = extractFileName(name);
+    std::string s = extractFileName(name);
     size_t pos = s.rfind('.');
-    if (pos != string::npos) return string(s.begin() + pos + 1, s.end());
-    return string();
+    if (pos != std::string::npos) return std::string(s.begin() + pos + 1, s.end());
+    return std::string();
   }
 
 //---------------------------------------------------------------------------
   bool createDirectory(const std::string &dir)
   {
-    string s(dir);
+    std::string s(dir);
     cleanDirName(s);
     try
     {
-      path p(s);
+      fs::path p(s);
       create_directories(p);
     }
     catch ( ... )
@@ -429,18 +377,18 @@ namespace core
   }
 
 //---------------------------------------------------------------------------
-  string getPathRelativeToLocation(const std::string &_pathToAlter, const std::string &_fixedPath)
+  std::string getPathRelativeToLocation(const std::string &_pathToAlter, const std::string &_fixedPath)
   {
 //Make copies so we can change them for processing
-    string pathToAlter = _pathToAlter;
-    string fixedPath = _fixedPath;
+    std::string pathToAlter = _pathToAlter;
+    std::string fixedPath = _fixedPath;
 
 //if a relative path cannot be written
     if ( (rootName(pathToAlter)).compare(rootName(fixedPath)) != 0 )
       return pathToAlter;
 //if the two paths are the same
     if ( pathToAlter.compare(fixedPath) == 0)
-      return string(".");
+      return std::string(".");
 
 //if the path ends with a "\" then cut it off
     if (pathToAlter.find_last_of(dirsep) == pathToAlter.length() - 1)
@@ -449,25 +397,25 @@ namespace core
       fixedPath = fixedPath.substr(0, fixedPath.length() - 1);
 
 
-    string relativePath;
+    std::string relativePath;
 //If the entire fixed path is contained within the path to be given
     if ( pathToAlter.length() >= fixedPath.length()
          && pathToAlter.substr(0, fixedPath.length()).compare(fixedPath) == 0 )
     {
       //Tben we just need "./" and to append the remainder (non-matched part) of pathToAlter
-      relativePath = string(".") + dirsep + pathToAlter.substr(fixedPath.length() + 1, pathToAlter.length() - fixedPath.length());
+      relativePath = std::string(".") + dirsep + pathToAlter.substr(fixedPath.length() + 1, pathToAlter.length() - fixedPath.length());
     }
 //Otherwise we need at least one "../" step in the relative path
     else
     {
-      relativePath = string("..") + dirsep;
+      relativePath = std::string("..") + dirsep;
       //step up a level in the fixed path and see if it is now contained within the pathToAlter
-      string choppedFixed = upOneLevel(fixedPath);
+      std::string choppedFixed = upOneLevel(fixedPath);
       //As long as the "choppedFixed" is not contained in pathToAlter
       while ( pathToAlter.substr(0, choppedFixed.length()).compare(choppedFixed) != 0)
       {
         //Keep stepping up one level and appending "../" to relative path
-        relativePath = relativePath + string("..") + dirsep;
+        relativePath = relativePath + std::string("..") + dirsep;
         choppedFixed = upOneLevel(choppedFixed);
       }
 
@@ -476,7 +424,7 @@ namespace core
         choppedFixed = choppedFixed.substr(0, choppedFixed.length() - 1);
 
       //A string to hold the path that we need to append to the "../../../" we made
-      string endOfRelPath = string("");
+      std::string endOfRelPath = std::string("");
 
       //Take the end part of "pathToAlter" (The part which doesn't match with choppedFixed)
       if (pathToAlter.length() > choppedFixed.length())
@@ -491,22 +439,22 @@ namespace core
 //---------------------------------------------------------------------------
   std::string rootName(const std::string &spath)
   {
-    path p(spath);
+    fs::path p(spath);
     return p.root_name().string();
   }
 
   bool isRoot(const std::string &spath)
   {
     if (spath.empty()) return false;
-    path p(spath);
-    string s1 = p.string();
-    string s2 = p.root_path().string();
+    fs::path p(spath);
+    std::string s1 = p.string();
+    std::string s2 = p.root_path().string();
     return (s1 == s2);
   }
 
   bool isUNCPath(const std::string &spath)
   {
-    string s = rootName(spath);
+    std::string s = rootName(spath);
     if (s.size() < 3) return false;
     // Attention: Root is returned by boost as //ComputerName
     if ((s[0] == '/') && (s[1] == '/')) return true;
@@ -524,12 +472,12 @@ namespace core
     if (f == '\\') return true;
     if ((f == ':') && (spath.size() == 2) && ((b >= 'a') && (b <= 'z'))) return true;
 
-    string s(spath);
+    std::string s(spath);
     cleanDirName(s);
     try
     {
-      path p(s);
-      if (p.leaf() == p.root_name())
+      fs::path p(s);
+      if (p.filename() == p.root_name())
         return true;
     }
     catch ( ... )
@@ -544,8 +492,8 @@ namespace core
   {
     try
     {
-      path mypath(spath);
-      if (is_directory(mypath))
+      fs::path mypath(spath);
+      if (fs::is_directory(mypath))
         return true;
     }
     catch ( ... )
@@ -558,7 +506,7 @@ namespace core
 //---------------------------------------------------------------------------
   std::string currentDirPath()
   {
-    path p = current_path();
+    fs::path p = fs::current_path();
     return p.string();
   }
 
@@ -566,22 +514,7 @@ namespace core
 
   std::string stripTrailingSlash(std::string strPath)
   {
-#if (__CODEGEARC__ >= 0x610)
-    char lastchar = strPath[strPath.size()-1];
-    if (lastchar == '\\')
-    {
-      strPath = strPath.substr(0, strPath.size() - 1);
-    }
-    else
-    {
-      std::string x = strPath.substr(strPath.size() - 2, 2);
-      if (x == "\\.")
-      {
-        strPath = strPath.substr(0, strPath.size() - 2);
-      }
-    }
-#endif
-#ifdef _MSC_VER
+#ifdef WIN32
     char lastchar = strPath[strPath.size()-1];
     if (lastchar == '\\' ||  lastchar == '/')
     {
@@ -595,8 +528,7 @@ namespace core
         strPath = strPath.substr(0, strPath.size() - 2);
       }
     }
-#endif
-#ifndef WIN32
+#else
     char lastchar = strPath[strPath.size()-1];
     if (lastchar == '/')
     {
@@ -621,8 +553,8 @@ namespace core
 
     std::string cpath(spath);
     cleanDirName(cpath);
-    path pp(cpath);
-    if (pp.is_complete())
+    fs::path pp(cpath);
+    if (pp.is_absolute())
     {
       // CM: this fiddling about is based on the tests in testFileTools.cpp, maybe we should revise these tests?
       std::string h = pp.root_path().string();
@@ -638,45 +570,17 @@ namespace core
 
     std::string s(base);
     cleanDirName(s);
-    path pb(s);
+    fs::path pb(s);
 
-    path cp;
+    fs::path cp;
     if (! pp.empty())
     {
       if ((spath == "\\" || spath == "/") && pb.has_root_path())
         return pb.root_path().string();
       else
-        cp = complete(pp, pb);
+        cp = pb / pp;
     }
     else cp = pb;
-
-    cp.normalize();
-
-    /*
-    // If spath = "./dir1/dir2" and base = "d:/dir0", the complete function
-    // then gives the following path "d:/dir0/./dir1/dir2". Because such a path
-    // is not accepted by some applications (the net share command, for example,
-    // does not recognise it) we remove below any "." component in the path cp.
-    // This bugs was fixed in a newer version of boost - a function normalize()
-    // was introduced which presumably does the above.
-
-    vector<string> v;
-    path p = cp;
-    path p1;
-    while (!p.string().empty())
-    {
-     p1 = p;
-     if (p.leaf() != ".") v.push_back(p.leaf());
-     p = p.branch_path();
-    }
-
-    cp = path();
-    for (int i = v.size()-1; i >= 0; --i)
-     cp /= path(v[i]);
-
-    // cp.normalize();
-    // when updating to Boost 1.32 this function could replace the above code
-    */
 
     return stripTrailingSlash(cp.string());
   }
@@ -685,13 +589,13 @@ namespace core
 //MN: WARNING, THIS FUNCTION HAS BEEN OBSERVED TO GENERATE FILESYSTEM EXCEPTIONS
 //    IN THE WILD.
   void getFiles(
-    const string &thepath,
-    const string &name,
-    vector<string> &v,
+    const std::string &thepath,
+    const std::string &name,
+      std::vector<std::string> &v,
     bool recurse)
   {
     v.clear();
-    string pa(thepath);
+    std::string pa(thepath);
     if (pa.empty()) pa = ".";
     cleanDirName(pa);
 #ifdef WIN32
@@ -705,8 +609,8 @@ namespace core
 #endif
     if (!dirExists(pa)) return;
 
-    vector<path> vp;
-    vp.push_back(path(pa));
+    std::vector<fs::path> vp;
+    vp.push_back(fs::path(pa));
     unsigned int i = 0;
 
     //to create a proper regular expression, any non literal should be preceded by \:
@@ -714,9 +618,10 @@ namespace core
     //"[", "]", "^", "$" and "\".
     //some of these characters are not allowed in filenames, ...
     //and * should be replaced by .* and ? should be replaced by .?
-    string filename = name;
-    if (filename.empty()) filename = "*";
+    std::string filename = name;
+
     replaceAll(filename, ".", "\\.");
+    replaceAll(filename, "|", "\\|");
     replaceAll(filename, "|", "\\|");
     replaceAll(filename, "+", "\\+");
     replaceAll(filename, "(", "\\(");
@@ -729,26 +634,26 @@ namespace core
     replaceAll(filename, "^", "\\^");
     replaceAll(filename, "*", ".*");
     replaceAll(filename, "?", ".?");
-    boost::regex e(filename, boost::regbase::normal | boost::regbase::icase);
+    std::regex e(filename, std::regex::icase);
 
     while (i < vp.size())
     {
       //now we collect all files in the directory and check if they match the pattern
-      directory_iterator end_itr; // default construction yields past-the-end
-      string p = vp[i].string();
+      fs::directory_iterator end_itr; // default construction yields past-the-end
+      std::string p = vp[i].string();
 #ifdef WIN32
       if (p[p.size()-1] != '\\') p += "\\";
 #else
       if (p[p.size()-1] != '/') p += "/";
 #endif
-      for (directory_iterator itr(vp[i]); itr != end_itr; ++itr)
+      for (fs::directory_iterator itr(vp[i]); itr != end_itr; ++itr)
       {
         //BvG: the call to is_directory could raise an exception if
         //the directory is not accessible
         bool b;
         try
         {
-          b = is_directory(*itr);
+          b = fs::is_directory(*itr);
         }
         catch ( ... )
         {
@@ -758,18 +663,14 @@ namespace core
         }
         if ( !b )
         {
-          string f = itr->path().filename().string();
-          if (regex_match(f, e)) v.push_back(p + f);
+          std::string f = itr->path().filename().string();
+          if (std::regex_match(f, e)) v.push_back(p + f);
         }
         else if (recurse)
         {
 
-#if BOOST_VERSION <= 103301
-          string subdir = itr->string() + dirsep;
-#else
-          string subdir = itr->path().string() + dirsep;
-#endif
-          vp.push_back(path(subdir));
+          std::string subdir = itr->path().string() + dirsep;
+          vp.push_back(fs::path(subdir));
         }
       }
       ++i; // move to the next directory to process
@@ -782,14 +683,14 @@ namespace core
 
 //---------------------------------------------------------------------------
   void getSubdirectories(
-    const string &thepath,
-    vector<string> &v,
+    const std::string &thepath,
+      std::vector<std::string> &v,
     bool recurse)
   {
     v.clear();
-    string pa = thepath;
-    vector<path> vp;
-    path p(pa);
+    std::string pa = thepath;
+    std::vector<fs::path> vp;
+    fs::path p(pa);
     vp.push_back(p);
     v.push_back(p.string());
 
@@ -797,15 +698,15 @@ namespace core
     while (i < vp.size())
     {
       //now we collect all subdirectories of path vp[i]
-      directory_iterator end_itr; // default construction yields past-the-end
-      for (directory_iterator itr(vp[i]); itr != end_itr; ++itr)
+      fs::directory_iterator end_itr; // default construction yields past-the-end
+      for (fs::directory_iterator itr(vp[i]); itr != end_itr; ++itr)
       {
         //BvG: the call to is_directory could raise an exception if
         //the directory is not accessible
         bool b;
         try
         {
-          b = is_directory(*itr);
+          b = fs::is_directory(*itr);
         }
         catch ( ... )
         {
@@ -815,14 +716,10 @@ namespace core
         }
         if (b)
         {
-#if BOOST_VERSION <= 103301
-          string subdir = itr->string();
-#else
-          string subdir = itr->path().string();
-#endif
+          std::string subdir = itr->path().string();
           v.push_back(subdir);
           if (recurse)
-            vp.push_back(path(subdir));
+            vp.push_back(fs::path(subdir));
         }
       }
       ++i; // move to the next directory to process
@@ -831,8 +728,8 @@ namespace core
 
 #ifdef WIN32
   void getSubdirectoriesWindows(
-    const string &thepath,
-    vector<string> &v,
+    const std::string &thepath,
+    std::vector<std::string> &v,
     bool recurse)
   {
     WIN32_FIND_DATAA FindFileData;
@@ -861,7 +758,7 @@ namespace core
   {
     if (extractFileExtension(name) != "")
     {
-      string path = extractFilePath(name);
+      std::string path = extractFilePath(name);
       if ((!path.empty()) && (!isRoot(path)))
         path += dirsep;
 
@@ -877,7 +774,7 @@ namespace core
     {
       // this is for uniformity - it returns name in boost format
       // if name is "./dir" it returns ".\\dir" instead of "./dir"
-      name = path(name).string();
+      name = fs::path(name).string();
       if (!name.empty() && !isRoot(name))
         name = stripTrailingSlash(name);
     }
@@ -889,7 +786,7 @@ namespace core
   {
     if (extractBaseName(name) != "")
     {
-      string path =  extractFilePath(name);
+      std::string path =  extractFilePath(name);
       if ((!path.empty()) && (!isRoot(path)))
         path += dirsep;
       if (extractFileExtension(name) != "")
@@ -901,7 +798,7 @@ namespace core
     {
       // this is for uniformity - it returns name in boost format
       // if name is "./dir" it returns ".\\dir" instead of "./dir"
-      name = path(name).string();
+      name = fs::path(name).string();
       if (!name.empty() && !isRoot(name))
         name = stripTrailingSlash(name);
     }
@@ -913,11 +810,11 @@ namespace core
   {
     if (!newpath.empty())
     {
-      string spath = path(newpath).string();
+      std::string spath = fs::path(newpath).string();
 //    if ((!isRoot(spath)) && (extractFileName(name) != ""))
 //      spath += dirsep;
       if (extractFileName(name) != "")
-        name = spath + ((spath[spath.length()-1] == dirsep[0]) ? string("") : dirsep) +  extractFileName(name);
+        name = spath + ((spath[spath.length()-1] == dirsep[0]) ? std::string("") : dirsep) +  extractFileName(name);
       else
       {
         name = spath;
@@ -952,73 +849,17 @@ namespace core
 //---------------------------------------------------------------------------
   bool readFile(const std::string &filename, std::vector<std::string> &vs)
   {
-	string s;
+	std::string s;
     bool res = readFile(filename, s);
     if (!res) return false;
     vs.clear();
-    split(s, vs, "\r\n");
+    vs = split(s, "\r\n");
     if (vs.size() < 2)
     {
       //it may be a unix file, try to split on \n
       vs.clear();
-      split(s, vs, "\n");
+      vs = split(s, "\n");
     }
-    return true;
-  }
-
-  bool readFileTail(const std::string &filename, std::vector<std::string> &vs, int nBytesToRead)
-  {
-#ifdef WIN32
-    //get file size
-   // HANDLE h = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	//DWORD size = GetFileSize(h, NULL);
-    //CloseHandle(h);
-	//
-	 // stringstream ss;
-	  string tail;
-	FILE *pFile;
-	pFile = fopen(filename.c_str(), "rb");
-	if(!pFile) return false;
-	//fseek(handle, 0, SEEK_END);
-    //long int length = ftell(handle); /* determine filelength */
-   //	int nBytesToRead = 2048; //size > 2048 ? 2048 : size;
-	if (!fseek(pFile, -nBytesToRead, SEEK_END))
-	{
-	/*
-	  int c;
-	  do
-	  {
-		c = fgetc (pFile);
-		ss << char(c);
-	  }
-	  while (c != EOF);
-	  */
-	  tail.resize(nBytesToRead);
-	  long bytes = static_cast<long>(fread(&(tail[0]), sizeof(char), nBytesToRead, pFile));
-	
-	}
-	else //smaller than nBytesToRead
-	{
-	  fclose(pFile);
-	  return readFile(filename, vs);
-	}
-	  fclose(pFile);
-
-
-	//
-	//string tail = ss.str();
-   //	libReport(eError, tail.c_str());
-	vs.clear();
-	split(tail, vs, "\r\n");
-    if (vs.size() < 2)
-    {
-      //it may be a unix file, try to split on \n
-      vs.clear();
-      split(tail, vs, "\n");
-    }
-#else
-	return readFile(filename, vs);
-#endif
     return true;
   }
 
@@ -1028,15 +869,15 @@ namespace core
     const std::string& split_at)
   {
     //BvG: can be made more efficient...
-    vector<string> vs;
+    std::vector<std::string> vs;
     readFile(filename, vs);
     vvs.clear();
-    for (vector<string>::iterator it = vs.begin(); it != vs.end(); ++it)
+    for (std::vector<std::string>::iterator it = vs.begin(); it != vs.end(); ++it)
     {
-      vector<string> line;
-      split(*it, line, split_at);
-      vvs.push_back(vector<string>());
-      for (vector<string>::iterator it2 = line.begin(); it2 != line.end(); ++it2)
+      std::vector<std::string> line;
+      line = split(*it, split_at);
+      vvs.push_back(std::vector<std::string>());
+      for (std::vector<std::string>::iterator it2 = line.begin(); it2 != line.end(); ++it2)
       {
         if (!it2->empty()) vvs.back().push_back(*it2);
       }
@@ -1046,9 +887,9 @@ namespace core
 
   bool writeFile(const std::string &filename, const std::string &s)
   {
-    string path = extractFilePath(filename);
+    std::string path = extractFilePath(filename);
     createDirectory(path);
-    ofstream f(filename.c_str());
+    std::ofstream f(filename.c_str());
     if (!f) return false;
     f << s;
     return true;
@@ -1056,11 +897,11 @@ namespace core
 
   bool writeFile(const std::string &filename, const std::vector<std::string> &vs)
   {
-    string path = extractFilePath(filename);
+    std::string path = extractFilePath(filename);
     createDirectory(path);
-    ofstream f(filename.c_str());
+    std::ofstream f(filename.c_str());
     if (!f) return false;
-    for (unsigned int i = 0; i < vs.size(); ++i) f << vs[i] << endl;
+    for (unsigned int i = 0; i < vs.size(); ++i) f << vs[i] << std::endl;
     return f.good();
   }
 
@@ -1070,9 +911,9 @@ namespace core
     const std::string &split
   )
   {
-    string path = extractFilePath(filename);
+    std::string path = extractFilePath(filename);
     createDirectory(path);
-    ofstream f(filename.c_str());
+    std::ofstream f(filename.c_str());
     if (!f) return false;
     for (unsigned int i = 0; i < vvs.size(); ++i)
     {
@@ -1081,14 +922,14 @@ namespace core
         f << vvs[i][j] << split;
       }
       if (vvs[i].size() > 0) f << vvs[i].back();
-      f  << endl;
+      f  << std::endl;
     }
     return f.good();
   }
 
-  bool equivalentPaths(const string path1, const string path2)
+  bool equivalentPaths(const std::string path1, const std::string path2)
   {
-    return equivalent(path(path1), path(path2));
+    return fs::equivalent(fs::path(path1), fs::path(path2));
   }
 
   void cleanFileName(std::string &file)
@@ -1096,7 +937,7 @@ namespace core
     if (file.size() < 2) return;
     bool networkpath = (file.substr(0, 2) == "\\\\");
     replaceAll(file, "\\\\", "\\");
-    if (networkpath) file = string("\\") + file;
+    if (networkpath) file = std::string("\\") + file;
     if (file.substr(file.size() - 1, 1) == dirsep)
       file = file.substr(0, file.size() - 1);
   }
@@ -1106,78 +947,6 @@ namespace core
     cleanFileName(dir);
     dir += dirsep;
   }
-
-  void fileDateTime(
-    const std::string &file,
-    int &year,
-    int &month,
-    int &day,
-    int &hour,
-    int &min,
-    int &sec
-  )
-  {
-    year = month = day = hour = min = sec = -1;
-    if (!fileExists(file)) return;
-    path p(file);
-    std::time_t t = last_write_time(p);
-
-    struct tm *tb;
-    // converts date/time to a structure
-    tb = localtime(&t);
-    //These quantities give the time on a 24-hour clock, day of month (1 to 31),
-    //month (0 to 11), weekday (Sunday equals 0), year - 1900, day of year
-    //(0 to 365), and a flag that is nonzero if the daylight saving time
-    //conversion should be applied.
-    sec = tb->tm_sec;
-    min = tb->tm_min;
-    hour = tb->tm_hour;
-    day = tb->tm_mday;
-    month = tb->tm_mon + 1;
-    year = tb->tm_year + 1900;
-  }
-
-  void getDateTime(std::string &s)
-  {
-    std::time_t t = time(NULL);
-
-    struct tm *tb;
-    // converts date/time to a structure
-    tb = localtime(&t);
-
-    s = tostring(tb->tm_year + 1900);
-    if (tb->tm_mon + 1 < 10) s += "0";
-    s += tostring(tb->tm_mon + 1);
-    if (tb->tm_mday < 10) s += "0";
-    s += tostring(tb->tm_mday);
-    if (tb->tm_hour < 10) s += "0";
-    s += tostring(tb->tm_hour);
-    if (tb->tm_min < 10) s += "0";
-    s += tostring(tb->tm_min);
-    if (tb->tm_sec < 10) s += "0";
-    s += tostring(tb->tm_sec);
-  }
-
-  void fileDateTime(
-    const std::string &file, string &s)
-  {
-    s.clear();
-    int y, mo, d, h, mi, se;
-    fileDateTime(file, y, mo, d, h, mi, se);
-    if (y < 0) return;
-    s = tostring(y);
-    if (mo < 10) s += "0";
-    s += tostring(mo);
-    if (d < 10) s += "0";
-    s += tostring(d);
-    if (h < 10) s += "0";
-    s += tostring(h);
-    if (mi < 10) s += "0";
-    s += tostring(mi);
-    if (se < 10) s += "0";
-    s += tostring(se);
-  }
-
 
   void getTempFile(std::string &filename, const std::string &prefix)
   {
@@ -1193,7 +962,7 @@ namespace core
     sprintf(buffer, "%sXXXXXX", prefix.c_str());
     // WARNING: UGLY. Better this function should return a file handler
     close(mkstemp(buffer));
-    filename = string(buffer);
+    filename = std::string(buffer);
 #endif
 
   }
@@ -1219,7 +988,7 @@ namespace core
   void getEmptyTempDir(std::string &dirname, const std::string &parent)
   {
 #ifdef WIN32
-    string temp(parent);
+    std::string temp(parent);
     if (temp.empty()) getTempDir(temp);
     srand(static_cast<unsigned int>(time(NULL)));
     do
@@ -1227,7 +996,7 @@ namespace core
       do
       {
         int i = rand();
-        dirname = temp + tostring(i);
+        dirname = temp + std::to_string(i);
       }
       while (dirExists(dirname));
       createDirectory(dirname);
@@ -1236,13 +1005,13 @@ namespace core
 #endif
   }
 
-  vector<string> getWindowsDriveLetters()
+ std::vector<std::string> getWindowsDriveLetters()
   {
-    vector<string> driveletters;
+    std::vector<std::string> driveletters;
 #ifdef WIN32
     DWORD bitmask = GetLogicalDrives();
     char driveletter = 'A';
-    string empty;
+    std::string empty;
     for (char i = 0; i < 32; i++)
     {
       if (bitmask & 0x1)
@@ -1263,7 +1032,7 @@ namespace core
 
   bool isComplete(const std::string &spath)
   {
-    return path(spath).is_complete();
+    return fs::path(spath).is_absolute();
   }
 
 

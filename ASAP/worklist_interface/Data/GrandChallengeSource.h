@@ -39,8 +39,8 @@ namespace ASAP
 			size_t getStudyRecords(const std::string& patient_index, const std::function<void(DataTable&, const int)>& receiver);
 			size_t getImageRecords(const std::string& worklist_index, const std::string& study_index, const std::function<void(DataTable&, const int)>& receiver);
 
-			size_t getImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer);
-			size_t getImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer);
+			size_t getImageThumbnailFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer);
+			size_t getImageFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer);
 
 			std::set<std::string> getWorklistHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL);
 			std::set<std::string> getPatientHeaders(const DataTable::FIELD_SELECTION selection = DataTable::FIELD_SELECTION::ALL);

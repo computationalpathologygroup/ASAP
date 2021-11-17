@@ -176,6 +176,7 @@ void ASAP_Window::loadPlugins() {
                   mainToolBar->addAction(toolAction);
                   toolAction->setCheckable(true);
                   _toolActions->addAction(toolAction);
+                  toolAction->setParent(this);
                 }
               }
               _extensions.push_back(std::move(extension));
@@ -195,6 +196,9 @@ void ASAP_Window::loadPlugins() {
 void ASAP_Window::keyPressEvent(QKeyEvent* event)
 {
     event->ignore();
+    if (event->key() == Qt::Key::Key_F1) {
+        this->showShortcutOverview();
+    }
     for (auto const& extension : _extensions) {
         extension->keyPressEvent(event);
     }
@@ -411,3 +415,10 @@ void ASAP_Window::retranslateUi()
   menuView->setTitle(QApplication::translate("PathologyWorkstation", "View", 0));
   menuHelp->setTitle(QApplication::translate("PathologyWorkstation", "Help", 0));
 } 
+
+void ASAP_Window::showShortcutOverview() {
+    auto actions = this->findChildren<QAction*>();
+    for (QAction* action : actions) {
+        qDebug() << action->objectName() << "\t" << action->shortcut().toString();
+    }
+}

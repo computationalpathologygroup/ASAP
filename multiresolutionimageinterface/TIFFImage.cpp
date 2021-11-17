@@ -6,7 +6,9 @@
 #include "tiffio.h"
 #include "JPEG2000Codec.h"
 #include "core/PathologyEnums.h"
-#include <boost/thread.hpp>
+#include <shared_mutex>
+#include <cmath>
+#include <sstream>
 
 using namespace pathology;
 
@@ -14,13 +16,13 @@ TIFFImage::TIFFImage() : MultiResolutionImage(), _tiff(NULL), _jp2000(NULL) {
 }
 
 TIFFImage::~TIFFImage() {
-  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   cleanup();
   MultiResolutionImage::cleanup();
 }
 
 bool TIFFImage::initializeType(const std::string& imagePath) {
-  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   cleanup();
 
 #ifdef _WIN32
@@ -404,7 +406,7 @@ unsigned char* TIFFImage::readEncodedDataFromImage(const long long& startX, cons
 template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long& startX, const long long& startY, const unsigned long long& width,
   const unsigned long long& height, const unsigned int& level, unsigned int nrSamples)
 {
-  boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::shared_lock<std::shared_mutex> l(*_openCloseMutex);
   T* temp = new T[width * height * nrSamples];
   std::fill(temp, temp + width * height * nrSamples, static_cast<T>(0));
   unsigned int tileW = _tileSizesPerLevel[level][0], tileH = _tileSizesPerLevel[level][1], levelH = _levelDimensions[level][1], levelW = _levelDimensions[level][0];

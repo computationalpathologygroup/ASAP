@@ -110,7 +110,6 @@ if (BUILD_WORKLIST_INTERFACE)
 
 	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE ASAPLib core multiresolutionimageinterface)
 	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools Qt5::Concurrent)
-	TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE Boost::disable_autolinking Boost::filesystem)
 	if(NOT WIN32)
 		TARGET_LINK_LIBRARIES(ASAP_browser PRIVATE pthread)
 	endif(NOT WIN32)

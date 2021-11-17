@@ -1,7 +1,6 @@
 #include "MultiResolutionImageFactory.h"
 #include "MultiResolutionImage.h"
 #include "core/filetools.h"
-#include "core/stringconversion.h"
 
 #ifdef HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT
 #include "VSIImage.h"

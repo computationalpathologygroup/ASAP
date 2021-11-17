@@ -195,7 +195,7 @@ namespace ASAP
 		});
 	}
 
-	size_t GrandChallengeSource::getImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t GrandChallengeSource::getImageThumbnailFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		/*std::wstringstream url;
 		url << L"/" << m_rest_uri_.image_addition << L"/" << Misc::StringToWideString(image_index) << L"/";
@@ -203,12 +203,12 @@ namespace ASAP
 		web::http::http_request request(web::http::methods::GET);
 		request.set_request_uri(url.str());
 		*/
-		receiver(boost::filesystem::path());
+		receiver(fs::path());
 		observer(100);
 		return 0;
 	}
 
-	size_t GrandChallengeSource::getImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t GrandChallengeSource::getImageFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		std::wstringstream url;
 		url << L"/" << m_rest_uri.image_addition << core::stringToWideString(image_index) << L"/";
@@ -243,7 +243,7 @@ namespace ASAP
 				catch (const std::exception& e)
 				{
 					// TODO: implement method to reveal errors to user.
-					receiver(boost::filesystem::path());
+					receiver(fs::path());
 				}
 			}
 		});

@@ -4,14 +4,12 @@
 #include "core_export.h"
 #include "ProgressMonitor.h"
 
-namespace boost {
-  class progress_display;
-}
+class ProgressDisplay;
 
 class CORE_EXPORT CmdLineProgressMonitor : public ProgressMonitor {
 
 protected:
-  boost::progress_display* disp;
+  ProgressDisplay* disp;
 
 public :
 

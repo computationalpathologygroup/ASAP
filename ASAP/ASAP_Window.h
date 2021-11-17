@@ -85,6 +85,7 @@ private:
   void initializeDocks();
   void setupUi();
   void retranslateUi();
+  void showShortcutOverview();
   void loadPlugins();
   void readSettings();
   void writeSettings();

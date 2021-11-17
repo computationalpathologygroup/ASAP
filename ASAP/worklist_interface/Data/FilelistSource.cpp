@@ -3,7 +3,7 @@
 #include <functional>
 #include <fstream>
 #include <stdexcept>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "multiresolutionimageinterface/MultiResolutionImageFactory.h"
 
@@ -74,15 +74,15 @@ namespace ASAP
 		return std::set<std::string>();
 	}
 
-	size_t FilelistSource::getImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t FilelistSource::getImageThumbnailFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		receiver(boost::filesystem::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
+		receiver(fs::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
 		return 0;
 	}
 
-	size_t FilelistSource::getImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t FilelistSource::getImageFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		receiver(boost::filesystem::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
+		receiver(fs::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
 		return 0;
 	}
 
@@ -99,8 +99,8 @@ namespace ASAP
 				std::string line;
 				std::getline(stream, line);
 
-				boost::filesystem::path image_path(line);
-				if (boost::filesystem::is_regular_file(image_path) && allowed_extensions.find(image_path.extension().string().substr(1)) != allowed_extensions.end())
+				fs::path image_path(line);
+				if (fs::is_regular_file(image_path) && allowed_extensions.find(image_path.extension().string().substr(1)) != allowed_extensions.end())
 				{
 					images.insert({ std::to_string(images.size()), image_path.string(), image_path.filename().string() });
 				}

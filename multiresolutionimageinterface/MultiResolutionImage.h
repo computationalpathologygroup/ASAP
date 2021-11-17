@@ -8,7 +8,7 @@
 #include "core/ImageSource.h"
 #include "core/Patch.h"
 
-namespace boost {
+namespace std {
   class mutex;
   class shared_mutex;
 }
@@ -124,8 +124,8 @@ public :
 protected :
 
   //! To make MultiResolutionImage thread-safe
-  std::unique_ptr<boost::shared_mutex> _openCloseMutex;
-  std::unique_ptr<boost::mutex> _cacheMutex;
+  std::unique_ptr<std::shared_mutex> _openCloseMutex;
+  std::unique_ptr<std::mutex> _cacheMutex;
   std::shared_ptr<void> _cache;
 
   // Aditional properties of a multi-resolution image

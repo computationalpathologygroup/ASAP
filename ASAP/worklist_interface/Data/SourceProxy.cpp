@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include "core/stringconversion.h"
 #ifdef BUILD_GRANDCHALLENGE_INTERFACE
 #include "GrandChallengeSource.h"
@@ -36,12 +36,12 @@ namespace ASAP
 
 		try
 		{
-			boost::filesystem::path potential_system_path(source_path);
-			if (boost::filesystem::is_regular_file(potential_system_path) && checkParameters(parameters, FilelistSource::getRequiredParameterFields()))
+			fs::path potential_system_path(source_path);
+			if (fs::is_regular_file(potential_system_path) && checkParameters(parameters, FilelistSource::getRequiredParameterFields()))
 			{
 				m_source = std::unique_ptr<WorklistSourceInterface>(new FilelistSource(source_path));
 			}
-			else if (boost::filesystem::is_directory(potential_system_path) && checkParameters(parameters, DirectorySource::getRequiredParameterFields()))
+			else if (fs::is_directory(potential_system_path) && checkParameters(parameters, DirectorySource::getRequiredParameterFields()))
 			{
 				m_source = std::unique_ptr<DirectorySource>(new DirectorySource(source_path));
 			}
@@ -199,12 +199,12 @@ namespace ASAP
 		return m_source->getImageRecords(worklist_index, study_index, receiver);
 	}
 
-	size_t SourceProxy::getImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t SourceProxy::getImageThumbnailFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		return m_source->getImageThumbnailFile(image_index, receiver, observer);
 	}
 
-	size_t SourceProxy::getImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t SourceProxy::getImageFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
 		return m_source->getImageFile(image_index, receiver, observer);
 	}

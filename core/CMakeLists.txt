@@ -1,10 +1,9 @@
-set(CORE_SRC filetools.cpp stringconversion.cpp PathologyEnums.cpp ImageSource.cpp Patch.hpp Box.cpp Point.cpp ProgressMonitor.cpp CmdLineProgressMonitor.cpp)
-set(CORE_HEADERS filetools.h stringconversion.h PathologyEnums.h ImageSource.h Patch.h Patch.hpp Box.h Point.h ProgressMonitor.h CmdLineProgressMonitor.h)
+set(CORE_SRC filetools.cpp PathologyEnums.cpp ImageSource.cpp Patch.hpp Box.cpp Point.cpp ProgressMonitor.cpp CmdLineProgressMonitor.cpp stringconversion.cpp)
+set(CORE_HEADERS filetools.h PathologyEnums.h ImageSource.h Patch.h Patch.hpp Box.h Point.h ProgressMonitor.h CmdLineProgressMonitor.h stringconversion.h)
 
 add_library(core SHARED ${CORE_SRC} ${CORE_HEADERS})
 generate_export_header(core)
-target_link_libraries(core PRIVATE Boost::disable_autolinking Boost::filesystem Boost::system Boost::regex)
-target_include_directories(core PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${DIAGPathology_BINARY_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/core> ${Boost_INCLUDE_DIRS} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(core PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${DIAGPathology_BINARY_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/core> PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(core PRIVATE cxx_generalized_initializers)
 set_target_properties(core PROPERTIES DEBUG_POSTFIX _d)
 

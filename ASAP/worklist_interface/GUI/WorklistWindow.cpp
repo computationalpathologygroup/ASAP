@@ -5,7 +5,6 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <boost/bind.hpp>
 #include <qfiledialog.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -24,7 +23,7 @@ namespace ASAP
 	WorklistWindow::WorklistWindow(QWidget* parent) :
 		CompositeChild(parent),
 		m_ui(new Ui::WorklistWindowLayout),
-		m_storage_directory(boost::filesystem::path("/temp/"), TemporaryDirectoryTracker::getStandardConfiguration()),
+		m_storage_directory(fs::path("/temp/"), TemporaryDirectoryTracker::getStandardConfiguration()),
 		m_source(m_storage_directory)
 	{
 		m_ui->setupUi(this);
@@ -659,7 +658,7 @@ namespace ASAP
 		std::string image_index(image->data().toString().toStdString());
 
 		m_ui->status_bar->showMessage("Loading image: 0%");
-		auto image_loading([this](const boost::filesystem::path& filepath)
+		auto image_loading([this](const fs::path& filepath)
 			{
 				if (filepath.has_filename())
 				{

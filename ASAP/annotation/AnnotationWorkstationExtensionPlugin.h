@@ -56,11 +56,20 @@ public slots:
     void onItemNameChanged(QTreeWidgetItem* item, int column);
     void onTreeWidgetItemDoubleClicked(QTreeWidgetItem * item, int column);
     void onTreeWidgetSelectedItemsChanged();
+    void zoomToAnnotationStart();
+
+protected slots:
+    void zoomToAnnotation(qreal val);
+    void zoomToAnnotationFinished();
 
 private slots:
     void resizeOnExpand();
     void updateAnnotationToolTip(QtAnnotation* annotation);
     void updateGeneratingAnnotationLabel(QtAnnotation* annotation);
+
+protected:
+    QRectF _start_zoom;
+    QRectF _end_zoom;
 
 private :
     std::vector<std::shared_ptr<ToolPluginInterface> > _annotationTools;

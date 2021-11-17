@@ -69,15 +69,15 @@ namespace ASAP
 		return std::set<std::string>();
 	}
 
-	size_t DirectorySource::getImageThumbnailFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t DirectorySource::getImageThumbnailFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		receiver(boost::filesystem::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
+		receiver(fs::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
 		return 0;
 	}
 
-	size_t DirectorySource::getImageFile(const std::string& image_index, const std::function<void(boost::filesystem::path)>& receiver, const std::function<void(uint8_t)>& observer)
+	size_t DirectorySource::getImageFile(const std::string& image_index, const std::function<void(fs::path)>& receiver, const std::function<void(uint8_t)>& observer)
 	{
-		receiver(boost::filesystem::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
+		receiver(fs::path(*m_images.at(std::stoi(image_index), { "location" })[0]));
 		return 0;
 	}
 
@@ -86,11 +86,11 @@ namespace ASAP
 		std::set<std::string> allowed_extensions = MultiResolutionImageFactory::getAllSupportedExtensions();	
 		DataTable images({ "id", "location", "title" });
 
-		boost::filesystem::path directory(directory_path);
-		boost::filesystem::directory_iterator end_it;
-		for (boost::filesystem::directory_iterator it(directory); it != end_it; ++it)
+		fs::path directory(directory_path);
+		fs::directory_iterator end_it;
+		for (fs::directory_iterator it(directory); it != end_it; ++it)
 		{
-			if (boost::filesystem::is_regular_file(it->path()) && (allowed_extensions.find(it->path().extension().string().substr(1)) != allowed_extensions.end()))
+			if (fs::is_regular_file(it->path()) && (allowed_extensions.find(it->path().extension().string().substr(1)) != allowed_extensions.end()))
 			{
 				images.insert({ std::to_string(images.size()), it->path().string(), it->path().filename().string() });
 			}

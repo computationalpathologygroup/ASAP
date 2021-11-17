@@ -21,7 +21,7 @@ if(NOT WIN32)
 	set(CMAKE_MACOSX_RPATH TRUE)
 ENDIF(NOT WIN32)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Set compile definitions to ignore some warnings
 if(WIN32)

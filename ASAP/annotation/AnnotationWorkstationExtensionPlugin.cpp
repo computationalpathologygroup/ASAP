@@ -648,14 +648,35 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
       }
       connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
     }
-    else if (kpEvent->key() == Qt::Key::Key_Z) {
-      if (std::shared_ptr<AnnotationTool> tool = std::dynamic_pointer_cast<AnnotationTool>(_viewer->getActiveTool())) {
-        tool->keyPressEvent(kpEvent);
-      }
-    }
   }
   return QObject::eventFilter(watched, event);
 }
+
+void AnnotationWorkstationExtensionPlugin::zoomToAnnotationStart() {
+    if (this->getActiveAnnotation()) {
+        QTimeLine* anim = new QTimeLine(500);
+
+        _start_zoom = _viewer->mapToScene(_viewer->viewport()->rect()).boundingRect();
+        _end_zoom = this->getActiveAnnotation()->mapToScene(this->getActiveAnnotation()->boundingRect()).boundingRect();
+        anim->setFrameRange(0, 100);
+        anim->setUpdateInterval(5);
+
+        connect(anim, SIGNAL(valueChanged(qreal)), SLOT(zoomToAnnotation(qreal)));
+        connect(anim, SIGNAL(finished()), SLOT(zoomToAnnotationFinished()));
+        anim->start();
+    }
+}
+
+void AnnotationWorkstationExtensionPlugin::zoomToAnnotation(qreal val) {
+    QRectF current = QRectF(_start_zoom.topLeft() + val * (_end_zoom.topLeft() - _start_zoom.topLeft()), _start_zoom.bottomRight() + val * (_end_zoom.bottomRight() - _start_zoom.bottomRight()));
+    _viewer->fitInView(current, Qt::AspectRatioMode::KeepAspectRatio);
+}
+
+void AnnotationWorkstationExtensionPlugin::zoomToAnnotationFinished() {
+    sender()->~QObject();
+    _viewer->updateCurrentFieldOfView();
+}
+
 
 void AnnotationWorkstationExtensionPlugin::addAnnotationGroup() {
   if (_treeWidget && _annotationService) {

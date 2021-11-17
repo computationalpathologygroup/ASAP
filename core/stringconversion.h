@@ -7,29 +7,8 @@
 #include <typeinfo>
 #include <iomanip>
 #include <vector>
-#include "boost/lexical_cast.hpp"
 
 namespace core {
-///////////////////////////////////////////////
-//Checks that the given string is a valid representation
-// of a numerical type T
-  template<typename T>
-  bool isValid(const std::string& num)
-  {
-
-    bool res = true;
-
-    try
-    {
-      T tmp = boost::lexical_cast<T>(num);
-    }
-    catch (boost::bad_lexical_cast&)
-    {
-      res = false;
-    }
-
-    return(res);
-  }
 
 //////////
 // Converts a string to type T.
@@ -178,7 +157,8 @@ namespace core {
 
     return s;
   }
-
+  
+  // NOTE: Below is deprecated in C17, but valid until a replacement is introduced
   std::wstring CORE_EXPORT stringToWideString(const std::string& string);
 
   std::vector<std::wstring> CORE_EXPORT stringsToWideStrings(const std::vector<std::string>& strings);
@@ -186,7 +166,7 @@ namespace core {
   std::string CORE_EXPORT wideStringToString(const std::wstring& string);
 
   std::vector<std::string> CORE_EXPORT wideStringsToStrings(const std::vector<std::wstring> strings);
-
+  
   void CORE_EXPORT lower(std::string &s);
 
   void CORE_EXPORT upper(std::string &s);

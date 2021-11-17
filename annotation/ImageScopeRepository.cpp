@@ -4,7 +4,6 @@
 #include "AnnotationList.h"
 #include "core/Point.h"
 #include "core/filetools.h"
-#include "core/stringconversion.h"
 #include <vector>
 #include <string>
 #include <stdio.h>
