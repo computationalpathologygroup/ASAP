@@ -98,6 +98,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 
 /*!
