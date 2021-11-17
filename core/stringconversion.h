@@ -10,6 +10,10 @@
 
 namespace core {
 
+void CORE_EXPORT replaceAll(std::string& s, const std::string& item, const std::string& replacement);
+
+std::vector<std::string> CORE_EXPORT split(const std::string& input, const std::string& regex);
+
 //////////
 // Converts a string to type T.
   template <typename T> inline T fromstring(const std::string s)
@@ -164,10 +168,6 @@ namespace core {
   void CORE_EXPORT upper(std::string &s);
 
   void CORE_EXPORT trim(std::string &s);
-
-  void CORE_EXPORT replaceAll(std::string& s, const std::string& item, const std::string& replacement);
-
-  std::vector<std::string> CORE_EXPORT split(const std::string& input, const std::string& regex);
 
   //escape 
   void CORE_EXPORT escape(std::string &str, char toEscape);

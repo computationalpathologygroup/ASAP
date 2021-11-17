@@ -8,6 +8,7 @@
 #include <string>
 #include <stdio.h>
 #include "pugixml.hpp"
+#include <algorithm>
 
 ImageScopeRepository::ImageScopeRepository(const std::shared_ptr<AnnotationList>& list) :
   Repository(list),
