@@ -1,4 +1,5 @@
 option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT "Builds support for Olympus VSI files; requires DCMTK ijg8.lib" OFF)
+option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT "Builds support for DICOM files; requires DCMTK" OFF)
 
 set(MULTIRESOLUTIONIMAGEINTERFACE_HS
     MultiResolutionImageReader.h 
@@ -45,6 +46,16 @@ set(OPENSLIDE_SUPPORT_SRCS
 set(VSI_SUPPORT_SRCS
     VSIImage.cpp
 	VSIImageFactory.cpp
+)
+
+set(DICOM_SUPPORT_HS
+    DICOMImage.h
+	DICOMImageFactory.h
+)
+
+set(DICOM_SUPPORT_SRCS
+    DICOMImage.cpp
+	DICOMImageFactory.cpp
 )
 
 if(WIN32)
@@ -97,10 +108,22 @@ target_include_directories(openslidefileformat PRIVATE ${OPENSLIDE_INCLUDE_DIR})
 target_link_libraries(openslidefileformat PUBLIC multiresolutionimageinterface PRIVATE ${OPENSLIDE_LIBRARY} core)
 set_target_properties(openslidefileformat PROPERTIES DEBUG_POSTFIX _d)
 
+if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+  #find_package(DCMTK REQUIRED)
+  add_library(dicomfileformat SHARED ${DICOM_SUPPORT_SRCS} ${DICOM_SUPPORT_HS})
+  generate_export_header(dicomfileformat)
+  target_include_directories(dicomfileformat PRIVATE ${DCMTK_INCLUDE_DIR})
+  target_link_libraries(dicomfileformat PUBLIC multiresolutionimageinterface PRIVATE core)
+  set_target_properties(dicomfileformat PROPERTIES DEBUG_POSTFIX _d)
+endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+
 if(WIN32)  
   set_target_properties(multiresolutionimageinterface PROPERTIES FOLDER multiresolutionimageinterface)    
   set_target_properties(jpeg2kcodec PROPERTIES FOLDER multiresolutionimageinterface)    
   set_target_properties(openslidefileformat PROPERTIES FOLDER multiresolutionimageinterface)
+  if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+    set_target_properties(dicomfileformat PROPERTIES FOLDER multiresolutionimageinterface)
+  endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
 endif(WIN32)
 
 option(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON "Wrap multi-resolution image reading in Python" OFF)
@@ -201,6 +224,11 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface_export.h
 install(FILES ${EXTERNAL_OPENSLIDE_HS} DESTINATION include/multiresolutionimageinterface)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/openslidefileformat_export.h DESTINATION include/multiresolutionimageinterface)
 
+if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+  install(FILES ${DICOM_OPENSLIDE_HS} DESTINATION include/multiresolutionimageinterface)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dicomfileformat_export.h DESTINATION include/multiresolutionimageinterface)
+endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+
 IF(APPLE)
 
   install(TARGETS multiresolutionimageinterface
@@ -224,6 +252,16 @@ IF(APPLE)
     ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
   )
 
+  if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+  install(TARGETS dicomfileformat
+    EXPORT asap-targets
+    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/formats
+    LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/formats
+    ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+  endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+
+
 ELSE(APPLE)
 
   install(TARGETS multiresolutionimageinterface
@@ -246,5 +284,14 @@ ELSE(APPLE)
     LIBRARY DESTINATION bin/formats
     ARCHIVE DESTINATION lib
   )
+  if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+  install(TARGETS dicomfileformat
+    EXPORT asap-targets
+    RUNTIME DESTINATION bin/formats
+    LIBRARY DESTINATION bin/formats
+    ARCHIVE DESTINATION lib
+  )
+  endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
+
 
 ENDIF(APPLE)
