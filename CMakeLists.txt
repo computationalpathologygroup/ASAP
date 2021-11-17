@@ -33,10 +33,6 @@ if(WIN32)
 	add_definitions(${DEFAULT_COMPILE_DEFINITIONS})
 endif()
 
-# Use boost for cross-platform use of threading, file system and date_time handling
-find_package(Boost QUIET REQUIRED COMPONENTS date_time filesystem program_options regex system thread)
-SET(Boost_USE_STATIC_LIBS OFF)
-
 # OpenJPEG for JPEG2000 codec
 find_package(OpenJPEG REQUIRED)
 

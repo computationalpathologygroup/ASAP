@@ -4,8 +4,7 @@ set(WSILabelStatistics_src
 
 add_executable(WSILabelStatistics ${WSILabelStatistics_src})
 set_target_properties(WSILabelStatistics PROPERTIES DEBUG_POSTFIX _d)
-target_link_libraries(WSILabelStatistics wholeslidefilters multiresolutionimageinterface Boost::disable_autolinking Boost::program_options)
-target_compile_definitions(WSILabelStatistics PRIVATE -DBOOST_ALL_DYN_LINK)
+target_link_libraries(WSILabelStatistics wholeslidefilters multiresolutionimageinterface)
 
 IF(APPLE)
   set(prefix "ASAP.app/Contents")

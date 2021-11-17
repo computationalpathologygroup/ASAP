@@ -4,8 +4,7 @@ set(WSIDistanceTransform_src
 
 add_executable(WSIDistanceTransform ${WSIDistanceTransform_src})
 set_target_properties(WSIDistanceTransform PROPERTIES DEBUG_POSTFIX _d)
-target_link_libraries(WSIDistanceTransform PRIVATE wholeslidefilters multiresolutionimageinterface Boost::disable_autolinking Boost::program_options)
-target_compile_definitions(WSIDistanceTransform PRIVATE -DBOOST_ALL_DYN_LINK)
+target_link_libraries(WSIDistanceTransform PRIVATE wholeslidefilters multiresolutionimageinterface)
 
 IF(APPLE)
   set(prefix "ASAP.app/Contents")

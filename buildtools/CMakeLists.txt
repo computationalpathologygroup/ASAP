@@ -16,22 +16,12 @@ IF(WIN32)
     
     get_filename_component(opencv_dll_directory ${opencv_dll_location} DIRECTORY)
   endif(BUILD_IMAGEPROCESSING)
-  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt5_DIR}/../../../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${Boost_LIBRARY_DIRS} ${Boost_LIBRARY_DIR_RELEASE}/../bin ${Boost_LIBRARY_DIR_DEBUG}/../bin ${cpprestsdk_DIR}/../../bin)
+  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt5_DIR}/../../../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${cpprestsdk_DIR}/../../bin)
   INCLUDE(InstallRequiredSystemLibraries)
 
   if(BUILD_ASAP)
   INSTALL(FILES ${Qt5_DIR}/../../../plugins/platforms/qwindows.dll DESTINATION bin/platforms CONFIGURATIONS Release)
   INSTALL(FILES ${Qt5_DIR}/../../../plugins/platforms/qwindowsd.dll DESTINATION bin/platforms CONFIGURATIONS Debug)
-  IF(EXISTS ${Qt5_DIR}/../../../bin/libEGL.dll)
-      INSTALL(FILES ${Qt5_DIR}/../../../bin/libEGL.dll DESTINATION bin CONFIGURATIONS Release)
-  ENDIF(EXISTS ${Qt5_DIR}/../../../bin/libEGL.dll)
-  IF(EXISTS ${Qt5_DIR}/../../../bin/libEGLd.dll)
-      INSTALL(FILES ${Qt5_DIR}/../../../bin/libEGLd.dll DESTINATION bin CONFIGURATIONS Debug)
-  ENDIF(EXISTS ${Qt5_DIR}/../../../bin/libEGLd.dll)  
-  FILE(GLOB D3D_LIB ${Qt5_DIR}/../../../bin/d3dcompiler_*.dll)
-  INSTALL(FILES ${D3D_LIB} DESTINATION bin)
-  INSTALL(FILES ${Qt5_DIR}/../../../bin/Qt5OpenGL.dll DESTINATION bin CONFIGURATIONS Release)
-  INSTALL(FILES ${Qt5_DIR}/../../../bin/Qt5OpenGLd.dll DESTINATION bin CONFIGURATIONS Debug)
   INSTALL(CODE "
    include(BundleUtilities)
    if(\"\${CMAKE_INSTALL_CONFIG_NAME}\" STREQUAL \"Debug\")
@@ -72,7 +62,6 @@ ELSEIF(APPLE)
             ${CMAKE_BINARY_DIR}/multiresolutionimageinterface
             ${cpprestsdk_DIR}/../../lib 
             ${UNITTEST_INCLUDE_DIR}/../lib 
-            ${Boost_LIBRARY_DIRS} 
             ${OPENSLIDE_INCLUDE_DIR}/../../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../bin 
             ${Qt5_DIR}/../.. 
@@ -80,10 +69,8 @@ ELSEIF(APPLE)
             ${OPENJPEG_INCLUDE_DIRS}/../../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../lib 
             ${PugiXML_INCLUDE_DIR}/../lib 
-            ${UNITTEST_INCLUDE_DIR}/../lib 
-            ${Boost_LIBRARY_DIRS} ${Boost_LIBRARY_DIR_RELEASE}/../lib 
-            ${Boost_LIBRARY_DIR_DEBUG}/../lib)
-            
+            ${UNITTEST_INCLUDE_DIR}/../lib )
+
 
    list(APPEND DIRS "${CMAKE_BINARY_DIR}")
    

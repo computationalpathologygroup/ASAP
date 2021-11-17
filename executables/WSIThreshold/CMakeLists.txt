@@ -4,8 +4,7 @@ set(WSIThreshold_src
 
 add_executable(WSIThreshold ${WSIThreshold_src})
 set_target_properties(WSIThreshold PROPERTIES DEBUG_POSTFIX _d)
-target_link_libraries(WSIThreshold wholeslidefilters multiresolutionimageinterface Boost::disable_autolinking Boost::program_options)
-target_compile_definitions(WSIThreshold PRIVATE -DBOOST_ALL_DYN_LINK)
+target_link_libraries(WSIThreshold wholeslidefilters multiresolutionimageinterface)
 
 IF(APPLE)
   set(prefix "ASAP.app/Contents")

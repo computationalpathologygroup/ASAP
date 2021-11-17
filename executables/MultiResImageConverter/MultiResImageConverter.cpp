@@ -89,7 +89,7 @@ void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std
 int main(int argc, char *argv[]) {
   try {
 
-    argparse::ArgumentParser desc("Multi-resolution image converter");
+    argparse::ArgumentParser desc("Multi-resolution image converter", ASAP_VERSION_STRING);
 
     desc.add_argument("-s", "--svs")
         .help("Convert to Aperio SVS instead of regular TIFF")
