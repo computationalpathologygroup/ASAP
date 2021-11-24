@@ -109,11 +109,11 @@ target_link_libraries(openslidefileformat PUBLIC multiresolutionimageinterface P
 set_target_properties(openslidefileformat PROPERTIES DEBUG_POSTFIX _d)
 
 if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
-  #find_package(DCMTK REQUIRED)
+  find_package(DCMTK REQUIRED)
   add_library(dicomfileformat SHARED ${DICOM_SUPPORT_SRCS} ${DICOM_SUPPORT_HS})
   generate_export_header(dicomfileformat)
   target_include_directories(dicomfileformat PRIVATE ${DCMTK_INCLUDE_DIR})
-  target_link_libraries(dicomfileformat PUBLIC multiresolutionimageinterface PRIVATE core)
+  target_link_libraries(dicomfileformat PUBLIC multiresolutionimageinterface PRIVATE core DCMTK::dcmdata )
   set_target_properties(dicomfileformat PROPERTIES DEBUG_POSTFIX _d)
 endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT)
 
