@@ -44,7 +44,7 @@ bool DICOMImage::initializeType(const std::string& imagePath) {
   std::vector<DcmFileFormat> dcmFiles;
   for (auto dcmFilePath : dcmFilePaths) {
       DcmFileFormat dcm;
-      OFCondition status = dcm.loadFile(dcmFilePath);
+      OFCondition status = dcm.loadFile(OFFilename(dcmFilePath.c_str()));
       if (status.good()) {
           OFString msSOPClassUID;
           std::vector<std::string> supportedTransferSyntax = { UID_JPEGProcess1TransferSyntax, UID_JPEGProcess2_4TransferSyntax, UID_JPEG2000LosslessOnlyTransferSyntax, UID_JPEG2000TransferSyntax };
@@ -69,7 +69,6 @@ bool DICOMImage::initializeType(const std::string& imagePath) {
                   dcmDataset->findAndGetOFString(DCM_ImageType, imageType, 2);
                   if (imageType == "VOLUME") {
                       DicomImage* image = new DicomImage(&dcm, EXS_Unknown, CIF_UsePartialAccessToPixelData);
-                      image->getOutputData()
                   }
               }
           }
