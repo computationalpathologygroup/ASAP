@@ -10,7 +10,7 @@ class DcmFileFormat;
 class DcmMetaInfo;
 class DcmDataset;
 class DicomImage;
-class DcmElement;
+class DcmItem;
 
 class DICOMFILEFORMAT_EXPORT WSIDicomInstance  {
 
@@ -42,7 +42,7 @@ private:
     DcmDataset* _dataset;
     DicomImage* _image;
 
-    DcmElement* _opticalPathSequence;
+    DcmItem* _opticalPathSequence;
 
     DcmImageType _imageType;
     TilingType _tiling;
@@ -51,20 +51,21 @@ private:
 
     unsigned int _frameOffset;
     unsigned int _numberOfFrames;
-    unsigned int _nrFocalFlanes;
-    unsigned int _extendedDoFPlanes;
-    double _extendedDoFPlaneDistance;
+    bool _extendedDoF;
+    unsigned short _extendedDoFPlanes;
+    float _extendedDoFPlaneDistance;
     std::string _focusMethod;
     unsigned int _width;
     unsigned int _height;
-    double _widthInMm;
-    double _heightInMm;
+    float _widthInMm;
+    float _heightInMm;
+    float _depthInMm;
     unsigned short _tileHeight;
     unsigned short _tileWidth;
     unsigned short _samplesPerPixel;
     std::string _photometricInterpretation;
     unsigned int _instanceNumber;
-    double _sliceThickness;
+    float _sliceThickness;
     
 
     bool _isValid;

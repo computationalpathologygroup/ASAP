@@ -22,7 +22,10 @@ const std::vector<std::string> WSIDicomInstance::SUPPORTED_TRANSFER_SYNTAX = { U
 
 WSIDicomInstance::WSIDicomInstance() :
     _fileFormat(nullptr), _dataset(nullptr), _metaInfo(nullptr), _image(nullptr), _isValid(false),
-    _frameOffset(0), _numberOfFrames(0), _imageType(DcmImageType::InvalidImageType), _tiling(TilingType::Sparse)
+    _frameOffset(0), _numberOfFrames(0), _imageType(DcmImageType::InvalidImageType), _tiling(TilingType::Sparse),
+    _depthInMm(0), _widthInMm(0), _heightInMm(0), _opticalPathSequence(nullptr), _focusMethod(""), _extendedDoF(false),
+    _extendedDoFPlaneDistance(0), _extendedDoFPlanes(0), _height(0), _width(0), _tileWidth(0), _tileHeight(0), _samplesPerPixel(0),
+    _instanceNumber(0), _sliceThickness(0)
 {
 }
 
@@ -122,6 +125,51 @@ bool WSIDicomInstance::initialize(DcmFileFormat* fileFormat) {
             }
         }
 
+        // Get focusing info
+        OFString eDoF;
+        if (this->_dataset->findAndGetOFString(DCM_ExtendedDepthOfField, eDoF).good()) {
+            if (eDoF == "YES") {
+                _extendedDoF = true;
+                if (this->_dataset->findAndGetUint16(DCM_NumberOfFocalPlanes, _extendedDoFPlanes).bad()) {
+                    _extendedDoFPlanes = 0;
+                }
+                if (this->_dataset->findAndGetFloat32(DCM_DistanceBetweenFocalPlanes, _extendedDoFPlaneDistance).bad()) {
+                    _extendedDoFPlaneDistance = 0;
+                }
+            }
+            else {
+                _extendedDoF = false;
+            }
+        }
+        OFString focusMethod = "";
+        this->_dataset->findAndGetOFString(DCM_FocusMethod, focusMethod);
+        _focusMethod = std::string(focusMethod.c_str());
+
+        this->_dataset->findAndGetUint32(DCM_TotalPixelMatrixRows, _height);
+        this->_dataset->findAndGetUint32(DCM_TotalPixelMatrixColumns, _width);
+        if (_height == 0 || _width == 0) {
+            return _isValid;
+        }
+
+        this->_dataset->findAndGetFloat32(DCM_ImagedVolumeHeight, _heightInMm);
+        this->_dataset->findAndGetFloat32(DCM_ImagedVolumeWidth, _widthInMm);
+        this->_dataset->findAndGetFloat32(DCM_ImagedVolumeDepth, _depthInMm);
+        this->_dataset->findAndGetUint16(DCM_Rows, _tileHeight);
+        this->_dataset->findAndGetUint16(DCM_Columns, _tileWidth);
+        this->_dataset->findAndGetUint16(DCM_SamplesPerPixel, _samplesPerPixel);
+        OFString photometricInterpretation = "";
+        this->_dataset->findAndGetOFString(DCM_PhotometricInterpretation, photometricInterpretation);
+        _photometricInterpretation = std::string(photometricInterpretation.c_str());
+        this->_dataset->findAndGetUint32(DCM_InstanceNumber, _instanceNumber);
+        if (this->_dataset->findAndGetFloat32(DCM_SliceThickness, _sliceThickness).bad()) {
+            _sliceThickness = _depthInMm;
+        }
+        this->_dataset->findAndGetSequenceItem(DCM_OpticalPathSequence, _opticalPathSequence);
+
+        // Check matching SeriesUIDs
+        // Check matching image sizes
+        // Assign levels to grouped instances
+        // Determine base level and pixel size
 
 
         _isValid = true;
