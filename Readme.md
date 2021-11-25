@@ -28,13 +28,12 @@ To compile the code yourself, some prerequesites are required. First, we use CMa
 - Qt (http://www.qt.io/)
 - libtiff (http://www.libtiff.org/)
 - libjpeg (http://libjpeg.sourceforge.net/)
-- JasPer (http://www.ece.uvic.ca/~frodo/jasper/)
+- OpenJPEG (http://www.openjpeg.org/)
 - DCMTK (http://dicom.offis.de/dcmtk.php.en)
 - SWIG (http://www.swig.org/) (only for Python wrapping of the IO library)
 - OpenSlide (http://openslide.org/)
 - PugiXML (http://pugixml.org/)
 - zlib (http://www.zlib.net/)
-- unittest++ (https://github.com/unittest-cpp/unittest-cpp)
 
 To help developers compile this software themselves we provide the necesarry binaries (Visual Studio 2019, 64-bit) for all third party libraries on Windows except OpenCV and Qt (due to size constraints). See the Release page for binaries. If you want to provide the packages yourself, there are no are no strict version requirements, except for libtiff (4.0.1 and higher), Qt (5.1 or higher) and OpenCV (3.1). On Linux all packages can be installed through the package manager on Ubuntu-derived systems (tested on Ubuntu and Kubuntu 18.04 LTS). You can also use the provided Dockerfile for Linux builds (under buildtools).
 

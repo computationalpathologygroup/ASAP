@@ -436,7 +436,7 @@ namespace psimpl
             stats.max = static_cast <double> (*std::max_element (first, last));
             stats.sum = static_cast <double> (std::accumulate (first, last, init));
             stats.mean = stats.sum / count; 
-            std::transform (first, last, first, [stats.mean](auto a) {return stats.mean - a; });
+            std::transform (first, last, first, [stats](auto a) {return stats.mean - a; });
             stats.std = std::sqrt (static_cast <double> (std::inner_product (first, last, first, init)) / count);
             return stats;
         }
