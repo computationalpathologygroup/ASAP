@@ -51,11 +51,13 @@ set(VSI_SUPPORT_SRCS
 set(DICOM_SUPPORT_HS
     DICOMImage.h
 	DICOMImageFactory.h
+    WSIDicomInstance.h
 )
 
 set(DICOM_SUPPORT_SRCS
     DICOMImage.cpp
 	DICOMImageFactory.cpp
+    WSIDicomInstance.cpp
 )
 
 if(WIN32)

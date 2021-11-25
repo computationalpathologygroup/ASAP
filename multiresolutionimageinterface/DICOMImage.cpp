@@ -2,23 +2,8 @@
 #include <shared_mutex>
 #include <sstream>
 #include "core/filetools.h"
-
-#include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
-#include "dcmtk/ofstd/ofcond.h"
-#include "dcmtk/dcmdata/dcdeftag.h"
-#include "dcmtk/dcmdata/dcuid.h"
-#include "dcmtk/dcmimgle/dcmimage.h"
-#include "dcmtk/dcmdata/dcdatset.h"
-#include "dcmtk/dcmdata/dcxfer.h"
-#include "dcmtk/dcmdata/dcmetinf.h"
-#include "dcmtk/dcmdata/dcrlerp.h"
-#include "dcmtk/dcmdata/dcrledrg.h"
-
-// JPEG en/decoding
-#include "dcmtk/dcmjpeg/djdecode.h"
-#include "dcmtk/dcmjpeg/djencode.h"
-
+#include "WSIDicomInstance.h"
 using namespace pathology;
 
 DICOMImage::DICOMImage() : MultiResolutionImage() {
@@ -43,35 +28,11 @@ bool DICOMImage::initializeType(const std::string& imagePath) {
   core::getFiles(dirPath, "*.dcm", dcmFilePaths);
   std::vector<DcmFileFormat> dcmFiles;
   for (auto dcmFilePath : dcmFilePaths) {
-      DcmFileFormat dcm;
-      OFCondition status = dcm.loadFile(OFFilename(dcmFilePath.c_str()));
+      DcmFileFormat* dcm = new DcmFileFormat();
+      OFCondition status = dcm->loadFile(OFFilename(dcmFilePath.c_str()));
       if (status.good()) {
-          OFString msSOPClassUID;
-          std::vector<std::string> supportedTransferSyntax = { UID_JPEGProcess1TransferSyntax, UID_JPEGProcess2_4TransferSyntax, UID_JPEG2000LosslessOnlyTransferSyntax, UID_JPEG2000TransferSyntax };
-          std::vector<DcmTagKey> requiredTags = { DCM_StudyInstanceUID, DCM_SeriesInstanceUID, DCM_FrameOfReferenceUID, DCM_Rows, DCM_Columns,
-                                                  DCM_SamplesPerPixel, DCM_PhotometricInterpretation, DCM_ImageType, DCM_TotalPixelMatrixColumns,
-                                                  DCM_TotalPixelMatrixRows, DCM_NumberOfFrames,  DCM_SharedFunctionalGroupsSequence, DCM_OpticalPathSequence};
-          DcmMetaInfo* metainfo = dcm.getMetaInfo();
-          DcmDataset* dcmDataset = dcm.getDataset();
-          metainfo->findAndGetOFString(DCM_MediaStorageSOPClassUID, msSOPClassUID);
-          if (msSOPClassUID == UID_VLWholeSlideMicroscopyImageStorage) {
-              dcmFiles.push_back(dcm);
-              DcmXfer transferSyntax = dcmDataset->getOriginalXfer();
-              if (std::find(supportedTransferSyntax.begin(), supportedTransferSyntax.end(), transferSyntax.getXferID()) == supportedTransferSyntax.end()) {
-                  return _isValid;
-              }
-              OFString tagValue;
-              for (auto tag : requiredTags) {
-                  if (dcmDataset->findAndGetOFString(tag, tagValue).bad()) {
-                      return _isValid;
-                  }
-                  OFString imageType;
-                  dcmDataset->findAndGetOFString(DCM_ImageType, imageType, 2);
-                  if (imageType == "VOLUME") {
-                      DicomImage* image = new DicomImage(&dcm, EXS_Unknown, CIF_UsePartialAccessToPixelData);
-                  }
-              }
-          }
+          WSIDicomInstance instance;
+          instance.initialize(dcm);
       }
       else {
           return _isValid;
