@@ -58,8 +58,8 @@ bool DICOMImage::initializeType(const std::string& imagePath) {
   downsampleToLevel[1] = { baseLevel };
   for (auto instance : dcmInstances) {
       if (instance->getUID("StudyInstanceUID") == baseLevel->getUID("StudyInstanceUID") &&
-          instance->getUID("SeriesInstanceUID") == baseLevel->getUID("SeriesInstanceUID") &&
-          instance->getUID("FrameOfReferenceUID") == baseLevel->getUID("FrameOfReferenceUID")) {
+          instance->getUID("SeriesInstanceUID") == baseLevel->getUID("SeriesInstanceUID") /* &&
+          instance->getUID("FrameOfReferenceUID") == baseLevel->getUID("FrameOfReferenceUID")*/) {
           if (instance->getImageType() == WSIDicomInstance::DcmImageType::Volume) {
               float downsample = static_cast<float>(baseLevel->getSize()[0]) / instance->getSize()[0];
               int roundedDownsample = std::lround(downsample);

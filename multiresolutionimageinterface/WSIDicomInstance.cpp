@@ -4,10 +4,12 @@
 
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/ofstd/ofcond.h"
+#include "dcmtk/dcmdata/dctk.h" 
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcuid.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/dcmdata/dcdatset.h"
+#include "dcmtk/dcmdata/dcpxitem.h" 
 #include "dcmtk/dcmimage/diregist.h"
 #include "dcmtk/dcmdata/dcxfer.h"
 #include "dcmtk/dcmdata/dcmetinf.h"
@@ -17,6 +19,7 @@
 // JPEG en/decoding
 #include "dcmtk/dcmjpeg/djdecode.h"
 #include "dcmtk/dcmjpeg/djencode.h"
+#include "JPEG2000Codec.h"
 
 const std::vector<std::string> WSIDicomInstance::SUPPORTED_TRANSFER_SYNTAX = { UID_JPEGProcess1TransferSyntax, UID_JPEGProcess2_4TransferSyntax, UID_JPEG2000LosslessOnlyTransferSyntax, UID_JPEG2000TransferSyntax };
 
@@ -25,9 +28,8 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
     _frameOffset(0), _numberOfFrames(0), _imageType(DcmImageType::InvalidImageType), _tiling(TilingType::Sparse),
     _depthInMm(0), _widthInMm(0), _heightInMm(0), _opticalPathSequence(nullptr), _focusMethod(""), _extendedDoF(false),
     _extendedDoFPlaneDistance(0), _extendedDoFPlanes(0), _height(0), _width(0), _tileWidth(0), _tileHeight(0), _samplesPerPixel(0),
-    _instanceNumber(0), _sliceThickness(0), _pixelSpacingX(0), _pixelSpacingY(0), _sliceSpacing(0), _bitsPerSample(0)
+    _instanceNumber(0), _sliceThickness(0), _pixelSpacingX(0), _pixelSpacingY(0), _sliceSpacing(0), _bitsPerSample(0), _jp2Codec(new JPEG2000Codec())
 {
-    DJDecoderRegistration::registerCodecs();
     DcmElement* element = NULL;
     if (_dataset->findAndGetElement(DCM_PixelData, element).good()) {
         _pixels = OFstatic_cast(DcmPixelData*, element);
@@ -36,7 +38,7 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
     OFString msSOPClassUID;
     std::vector<DcmTagKey> requiredTags = { DCM_StudyInstanceUID, DCM_SeriesInstanceUID, DCM_FrameOfReferenceUID, DCM_Rows, DCM_Columns,
                                             DCM_SamplesPerPixel, DCM_PhotometricInterpretation, DCM_ImageType, DCM_TotalPixelMatrixColumns,
-                                            DCM_TotalPixelMatrixRows, DCM_NumberOfFrames, DCM_SharedFunctionalGroupsSequence, DCM_OpticalPathSequence };
+                                            DCM_TotalPixelMatrixRows, DCM_NumberOfFrames, DCM_SharedFunctionalGroupsSequence};
     this->_metaInfo->findAndGetOFString(DCM_MediaStorageSOPClassUID, msSOPClassUID);
     if (msSOPClassUID == UID_VLWholeSlideMicroscopyImageStorage) {
         DcmXfer transferSyntax = _dataset->getOriginalXfer();
@@ -163,7 +165,10 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
         if (this->_dataset->findAndGetFloat32(DCM_SliceThickness, _sliceThickness).bad()) {
             _sliceThickness = _depthInMm;
         }
-        this->_dataset->findAndGetSequenceItem(DCM_OpticalPathSequence, _opticalPathSequence);
+
+        if (this->_dataset->findAndGetSequenceItem(DCM_OpticalPathSequence, _opticalPathSequence).bad()) {
+            _opticalPathSequence = nullptr;
+        }
 
         DcmItem* pfSeq;
         if (this->_tiling == TilingType::Sparse) {
@@ -193,7 +198,8 @@ WSIDicomInstance::~WSIDicomInstance()
     _pixels = nullptr;
     delete _fileFormat;
     _fileFormat = nullptr;
-    DJDecoderRegistration::cleanup();
+    delete _jp2Codec;
+    _jp2Codec = nullptr;
 }
 
 std::string WSIDicomInstance::getUID(const std::string& UIDName) const { return this->_UIDs.at(UIDName); }
@@ -233,17 +239,56 @@ bool WSIDicomInstance::valid() const {
 
 void* WSIDicomInstance::getFrame(const long long& x, const long long& y, const long long& z, const long long& op)
 {
-    Uint32 bufferSize = 0;
-    _pixels->getUncompressedFrameSize(_dataset, bufferSize);
-    unsigned char* buffer = new unsigned char[bufferSize];
-    std::fill(buffer, buffer + bufferSize, 0); 
+    unsigned char* buffer;
+    DcmXfer transferSyntax = _dataset->getOriginalXfer();
     int frameRow = y / _tileHeight;
     int frameColumn = x / _tileWidth;
     std::vector<unsigned short> sizeInTiles = this->getSizeInTiles();
-    int frameOffset = this->_tiling == TilingType::Sparse ? _positionToFrameIndex[frameRow * sizeInTiles[0] + frameColumn]  : frameColumn + sizeInTiles[0] * frameRow;
-    Uint32 fragmentNo = 0;
-    OFString dcmColorModel = "";
-    _pixels->getUncompressedFrame(_dataset, frameOffset, fragmentNo, buffer, bufferSize, dcmColorModel);
+    int frameOffset = this->_tiling == TilingType::Sparse ? _positionToFrameIndex[frameRow * sizeInTiles[0] + frameColumn] : frameColumn + sizeInTiles[0] * frameRow;
+
+    if (transferSyntax.getXferID() == std::string(UID_JPEG2000LosslessOnlyTransferSyntax) || transferSyntax.getXferID() == std::string(UID_JPEG2000TransferSyntax)) {
+        Uint32 bufferSize = _tileHeight * _tileWidth * _samplesPerPixel;
+        buffer = new unsigned char[bufferSize];
+        std::fill(buffer, buffer + bufferSize, 0);
+
+        DcmPixelSequence* dseq = NULL;
+        E_TransferSyntax xferSyntax = EXS_Unknown;
+        const DcmRepresentationParameter* rep = NULL;
+        // Find the key that is needed to access the right representation of the data within DCMTK
+        _pixels->getOriginalRepresentationKey(xferSyntax, rep);
+        // Access original data representation and get result within pixel sequence
+        OFCondition result = _pixels->getEncapsulatedRepresentation(xferSyntax, rep, dseq);
+        if (result == EC_Normal)
+        {
+            unsigned long numItems = dseq->card();
+            DcmPixelItem* pixitem = NULL;
+            // Access first frame (skipping offset table)
+            dseq->getItem(pixitem, frameOffset + 1);
+            if (pixitem == NULL) {
+                return buffer;
+            }
+            Uint8* pixData = NULL;
+            // Get the length of this pixel item (i.e. fragment, i.e. most of the time, the lenght of the frame)
+            Uint32 length = pixitem->getLength();
+            if (length == 0) {
+                return buffer;
+            }
+            // Finally, get the compressed data for this pixel item
+            result = pixitem->getUint8Array(pixData);
+            // Do something useful with pixData...
+            _jp2Codec->decode(pixData, length, buffer, bufferSize);
+        }
+    }
+    else {
+        Uint32 bufferSize;
+        _pixels->getUncompressedFrameSize(_dataset, bufferSize);
+        buffer = new unsigned char[bufferSize];
+        std::fill(buffer, buffer + bufferSize, 0);
+
+        Uint32 fragmentNo = 0;
+        OFString dcmColorModel = "";
+        _pixels->getUncompressedFrame(_dataset, frameOffset, fragmentNo, buffer, bufferSize, dcmColorModel);
+    }
     return buffer;
 }
 

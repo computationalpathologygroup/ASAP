@@ -7,6 +7,7 @@
 class DICOMFILEFORMAT_EXPORT DICOMImageFactory : public MultiResolutionImageFactory {
 public:
 	DICOMImageFactory();
+	~DICOMImageFactory();
 
 private:
   MultiResolutionImage* readImage(const std::string& fileName) const;

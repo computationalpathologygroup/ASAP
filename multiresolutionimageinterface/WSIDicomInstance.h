@@ -11,6 +11,7 @@ class DcmMetaInfo;
 class DcmDataset;
 class DcmPixelData;
 class DcmItem;
+class JPEG2000Codec;
 
 class DICOMFILEFORMAT_EXPORT WSIDicomInstance  {
 
@@ -58,6 +59,8 @@ private:
 
     DcmImageType _imageType;
     TilingType _tiling;
+
+    JPEG2000Codec* _jp2Codec;
 
     std::map<std::string, std::string> _UIDs;
 

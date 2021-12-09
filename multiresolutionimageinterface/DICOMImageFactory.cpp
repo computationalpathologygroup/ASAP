@@ -1,7 +1,14 @@
 #include "DICOMImageFactory.h"
 #include "DICOMImage.h"
+#include "dcmtk/dcmjpeg/djdecode.h"
 
 DICOMImageFactory::DICOMImageFactory() : MultiResolutionImageFactory("DICOM Formats", { "dcm" }, 1) {
+    DJDecoderRegistration::registerCodecs();
+}
+
+DICOMImageFactory::~DICOMImageFactory()
+{
+    DJDecoderRegistration::cleanup();
 }
 
 MultiResolutionImage* DICOMImageFactory::readImage(const std::string& fileName) const {
