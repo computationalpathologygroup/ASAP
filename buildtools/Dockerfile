@@ -50,11 +50,11 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
 
 RUN /root/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
     /root/miniconda3/bin/conda create --quiet --name build_python3.6m python=3.6 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.6m numpy=1.19 nomkl &&\
+    /root/miniconda3/bin/conda install --quiet -n build_python3.6m numpy nomkl &&\
     /root/miniconda3/bin/conda create --quiet --name build_python3.7m python=3.7 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.7m numpy=1.19 nomkl && \
+    /root/miniconda3/bin/conda install --quiet -n build_python3.7m numpy nomkl && \
     /root/miniconda3/bin/conda create --quiet --name build_python3.8 python=3.8 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.8 numpy=1.19 nomkl
+    /root/miniconda3/bin/conda install --quiet -n build_python3.8 numpy nomkl
 
 RUN ln -sd /root/miniconda3/envs/build_python3.7m/lib/python3.7 /root/miniconda3/envs/build_python3.7m/lib/python3.7m && \
     ln -sd /root/miniconda3/envs/build_python3.6m/lib/python3.6 /root/miniconda3/envs/build_python3.6m/lib/python3.6m
