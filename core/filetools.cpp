@@ -458,7 +458,6 @@ namespace core
     if ((f == ':') && (spath.size() == 2) && ((b >= 'a') && (b <= 'z'))) return true;
 
     std::string s(spath);
-    cleanDirName(s);
     try
     {
       fs::path p(s);

@@ -1,6 +1,7 @@
 #include "WSIDicomInstance.h"
 
 #include <vector>
+#include <string>
 
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/ofstd/ofcond.h"
@@ -101,7 +102,7 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
         }
         OFString nrFrames;
         if (this->_dataset->findAndGetOFString(DCM_NumberOfFrames, nrFrames).good()) {
-            this->_numberOfFrames = std::stoi(nrFrames);
+            this->_numberOfFrames = std::stoi(nrFrames.c_str());
         } else {
             this->_numberOfFrames = 1;
         }
