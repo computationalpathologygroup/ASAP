@@ -107,12 +107,12 @@ int main(int argc, char *argv[]) {
 
     desc.add_argument("-x", "--spacingX")
         .help("Set the pixel spacing of the x-dimension")
-        .default_value(-1)
+        .default_value(double(-1))
         .scan<'g', double>();
 
     desc.add_argument("-y", "--spacingY")
         .help("Set the pixel spacing of the y-dimension")
-        .default_value(-1)
+        .default_value(double(-1))
         .scan<'g', double>();
 
     desc.add_argument("-t", "--tileSize")
