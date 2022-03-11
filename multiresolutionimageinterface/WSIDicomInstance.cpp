@@ -37,8 +37,8 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
     }
 
     OFString msSOPClassUID;
-    std::vector<DcmTagKey> requiredTags = { DCM_StudyInstanceUID, DCM_SeriesInstanceUID, DCM_FrameOfReferenceUID, DCM_Rows, DCM_Columns,
-                                            DCM_SamplesPerPixel, DCM_PhotometricInterpretation, DCM_ImageType, DCM_TotalPixelMatrixColumns,
+    std::vector<DcmTagKey> requiredTags = { DCM_StudyInstanceUID, DCM_SeriesInstanceUID, DCM_Rows, DCM_Columns,
+                                            DCM_SamplesPerPixel, DCM_PhotometricInterpretation, DCM_TotalPixelMatrixColumns,
                                             DCM_TotalPixelMatrixRows, DCM_NumberOfFrames, DCM_SharedFunctionalGroupsSequence};
     this->_metaInfo->findAndGetOFString(DCM_MediaStorageSOPClassUID, msSOPClassUID);
     if (msSOPClassUID == UID_VLWholeSlideMicroscopyImageStorage) {
@@ -57,20 +57,24 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
 
         // Check the Image Type
         OFString imageType;
-        this->_dataset->findAndGetOFString(DCM_ImageType, imageType, 2);
-        if (imageType == "VOLUME") {
-            _imageType = DcmImageType::Volume;
-        }
-        else if (imageType == "LABEL") {
-            _imageType = DcmImageType::Label;
-        }
-        else if (imageType == "OVERVIEW") {
-            _imageType = DcmImageType::Overview;
+        if (this->_dataset->findAndGetOFString(DCM_ImageType, imageType, 2).good()) {
+            if (imageType == "VOLUME") {
+                _imageType = DcmImageType::Volume;
+            }
+            else if (imageType == "LABEL") {
+                _imageType = DcmImageType::Label;
+            }
+            else if (imageType == "OVERVIEW") {
+                _imageType = DcmImageType::Overview;
+            }
+            else {
+                _imageType = DcmImageType::InvalidImageType;
+                _isValid;
+                return;
+            }
         }
         else {
-            _imageType = DcmImageType::InvalidImageType;
-            _isValid;
-            return;
+            _imageType = DcmImageType::Volume;
         }
 
         // Store the UIDs
@@ -79,8 +83,8 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
         this->_UIDs["StudyInstanceUID"] = std::string(uid.c_str());
         this->_dataset->findAndGetOFString(DCM_SeriesInstanceUID, uid);
         this->_UIDs["SeriesInstanceUID"] = std::string(uid.c_str());
-        this->_dataset->findAndGetOFString(DCM_FrameOfReferenceUID, uid);
-        this->_UIDs["FrameOfReferenceUID"] = std::string(uid.c_str());
+        //this->_dataset->findAndGetOFString(DCM_FrameOfReferenceUID, uid);
+       // this->_UIDs["FrameOfReferenceUID"] = std::string(uid.c_str());
         this->_dataset->findAndGetOFString(DCM_SOPInstanceUID, uid);
         this->_UIDs["SOPInstanceUID"] = std::string(uid.c_str());
 

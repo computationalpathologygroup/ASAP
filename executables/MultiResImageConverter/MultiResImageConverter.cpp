@@ -93,16 +93,16 @@ int main(int argc, char *argv[]) {
 
     desc.add_argument("-s", "--svs")
         .help("Convert to Aperio SVS instead of regular TIFF")
-        .default_value(false)
-        .implicit_value(true);
+        .default_value(bool(false))
+        .implicit_value(bool(true));
 
     desc.add_argument("-c", "--codec")
         .help("Set compression codec. Can be one of the following: RAW, LZW, JPEG, JPEG2000")
-        .default_value("LZW");
+        .default_value(std::string("LZW"));
 
     desc.add_argument("-r", "--rate")
         .help("Set compression rate for JPEG and JPEG2000")
-        .default_value(70.)
+        .default_value(double(70.))
         .scan<'g', double>();
 
     desc.add_argument("-x", "--spacingX")
@@ -117,17 +117,17 @@ int main(int argc, char *argv[]) {
 
     desc.add_argument("-t", "--tileSize")
         .help("Sets the tile size for the TIFF")
-        .default_value(512)
+        .default_value((unsigned int)512)
         .scan<'i', unsigned int>();
 
     desc.add_argument("-p", "--pyramidLevels")
         .help("Sets the maximum number of pyramid levels; -1 indicates that the number of levels is automatically determined")
-        .default_value(-1)
+        .default_value(int(-1))
         .scan<'i', int>();
 
     desc.add_argument("-d", "--downsample")
         .help("Sets the downsample factor between each pyramid level")
-        .default_value(2)
+        .default_value((unsigned int)2)
         .scan<'i', unsigned int>();
 
     desc.add_argument("input")
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 
     desc.add_argument("output")
         .help("Path to the output image")
-        .default_value(".");
+        .default_value(std::string("."));
 
     try {
         desc.parse_args(argc, argv);
