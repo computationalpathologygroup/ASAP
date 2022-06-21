@@ -4,7 +4,9 @@
 #include <thread>
 #include <vector>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace ASAP
 {
@@ -28,22 +30,22 @@ namespace ASAP
 	class TemporaryDirectoryTracker
 	{
 		public:
-			TemporaryDirectoryTracker(const boost::filesystem::path directory, const TemporaryDirectoryConfiguration configuration = GetStandardConfiguration());
+			TemporaryDirectoryTracker(const fs::path directory, const TemporaryDirectoryConfiguration configuration = getStandardConfiguration());
 			~TemporaryDirectoryTracker(void);
 
-			static TemporaryDirectoryConfiguration GetStandardConfiguration(void);
+			static TemporaryDirectoryConfiguration getStandardConfiguration(void);
 
-			boost::filesystem::path GetAbsolutePath(void) const;
-			std::vector<boost::filesystem::path> GetFilepaths(void) const;
-			uint64_t GetDirectorySizeInMb(void) const;
+			fs::path getAbsolutePath(void) const;
+			std::vector<fs::path> getFilepaths(void) const;
+			uint64_t getDirectorySizeInMb(void) const;
 
 		private:
-			TemporaryDirectoryConfiguration m_configuration_;
-			bool							m_continue_;
-			boost::filesystem::path			m_directory_;
-			std::thread						m_update_thread_;
+			TemporaryDirectoryConfiguration m_configuration;
+			bool							m_continue;
+			fs::path            			m_directory;
+			std::thread						m_update_thread;
 
-			void Update_(void);
+			void update(void);
 	};
 }
 #endif // __ASAP_MISC_TEMPORARYDIRECTORYTRACKER__

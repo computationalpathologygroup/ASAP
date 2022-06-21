@@ -60,8 +60,20 @@
       <property name="editTriggers">
        <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed</set>
       </property>
+      <property name="showDropIndicator" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropOverwriteMode">
+       <bool>false</bool>
+      </property>
       <property name="dragDropMode">
        <enum>QAbstractItemView::DragOnly</enum>
+      </property>
+      <property name="defaultDropAction">
+       <enum>Qt::IgnoreAction</enum>
       </property>
       <property name="alternatingRowColors">
        <bool>true</bool>
@@ -84,11 +96,11 @@
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
       </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>33</number>
-      </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
        <number>20</number>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>33</number>
       </attribute>
      </widget>
     </item>
@@ -110,6 +122,12 @@
       <property name="editTriggers">
        <set>QAbstractItemView::EditKeyPressed</set>
       </property>
+      <property name="showDropIndicator" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
       <property name="dragDropMode">
        <enum>QAbstractItemView::DragDrop</enum>
       </property>
@@ -121,6 +139,9 @@
         <width>200</width>
         <height>200</height>
        </size>
+      </property>
+      <property name="movement">
+       <enum>QListView::Snap</enum>
       </property>
       <property name="resizeMode">
        <enum>QListView::Adjust</enum>
@@ -150,8 +171,20 @@
       <property name="editTriggers">
        <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed</set>
       </property>
+      <property name="showDropIndicator" stdset="0">
+       <bool>false</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropOverwriteMode">
+       <bool>false</bool>
+      </property>
       <property name="dragDropMode">
        <enum>QAbstractItemView::DragOnly</enum>
+      </property>
+      <property name="defaultDropAction">
+       <enum>Qt::IgnoreAction</enum>
       </property>
       <property name="alternatingRowColors">
        <bool>true</bool>
@@ -212,6 +245,9 @@
       <property name="dragDropMode">
        <enum>QAbstractItemView::DropOnly</enum>
       </property>
+      <property name="defaultDropAction">
+       <enum>Qt::IgnoreAction</enum>
+      </property>
      </widget>
     </item>
    </layout>
@@ -222,12 +258,12 @@
      <x>0</x>
      <y>0</y>
      <width>1113</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_start">
+   <widget class="QMenu" name="menu_source">
     <property name="title">
-     <string>Start</string>
+     <string>Source</string>
     </property>
     <addaction name="action_open_file"/>
     <addaction name="action_open_folder"/>
@@ -238,7 +274,7 @@
      <string>History</string>
     </property>
    </widget>
-   <addaction name="menu_start"/>
+   <addaction name="menu_source"/>
    <addaction name="menu_history"/>
   </widget>
   <widget class="QStatusBar" name="status_bar"/>
@@ -255,6 +291,12 @@
   <action name="action_open_external">
    <property name="text">
     <string>Open External</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

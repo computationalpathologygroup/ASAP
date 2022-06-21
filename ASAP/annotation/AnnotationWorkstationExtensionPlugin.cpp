@@ -96,6 +96,7 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
     QColorDialog::setCustomColor(i, customColor);
   }
   QtAnnotation::selectionSensitivity = _settings->value("annotationSelectionSensitivity", 100.).value<float>();
+  QtAnnotation::annotationColorForRects = _settings->value("annotationColorForRects", true).value<bool>();
 
   qRegisterMetaTypeStreamOperators<QtAnnotation*>("QtAnnotation*");
   qRegisterMetaTypeStreamOperators<QtAnnotationGroup*>("QtAnnotationGroup*");
@@ -128,7 +129,12 @@ void AnnotationWorkstationExtensionPlugin::onOptionsButtonPressed() {
   selSensSpinBox->setSingleStep(20);
   selSensSpinBox->setObjectName("SelectionSensitivity");
   selSensSpinBox->setToolTip("Sets the selection sensitivy for clicking individual points in an annatation. Higher means easier to click.");
+  QCheckBox* annotationColorForRects = new QCheckBox();
+  annotationColorForRects->setChecked(QtAnnotation::annotationColorForRects);
+  annotationColorForRects->setObjectName("AnnotationColorForRects");
+  annotationColorForRects->setToolTip("Set the color of the rectangles to the same color as the annotation itself.");
   optionsDialogLayout->addRow("Selection sensitivity", selSensSpinBox);
+  optionsDialogLayout->addRow("Use annotation color for coordinate indicators", annotationColorForRects);
   dialogLayout->addLayout(optionsDialogLayout);
   QPushButton* cancel = new QPushButton("Cancel");
   QPushButton* ok = new QPushButton("Ok");
@@ -142,8 +148,11 @@ void AnnotationWorkstationExtensionPlugin::onOptionsButtonPressed() {
   int rval = optionsDialog->exec();
   if (rval) {
     float newSelectionSensitivity = static_cast<float>(selSensSpinBox->value());
+    bool colorForRects = annotationColorForRects->isChecked();
     QtAnnotation::selectionSensitivity = newSelectionSensitivity;
+    QtAnnotation::annotationColorForRects = colorForRects;
     _settings->setValue("annotationSelectionSensitivity", newSelectionSensitivity);
+    _settings->setValue("annotationColorForRects", colorForRects);
   }
 }
 
@@ -639,14 +648,35 @@ bool AnnotationWorkstationExtensionPlugin::eventFilter(QObject* watched, QEvent*
       }
       connect(_treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(onTreeWidgetSelectedItemsChanged()));
     }
-    else if (kpEvent->key() == Qt::Key::Key_Z) {
-      if (std::shared_ptr<AnnotationTool> tool = std::dynamic_pointer_cast<AnnotationTool>(_viewer->getActiveTool())) {
-        tool->keyPressEvent(kpEvent);
-      }
-    }
   }
   return QObject::eventFilter(watched, event);
 }
+
+void AnnotationWorkstationExtensionPlugin::zoomToAnnotationStart() {
+    if (this->getActiveAnnotation()) {
+        QTimeLine* anim = new QTimeLine(500);
+
+        _start_zoom = _viewer->mapToScene(_viewer->viewport()->rect()).boundingRect();
+        _end_zoom = this->getActiveAnnotation()->mapToScene(this->getActiveAnnotation()->boundingRect()).boundingRect();
+        anim->setFrameRange(0, 100);
+        anim->setUpdateInterval(5);
+
+        connect(anim, SIGNAL(valueChanged(qreal)), SLOT(zoomToAnnotation(qreal)));
+        connect(anim, SIGNAL(finished()), SLOT(zoomToAnnotationFinished()));
+        anim->start();
+    }
+}
+
+void AnnotationWorkstationExtensionPlugin::zoomToAnnotation(qreal val) {
+    QRectF current = QRectF(_start_zoom.topLeft() + val * (_end_zoom.topLeft() - _start_zoom.topLeft()), _start_zoom.bottomRight() + val * (_end_zoom.bottomRight() - _start_zoom.bottomRight()));
+    _viewer->fitInView(current, Qt::AspectRatioMode::KeepAspectRatio);
+}
+
+void AnnotationWorkstationExtensionPlugin::zoomToAnnotationFinished() {
+    sender()->~QObject();
+    _viewer->updateCurrentFieldOfView();
+}
+
 
 void AnnotationWorkstationExtensionPlugin::addAnnotationGroup() {
   if (_treeWidget && _annotationService) {

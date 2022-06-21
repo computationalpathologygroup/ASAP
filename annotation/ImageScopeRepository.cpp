@@ -4,11 +4,11 @@
 #include "AnnotationList.h"
 #include "core/Point.h"
 #include "core/filetools.h"
-#include "core/stringconversion.h"
 #include <vector>
 #include <string>
 #include <stdio.h>
 #include "pugixml.hpp"
+#include <algorithm>
 
 ImageScopeRepository::ImageScopeRepository(const std::shared_ptr<AnnotationList>& list) :
   Repository(list),

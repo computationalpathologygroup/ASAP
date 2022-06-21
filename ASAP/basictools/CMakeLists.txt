@@ -20,11 +20,26 @@ target_link_libraries(ZoomToolPlugin PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
 set_target_properties(PanToolPlugin PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(ZoomToolPlugin PROPERTIES DEBUG_POSTFIX _d)
 
-install(TARGETS PanToolPlugin ZoomToolPlugin
-        RUNTIME DESTINATION bin/plugins/tools
-        LIBRARY DESTINATION bin/plugins/tools
-        ARCHIVE DESTINATION lib/plugins/tools
-)
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+
+  install(TARGETS PanToolPlugin ZoomToolPlugin
+          BUNDLE DESTINATION . 
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/tools
+          LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/tools
+          ARCHIVE DESTINATION ${INSTALL_CMAKE_DIR}/plugins/tools
+  )
+
+ELSE(APPLE)
+  install(TARGETS PanToolPlugin ZoomToolPlugin
+          RUNTIME DESTINATION bin/plugins/tools
+          LIBRARY DESTINATION bin/plugins/tools
+          ARCHIVE DESTINATION lib/plugins/tools
+  )
+ENDIF(APPLE)
 
 install(FILES PanTool.h ZoomTool.h DESTINATION include/ASAP/plugins/tools)
 

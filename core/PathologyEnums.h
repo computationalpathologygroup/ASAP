@@ -3,22 +3,27 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <array>
 #include "core_export.h"
+
+typedef std::array<float, 4> rgbaArray;
 
 namespace pathology {
 
   struct LUT {
-    unsigned char colors[256][4];
-    bool wrapAround;
+    std::vector<float> indices;
+    std::vector<rgbaArray> colors;
+    bool relative;
   };
 
-  extern CORE_EXPORT const std::map<std::string, LUT> ColorLookupTables;
+  extern CORE_EXPORT std::map<std::string, LUT> DefaultColorLookupTables;
 
   enum ColorType : int {
     InvalidColorType,
     Monochrome,
     RGB,
-    ARGB,
+    RGBA,
     Indexed
   };
 

@@ -1,5 +1,4 @@
 #include "MultiResolutionImage.h"
-#include "boost/thread.hpp"
 #include <cmath>
 
 using namespace pathology;
@@ -124,15 +123,15 @@ MultiResolutionImage::MultiResolutionImage() :
   _numberOfZPlanes(1),
   _currentZPlaneIndex(0)
 {
-  _cacheMutex.reset(new boost::mutex());
-  _openCloseMutex.reset(new boost::shared_mutex());
+  _cacheMutex.reset(new std::mutex());
+  _openCloseMutex.reset(new std::shared_mutex());
 }
 
 int MultiResolutionImage::getNumberOfZPlanes() const {
   return _numberOfZPlanes;
 }
 void MultiResolutionImage::setCurrentZPlaneIndex(const unsigned int& zPlaneIndex) {
-  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   zPlaneIndex < _numberOfZPlanes ? _currentZPlaneIndex = zPlaneIndex : _currentZPlaneIndex = _numberOfZPlanes - 1;
 }
 
@@ -193,7 +192,7 @@ const int MultiResolutionImage::getBestLevelForDownSample(const double& downsamp
       double currentDownSample = (double)_levelDimensions[0][0]/(double)_levelDimensions[i][0];
       double previousDownSample = (double)_levelDimensions[0][0] / (double)_levelDimensions[i-1][0];
       if (downsample<currentDownSample) {
-        
+   
         if (std::abs(currentDownSample - downsample) > std::abs(previousDownSample - downsample)) {
           return i - 1;
         }
@@ -212,8 +211,13 @@ const int MultiResolutionImage::getBestLevelForDownSample(const double& downsamp
 }
 
 MultiResolutionImage::~MultiResolutionImage() {
-  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   cleanup();
+}
+
+ImageSource* MultiResolutionImage::clone()
+{
+    return nullptr;
 }
 
 void MultiResolutionImage::cleanup() {

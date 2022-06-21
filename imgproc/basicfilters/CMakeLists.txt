@@ -21,9 +21,24 @@ ENDIF(WIN32)
 install(FILES FilterBase.h ColorDeconvolutionFilter.h ImageFilter.h DESTINATION include/imgproc/basicfilters)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/basicfilters_export.h DESTINATION include/imgproc/basicfilters)
 
-install(TARGETS basicfilters
-  EXPORT asap-targets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+  
+  install(TARGETS basicfilters
+    EXPORT asap-targets
+    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+    LIBRARY DESTINATION ${INSTALL_RESOURCE_DIR}
+    ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}
+  )
+
+ELSE(APPLE)
+  install(TARGETS basicfilters
+    EXPORT asap-targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+  )
+ENDIF(APPLE)

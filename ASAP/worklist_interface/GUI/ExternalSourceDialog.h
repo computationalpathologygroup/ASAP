@@ -2,12 +2,12 @@
 #define __ASAP_GUI_EXTERNALSOURCEDIALOG__
 
 #include <QDialog>
-#include <QLabel>
-#include <QPushButton>
-#include <QDialogButtonBox>
-#include <QLineEdit>
-#include <QGridLayout>
-#include <QCheckBox>
+
+class QLabel;
+class QLineEdit;
+class QCheckBox;
+class QDialogButtonBox;
+class QGridLayout;
 
 namespace ASAP
 {
@@ -24,27 +24,27 @@ namespace ASAP
 
 			explicit ExternalSourceDialog(QWidget* parent = nullptr);
 
-			SourceDialogResults GetLoginDetails(void);
-			bool HasValidCredentials(void);
+			SourceDialogResults getLoginDetails(void);
+			bool hasValidCredentials(void);
 
 
 		private:
-			QLabel*				m_label_location_;
-			QLabel*				m_label_token_;
+			QLabel* m_label_location;
+			QLabel*	m_label_token;
 
-			QLineEdit*			m_input_location_;
-			QLineEdit*			m_input_token_;
-			QCheckBox*			m_input_ignore_certificate_;
+			QLineEdit* m_input_location;
+			QLineEdit* m_input_token;
+			QCheckBox* m_input_ignore_certificate;
 
-			QDialogButtonBox*	m_buttons_;
-			QGridLayout*		m_grid_layout_;
+			QDialogButtonBox*	m_buttons;
+			QGridLayout* m_grid_layout;
 
-			bool				m_valid_;
+			bool m_valid;
 
-			void SetupGUI_(void);
+			void setupGUI(void);
 
 		private slots:
-			void SaveCredentials_(void);
+			void saveCredentials(void);
 	};
 }
 #endif // __ASAP_GUI_EXTERNALSOURCEDIALOG__

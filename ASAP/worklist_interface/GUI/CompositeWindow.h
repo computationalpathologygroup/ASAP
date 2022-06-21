@@ -5,6 +5,7 @@
 #include <memory>
 #include <unordered_map>
 #include <QtWidgets/QMainWindow>
+#include <QSettings>
 
 #include "CompositeChild.h"
 #include "ui_CompositeWindowLayout.h"
@@ -34,21 +35,26 @@ namespace ASAP
 		public:
 			explicit CompositeWindow(QWidget* parent = 0);
 
-			int AddTab(QMainWindow* window, const std::string tab_name);
-			int AddTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts);
+			~CompositeWindow();
+
+			int addTab(QMainWindow* window, const std::string tab_name);
+			int addTab(CompositeChild* window, const std::string tab_name, std::vector<ShortcutAction>& shortcuts);
 
 		private:
 			int											m_current_child_;
 			std::vector<QMainWindow*>					m_children_;
 			std::unordered_map<std::string, size_t>		m_mapped_children_;
 			std::unique_ptr<Ui::CompositeWindowLayout>	m_ui_;
+			QSettings*									m_settings;
 
-			void RegisterKeySequence_(const ShortcutAction& shortcut);
-			void SetSlots_(void);
+			void registerKeySequence_(const ShortcutAction& shortcut);
+			void setSlots_(void);
+			void readSettings();
+			void writeSettings();
 			
 		private slots:
-			void OnTabChange_(int index);
-			void OnTabRequest_(int tab_id);
+			void onTabChange(int index);
+			void onTabRequest(int tab_id);
 	};
 }
 #endif // __ASAP_GUI_COMPOSITEWINDOW__

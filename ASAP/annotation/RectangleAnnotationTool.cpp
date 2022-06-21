@@ -90,6 +90,7 @@ void RectangleAnnotationTool::keyPressEvent(QKeyEvent *event) {
     if (!_generating && _annotationPlugin->getActiveAnnotation()) {
       if (_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() <= 2) {
         _annotationPlugin->deleteAnnotation(_annotationPlugin->getActiveAnnotation());
+        event->accept();
       }
     }
   }
@@ -203,9 +204,10 @@ void RectangleAnnotationTool::addCoordinate(const QPointF& scenePos) {
 
 QAction* RectangleAnnotationTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("RectangleAnnotation", this);
+    _button = new QAction("&RectangleAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/rectangle.png")));
+    _button->setShortcut(QKeySequence("r"));
   }
   return _button;
 }

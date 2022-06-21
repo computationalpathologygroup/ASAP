@@ -176,7 +176,7 @@ Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const patholo
     _buffer = new T[_bufferSize];
   }
   if (!dimensions.empty()) {
-    if ((_colorType == pathology::ARGB && dimensions.back() != 4) || (_colorType == pathology::RGB && dimensions.back() != 3) || (_colorType == pathology::Monochrome && dimensions.back() != 1)) {
+    if ((_colorType == pathology::RGBA && dimensions.back() != 4) || (_colorType == pathology::RGB && dimensions.back() != 3) || (_colorType == pathology::Monochrome && dimensions.back() != 1)) {
       _colorType = pathology::Indexed;
     }
   }
@@ -216,8 +216,13 @@ void Patch<T>::swap(Patch<T>& first, Patch<T>& second) {
 
 template<typename T>
 Patch<T>& Patch<T>::operator=(Patch<T> rhs) {
-  this->swap(*this, rhs);
+  this->swap(*this, const_cast <Patch<T>&>(rhs));
   return *this;
+}
+
+template<typename T>
+ImageSource* Patch<T>::clone() {
+  return new Patch<T>(*this);
 }
 
 template<typename T>

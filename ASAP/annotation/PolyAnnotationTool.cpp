@@ -89,9 +89,10 @@ void PolyAnnotationTool::addCoordinate(const QPointF& scenePos) {
 
 QAction* PolyAnnotationTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("PolyAnnotation", this);
+    _button = new QAction("&PolyAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/poly.png")));
+    _button->setShortcut(QKeySequence("p"));
   }
   return _button;
 }

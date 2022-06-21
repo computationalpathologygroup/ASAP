@@ -41,6 +41,8 @@
 
 #ifdef WIN32
 const char* ASAP_Window::sharedLibraryExtensions = ".dll";
+#elif __APPLE__
+const char* ASAP_Window::sharedLibraryExtensions = ".dylib";
 #else
 const char* ASAP_Window::sharedLibraryExtensions = ".so";
 #endif
@@ -174,6 +176,7 @@ void ASAP_Window::loadPlugins() {
                   mainToolBar->addAction(toolAction);
                   toolAction->setCheckable(true);
                   _toolActions->addAction(toolAction);
+                  toolAction->setParent(this);
                 }
               }
               _extensions.push_back(std::move(extension));
@@ -187,6 +190,18 @@ void ASAP_Window::loadPlugins() {
       }
     }
   }
+}
+
+
+void ASAP_Window::keyPressEvent(QKeyEvent* event)
+{
+    event->ignore();
+    if (event->key() == Qt::Key::Key_F1) {
+        this->showShortcutOverview();
+    }
+    for (auto const& extension : _extensions) {
+        extension->keyPressEvent(event);
+    }
 }
 
 void ASAP_Window::closeEvent(QCloseEvent *event) {
@@ -278,28 +293,33 @@ void ASAP_Window::openFile(const QString& fileName, const QString& factoryName) 
 
 void ASAP_Window::on_actionOpen_triggered()
 { 
-  QString filterList;
-  std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
-  QString defaultString = "All supported types (";
-  for (auto it = allExtensions.begin(); it != allExtensions.end(); ++it) {
-    defaultString += " *." + QString::fromStdString(*it);
-  }
-  defaultString += ")";
-  filterList += defaultString;
+	QList<QString> filename_factory = this->getFileNameAndFactory();
+	openFile(filename_factory[0], filename_factory[1] == "All supported types" ? "default": filename_factory[1]);
+}
 
-  std::vector<std::pair<std::string, std::set<std::string>> > factoriesAndExtensions = MultiResolutionImageFactory::getLoadedFactoriesAndSupportedExtensions();
-  for (auto it = factoriesAndExtensions.begin(); it != factoriesAndExtensions.end(); ++it) {
-    QString extensionString = "(*." + QString::fromStdString(*(it->second.begin()));
-    for (auto extensionIt = std::next(it->second.begin(), 1); extensionIt != it->second.end(); ++extensionIt) {
-      extensionString += " *." + QString::fromStdString(*extensionIt);
-    }
-    extensionString += ")";
-    filterList += (";;" + QString::fromStdString(it->first) + " " + extensionString);
-  }
-  QString selectedFilter;
-  QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), filterList, &selectedFilter);
-  QString selectedFactory = selectedFilter.split("(")[0].trimmed();
-  openFile(fileName, selectedFactory == "All supported types" ? "default": selectedFactory);
+QList<QString> ASAP_Window::getFileNameAndFactory() {
+	QString filterList;
+	std::set<std::string> allExtensions = MultiResolutionImageFactory::getAllSupportedExtensions();
+	QString defaultString = "All supported types (";
+	for (auto it = allExtensions.begin(); it != allExtensions.end(); ++it) {
+		defaultString += " *." + QString::fromStdString(*it);
+	}
+	defaultString += ")";
+	filterList += defaultString;
+
+	std::vector<std::pair<std::string, std::set<std::string>> > factoriesAndExtensions = MultiResolutionImageFactory::getLoadedFactoriesAndSupportedExtensions();
+	for (auto it = factoriesAndExtensions.begin(); it != factoriesAndExtensions.end(); ++it) {
+		QString extensionString = "(*." + QString::fromStdString(*(it->second.begin()));
+		for (auto extensionIt = std::next(it->second.begin(), 1); extensionIt != it->second.end(); ++extensionIt) {
+			extensionString += " *." + QString::fromStdString(*extensionIt);
+		}
+		extensionString += ")";
+		filterList += (";;" + QString::fromStdString(it->first) + " " + extensionString);
+	}
+	QString selectedFilter;
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), _settings->value("lastOpenendPath", QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation)).toString(), filterList, &selectedFilter);
+	QString selectedFactory = selectedFilter.split("(")[0].trimmed();
+	return QList<QString>({ fileName, selectedFactory });
 }
 
 void ASAP_Window::setCacheSize(const unsigned long long& cacheMaxByteSize) {
@@ -383,7 +403,7 @@ void ASAP_Window::setupUi()
 
 void ASAP_Window::retranslateUi()
 {
-  this->setWindowTitle(QApplication::translate("PathologyWorkstation", "ASAP", 0));
+  this->setWindowTitle(QString("ASAP v") + QString(ASAP_VERSION_STRING));
   actionOpen->setText(QApplication::translate("PathologyWorkstation", "Open", 0));
   actionOpen->setIconText(QApplication::translate("PathologyWorkstation", "Open", 0));
   actionAbout->setText(QApplication::translate("PathologyWorkstation", "About...", 0));
@@ -395,3 +415,10 @@ void ASAP_Window::retranslateUi()
   menuView->setTitle(QApplication::translate("PathologyWorkstation", "View", 0));
   menuHelp->setTitle(QApplication::translate("PathologyWorkstation", "Help", 0));
 } 
+
+void ASAP_Window::showShortcutOverview() {
+    auto actions = this->findChildren<QAction*>();
+    for (QAction* action : actions) {
+        qDebug() << action->objectName() << "\t" << action->shortcut().toString();
+    }
+}

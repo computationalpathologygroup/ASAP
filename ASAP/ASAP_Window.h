@@ -16,6 +16,7 @@ class PathologyViewer;
 class WorkstationExtensionPluginInterface;
 class QActionGroup;
 class QSettings;
+class QKeyPressEvent;
 
 /*
 
@@ -40,6 +41,7 @@ public:
 
   unsigned long long getCacheSize() const;
 
+  QList<QString> getFileNameAndFactory();
   void openFile(const QString& fileName, const QString& factoryName = QString("default"));
 
 signals:
@@ -83,9 +85,12 @@ private:
   void initializeDocks();
   void setupUi();
   void retranslateUi();
+  void showShortcutOverview();
   void loadPlugins();
   void readSettings();
   void writeSettings();
+
+  virtual void keyPressEvent(QKeyEvent* event);
 
   std::vector<std::unique_ptr<WorkstationExtensionPluginInterface> > _extensions;
 };

@@ -27,7 +27,8 @@ public:
   void moveCoordinatesBy(const Point& moveBy);
 
   static float selectionSensitivity;
-	std::shared_ptr<Annotation> getAnnotation() const;
+  static bool annotationColorForRects;
+  std::shared_ptr<Annotation> getAnnotation() const;
   
   virtual QRectF boundingRect() const = 0;
 

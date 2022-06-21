@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>329</width>
+    <width>385</width>
     <height>797</height>
    </rect>
   </property>
@@ -45,8 +45,8 @@ QLabel {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>331</width>
-     <height>780</height>
+     <width>385</width>
+     <height>797</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -90,7 +90,28 @@ QLabel {
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="1" colspan="2">
+         <item row="3" column="0">
+          <widget class="QLabel" name="ChannelLabel">
+           <property name="text">
+            <string>Channel</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="OpacityLabel">
+           <property name="text">
+            <string>Opacity</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="LUTLabel">
+           <property name="text">
+            <string>LUT</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
           <widget class="QDoubleSpinBox" name="OpacitySpinBox">
            <property name="maximum">
             <double>1.000000000000000</double>
@@ -103,92 +124,26 @@ QLabel {
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="OpacityLabel">
-           <property name="text">
-            <string>Opacity</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="WindowLevelLabel">
-           <property name="text">
-            <string>Window / Level</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QDoubleSpinBox" name="LevelSpinBox">
-           <property name="decimals">
-            <number>2</number>
-           </property>
-           <property name="minimum">
-            <double>-4294967296.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>4294967296.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.100000000000000</double>
-           </property>
-           <property name="value">
-            <double>0.500000000000000</double>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="1">
-          <widget class="QDoubleSpinBox" name="WindowSpinBox">
-           <property name="minimum">
-            <double>-4294967296.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>4294967296.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.100000000000000</double>
-           </property>
-           <property name="value">
-            <double>1.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="ChannelLabel">
-           <property name="text">
-            <string>Channel</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1" colspan="2">
           <widget class="QSpinBox" name="ChannelSpinBox"/>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="LUTLabel">
+         <item row="1" column="1">
+          <widget class="QComboBox" name="LUTComboBox"/>
+         </item>
+         <item row="1" column="2">
+          <widget class="QToolButton" name="LUTEditorButton">
+           <property name="minimumSize">
+            <size>
+             <width>25</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
-            <string>LUT</string>
+            <string>S</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" colspan="2">
-          <widget class="QComboBox" name="LUTComboBox"/>
-         </item>
         </layout>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="SegmentationGroupBox">
-      <property name="title">
-       <string>Segmentation</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QCheckBox" name="SegmentationCheckBox">
-         <property name="text">
-          <string>Enable segmentation visualization</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>

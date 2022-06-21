@@ -7,29 +7,12 @@
 #include <typeinfo>
 #include <iomanip>
 #include <vector>
-#include "boost/lexical_cast.hpp"
 
 namespace core {
-///////////////////////////////////////////////
-//Checks that the given string is a valid representation
-// of a numerical type T
-  template<typename T>
-  bool isValid(const std::string& num)
-  {
 
-    bool res = true;
+void CORE_EXPORT replaceAll(std::string& s, const std::string& item, const std::string& replacement);
 
-    try
-    {
-      T tmp = boost::lexical_cast<T>(num);
-    }
-    catch (boost::bad_lexical_cast&)
-    {
-      res = false;
-    }
-
-    return(res);
-  }
+std::vector<std::string> CORE_EXPORT split(const std::string& input, const std::string& regex);
 
 //////////
 // Converts a string to type T.
@@ -49,13 +32,6 @@ namespace core {
     return s;
   }
 
-/////////////////////
-// Splits s into pieces, separated with split.
-  void CORE_EXPORT split(
-    const std::string &s,
-    std::vector<std::string> &vs,
-    const std::string &split);
-
 //////////
 // Converts a string to a vector of type T, separated at sep
   template <typename T> inline
@@ -64,8 +40,7 @@ namespace core {
     std::vector<T> result;
 
     //Split string
-    std::vector<std::string> vs;
-    split(s, vs, sep);
+    std::vector<std::string> vs = split(s, sep);
 
     size_t size = vs.size();
     result.resize(size);
@@ -178,21 +153,21 @@ namespace core {
 
     return s;
   }
+  
+  // NOTE: Below is deprecated in C17, but valid until a replacement is introduced
+  std::wstring CORE_EXPORT stringToWideString(const std::string& string);
 
+  std::vector<std::wstring> CORE_EXPORT stringsToWideStrings(const std::vector<std::string>& strings);
+
+  std::string CORE_EXPORT wideStringToString(const std::wstring& string);
+
+  std::vector<std::string> CORE_EXPORT wideStringsToStrings(const std::vector<std::wstring> strings);
+  
   void CORE_EXPORT lower(std::string &s);
 
   void CORE_EXPORT upper(std::string &s);
 
   void CORE_EXPORT trim(std::string &s);
-
-////////////////////
-// Replace all occurrences of olds with news in s. Returns true iff
-// any replacements have been made.
-  bool CORE_EXPORT replaceAll(
-    std::string &s,
-    const std::string &olds,
-    const std::string &news
-  );
 
   //escape 
   void CORE_EXPORT escape(std::string &str, char toEscape);

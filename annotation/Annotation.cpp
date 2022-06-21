@@ -3,6 +3,7 @@
 #include "psimpl.h"
 #include <limits>
 #include <cmath>
+#include <iterator>
 
 const char* Annotation::_typeStrings[7] = { "None", "Dot", "Polygon", "Spline", "PointSet", "Measurement", "Rectangle"};
 

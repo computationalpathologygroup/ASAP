@@ -1,5 +1,7 @@
 #include "IconCreator.h"
 
+#include <QStandardPaths>
+
 #include <functional>
 #include <stdexcept>
 
@@ -9,139 +11,137 @@
 
 namespace ASAP
 {
-	IconCreator::IconCreator(void)
+	int IconCreator::m_icon_size = 200;
+
+	IconCreator::IconCreator(void) : m_placeholder_icon(IconCreator::createBlankIcon()), m_invalid_icon(IconCreator::createInvalidIcon())
 	{
+		m_thumbnail_cache = new ThumbnailCache(QStandardPaths::writableLocation(QStandardPaths::StandardLocation::CacheLocation));		
 	}
 
-	void IconCreator::InsertIcons(const DataTable& image_items, QStandardItemModel* image_model, const size_t size, bool& continue_loading)
-	{
-		QIcon placeholder_icon(CreateBlankIcon_(size));
-		QIcon invalid_icon(CreateInvalidIcon_(size));
-
-		// Creates placeholder items
-		image_model->setRowCount(image_items.Size());
-		for (size_t item = 0; item < image_items.Size(); ++item)
-		{
-			std::vector<const std::string*> record(image_items.At(item, { "id", "title" }));
-			QStandardItem* standard_item(new QStandardItem(placeholder_icon, QString(record[1]->data())));
-			standard_item->setData(QVariant(QString(record[0]->data())));
-			image_model->setItem(item, 0, standard_item);
+	IconCreator::~IconCreator() {
+		if (m_thumbnail_cache) {
+			delete m_thumbnail_cache;
 		}
-
-		// Fills the placeholders
-		std::vector<size_t> valid;
-		std::vector<size_t> invalid;
-
-		QString total_size(std::to_string(image_items.Size()).data());
-		for (size_t item = 0; item < image_items.Size(); ++item)
-		{
-			// Exits the loading loop if the signal is flipped to true.
-			if (!continue_loading)
-			{
-				break;
-			}
-
-			RequiresStatusBarChange("Loading " + QString::fromStdString(std::to_string(item)) + " out of " + total_size);
-			try
-			{
-				std::vector<const std::string*> record(image_items.At(item, { "location" }));
-				image_model->item(item, 0)->setIcon(CreateIcon_(*record[0], size));
-				valid.push_back(item);
-			}
-			catch (const std::exception& e)
-			{
-				image_model->item(item, 0)->setIcon(invalid_icon);
-				invalid.push_back(item);
-			}
-
-			// Signals the model that the item has had a certain amount of icon changes.
-			RequiresItemRefresh();
-		}
-
-		// Reorders the list.
-		std::vector<QStandardItem*> items;
-		for (size_t item = 0; item < image_items.Size(); ++item)
-		{
-			items.push_back(image_model->takeItem(item));
-		}
-
-		size_t current_item = 0;
-		for (size_t item = 0; item < valid.size(); ++item)
-		{
-				image_model->setItem(current_item, 0, items[valid[item]]);
-				++current_item;
-		}
-
-		for (size_t item = 0; item < invalid.size(); ++item)
-		{
-			image_model->setItem(current_item, 0, items[invalid[item]]);
-			++current_item;
-		}
-
-		RequiresItemRefresh();
-		RequiresStatusBarChange("Finished loading thumbnails");
 	}
 
-	QIcon IconCreator::CreateIcon_(const std::string& filepath, const size_t size)
+	bool IconCreator::insertIcon(const std::pair<int, std::string>& index_location)
 	{
-		MultiResolutionImageReader reader;
-		std::unique_ptr<MultiResolutionImage> image(reader.open(filepath));
-			
-		if (image)
-		{
-			unsigned char* data(nullptr);
-			std::vector<unsigned long long> dimensions;
-
-			if (image->getNumberOfLevels() > 1)
-			{
-				dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);
-				image->getRawRegion(0, 0, dimensions[0], dimensions[1], image->getNumberOfLevels() - 1, data);
-			}
-			else
-			{
-				dimensions = image->getDimensions();
-				image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
-			}
-
-			// Gets the largest dimension and creates an offset for the smallest.
-			unsigned long long max_dim	= std::max(dimensions[0], dimensions[1]);
-			size_t offset_x				= dimensions[0] == max_dim ? 0 : (dimensions[1] - dimensions[0]) / 2;
-			size_t offset_y				= dimensions[1] == max_dim ? 0 : (dimensions[0] - dimensions[1]) / 2;
-
-			QImage image(max_dim, max_dim, QImage::Format::Format_BGR30);
-			image.fill(Qt::white);
-
-			// Writes the multiresolution pixel data into the image.
-			size_t base_index = 0;
-			for (size_t y = 0; y < dimensions[1]; ++y)
-			{
-				for (size_t x = 0; x < dimensions[0]; ++x)
-				{
-					image.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index + 2], data[base_index + 1], data[base_index]));
-					base_index += 3;
-				}
-			}
-
-			delete data;
-			QPixmap pixmap(QPixmap::fromImage(image).scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio));
-			return QIcon(pixmap);
+		bool isValid = false;
+		QIcon itemIcon = createIcon(index_location.second, IconCreator::m_icon_size);	
+		if (itemIcon.isNull()) {
+			itemIcon = m_invalid_icon;
 		}
 		else
 		{
-			throw std::runtime_error("Unable to read image: " + filepath);
+			isValid = true;
+		}
+			
+		// Signals the model that the item has had a certain amount of icon changes.
+		requiresItemRefresh(index_location.first, itemIcon);		
+		return isValid;
+	}
+
+	QIcon IconCreator::createIcon(const std::string& filepath, const size_t size)
+	{
+		QImage scaled_image = m_thumbnail_cache->getThumbnailFromCache(QString::fromStdString(filepath));
+		if (scaled_image.isNull()) {
+			MultiResolutionImageReader reader;
+			std::unique_ptr<MultiResolutionImage> image(reader.open(filepath));
+
+			if (image)
+			{
+				unsigned char* data(nullptr);
+				std::vector<unsigned long long> dimensions;
+
+				if (image->getDataType() == pathology::UChar) {
+					if (image->getNumberOfLevels() > 1)
+					{
+						dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);
+						image->getRawRegion(0, 0, dimensions[0], dimensions[1], image->getNumberOfLevels() - 1, data);
+					}
+					else
+					{
+						dimensions = image->getDimensions();
+						if (dimensions[0] * dimensions[1] < (1024 * 1024)) {
+							image->getRawRegion(0, 0, dimensions[0], dimensions[1], 0, data);
+						}
+						else {
+							return m_invalid_icon;
+						}
+					}
+				}
+				else {
+					return m_invalid_icon;
+				}
+
+				// Gets the largest dimension and creates an offset for the smallest.
+				unsigned long long max_dim = std::max(dimensions[0], dimensions[1]);
+				size_t offset_x = dimensions[0] == max_dim ? 0 : (dimensions[1] - dimensions[0]) / 2;
+				size_t offset_y = dimensions[1] == max_dim ? 0 : (dimensions[0] - dimensions[1]) / 2;
+
+				QImage qimage(max_dim, max_dim, QImage::Format::Format_RGB888);
+				qimage.fill(Qt::white);
+
+				// Writes the multiresolution pixel data into the image.
+				size_t base_index = 0;
+				if (image->getColorType() == pathology::ColorType::Monochrome) {
+					for (size_t y = 0; y < dimensions[1]; ++y)
+					{
+						for (size_t x = 0; x < dimensions[0]; ++x)
+						{
+							qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index], data[base_index]));
+							base_index += 1;
+						}
+					}
+				}
+				else if (image->getColorType() == pathology::ColorType::RGB) {
+					for (size_t y = 0; y < dimensions[1]; ++y)
+					{
+						for (size_t x = 0; x < dimensions[0]; ++x)
+						{
+							qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index + 1], data[base_index + 2]));
+							base_index += 3;
+						}
+					}
+				}
+				else if (image->getColorType() == pathology::ColorType::RGBA) {
+					for (size_t y = 0; y < dimensions[1]; ++y)
+					{
+						for (size_t x = 0; x < dimensions[0]; ++x)
+						{
+							qimage.setPixel(x + offset_x, y + offset_y, qRgb(data[base_index], data[base_index + 1], data[base_index + 2]));
+							base_index += 4;
+						}
+					}
+				}
+
+				delete[] data;
+				scaled_image = qimage.scaled(QSize(size, size), Qt::AspectRatioMode::KeepAspectRatio);
+				m_thumbnail_cache->addThumbnailToCache(QString::fromStdString(filepath), scaled_image);
+				QPixmap pixmap(QPixmap::fromImage(scaled_image));
+				return QIcon(pixmap);
+			}
+			else
+			{
+				return QIcon();
+			}
+		}
+		else {
+			QPixmap pixmap(QPixmap::fromImage(scaled_image));
+			return QIcon(pixmap);
 		}
 	}
 
-	QIcon IconCreator::CreateBlankIcon_(const size_t size)
+	QIcon IconCreator::createBlankIcon()
 	{
-		QImage image(size, size, QImage::Format::Format_BGR30);
+		QImage image(IconCreator::m_icon_size, IconCreator::m_icon_size, QImage::Format::Format_BGR30);
 		image.fill(Qt::white);
 		return QIcon(QPixmap::fromImage(image));
 	}
 
-	QIcon IconCreator::CreateInvalidIcon_(const size_t size)
+	QIcon IconCreator::createInvalidIcon()
 	{
-		QPixmap invalid_icon("Resources/unavailable.png");
-		return QIcon(invalid_icon.scaled(size, size, Qt::AspectRatioMode::KeepAspectRatio));
+		QPixmap invalid_icon(":/ASAP_Worklist_icons/unavailable.png");
+		return QIcon(invalid_icon.scaled(IconCreator::m_icon_size, IconCreator::m_icon_size, Qt::AspectRatioMode::KeepAspectRatio));
 	}
 }

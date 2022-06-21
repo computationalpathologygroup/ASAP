@@ -1,5 +1,6 @@
 #include "AnnotationGroup.h"
 #include <iostream>
+#include <limits>
 
 AnnotationGroup::AnnotationGroup() :
   AnnotationBase(),

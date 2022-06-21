@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <vector>
 
 template <typename T>
 class TileCache {

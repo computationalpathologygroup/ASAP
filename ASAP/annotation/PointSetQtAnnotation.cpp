@@ -28,7 +28,12 @@ void PointSetQtAnnotation::paint(QPainter *painter, const QStyleOptionGraphicsIt
     //painter->drawRect(_bRect);
     std::vector<Point> coords = _annotation->getCoordinates();
     if (isSelected()) {
-      painter->setPen(QPen(QBrush(_rectColor.lighter(150)), 4.5 * _rectSize / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        if (QtAnnotation::annotationColorForRects) {
+            painter->setPen(QPen(QBrush(getDrawingColor().lighter(150)), 4.5 * _rectSize / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        }
+        else {
+            painter->setPen(QPen(QBrush(_rectColor.lighter(150)), 4.5 * _rectSize / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));
+        }
     }
     else {
       painter->setPen(QPen(QBrush(_rectColor), 3 * _rectSize / _currentLoD, Qt::PenStyle::SolidLine, Qt::PenCapStyle::SquareCap));

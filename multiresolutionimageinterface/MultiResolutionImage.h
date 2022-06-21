@@ -2,22 +2,20 @@
 #define _MultiResolutionImage
 #include <string>
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include "multiresolutionimageinterface_export.h"
 #include "TileCache.h"
 #include "core/PathologyEnums.h"
 #include "core/ImageSource.h"
 #include "core/Patch.h"
 
-namespace boost {
-  class mutex;
-  class shared_mutex;
-}
-
 class MULTIRESOLUTIONIMAGEINTERFACE_EXPORT MultiResolutionImage : public ImageSource {
 
 public :
   MultiResolutionImage();
   virtual ~MultiResolutionImage();
+  ImageSource* clone();
 
   //! Load the image, returns whether a valid image is obtained
   bool initialize(const std::string& imagePath);
@@ -123,8 +121,8 @@ public :
 protected :
 
   //! To make MultiResolutionImage thread-safe
-  std::unique_ptr<boost::shared_mutex> _openCloseMutex;
-  std::unique_ptr<boost::mutex> _cacheMutex;
+  std::unique_ptr<std::shared_mutex> _openCloseMutex;
+  std::unique_ptr<std::mutex> _cacheMutex;
   std::shared_ptr<void> _cache;
 
   // Aditional properties of a multi-resolution image

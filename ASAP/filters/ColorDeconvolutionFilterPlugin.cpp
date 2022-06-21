@@ -31,7 +31,7 @@ ColorDeconvolutionFilterPlugin::ColorDeconvolutionFilterPlugin() :
 }
 
 bool ColorDeconvolutionFilterPlugin::initialize(const ImageSource* img) {
-  if (img->getColorType() == pathology::ColorType::RGB || img->getColorType() == pathology::ColorType::ARGB) {
+  if (img->getColorType() == pathology::ColorType::RGB || img->getColorType() == pathology::ColorType::RGBA) {
     return true;
   }
   else {

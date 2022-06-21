@@ -83,6 +83,7 @@ void MeasurementAnnotationTool::keyPressEvent(QKeyEvent *event) {
     if (!_generating && _annotationPlugin->getActiveAnnotation()) {
       if (_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() <= 2) {
         _annotationPlugin->deleteAnnotation(_annotationPlugin->getActiveAnnotation());
+        event->accept();
       }
     }
   }
@@ -132,9 +133,10 @@ void MeasurementAnnotationTool::addCoordinate(const QPointF& scenePos) {
 
 QAction* MeasurementAnnotationTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("MeasurementAnnotation", this);
+    _button = new QAction("&MeasurementAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/measure.png")));
+    _button->setShortcut(QKeySequence("m"));
   }
   return _button;
 }

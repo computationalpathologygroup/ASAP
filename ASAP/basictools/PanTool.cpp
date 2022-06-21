@@ -30,6 +30,7 @@ QAction* PanTool::getToolButton() {
     _button = new QAction("Pan", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/basictools_icons/pan.png")));
+    _button->setShortcut(QKeySequence("x"));
   }
   return _button;
 }

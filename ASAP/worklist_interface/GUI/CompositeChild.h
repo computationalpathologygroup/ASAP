@@ -16,7 +16,7 @@ namespace ASAP
 			CompositeChild(QWidget *parent);
 
 		signals:
-			void RequiresTabSwitch(int tab_id);
+			void requiresTabSwitch(int tab_id);
 	};
 }
 #endif // __ASAP_GUI_COMPOSITECHILD__

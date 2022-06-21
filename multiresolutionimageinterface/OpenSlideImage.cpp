@@ -1,5 +1,5 @@
 #include "OpenSlideImage.h"
-#include <boost/thread.hpp>
+#include <shared_mutex>
 #include "openslide.h" 
 #include <sstream>
 
@@ -9,7 +9,7 @@ OpenSlideImage::OpenSlideImage() : MultiResolutionImage(), _slide(NULL), _bg_r(2
 }
 
 OpenSlideImage::~OpenSlideImage() {
-  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   cleanup();
   MultiResolutionImage::cleanup();
 }
@@ -31,7 +31,7 @@ std::string OpenSlideImage::getOpenSlideErrorState() {
 }
 
 bool OpenSlideImage::initializeType(const std::string& imagePath) {
-  boost::unique_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::unique_lock<std::shared_mutex> l(*_openCloseMutex);
   cleanup();
 
   if (openslide_detect_vendor(imagePath.c_str())) {
@@ -108,7 +108,7 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
     return NULL;
   }
 
-  boost::shared_lock<boost::shared_mutex> l(*_openCloseMutex);
+  std::shared_lock<std::shared_mutex> l(*_openCloseMutex);
   unsigned int* temp = new unsigned int[width*height];
   openslide_read_region(_slide, temp, startX, startY, level, width, height);
 

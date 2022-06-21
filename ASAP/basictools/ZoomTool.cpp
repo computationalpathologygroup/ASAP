@@ -49,9 +49,10 @@ void ZoomTool::mouseReleaseEvent(QMouseEvent *event) {
 
 QAction* ZoomTool::getToolButton() {
   if (!_button) {
-    _button = new QAction("Zoom", this);
+    _button = new QAction("&Zoom", this);
     _button->setObjectName(QString::fromStdString(name()));
     _button->setIcon(QIcon(QPixmap(":/basictools_icons/zoom.png")));
+    _button->setShortcut(QKeySequence("z"));
   }
   return _button;
 }

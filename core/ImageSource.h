@@ -34,6 +34,8 @@ public :
   //! Gets the maximum value for a channel. If no channel is specified, default to overall maximum
   virtual double getMaxValue(int channel = -1) = 0;
 
+  virtual ImageSource* clone() = 0;
+
   void swap(ImageSource& first, ImageSource& second);
 
 protected :

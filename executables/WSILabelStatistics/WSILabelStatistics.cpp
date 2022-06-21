@@ -9,56 +9,43 @@
 #include "core/CmdLineProgressMonitor.h"
 #include "config/ASAPMacros.h"
 
-#include <boost/program_options.hpp>
-namespace po = boost::program_options;
+#include "core/argparse.hpp"
 
 using namespace std;
 using namespace pathology;
 
 int main(int argc, char *argv[]) {
   try {
-    std::string inputPth, outputPth;
-    unsigned int processedLevel;
-    po::options_description desc("Options");
-    desc.add_options()
-      ("help,h", "Displays this message")
-      ("level,l", po::value<unsigned int>(&processedLevel)->default_value(0), "Set the level to be processed")
-      ;
-  
-    po::positional_options_description positionalOptions;
-    positionalOptions.add("input", 1);
-    positionalOptions.add("output", 1);
 
-    po::options_description posDesc("Positional descriptions");
-    posDesc.add_options()
-      ("input", po::value<std::string>(&inputPth)->required(), "Path to input")
-      ("output", po::value<std::string>(&outputPth)->default_value("."), "Path to output")
-      ;
+      argparse::ArgumentParser desc("WSI Label Statistics", ASAP_VERSION_STRING);
 
+      desc.add_argument("-l", "--level")
+          .help("Sets pyramid level to compute on")
+          .default_value(0)
+          .scan<'i', unsigned int>();
 
-    po::options_description descAndPos("All options");
-    descAndPos.add(desc).add(posDesc);
+      desc.add_argument("input")
+          .help("Path to the input image")
+          .required();
 
-    po::variables_map vm;
-    try {
-      po::store(po::command_line_parser(argc, argv).options(descAndPos)
-        .positional(positionalOptions).run(),
-        vm);
-      if (!vm.count("input")) {
-        cout << "WSILabelStatistics v" << ASAP_VERSION_STRING << endl;
-        cout << "Usage: WSILabelStatistics.exe input output [options]" << endl;
+      desc.add_argument("output")
+          .help("Path to the output image")
+          .default_value(".");
+
+      try {
+          desc.parse_args(argc, argv);
       }
-      if (vm.count("help")) {
-        std::cout << desc << std::endl;
-        return 0;
+      catch (const std::runtime_error& err) {
+          std::cerr << err.what() << std::endl;
+          std::cerr << desc;
+          std::exit(1);
       }
-      po::notify(vm);
-    }
-    catch (boost::program_options::required_option& e) {
-      std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-      std::cerr << "Use -h or --help for usage information" << std::endl;
-      return 1;
-    }
+
+      std::string inputPth = desc.get<std::string>("input");
+      std::string outputPth = desc.get<std::string>("output");
+      unsigned int level = desc.get<unsigned int>("--level");
+
+
     MultiResolutionImageReader reader; 
     std::shared_ptr<MultiResolutionImage> input = std::shared_ptr<MultiResolutionImage>(reader.open(inputPth));
     CmdLineProgressMonitor monitor;
@@ -67,7 +54,7 @@ int main(int argc, char *argv[]) {
       fltr.setInput(input);
       fltr.setOutput(outputPth);
       fltr.setProgressMonitor(&monitor);
-      fltr.setProcessedLevel(processedLevel);
+      fltr.setProcessedLevel(level);
       if (!fltr.process()) {
         std::cerr << "ERROR: Processing failed" << std::endl;
       }

@@ -25,10 +25,6 @@ public :
 public slots:
   virtual void cancelAnnotation();
 
-protected slots:
-  void zoomToAnnotation(qreal val);
-  void zoomToAnnotationFinished();
-
 protected:
   virtual void addCoordinate(const QPointF& scenePos);
 
@@ -39,8 +35,7 @@ protected:
 
   bool _startSelectionMove;
   QPointF _moveStart;
-  QRectF _start_zoom;
-  QRectF _end_zoom;
+
 };
 
 #endif

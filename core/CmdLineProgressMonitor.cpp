@@ -1,5 +1,5 @@
 #include "CmdLineProgressMonitor.h"
-#include <boost/progress.hpp>
+#include "ProgressDisplay.hpp"
 
 CmdLineProgressMonitor::CmdLineProgressMonitor() : ProgressMonitor(), disp(NULL)
 {
@@ -15,7 +15,7 @@ CmdLineProgressMonitor::~CmdLineProgressMonitor() {
 void CmdLineProgressMonitor::setProgress(const unsigned int& progress) {
   ProgressMonitor::setProgress(progress);
   if (!disp) {
-    disp = new boost::progress_display(100);
+    disp = new ProgressDisplay(100);
   } else if (progress == 0) {
     disp->restart(100);
   }

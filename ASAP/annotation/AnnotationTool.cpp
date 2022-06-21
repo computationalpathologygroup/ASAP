@@ -61,6 +61,7 @@ void AnnotationTool::mouseDoubleClickEvent(QMouseEvent *event) {
 void AnnotationTool::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key::Key_Escape) {
     cancelAnnotation();
+    event->accept();
   }
   else if (event->key() == Qt::Key::Key_Delete && event->modifiers() == Qt::ShiftModifier) {
     if (_generating) {
@@ -72,6 +73,7 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
         _annotationPlugin->deleteAnnotation(*it);
       }
     }
+    event->accept();
   }
   else if (event->key() == Qt::Key::Key_Delete) {
     if (_generating) {
@@ -85,10 +87,12 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
           _last = Point(prev.getX() * _viewer->getSceneScale(), prev.getY() * _viewer->getSceneScale());
         }
       }
+      event->accept();
     }
     else if (_annotationPlugin->getActiveAnnotation()) {
       if (_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() <= 1) {
         _annotationPlugin->deleteAnnotation(_annotationPlugin->getActiveAnnotation());
+        event->accept();
       }
       else if (_annotationPlugin->getActiveAnnotation()->getActiveSeedPoint() > -1) {
         int activeSeedPoint = _annotationPlugin->getActiveAnnotation()->getActiveSeedPoint();
@@ -99,24 +103,12 @@ void AnnotationTool::keyPressEvent(QKeyEvent *event) {
         else {
           _annotationPlugin->getActiveAnnotation()->setActiveSeedPoint(_annotationPlugin->getActiveAnnotation()->getAnnotation()->getCoordinates().size() - 1);
         }
+        event->accept();
       }
       else if (_annotationPlugin->getActiveAnnotation()) {
         _annotationPlugin->getActiveAnnotation()->removeCoordinate(-1);
+        event->accept();
       }
-    }
-  }
-  else if (event->key() == Qt::Key::Key_Z) {
-    if (_annotationPlugin->getActiveAnnotation()) {
-      QTimeLine * anim = new QTimeLine(500);
-
-      _start_zoom = _viewer->mapToScene(_viewer->viewport()->rect()).boundingRect();
-      _end_zoom = _annotationPlugin->getActiveAnnotation()->mapToScene(_annotationPlugin->getActiveAnnotation()->boundingRect()).boundingRect();
-      anim->setFrameRange(0, 100);
-      anim->setUpdateInterval(5);
-
-      connect(anim, SIGNAL(valueChanged(qreal)), SLOT(zoomToAnnotation(qreal)));
-      connect(anim, SIGNAL(finished()), SLOT(zoomToAnnotationFinished()));
-      anim->start();
     }
   }
 }
@@ -128,16 +120,6 @@ void AnnotationTool::setActive(bool active) {
     }
   }
   _active = active;
-}
-
-void AnnotationTool::zoomToAnnotation(qreal val) {
-  QRectF current = QRectF(_start_zoom.topLeft() + val*(_end_zoom.topLeft() - _start_zoom.topLeft()), _start_zoom.bottomRight() + val*(_end_zoom.bottomRight() - _start_zoom.bottomRight()));
-  _viewer->fitInView(current, Qt::AspectRatioMode::KeepAspectRatio);
-}
-
-void AnnotationTool::zoomToAnnotationFinished() {
-  sender()->~QObject();
-  _viewer->updateCurrentFieldOfView();
 }
 
 void AnnotationTool::cancelAnnotation() {

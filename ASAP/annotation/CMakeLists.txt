@@ -46,11 +46,25 @@ target_link_libraries(AnnotationPlugin PUBLIC ASAPLib core PRIVATE multiresoluti
 target_include_directories(AnnotationPlugin PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/ASAP/plugins/workstationextension>)
 set_target_properties(AnnotationPlugin PROPERTIES DEBUG_POSTFIX _d)
 
-install(TARGETS AnnotationPlugin
-        RUNTIME DESTINATION bin/plugins/workstationextension
-        LIBRARY DESTINATION bin/plugins/workstationextension
-        ARCHIVE DESTINATION lib/plugins/workstationextension
-)
+IF(APPLE)
+  set(prefix "ASAP.app/Contents")
+  set(INSTALL_RUNTIME_DIR "${prefix}/MacOS")
+  set(INSTALL_RESOURCE_DIR "${prefix}/Frameworks")
+  set(INSTALL_CMAKE_DIR "${prefix}/Resources")
+
+  install(TARGETS AnnotationPlugin
+          BUNDLE DESTINATION . 
+          RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/workstationextension
+          LIBRARY DESTINATION ${INSTALL_RUNTIME_DIR}/plugins/workstationextension
+          ARCHIVE DESTINATION ${INSTALL_RESOURCE_DIR}/plugins/workstationextension
+  )
+ELSE(APPLE)
+  install(TARGETS AnnotationPlugin
+            RUNTIME DESTINATION bin/plugins/workstationextension
+            LIBRARY DESTINATION bin/plugins/workstationextension
+            ARCHIVE DESTINATION lib/plugins/workstationextension
+  )
+ENDIF(APPLE)
 
 install(FILES ${ANNOTATION_HEADERS} DESTINATION include/ASAP/plugins/workstationextension)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/annotationplugin_export.h DESTINATION include/ASAP/plugins/workstationextension)

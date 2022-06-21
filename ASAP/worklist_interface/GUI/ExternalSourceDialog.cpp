@@ -1,84 +1,91 @@
 #include "ExternalSourceDialog.h"
 
+#include <QLabel>
+#include <QPushButton>
+#include <QDialogButtonBox>
+#include <QLineEdit>
+#include <QGridLayout>
+#include <QCheckBox>
+
 namespace ASAP
 {
-	ExternalSourceDialog::ExternalSourceDialog(QWidget* parent) : QDialog(parent)
+	ExternalSourceDialog::ExternalSourceDialog(QWidget* parent) : QDialog(parent), m_valid(false)
 	{
-		setWindowTitle(tr("Open External Source"));
+		setWindowTitle(tr("Open external source"));
 		setModal(true);
 
-		SetupGUI_();
+		setupGUI();
 	}
 
-	ExternalSourceDialog::SourceDialogResults ExternalSourceDialog::GetLoginDetails(void)
+	ExternalSourceDialog::SourceDialogResults ExternalSourceDialog::getLoginDetails(void)
 	{
-		return { m_input_location_->text(), m_input_token_->text(), m_input_ignore_certificate_->checkState() == Qt::Checked };
+		return { m_input_location->text(), m_input_token->text(), m_input_ignore_certificate->checkState() == Qt::Checked };
 	}
 
-	bool ExternalSourceDialog::HasValidCredentials(void)
+	bool ExternalSourceDialog::hasValidCredentials(void)
 	{
-		return m_valid_;
+		return m_valid;
 	}
 
-	void ExternalSourceDialog::SetupGUI_(void)
+	void ExternalSourceDialog::setupGUI(void)
 	{
 		// Initializes and configures the location label.
-		m_label_location_ = new QLabel(this);
-		m_label_location_->setText(tr("Location"));
+		m_label_location = new QLabel(this);
+		m_label_location->setText(tr("Location"));
 
 		// Initializes and configures the token label.
-		m_label_token_ = new QLabel(this);
-		m_label_token_->setText(tr("Token"));
+		m_label_token = new QLabel(this);
+		m_label_token->setText(tr("Token"));
 
 		// Initializes and configures the location input.
-		m_input_location_ = new QLineEdit(this);
+		m_input_location = new QLineEdit(this);
 
 		// Initializes and configures the token input.
-		m_input_token_ = new QLineEdit(this);
+		m_input_token = new QLineEdit(this);
 
 		// Initializes and configures the certificate checkbox.
-		m_input_ignore_certificate_ = new QCheckBox(this);
-		m_input_ignore_certificate_->setText(tr("Accept invalid certificate"));
+		m_input_ignore_certificate = new QCheckBox(this);
+		m_input_ignore_certificate->setText(tr("Accept invalid certificate"));
 
 		// Initializes and configures the dialog buttons.
-		m_buttons_ = new QDialogButtonBox(this);
-		m_buttons_->addButton(QDialogButtonBox::Ok);
-		m_buttons_->addButton(QDialogButtonBox::Cancel);
+		m_buttons = new QDialogButtonBox(this);
+		m_buttons->addButton(QDialogButtonBox::Ok);
+		m_buttons->addButton(QDialogButtonBox::Cancel);
 
 		// Links the labels to the inputs.
-		m_label_location_->setBuddy(m_input_location_);
-		m_label_token_->setBuddy(m_input_token_);
+		m_label_location->setBuddy(m_input_location);
+		m_label_token->setBuddy(m_input_token);
 
 		// Initializes the layout.
-		m_grid_layout_ = new QGridLayout(this);
-		m_grid_layout_->addWidget(m_label_location_, 0, 0);
-		m_grid_layout_->addWidget(m_input_location_, 0, 1);
-		m_grid_layout_->addWidget(m_label_token_, 1, 0);
-		m_grid_layout_->addWidget(m_input_token_, 1, 1);
-		m_grid_layout_->addWidget(m_input_ignore_certificate_, 2, 0, 1, 2);
-		m_grid_layout_->addWidget(m_buttons_, 3, 0, 1, 2);
+		m_grid_layout = new QGridLayout(this);
+		m_grid_layout->addWidget(m_label_location, 0, 0);
+		m_grid_layout->addWidget(m_input_location, 0, 1);
+		m_grid_layout->addWidget(m_label_token, 1, 0);
+		m_grid_layout->addWidget(m_input_token, 1, 1);
+		m_grid_layout->addWidget(m_input_ignore_certificate, 2, 0, 1, 2);
+		m_grid_layout->addWidget(m_buttons, 3, 0, 1, 2);
 
 		// Connects signals to slots
-		connect(m_buttons_->button(QDialogButtonBox::Cancel),
+		connect(m_buttons->button(QDialogButtonBox::Cancel),
 			SIGNAL(clicked()),
 			this,
 			SLOT(close())
 		);
 
-		connect(m_buttons_->button(QDialogButtonBox::Ok),
+		connect(m_buttons->button(QDialogButtonBox::Ok),
 			SIGNAL(clicked()),
 			this,
-			SLOT(SaveCredentials_())
+			SLOT(saveCredentials())
 		);
 	}
 
-	void ExternalSourceDialog::SaveCredentials_(void)
+	void ExternalSourceDialog::saveCredentials(void)
 	{
-		if (!m_input_location_->text().isEmpty())
+		if (!m_input_location->text().isEmpty())
 		{
-			if (!m_input_token_->text().isEmpty())
+			if (!m_input_token->text().isEmpty())
 			{
-				m_valid_ = true;
+				m_valid = true;
 				close();
 			}
 			else

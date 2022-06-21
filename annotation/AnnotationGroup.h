@@ -5,9 +5,9 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include "core/stringconversion.h"
 #include "annotation_export.h"
 #include "AnnotationBase.h"
+#include "core/stringconversion.h"
 
 class ANNOTATION_EXPORT AnnotationGroup : public AnnotationBase {
 public:

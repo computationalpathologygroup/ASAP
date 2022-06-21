@@ -6,6 +6,7 @@
 #include "core/Box.h"
 #include "core/ProgressMonitor.h"
 #include "core/PathologyEnums.h"
+#include <algorithm>
 
 void AnnotationToMask::setProgressMonitor(ProgressMonitor* monitor) {
   _monitor = monitor;
