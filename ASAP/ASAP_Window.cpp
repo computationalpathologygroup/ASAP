@@ -403,7 +403,7 @@ void ASAP_Window::setupUi()
 
 void ASAP_Window::retranslateUi()
 {
-  this->setWindowTitle(QApplication::translate("PathologyWorkstation", "ASAP", 0));
+  this->setWindowTitle(QString("ASAP v") + QString(ASAP_VERSION_STRING));
   actionOpen->setText(QApplication::translate("PathologyWorkstation", "Open", 0));
   actionOpen->setIconText(QApplication::translate("PathologyWorkstation", "Open", 0));
   actionAbout->setText(QApplication::translate("PathologyWorkstation", "About...", 0));

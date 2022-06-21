@@ -49,7 +49,7 @@ IF(APPLE)
   add_executable(ASAP MACOSX_BUNDLE main.cpp ASAP.rc ${RESOURCE_ADDED} ${DIAGPathology_SOURCE_DIR}/ASAP/icon.icns)
 
 ELSE(APPLE)
-  add_executable(ASAP main.cpp ASAP.rc ${RESOURCE_ADDED})
+  add_executable(ASAP WIN32 main.cpp ASAP.rc ${RESOURCE_ADDED})
 ENDIF(APPLE)
 
 target_link_libraries(ASAPLib PUBLIC basicfilters PRIVATE multiresolutionimageinterface Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools)

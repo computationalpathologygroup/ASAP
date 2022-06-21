@@ -457,18 +457,6 @@ template <typename T> T* TIFFImage::FillRequestedRegionFromTIFF(const long long&
             TIFFSetField(_tiff, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
           }
           TIFFReadTile(_tiff, tile, ix, iy, 0, 0);
-          if (_colorType == pathology::RGBA) {
-            for (unsigned int pos = 0; pos < tileW * tileH * nrSamples; pos += 4) {
-              T b = tile[pos + 0];
-              T g = tile[pos + 1];
-              T r = tile[pos + 2];
-              T a = tile[pos + 3];
-              tile[pos + 0] = r;
-              tile[pos + 1] = g;
-              tile[pos + 2] = b;
-              tile[pos + 3] = a;
-            }
-          }
         }
         if (std::static_pointer_cast<TileCache<T>>(_cache)->set(k.str(), tile, tileW * tileH * getSamplesPerPixel() * sizeof(T))) {
           deleteTile = true;
