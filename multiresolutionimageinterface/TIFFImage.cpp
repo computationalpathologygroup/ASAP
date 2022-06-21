@@ -139,51 +139,51 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
 
     TIFFSetDirectory(_tiff, 0);
     if (dType == SAMPLEFORMAT_IEEEFP) {
-      _dataType = Float;
+      _dataType = DataType::Float;
     }
     else if (dType == SAMPLEFORMAT_UINT) {
       if (bitsPerSample == 8) {
-        _dataType = UChar;
+        _dataType = DataType::UChar;
       }
       else if (bitsPerSample == 16) {
-        _dataType = UInt16;
+        _dataType = DataType::UInt16;
       }
       else if (bitsPerSample == 32) {
-        _dataType = UInt32;
+        _dataType = DataType::UInt32;
       }
       else {
-        _dataType = InvalidDataType;
+        _dataType = DataType::InvalidDataType;
       }
     }
 
     if (cType == PHOTOMETRIC_MINISBLACK) {
       if (_samplesPerPixel > 1) {
-        _colorType = Indexed;
+        _colorType = ColorType::Indexed;
       }
       else {
-        _colorType = Monochrome;
+        _colorType = ColorType::Monochrome;
       }
     }
     else if (cType == PHOTOMETRIC_RGB) {
       if (_samplesPerPixel == 3) {
-        _colorType = RGB;
+        _colorType = ColorType::RGB;
       }
       else if (_samplesPerPixel == 4) {
-        _colorType = RGBA;
+        _colorType = ColorType::RGBA;
       }
       else {
-        _colorType = InvalidColorType;
+        _colorType = ColorType::InvalidColorType;
       }
     }
     else if (cType == PHOTOMETRIC_YCBCR && codec == COMPRESSION_JPEG) {
       if (_samplesPerPixel == 3) {
-        _colorType = RGB;
+        _colorType = ColorType::RGB;
       }
       else if (_samplesPerPixel == 4) {
-        _colorType = RGBA;
+        _colorType = ColorType::RGBA;
       }
       else {
-        _colorType = InvalidColorType;
+        _colorType = ColorType::InvalidColorType;
       }
     }
 
@@ -229,16 +229,16 @@ bool TIFFImage::initializeType(const std::string& imagePath) {
     return false;
   }
 
-  if (_dataType == UInt32) {
+  if (_dataType == DataType::UInt32) {
     createCache<unsigned int>();
   }
-  else if (_dataType == UInt16) {
+  else if (_dataType == DataType::UInt16) {
     createCache<unsigned short>();
   }
-  else if (_dataType == Float) {
+  else if (_dataType == DataType::Float) {
     createCache<float>();
   }
-  else if (_dataType == UChar) {
+  else if (_dataType == DataType::UChar) {
     createCache<unsigned char>();
   }
   return _isValid;
@@ -282,19 +282,19 @@ void TIFFImage::cleanup() {
 
 void* TIFFImage::readDataFromImage(const long long& startX, const long long& startY, const unsigned long long& width,
   const unsigned long long& height, const unsigned int& level) {
-  if (getDataType() == UInt32) {
+  if (getDataType() == DataType::UInt32) {
     unsigned int* temp = FillRequestedRegionFromTIFF<unsigned int>(startX, startY, width, height, level, _samplesPerPixel);
     return (void*)temp;
   }
-  else if (getDataType() == UInt16) {
+  else if (getDataType() == DataType::UInt16) {
     unsigned short* temp = FillRequestedRegionFromTIFF<unsigned short>(startX, startY, width, height, level, _samplesPerPixel);
     return (void*)temp;
   }
-  else if (getDataType() == Float) {
+  else if (getDataType() == DataType::Float) {
     float* temp = FillRequestedRegionFromTIFF<float>(startX, startY, width, height, level, _samplesPerPixel);
     return (void*)temp;
   }
-  else if (getDataType() == UChar) {
+  else if (getDataType() == DataType::UChar) {
     unsigned char* temp = FillRequestedRegionFromTIFF<unsigned char>(startX, startY, width, height, level, _samplesPerPixel);
     return (void*)temp;
   }

@@ -225,8 +225,8 @@ void LIFImage::translateMetaData(pugi::xml_document& doc) {
   _imageCount = std::vector<unsigned int>(images.size(), 0);
   _seriesDimensions = std::vector<std::map<std::string, unsigned long long> >(images.size(), std::map<std::string, unsigned long long>());
   _dimensionOrder = std::vector<std::string >(images.size(), "");
-  _colorTypes = std::vector<pathology::ColorType>(images.size(), pathology::InvalidColorType);
-  _dataTypes = std::vector<pathology::DataType>(images.size(), pathology::InvalidDataType);
+  _colorTypes = std::vector<pathology::ColorType>(images.size(), pathology::ColorType::InvalidColorType);
+  _dataTypes = std::vector<pathology::DataType>(images.size(), pathology::DataType::InvalidDataType);
 
   _expTimes = std::vector<std::vector<double> >(images.size(), std::vector<double>());
   _gains = std::vector<std::vector<double> >(images.size(), std::vector<double>());
@@ -309,9 +309,9 @@ void* LIFImage::readDataFromImage(const long long& startX, const long long& star
     unsigned int nrChannels = _seriesDimensions[_selectedSeries]["c"];
     unsigned long long offset = _offsets[index];
     int bytes = 4;
-    if (_dataTypes[_selectedSeries] == UInt16) {
+    if (_dataTypes[_selectedSeries] == DataType::UInt16) {
       bytes = 2;
-    } else if (_dataTypes[_selectedSeries] == UChar) {
+    } else if (_dataTypes[_selectedSeries] == DataType::UChar) {
       bytes = 1;
     }
     int bpp = bytes;
@@ -484,19 +484,19 @@ void LIFImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
       case 1: // X axis
         serieDimensions["x"] = len;
         if ((nBytes % 3) == 0) {
-          _colorTypes[imageNr] = RGB;
+          _colorTypes[imageNr] = ColorType::RGB;
         } else {
-          _colorTypes[imageNr] = Indexed;
+          _colorTypes[imageNr] = ColorType::Indexed;
         }
-        if (_colorType == RGB) {
+        if (_colorType == ColorType::RGB) {
           nBytes /= 3;
         }
         if (nBytes == 1) {
-          _dataTypes[imageNr] = UChar;
+          _dataTypes[imageNr] = DataType::UChar;
         } else if (nBytes == 2) {
-          _dataTypes[imageNr] = UInt16;
+          _dataTypes[imageNr] = DataType::UInt16;
         } else if(nBytes == 4) {
-          _dataTypes[imageNr] = Float;
+          _dataTypes[imageNr] = DataType::Float;
         }
         physicalSizeX = physicalLen;
         break;
@@ -584,7 +584,7 @@ void LIFImage::translateImageNodes(pugi::xpath_node&  imageNode, int imageNr)
   }
 
   _imageCount[imageNr] = serieDimensions["z"] * serieDimensions["t"];
-  if (_colorTypes[imageNr] != pathology::RGB) {
+  if (_colorTypes[imageNr] != pathology::ColorType::RGB) {
     _imageCount[imageNr] *= serieDimensions["c"];
   }
 

@@ -29,6 +29,7 @@ if(WIN32)
         /D"_SCL_SECURE_NO_WARNINGS"  # Calling any one of the potentially unsafe methods in the Standard C++ Library
         /D"_CRT_SECURE_NO_WARNINGS"  # Calling any one of the potentially unsafe methods in the CRT Library
 		/wd4251
+
     )
 	add_definitions(${DEFAULT_COMPILE_DEFINITIONS})
 endif()

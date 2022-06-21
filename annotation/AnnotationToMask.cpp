@@ -52,11 +52,11 @@ void AnnotationToMask::convert(const std::shared_ptr<AnnotationList>& annotation
     writer.setProgressMonitor(_monitor);
   }
 	if (writer.openFile(maskFile) == 0) {
-		writer.setColorType(pathology::Monochrome);
-		writer.setCompression(pathology::LZW);
+		writer.setColorType(pathology::ColorType::Monochrome);
+		writer.setCompression(pathology::Compression::LZW);
 		writer.setTileSize(512);
-		writer.setDataType(pathology::UChar);
-		writer.setInterpolation(pathology::NearestNeighbor);
+		writer.setDataType(pathology::DataType::UChar);
+		writer.setInterpolation(pathology::Interpolation::NearestNeighbor);
     std::vector<double> spacing_copy(spacing);
 		writer.setSpacing(spacing_copy);
 		writer.writeImageInformation(dimensions[0], dimensions[1]);

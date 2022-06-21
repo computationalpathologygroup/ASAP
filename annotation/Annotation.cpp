@@ -8,13 +8,13 @@
 const char* Annotation::_typeStrings[7] = { "None", "Dot", "Polygon", "Spline", "PointSet", "Measurement", "Rectangle"};
 
 Annotation::Annotation() :
-  _type(Annotation::NONE),
+  _type(Annotation::Type::NONE),
   _coordinates()
 {
 }
 
 std::string Annotation::getTypeAsString() const {
-  return _typeStrings[_type];
+  return _typeStrings[static_cast<int>(_type)];
 }
 
 bool Annotation::isClockwise() const {

@@ -5,8 +5,8 @@ using namespace pathology;
 ImageSource::ImageSource() :
   _spacing(),
   _samplesPerPixel(0),
-  _colorType(InvalidColorType),
-  _dataType(InvalidDataType),
+  _colorType(ColorType::InvalidColorType),
+  _dataType(DataType::InvalidDataType),
   _isValid(false)
 {
 }
@@ -34,7 +34,7 @@ const ColorType ImageSource::getColorType() const {
   if (_isValid) {
     return _colorType;
   } else {
-    return InvalidColorType;
+    return ColorType::InvalidColorType;
   }
 }
 
@@ -46,6 +46,6 @@ const DataType ImageSource::getDataType() const {
   if (_isValid) {
     return _dataType;
   } else {
-    return InvalidDataType;
+    return DataType::InvalidDataType;
   }
  }
