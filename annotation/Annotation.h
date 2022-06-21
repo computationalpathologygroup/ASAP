@@ -14,7 +14,7 @@ class AnnotationGroup;
 class ANNOTATION_EXPORT Annotation : public AnnotationBase {
 public:
 
-  enum Type {
+  enum class Type {
     NONE,
     DOT,
     POLYGON,

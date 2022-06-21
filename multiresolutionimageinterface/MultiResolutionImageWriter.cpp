@@ -19,9 +19,9 @@ using namespace std;
 using namespace pathology;
 
 MultiResolutionImageWriter::MultiResolutionImageWriter() : _tiff(NULL),
-_codec(LZW), _quality(30), _tileSize(512), _pos(0), _numberOfIndexedColors(0),
-_interpolation(pathology::Linear), _monitor(NULL), _cType(pathology::InvalidColorType),
-_dType(pathology::InvalidDataType), _min_vals(NULL), _max_vals(NULL), _jpeg2000Codec(NULL),
+_codec(Compression::LZW), _quality(30), _tileSize(512), _pos(0), _numberOfIndexedColors(0),
+_interpolation(Interpolation::Linear), _monitor(NULL), _cType(ColorType::InvalidColorType),
+_dType(pathology::DataType::InvalidDataType), _min_vals(NULL), _max_vals(NULL), _jpeg2000Codec(NULL),
 _totalWritingTime(0), _totalReadingTime(0), _jpeg2kCompressionTime(0), _totalBaseWritingTime(0),
 _totalDownsamplingtime(0), _totalPyramidTime(0), _totalMinMaxTime(0), _downsamplePerLevel(2),
 _maxPyramidLevels(-1)
@@ -60,21 +60,21 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
 	setColorType(img->getColorType());
 	setDataType(img->getDataType());
 	unsigned int cDepth = 1;
-	if (_cType == RGB) {
+	if (_cType == ColorType::RGB) {
 		cDepth = 3;
 	}
-	else if (_cType == RGBA) {
+	else if (_cType == ColorType::RGBA) {
 		cDepth = 4;
 	}
-	else if (_cType == Indexed) {
+	else if (_cType == ColorType::Indexed) {
 		cDepth = img->getSamplesPerPixel();
 		setNumberOfIndexedColors(cDepth);
 	}
 	unsigned int nrBits = 8;
-	if (_dType == UInt32 || _dType == Float) {
+	if (_dType == DataType::UInt32 || _dType == DataType::Float) {
 		nrBits = 32;
 	}
-	else if (_dType == UInt16) {
+	else if (_dType == DataType::UInt16) {
 		nrBits = 16;
 	}
 	if (openFile(fileName) == 0) {
@@ -90,16 +90,16 @@ void MultiResolutionImageWriter::writeImageToFile(MultiResolutionImage* img, con
 				for (int x = 0; x < dims[0]; x += _tileSize) {
 					auto startReadingTime = std::chrono::steady_clock::now();
 					unsigned char* data = new unsigned char[_tileSize * _tileSize * cDepth * (nrBits / 8)];
-					if (_dType == pathology::UInt32) {
+					if (_dType == DataType::UInt32) {
 						img->getRawRegion(x, y, _tileSize, _tileSize, 0, (unsigned int*&)data);
 					}
-					else if (_dType == pathology::UInt16) {
+					else if (_dType == DataType::UInt16) {
 						img->getRawRegion(x, y, _tileSize, _tileSize, 0, (unsigned short*&)data);
 					}
-					else if (_dType == pathology::Float) {
+					else if (_dType == DataType::Float) {
 						img->getRawRegion(x, y, _tileSize, _tileSize, 0, (float*&)data);
 					}
-					else if (_dType == pathology::UChar) {
+					else if (_dType == DataType::UChar) {
 						img->getRawRegion(x, y, _tileSize, _tileSize, 0, data);
 					}
 					auto endReadingTime = std::chrono::steady_clock::now();
@@ -135,13 +135,13 @@ int MultiResolutionImageWriter::openFile(const std::string& fileName) {
 int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& sizeX, const unsigned long long& sizeY) {
 	if (_tiff) {
 		unsigned int cDepth = 1;
-		if (_cType == RGB) {
+		if (_cType == ColorType::RGB) {
 			cDepth = 3;
 		}
-		else if (_cType == RGBA) {
+		else if (_cType == ColorType::RGBA) {
 			cDepth = 4;
 		}
-		else if (_cType == Indexed) {
+		else if (_cType == ColorType::Indexed) {
 			cDepth = getNumberOfIndexedColors();
 		}
 		_min_vals = new double[cDepth];
@@ -156,7 +156,7 @@ int MultiResolutionImageWriter::writeImageInformation(const unsigned long long& 
 			_monitor->setMaximumProgress(2 * totalSteps);
 			_monitor->setProgress(0);
 		}
-		if (_codec == JPEG2000) {
+		if (_codec == Compression::JPEG2000) {
 			_jpeg2000Codec = new JPEG2000Codec();
 		}
 		_totalWritingTime = 0;
@@ -185,13 +185,13 @@ void MultiResolutionImageWriter::writeBaseImagePartToLocation(void* data, const 
 
 void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsigned int pos) {
 	unsigned int cDepth = 1;
-	if (_cType == RGB) {
+	if (_cType == ColorType::RGB) {
 		cDepth = 3;
 	}
-	else if (_cType == RGBA) {
+	else if (_cType == ColorType::RGBA) {
 		cDepth = 4;
 	}
-	else if (_cType == Indexed) {
+	else if (_cType == ColorType::Indexed) {
 		if (_numberOfIndexedColors == 0) {
 			return;
 		}
@@ -201,7 +201,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 
 	//Determine min/max of tile part
 	auto startMinMax = std::chrono::steady_clock::now();
-	if (_dType == pathology::UInt32) {
+	if (_dType == DataType::UInt32) {
 		unsigned int* temp = (unsigned int*)data;
 		for (unsigned int i = 0; i < _tileSize * _tileSize * cDepth; i += cDepth) {
 			for (unsigned int j = 0; j < cDepth; ++j) {
@@ -215,7 +215,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 			}
 		}
 	}
-	else if (_dType == pathology::UInt16) {
+	else if (_dType == DataType::UInt16) {
 		unsigned short* temp = (unsigned short*)data;
 		for (unsigned int i = 0; i < _tileSize * _tileSize * cDepth; i += cDepth) {
 			for (unsigned int j = 0; j < cDepth; ++j) {
@@ -229,7 +229,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 			}
 		}
 	}
-	else if (_dType == pathology::Float) {
+	else if (_dType == DataType::Float) {
 		float* temp = (float*)data;
 		for (unsigned int i = 0; i < _tileSize * _tileSize * cDepth; i += cDepth) {
 			for (unsigned int j = 0; j < cDepth; ++j) {
@@ -243,7 +243,7 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 			}
 		}
 	}
-	else if (_dType == pathology::UChar) {
+	else if (_dType == DataType::UChar) {
 		unsigned char* temp = (unsigned char*)data;
 		for (unsigned int i = 0; i < _tileSize * _tileSize * cDepth; i += cDepth) {
 			for (unsigned int j = 0; j < cDepth; ++j) {
@@ -260,26 +260,26 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 	auto endMinMax = std::chrono::steady_clock::now();
 	_totalMinMaxTime += std::chrono::duration<double, milli>(endMinMax - startMinMax).count();
 
-	if (getCompression() == JPEG2000) {
+	if (getCompression() == Compression::JPEG2000) {
 		int depth = 8;
 		unsigned int size = npixels * sizeof(unsigned char);
-		if (getDataType() == UInt32 || getDataType() == Float) {
+		if (getDataType() == DataType::UInt32 || getDataType() == DataType::Float) {
 			depth = 32;
 			size = npixels * sizeof(float);
 		}
-		else if (getDataType() == UInt16) {
+		else if (getDataType() == DataType::UInt16) {
 			depth = 16;
 			size = npixels * sizeof(unsigned short);
 		}
 
 		unsigned int nrComponents = 3;
-		if (getColorType() == RGBA) {
+		if (getColorType() == ColorType::RGBA) {
 			nrComponents = 4;
 		}
-		else if (getColorType() == Monochrome) {
+		else if (getColorType() == ColorType::Monochrome) {
 			nrComponents = 1;
 		}
-		else if (getColorType() == Indexed) {
+		else if (getColorType() == ColorType::Indexed) {
 			nrComponents = _numberOfIndexedColors;
 		}
 
@@ -295,13 +295,13 @@ void MultiResolutionImageWriter::writeBaseImagePartToTIFFTile(void* data, unsign
 	}
 	else {
 		auto startTileWrite = std::chrono::steady_clock::now();
-		if (_dType == Float) {
+		if (_dType == DataType::Float) {
 			TIFFWriteEncodedTile(_tiff, pos, data, npixels * sizeof(float));
 		}
-		else if (_dType == UInt16) {
+		else if (_dType == DataType::UInt16) {
 			TIFFWriteEncodedTile(_tiff, pos, data, npixels * sizeof(unsigned short));
 		}
-		else if (_dType == UInt32) {
+		else if (_dType == DataType::UInt32) {
 			TIFFWriteEncodedTile(_tiff, pos, data, npixels * sizeof(unsigned int));
 		}
 		else {
@@ -332,20 +332,20 @@ int MultiResolutionImageWriter::finishImage() {
 		_max_vals = NULL;
 	}
 	auto startPyramidTime = std::chrono::steady_clock::now();
-	if (getDataType() == UInt32) {
+	if (getDataType() == DataType::UInt32) {
 		if (writePyramidToDisk<unsigned int>() < 0) {
 			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
 			return -1;
 		}
 		incorporatePyramid<unsigned int>();
 	}
-	else if (getDataType() == UInt16) {
+	else if (getDataType() == DataType::UInt16) {
 	if (writePyramidToDisk<unsigned short>() < 0) {
 		std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
 		return -1;
 	}		incorporatePyramid<unsigned short>();
 	}
-	else if (getDataType() == UChar) {
+	else if (getDataType() == DataType::UChar) {
 		if (writePyramidToDisk<unsigned char>() < 0) {
 			std::cout << "Writing pyramid to disk failed, TIFF file is still valid for further analysis." << std::endl;
 			return -1;
@@ -474,11 +474,11 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
 			}
 			T* outTile = (T*)_TIFFmalloc(npixels * sizeof(T));
 			unsigned int size = npixels * sizeof(T);
-			if (level == 1 && (getCompression() == JPEG2000)) {
+			if (level == 1 && (getCompression() == Compression::JPEG2000)) {
 				for (int inRow = 0; inRow < _downsamplePerLevel; inRow++) {
 					for (int inCol = 0; inCol < _downsamplePerLevel; inCol++) {
 						if (xpos + inCol * _tileSize >= prevLevelw || ypos + inRow * _tileSize >= prevLevelh) {
-							std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, 0);
+							std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, static_cast<T>(0));
 						}
 						else {
 							int tileNr = TIFFComputeTile(prevLevelTiff, xpos + inCol * _tileSize, ypos + inRow * _tileSize, 0, 0);
@@ -488,7 +488,7 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
 								tiles_valid[inRow * _downsamplePerLevel + inCol] = true;
 							}
 							else {
-								std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, 0);
+								std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, static_cast<T>(0));
 							}
 						}
 					}
@@ -498,10 +498,10 @@ template <typename T> int MultiResolutionImageWriter::writePyramidToDisk() {
 				for (int inRow = 0; inRow < _downsamplePerLevel; inRow++) {
 					for (int inCol = 0; inCol < _downsamplePerLevel; inCol++) {
 						if (xpos + inCol * _tileSize >= prevLevelw || ypos + inRow * _tileSize >= prevLevelh) {
-							std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, 0);
+							std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, static_cast<T>(0));
 						} else {
 							if (TIFFReadTile(prevLevelTiff, tiles[inRow * _downsamplePerLevel + inCol], xpos + inCol * _tileSize, ypos + inRow * _tileSize, 0, 0) < 0) {
-								std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, 0);
+								std::fill_n(tiles[inRow * _downsamplePerLevel + inCol], npixels, static_cast<T>(0));
 							}
 							else {
 								tiles_valid[inRow * _downsamplePerLevel + inCol] = true;
@@ -597,39 +597,39 @@ template <typename T> int MultiResolutionImageWriter::incorporatePyramid() {
 template int MultiResolutionImageWriter::incorporatePyramid<unsigned int>();
 
 void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
-	if (_cType == Monochrome || _cType == Indexed) {
+	if (_cType == ColorType::Monochrome || _cType == ColorType::Indexed) {
 		TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 	}
-	else if (_cType == RGBA || _cType == RGB) {
+	else if (_cType == ColorType::RGBA || _cType == ColorType::RGB) {
 		TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 	}
 
-	if (_dType == UChar) {
+	if (_dType == DataType::UChar) {
 		TIFFSetField(levelTiff, TIFFTAG_BITSPERSAMPLE, 8);
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
 	}
-	else if (_dType == UInt32) {
+	else if (_dType == DataType::UInt32) {
 		TIFFSetField(levelTiff, TIFFTAG_BITSPERSAMPLE, sizeof(unsigned int) * 8);
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
 	}
-	else if (_dType == UInt16) {
+	else if (_dType == DataType::UInt16) {
 		TIFFSetField(levelTiff, TIFFTAG_BITSPERSAMPLE, sizeof(unsigned short) * 8);
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
 	}
-	else if (_dType == Float) {
+	else if (_dType == DataType::Float) {
 		TIFFSetField(levelTiff, TIFFTAG_BITSPERSAMPLE, sizeof(float) * 8);
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
 	}
-	if (_cType == Monochrome) {
+	if (_cType == ColorType::Monochrome) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 1);
 	}
-	else if (_cType == RGB) {
+	else if (_cType == ColorType::RGB) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 3);
 	}
-	else if (_cType == RGBA) {
+	else if (_cType == ColorType::RGBA) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, 4);
 	}
-	else if (_cType == Indexed) {
+	else if (_cType == ColorType::Indexed) {
 		TIFFSetField(levelTiff, TIFFTAG_SAMPLESPERPIXEL, _numberOfIndexedColors);
 	}
 	TIFFSetField(levelTiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -638,21 +638,21 @@ void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
 
 void MultiResolutionImageWriter::setPyramidTags(TIFF* levelTiff, const unsigned long long& width, const unsigned long long& hight) {
 	setBaseTags(levelTiff);
-	if (_codec == LZW) {
+	if (_codec == Compression::LZW) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
 	}
-	else if (_codec == JPEG) {
+	else if (_codec == Compression::JPEG) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_JPEG);
 		TIFFSetField(levelTiff, TIFFTAG_JPEGQUALITY, (unsigned int)_quality);
-		if (_codec == JPEG && _quality < 90) {
+		if (_codec == Compression::JPEG && _quality < 90) {
 			TIFFSetField(levelTiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_YCBCR);
 			TIFFSetField(levelTiff, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
 		}
 	}
-	else if (_codec == RAW) {
+	else if (_codec == Compression::RAW) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
 	}
-	else if (_codec == JPEG2000) {
+	else if (_codec == Compression::JPEG2000) {
 		TIFFSetField(levelTiff, TIFFTAG_COMPRESSION, 33005);
 	}
 
@@ -682,7 +682,7 @@ template <typename T> T* MultiResolutionImageWriter::downscaleTile(T* inTile, un
 			for (unsigned long long s = 0; s < nrSamples; ++s) {
 				unsigned int index = (_downsamplePerLevel * y * tileSize * nrSamples) + (_downsamplePerLevel * x * nrSamples) + s;
 				unsigned int dsIndex = (y * dsSize * nrSamples) + (x * nrSamples) + s;
-				if (_interpolation == pathology::Linear) {
+				if (_interpolation == Interpolation::Linear) {
 					float interVal = 0;
 					for (int j = 0; j < _downsamplePerLevel; ++j) {
 						for (int i = 0; i < _downsamplePerLevel; ++i) {
@@ -705,22 +705,22 @@ template <typename T> T* MultiResolutionImageWriter::downscaleTile(T* inTile, un
 template <typename T> void MultiResolutionImageWriter::writePyramidLevel(TIFF* levelTiff, unsigned int levelwidth, unsigned int levelheight, unsigned int nrsamples) {
 	unsigned int npixels = _tileSize * _tileSize * nrsamples;
 	T* raster = (T*)_TIFFmalloc(npixels * sizeof(T));
-	if (getCompression() == JPEG2000) {
+	if (getCompression() == Compression::JPEG2000) {
 		int depth = 8;
 		unsigned int size = npixels * sizeof(unsigned char);
-		if (getDataType() == UInt32 && getColorType() != pathology::ColorType::RGBA) {
+		if (getDataType() == DataType::UInt32 && getColorType() != ColorType::RGBA) {
 			depth = 32;
 			size = npixels * sizeof(T);
 		}
 
 		unsigned int nrComponents = 3;
-		if (getColorType() == RGBA) {
+		if (getColorType() == ColorType::RGBA) {
 			nrComponents = 4;
 		}
-		else if (getColorType() == Monochrome) {
+		else if (getColorType() == ColorType::Monochrome) {
 			nrComponents = 1;
 		}
-		else if (getColorType() == Indexed) {
+		else if (getColorType() == ColorType::Indexed) {
 			nrComponents = _numberOfIndexedColors;
 		}
 

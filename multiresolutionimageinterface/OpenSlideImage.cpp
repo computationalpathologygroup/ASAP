@@ -44,9 +44,9 @@ bool OpenSlideImage::initializeType(const std::string& imagePath) {
     }
     if (_errorState.empty()) {
       _numberOfLevels = openslide_get_level_count(_slide);
-      _dataType = UChar;
+      _dataType = DataType::UChar;
       _samplesPerPixel = 3;
-      _colorType = RGB;
+      _colorType = ColorType::RGB;
       for (int i = 0; i < _numberOfLevels; ++i) {
         int64_t x, y;
         openslide_get_level_dimensions(_slide, i, &x, &y);

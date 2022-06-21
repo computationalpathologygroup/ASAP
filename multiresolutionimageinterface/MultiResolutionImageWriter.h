@@ -13,10 +13,10 @@ class ProgressMonitor;
 class JPEG2000Codec;
 
 namespace pathology {
-  enum Compression : int;
-  enum Interpolation: int;
-  enum ColorType : int;
-  enum DataType : int;
+  enum class Compression : int;
+  enum class Interpolation: int;
+  enum class ColorType : int;
+  enum class DataType : int;
 }
 
 //! This class can be used to write images to disk in a multi-resolution pyramid fashion.

@@ -7,27 +7,27 @@
 
 template<>
 inline const pathology::DataType Patch<unsigned char>::getDataType() const {
-  return pathology::UChar;
+  return pathology::DataType::UChar;
 }
 
 template<>
 inline const pathology::DataType Patch<float>::getDataType() const {
-  return pathology::Float;
+  return pathology::DataType::Float;
 }
 
 template<>
 inline const pathology::DataType Patch<unsigned int>::getDataType() const {
-  return pathology::UInt32;
+  return pathology::DataType::UInt32;
 }
 
 template<>
 inline const pathology::DataType Patch<unsigned short>::getDataType() const {
-  return pathology::UInt16;
+  return pathology::DataType::UInt16;
 }
 
 template<>
 inline const pathology::DataType Patch<double>::getDataType() const {
-  return pathology::Float;
+  return pathology::DataType::Float;
 }
 
 template<typename T>

@@ -10,19 +10,19 @@ extern "C" {
 using namespace pathology;
 
 int AperioSVSWriter::finishImage() {
-  if (getDataType() == UInt32) {
+  if (getDataType() == DataType::UInt32) {
     writePyramidToDisk<unsigned int>();
     writeThumbnail<unsigned int>();
     incorporatePyramid<unsigned int>();
     writeThumbnail<unsigned int>();
   }
-  else if (getDataType() == UInt16) {
+  else if (getDataType() == DataType::UInt16) {
     writePyramidToDisk<unsigned short>();
     writeThumbnail<unsigned short>();
     incorporatePyramid<unsigned short>();
     writeThumbnail<unsigned short>();
   }
-  else if (getDataType() == UChar) {
+  else if (getDataType() == DataType::UChar) {
     writePyramidToDisk<unsigned char>();
     writeThumbnail<unsigned char>();
     incorporatePyramid<unsigned char>();
@@ -76,7 +76,7 @@ void AperioSVSWriter::writeThumbnail() {
   JPEG2000Codec cod;
   for (unsigned int tileY = 0; tileY < h; tileY += tileH) {
     for (unsigned int tileX = 0; tileX < w; tileX += tileW) {
-      if (getCompression() == JPEG2000) {
+      if (getCompression() == Compression::JPEG2000) {
         unsigned int no = TIFFComputeTile(lowestResTiff, tileX, tileY, 0, 0);
         unsigned int rawSize = TIFFReadRawTile(lowestResTiff, no, tile, tileW*tileH*nrsamples*sizeof(T));
         cod.decode((unsigned char*)tile, rawSize, tileW*tileH*nrsamples*sizeof(T));

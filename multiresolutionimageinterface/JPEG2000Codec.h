@@ -3,8 +3,8 @@
 #include "jpeg2kcodec_export.h"
 
 namespace pathology {
-  enum DataType : int;
-  enum ColorType : int;
+  enum class DataType;
+  enum class ColorType;
 }
 
 class JPEG2KCODEC_EXPORT JPEG2000Codec

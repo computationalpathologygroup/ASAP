@@ -19,7 +19,7 @@ namespace pathology {
 
   extern CORE_EXPORT std::map<std::string, LUT> DefaultColorLookupTables;
 
-  enum ColorType : int {
+  enum class ColorType {
     InvalidColorType,
     Monochrome,
     RGB,
@@ -27,7 +27,7 @@ namespace pathology {
     Indexed
   };
 
-  enum DataType : int  {
+  enum class DataType {
     InvalidDataType,
     UChar,
     UInt16,
@@ -35,14 +35,14 @@ namespace pathology {
     Float
   };
 
-  enum Compression : int  {
+  enum class Compression {
     RAW,
     JPEG,
     LZW,
     JPEG2000
   };
 
-  enum Interpolation : int  {
+  enum class Interpolation {
     NearestNeighbor,
     Linear
   };
