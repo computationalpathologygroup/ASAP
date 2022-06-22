@@ -182,6 +182,8 @@ for:
       - image: macos-bigsur
 
   build_script:
+    - sh: rm -f /usr/local/include/X11
+    - sh: brew unlink subversion
     - sh: brew update
     - sh: brew install openslide opencv swig qt5
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
