@@ -176,8 +176,8 @@ Patch<T>::Patch(const std::vector<unsigned long long>& dimensions, const patholo
     _buffer = new T[_bufferSize];
   }
   if (!dimensions.empty()) {
-    if ((_colorType == pathology::RGBA && dimensions.back() != 4) || (_colorType == pathology::RGB && dimensions.back() != 3) || (_colorType == pathology::Monochrome && dimensions.back() != 1)) {
-      _colorType = pathology::Indexed;
+    if ((_colorType == pathology::ColorType::RGBA && dimensions.back() != 4) || (_colorType == pathology::ColorType::RGB && dimensions.back() != 3) || (_colorType == pathology::ColorType::Monochrome && dimensions.back() != 1)) {
+      _colorType = pathology::ColorType::Indexed;
     }
   }
   this->_wsiMaxValues = wsiMaxValues;

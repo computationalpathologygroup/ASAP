@@ -70,6 +70,8 @@ import_array();
 #endif
 
 %ignore swap(ImageSource& first, ImageSource& second);
+%ignore AnnotationGroup::getAttribute(const std::string&);
+%ignore ProgressMonitor::operator++();
 
 %immutable ASAP_VERSION_STRING;
 %include "../config/ASAPMacros.h"
@@ -77,6 +79,7 @@ import_array();
 %include "../core/Point.h"
 %include "../core/PathologyEnums.h"
 %include "../core/ImageSource.h"
+%include "../core/ProgressMonitor.h"
 %include "../core/CmdLineProgressMonitor.h"
 %include "../annotation/AnnotationBase.h"
 %include "../annotation/Annotation.h"

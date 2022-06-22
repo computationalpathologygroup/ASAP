@@ -334,6 +334,9 @@ unsigned long long ASAP_Window::getCacheSize() const {
   if (view) {
     return view->getCacheSize();
   }
+  else {
+      return 0;
+  }
 }
 
 void ASAP_Window::setupUi()
