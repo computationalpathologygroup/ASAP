@@ -32,7 +32,7 @@ inline const pathology::DataType Patch<double>::getDataType() const {
 
 template<typename T>
 const pathology::DataType Patch<T>::getDataType() const {
-  return pathology::InvalidDataType;
+  return pathology::DataType::InvalidDataType;
 }
 
 template<typename T>
