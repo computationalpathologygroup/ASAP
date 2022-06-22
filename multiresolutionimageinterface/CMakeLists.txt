@@ -200,6 +200,7 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES OUTPUT_NAME multiresolutionimageinterface)
  	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES ARCHIVE_OUTPUT_NAME _multiresolutionimageinterface)
 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES DEBUG_POSTFIX _d)
+      target_compile_options(py_multiresolutionimageinterface PRIVATE "/wd6011;")
 
     # Cross-platform copying and installing instructions
     IF(APPLE)

@@ -337,10 +337,10 @@ void PathologyViewer::initializeGUIComponents(unsigned int level) {
   unsigned char* overview = new unsigned char[size];
   _img->getRawRegion<unsigned char>(0, 0, overviewDimensions[0], overviewDimensions[1], level, overview);
   QImage ovImg;
-  if (_img->getColorType() == pathology::RGBA) {
+  if (_img->getColorType() == pathology::ColorType::RGBA) {
     ovImg = QImage(overview, overviewDimensions[0], overviewDimensions[1], overviewDimensions[0] * 4, QImage::Format_RGBA8888).convertToFormat(QImage::Format_RGB888);
   }
-  else if (_img->getColorType() == pathology::RGB) {
+  else if (_img->getColorType() == pathology::ColorType::RGB) {
     ovImg = QImage(overview, overviewDimensions[0], overviewDimensions[1], overviewDimensions[0] * 3, QImage::Format_RGB888);
   }
   QPixmap ovPixMap = QPixmap(QPixmap::fromImage(ovImg));

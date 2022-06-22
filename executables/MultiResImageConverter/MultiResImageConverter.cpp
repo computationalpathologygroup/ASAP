@@ -33,20 +33,20 @@ void convertImage(std::string fileIn, std::string fileOut, bool svs = false, std
       if (img->valid()) {
         writer->setTileSize(tileSize);
         if (compression == string("LZW")) {
-          writer->setCompression(LZW);
+          writer->setCompression(Compression::LZW);
         } 
         else if (compression == string("RAW")) {
-          writer->setCompression(RAW);
+          writer->setCompression(Compression::RAW);
         }
         else if (compression == string("JPEG")) {
-          writer->setCompression(JPEG);
+          writer->setCompression(Compression::JPEG);
         }
         else if (compression == string("JPEG2000")) {
-          writer->setCompression(JPEG2000);
+          writer->setCompression(Compression::JPEG2000);
         }
         else {
           cout << "Invalid compression, setting default LZW as compression" << endl;
-          writer->setCompression(LZW);
+          writer->setCompression(Compression::LZW);
         }
         if (quality > 100) {
           cout << "Too high rate, maximum is 100, setting to 100 (for JPEG2000 this is equal to lossless)" << endl; 

@@ -125,7 +125,7 @@ bool NucleiDetectionWholeSlideFilter::process() {
   if (!_outPath.empty()) {
     std::shared_ptr<Annotation> annot(new Annotation());
     annot->setName("Detected nuclei");
-    annot->setType(Annotation::POINTSET);
+    annot->setType(Annotation::Type::POINTSET);
     for (std::vector<std::vector<float> >::const_iterator it = _centerPoints.begin(); it != _centerPoints.end(); ++it) {
       float x = (*it)[0];
       float y = (*it)[1];

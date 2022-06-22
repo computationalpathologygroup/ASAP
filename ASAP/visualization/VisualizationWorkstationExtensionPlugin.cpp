@@ -29,6 +29,7 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   WorkstationExtensionPluginInterface(),
   _dockWidget(NULL),
   _LUTEditor(NULL),
+  _LUTEditingArea(NULL),
   _likelihoodCheckBox(NULL),
   _foreground(NULL),
   _foregroundScale(1.),
@@ -36,7 +37,8 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _foregroundChannel(0),
   _renderingEnabled(false),
   _editingLUT(false),
-  _previewingLUT(false)
+  _previewingLUT(false),
+  _segmentationCheckBox(NULL)
 {
   qRegisterMetaTypeStreamOperators<QList<float>>("QListFloat");
   qRegisterMetaTypeStreamOperators<QList<QList<float>>>("QListRGBAArray");
@@ -486,16 +488,16 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     if (_settings) {
       _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
       pathology::DataType dtype = img->getDataType();
-      if (dtype == pathology::Float) {
+      if (dtype == pathology::DataType::Float) {
         _settings->beginGroup("VisualizationSettingsForFloatType");
       }
-      else if (dtype == pathology::UChar) {
+      else if (dtype == pathology::DataType::UChar) {
         _settings->beginGroup("VisualizationSettingsForUCharType");
       }
-      else if (dtype == pathology::UInt16) {
+      else if (dtype == pathology::DataType::UInt16) {
         _settings->beginGroup("VisualizationSettingsForUInt16Type");
       }
-      else if (dtype == pathology::UInt32) {
+      else if (dtype == pathology::DataType::UInt32) {
         _settings->beginGroup("VisualizationSettingsForUInt32Type");
       }
       _opacity = _settings->value("opacity", 0.5).toFloat();
@@ -503,7 +505,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
       if (_foregroundChannel >= img->getSamplesPerPixel()) {
         _foregroundChannel = 0;
       }
-      if (dtype == pathology::Float) {
+      if (dtype == pathology::DataType::Float) {
         _currentLUT = _settings->value("lut", "Traffic Light (0 - 1)").toString();
       }
       else {
@@ -516,7 +518,7 @@ void VisualizationWorkstationExtensionPlugin::setDefaultVisualizationParameters(
     else {
       _opacity = 0.5;
       _foregroundChannel = 0;
-      if (img->getDataType() == pathology::UChar || img->getDataType() == pathology::UInt32 || img->getDataType() == pathology::UInt16) {
+      if (img->getDataType() == pathology::DataType::UChar || img->getDataType() == pathology::DataType::UInt32 || img->getDataType() == pathology::DataType::UInt16) {
         _currentLUT = "Label";
       }
       else {
@@ -548,16 +550,16 @@ void VisualizationWorkstationExtensionPlugin::onImageClosed() {
   if (_settings && _foreground) {
     _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
     pathology::DataType dtype = _foreground->getDataType();
-    if (dtype == pathology::Float) {
+    if (dtype == pathology::DataType::Float) {
       _settings->beginGroup("VisualizationSettingsForFloatType");
     }
-    else if (dtype == pathology::UChar) {
+    else if (dtype == pathology::DataType::UChar) {
       _settings->beginGroup("VisualizationSettingsForUCharType");
     }
-    else if (dtype == pathology::UInt16) {
+    else if (dtype == pathology::DataType::UInt16) {
       _settings->beginGroup("VisualizationSettingsForUInt16Type");
     }
-    else if (dtype == pathology::UInt32) {
+    else if (dtype == pathology::DataType::UInt32) {
       _settings->beginGroup("VisualizationSettingsForUInt32Type");
     }
     _settings->setValue("opacity", _opacity);

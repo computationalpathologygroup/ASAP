@@ -96,22 +96,22 @@ public :
         return;
       }
       unsigned int nrSamples = getSamplesPerPixel();
-      if (this->getDataType()==pathology::Float) {
+      if (this->getDataType()==pathology::DataType::Float) {
         float * temp = (float*)readDataFromImage(startX, startY, width, height, level);
         std::copy(temp, temp + width*height*nrSamples, data);
         delete[] temp;
       }
-      else if (this->getDataType()==pathology::UChar) {
+      else if (this->getDataType()==pathology::DataType::UChar) {
         unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
         std::copy(temp, temp + width*height*nrSamples, data);
         delete[] temp;
       }
-      else if (this->getDataType()==pathology::UInt16) {
+      else if (this->getDataType()==pathology::DataType::UInt16) {
         unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
         std::copy(temp, temp + width*height*nrSamples, data);
         delete[] temp;
       }
-      else if (this->getDataType()==pathology::UInt32) {
+      else if (this->getDataType()==pathology::DataType::UInt32) {
         unsigned int * temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
         std::copy(temp, temp + width*height*nrSamples, data);
         delete[] temp;

@@ -201,8 +201,8 @@ unsigned long long VSIImage::parseETSFile(std::ifstream& ets) {
   // Set some defaults for VSI
   _numberOfLevels = 1;
   _samplesPerPixel = 3;
-  _colorType = RGB;
-  _dataType = UChar;
+  _colorType = ColorType::RGB;
+  _dataType = DataType::UChar;
   if (L0Dims[0]*L0Dims[1] > 0) {
     _isValid = true;
   } else {

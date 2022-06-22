@@ -10,10 +10,13 @@
 
 class AnnotationGroup;
 
+#ifndef SWIG
 class ANNOTATION_EXPORT AnnotationBase : public std::enable_shared_from_this<AnnotationBase> {
+#else
+class ANNOTATION_EXPORT AnnotationBase  {
+#endif
 public:
 
-  AnnotationBase();
   virtual ~AnnotationBase();
 
 	void setName(const std::string& name);
@@ -36,6 +39,7 @@ public:
   inline void resetModifiedStatus() { _modified = false; }
 
 protected:
+  AnnotationBase();
   bool _modified;
   std::string _name;
   std::weak_ptr<AnnotationGroup> _group;

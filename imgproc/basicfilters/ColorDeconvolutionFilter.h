@@ -175,7 +175,7 @@ public:
     _maxVal(0.0)
   {
     this->_samplesPerPixel = 1;
-    this->_colorType = pathology::Monochrome;
+    this->_colorType = pathology::ColorType::Monochrome;
     revertToDefaultStain();
   };
 
