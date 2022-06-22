@@ -53,7 +53,7 @@ namespace ASAP
 				unsigned char* data(nullptr);
 				std::vector<unsigned long long> dimensions;
 
-				if (image->getDataType() == pathology::UChar) {
+				if (image->getDataType() == pathology::DataType::UChar) {
 					if (image->getNumberOfLevels() > 1)
 					{
 						dimensions = image->getLevelDimensions(image->getNumberOfLevels() - 1);

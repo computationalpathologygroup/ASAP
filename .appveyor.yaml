@@ -1,5 +1,5 @@
 image:
- - macos-monterey
+ - macos-bigsur
  - Visual Studio 2019
  - Ubuntu
  
@@ -38,11 +38,11 @@ matrix:
   exclude:
     - image: Visual Studio 2019
       ubuntu_version: 20.04
-    - image: macos-monterey
+    - image: macos-bigsur
       ubuntu_version: 20.04
-    - image: macos-monterey
+    - image: macos-bigsur
       python_version: 3.6
-    - image: macos-monterey
+    - image: macos-bigsur
       python_version: 3.7
 
 install:
@@ -179,9 +179,10 @@ for:
 - 
   matrix:
     only:
-      - image: macos-monterey
+      - image: macos-bigsur
 
   build_script:
+    - sh: brew update
     - sh: brew install openslide opencv swig qt5
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.hpp
