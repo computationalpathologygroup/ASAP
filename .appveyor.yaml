@@ -38,11 +38,11 @@ matrix:
   exclude:
     - image: Visual Studio 2019
       ubuntu_version: 20.04
-    - image: macOS
+    - image: macos-monterey
       ubuntu_version: 20.04
-    - image: macOS
+    - image: macos-monterey
       python_version: 3.6
-    - image: macOS
+    - image: macos-monterey
       python_version: 3.7
 
 install:
@@ -179,7 +179,7 @@ for:
 - 
   matrix:
     only:
-      - image: macOS
+      - image: macos-monterey
 
   build_script:
     - sh: brew install openslide opencv swig qt5
