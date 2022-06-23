@@ -200,8 +200,9 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES OUTPUT_NAME multiresolutionimageinterface)
  	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES ARCHIVE_OUTPUT_NAME _multiresolutionimageinterface)
 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES DEBUG_POSTFIX _d)
+      IF(WIN32)
       target_compile_options(py_multiresolutionimageinterface PRIVATE "/wd6011;")
-
+      endif(WIN32)
     # Cross-platform copying and installing instructions
     IF(APPLE)
 	      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/multiresolutionimageinterface.py DESTINATION ${INSTALL_RUNTIME_DIR})
