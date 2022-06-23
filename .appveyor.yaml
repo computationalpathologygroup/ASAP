@@ -1,6 +1,6 @@
 image:
  - macos-bigsur
- - Visual Studio 2019
+ - Visual Studio 2022
  - Ubuntu
  
 
@@ -9,41 +9,18 @@ environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   
   matrix:
-    - python_version:        3.6
-      python_version_linux:  3.6m
-      python_version_no_dot: 36
-      ubuntu_version:        18.04 
-    - python_version:        3.7
-      python_version_linux:  3.7m
-      python_version_no_dot: 37
-      ubuntu_version:        18.04      
-    - python_version:        3.8
-      python_version_linux:  3.8
-      python_version_no_dot: 38 
-      ubuntu_version:        18.04      
-    - python_version:        3.6
-      python_version_linux:  3.6m
-      python_version_no_dot: 36
-      ubuntu_version:        20.04    
-    - python_version:        3.7
-      python_version_linux:  3.7m
-      python_version_no_dot: 37
-      ubuntu_version:        20.04      
     - python_version:        3.8
       python_version_linux:  3.8
       python_version_no_dot: 38 
       ubuntu_version:        20.04      
-
-matrix:
-  exclude:
-    - image: Visual Studio 2019
-      ubuntu_version: 20.04
-    - image: macos-bigsur
-      ubuntu_version: 20.04
-    - image: macos-bigsur
-      python_version: 3.6
-    - image: macos-bigsur
-      python_version: 3.7
+    - python_version:        3.9
+      python_version_linux:  3.9
+      python_version_no_dot: 39
+      ubuntu_version:        20.04      
+    - python_version:        3.10
+      python_version_linux:  3.10
+      python_version_no_dot: 310
+      ubuntu_version:        20.04
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
@@ -60,7 +37,7 @@ for:
 -
   matrix:
     only:
-      - image: Visual Studio 2019      
+      - image: Visual Studio 2022
 
   before_build:
   - cmd: set python_location=C:/Python%python_version_no_dot%-x64
@@ -192,50 +169,27 @@ for:
     - sh: sudo mv pugixml.cpp /usr/local/include/
     - sh: sudo mv pugixml.hpp /usr/local/include/
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
-    # Python 3.8
-    - sh: source ~/venv3.8/bin/activate
+    - sh: source ~/venv${python_version_linux}/bin/activate
     - sh: pip install numpy
     #- sh: export APPVEYOR_VNC_BLOCK=true
     #- sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.8.12/bin/python3.8 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.8.12/include/python3.8 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.8.12/lib/libpython3.8.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.8/lib/python3.8/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython${python_version_linux}/bin/python${python_version_linux} -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython${python_version_linux}/include/python${python_version_linux} -DPYTHON_LIBRARY=/Users/appveyor/.localpython${python_version_linux}/lib/libpython${python_version_linux}.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv${python_version_linux}/lib/python${python_version_linux}/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make package
-    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py38-Darwin.dmg
-    # Python 3.7
-    - sh: source ~/venv3.7/bin/activate
-    - sh: pip install numpy
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.7.12/bin/python3.7 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.7.12/include/python3.7m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.7.12/lib/libpython3.7.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.7/lib/python3.7/site-packages/numpy/core/include
-    - sh: make
-    - sh: cp **/*/*.dylib /usr/local/lib/
-    - sh: cp **/*.dylib /usr/local/lib/
-    - sh: sudo make package
-    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py37-Darwin.dmg
-    # Python 3.6
-    - sh: source ~/venv3.6/bin/activate
-    - sh: pip install numpy
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.6.15/bin/python3.6 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.6.15/include/python3.6m -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.6.15/lib/libpython3.6.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.6/lib/python3.6/site-packages/numpy/core/include
-    - sh: make
-    - sh: cp **/*/*.dylib /usr/local/lib/
-    - sh: cp **/*.dylib /usr/local/lib/
-    - sh: sudo make package
-    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py36-Darwin.dmg
+    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py${python_version_no_dot}-Darwin.dmg
 
   artifacts:
-    - path: ASAP-2.0-py38-Darwin.dmg
-      name: ASAP_APP_PYTHON38_Package
-    - path: ASAP-2.0-py37-Darwin.dmg
-      name: ASAP_APP_PYTHON37_Package
-    - path: ASAP-2.0-py36-Darwin.dmg
-      name: ASAP_APP_PYTHON36_Package
+    - path: ./*.dmg
+      name: ASAP_DMG_Package
 
   deploy:
     - provider: GitHub
       release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
       auth_token:
         secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
-      artifact: ASAP_APP_PYTHON36_Package,ASAP_APP_PYTHON37_Package,ASAP_APP_PYTHON38_Package
+      artifact: ASAP_APP_PYTHON38_Package,ASAP_APP_PYTHON39_Package
       draft: false
       force_update: true
       on:
@@ -246,7 +200,7 @@ for:
       release: ASAP $(asap_major_version).$(asap_minor_version)
       auth_token:
         secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
-      artifact: ASAP_APP_PYTHON36_Package,ASAP_APP_PYTHON37_Package,ASAP_APP_PYTHON38_Package
+      artifact: ASAP_APP_PYTHON38_Package,ASAP_APP_PYTHON39_Package
       draft: false
       force_update: true
       on:
