@@ -10,15 +10,15 @@ environment:
   
   matrix:
     - python_version:        3.8
-      python_version_linux:  3.8
+      python_version_macos:  3.8.12
       python_version_no_dot: 38 
       ubuntu_version:        20.04      
     - python_version:        3.9
-      python_version_linux:  3.9
+      python_version_macos:  3.9.10
       python_version_no_dot: 39
       ubuntu_version:        20.04      
     - python_version:        3.10
-      python_version_linux:  3.10
+      python_version_macos:  3.10.2
       python_version_no_dot: 310
       ubuntu_version:        20.04
 
@@ -125,7 +125,7 @@ for:
   build_script:
     - sh: cd buildtools
     - sh: docker build --tag asap_build:${ubuntu_version} --build-arg UBUNTU_VERSION=${ubuntu_version} .
-    - sh: docker run -v ${PWD}:/artifacts asap_build:${ubuntu_version} /root/build/build_ASAP.sh $python_version_linux $python_version_no_dot true
+    - sh: docker run -v ${PWD}:/artifacts asap_build:${ubuntu_version} /root/build/build_ASAP.sh $python_version $python_version_no_dot true
 
   artifacts:
     - path: ./buildtools/*.deb
@@ -169,11 +169,11 @@ for:
     - sh: sudo mv pugixml.cpp /usr/local/include/
     - sh: sudo mv pugixml.hpp /usr/local/include/
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
-    - sh: source ~/venv${python_version_linux}/bin/activate
+    - sh: source ~/venv${python_version}/bin/activate
     - sh: pip install numpy
-    - sh: export APPVEYOR_VNC_BLOCK=true
-    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython${python_version_linux}/bin/python${python_version_linux} -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython${python_version_linux}/include/python${python_version_linux} -DPYTHON_LIBRARY=/Users/appveyor/.localpython${python_version_linux}/lib/libpython${python_version_linux}.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv${python_version_linux}/lib/python${python_version_linux}/site-packages/numpy/core/include
+#    - sh: export APPVEYOR_VNC_BLOCK=true
+#    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython${python_version_macos}/bin/python${python_version} -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython${python_version_macos}/include/python${python_version} -DPYTHON_LIBRARY=/Users/appveyor/.localpython${python_version_macos}/lib/libpython${python_version}.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv${python_version}/lib/python${python_version}/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
