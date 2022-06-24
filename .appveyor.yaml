@@ -43,7 +43,7 @@ for:
   - cmd: set python_location=C:/Python%python_version_no_dot%-x64
   - cmd: set python_library=python%python_version_no_dot%.lib
   - cmd: set python_pip=C:\Python%python_version_no_dot%-x64\Scripts\pip
-  - cmd: set artefact_name=ASAP-2.0-py%python_version_no_dot%-win64.exe
+  - cmd: set artefact_name=ASAP-2.1-py%python_version_no_dot%-win64.exe
   - ps: >-
       If (!(Test-Path -Path 'C:\projects\pugixml')) {
         git clone https://github.com/zeux/pugixml c:\projects\pugixml
@@ -77,7 +77,7 @@ for:
     - cmd: cd ./ASAP_build
     - cmd: cmake --build . --config Release
     - cmd: cpack
-    - ps: mv ASAP-2.0-win64.exe $env:artefact_name
+    - ps: mv ASAP-2.1-win64.exe $env:artefact_name
 
   cache:
     - C:\tools\opencv -> appveyor.yml
@@ -178,7 +178,7 @@ for:
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make package
-    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.0-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.0-py${python_version_no_dot}-Darwin.dmg
+    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.1-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.1-py${python_version_no_dot}-Darwin.dmg
 
   artifacts:
     - path: ./*.dmg
