@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=18.04
+ARG UBUNTU_VERSION=20.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -50,9 +50,9 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
 
 RUN /root/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
     /root/miniconda3/bin/conda create --quiet --name build_python3.8 python=3.8 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.8 numpy nomkl
+    /root/miniconda3/bin/conda install --quiet -n build_python3.8 numpy nomkl && \ 
     /root/miniconda3/bin/conda create --quiet --name build_python3.9 python=3.9 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.9 numpy nomkl
+    /root/miniconda3/bin/conda install --quiet -n build_python3.9 numpy nomkl && \
     /root/miniconda3/bin/conda create --quiet --name build_python3.10 python=3.10 && \
     /root/miniconda3/bin/conda install --quiet -n build_python3.10 numpy nomkl
 

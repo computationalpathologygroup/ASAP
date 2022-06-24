@@ -1,7 +1,7 @@
 image:
- - macos-bigsur
- - Visual Studio 2022
  - Ubuntu
+ - Visual Studio 2022
+ - macos-bigsur
  
 
 environment:
@@ -186,10 +186,10 @@ for:
 
   deploy:
     - provider: GitHub
-      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
+      release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION (Nightly)    
       auth_token:
         secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
-      artifact: ASAP_APP_PYTHON38_Package,ASAP_APP_PYTHON39_Package
+      artifact: ASAP_DMG_Package
       draft: false
       force_update: true
       on:
@@ -200,7 +200,7 @@ for:
       release: ASAP $(asap_major_version).$(asap_minor_version)
       auth_token:
         secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
-      artifact: ASAP_APP_PYTHON38_Package,ASAP_APP_PYTHON39_Package
+      artifact: ASAP_DMG_Package
       draft: false
       force_update: true
       on:
