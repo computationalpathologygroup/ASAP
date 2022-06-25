@@ -111,7 +111,6 @@ for:
       draft: false
       force_update: true
       on:
-        branch: master                 # release from master branch only
         APPVEYOR_REPO_TAG: true        # deploy on tag push only
       
 - 
@@ -151,7 +150,6 @@ for:
       draft: true
       force_update: true
       on:
-        branch: master                 # release from master branch only
         APPVEYOR_REPO_TAG: true        # deploy on tag push only       
 - 
   matrix:
@@ -204,5 +202,4 @@ for:
       draft: false
       force_update: true
       on:
-        branch: master                 # release from master branch only
         APPVEYOR_REPO_TAG: true        # deploy on tag push only
