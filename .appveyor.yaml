@@ -56,7 +56,7 @@ for:
   - ps: >-
       If (!(Test-Path -Path 'c:\projects\other_dependencies')) {
         Start-FileDownload 'https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.zip'
-        7z x other_dependencies.zip -oc:\projects
+        7z x dcmtk-3.6.7.zip -oc:\projects
         mv c:\projects\dcmtk-3.6.7 c:\projects\dcmtk
       }
   - ps: >-
