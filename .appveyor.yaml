@@ -88,7 +88,6 @@ for:
     - C:\tools\opencv -> appveyor.yml
     - C:\projects\openslide -> appveyor.yml
     - C:\projects\swig -> appveyor.yml
-    - C:\projects\other_dependencies -> appveyor.yml
     - C:\projects\pugixml -> appveyor.yml
     - C:\tools\vcpkg\installed -> appveyor.yml
     - 'C:\Python%python_version_no_dot%-x64\Lib\site-packages\numpy -> appveyor.yml'
