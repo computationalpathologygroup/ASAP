@@ -1,5 +1,5 @@
-option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT "Builds support for Olympus VSI files; requires DCMTK ijg8.lib" OFF)
-option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT "Builds support for DICOM files; requires DCMTK" OFF)
+option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT "Builds support for Olympus VSI files; requires DCMTK ijg8.lib" ON)
+option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT "Builds support for DICOM files; requires DCMTK" ON)
 
 set(MULTIRESOLUTIONIMAGEINTERFACE_HS
     MultiResolutionImageReader.h 

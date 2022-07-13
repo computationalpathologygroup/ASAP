@@ -2,8 +2,8 @@ IF(PACKAGE_ON_INSTALL)
 IF(WIN32)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/ASAP.exe")
   SET(APPS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/ASAP_d.exe")
-  SET(LIBS "\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/NucleiDetectionFilterPlugin.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/openslidefileformat.dll")
-  SET(LIBS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/NucleiDetectionFilterPlugin_d.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/openslidefileformat_d.dll")
+  SET(LIBS "\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/NucleiDetectionFilterPlugin.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/openslidefileformat.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/dicomfileformat.dll")
+  SET(LIBS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/NucleiDetectionFilterPlugin_d.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/openslidefileformat_d.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/dicomfileformat_d.dll")
   if(BUILD_ASAP)
     set(LIBS "\${CMAKE_INSTALL_PREFIX}/bin/libEGL.dll" "\${CMAKE_INSTALL_PREFIX}/bin/Qt5OpenGL.dll" ${LIBS})
     set(LIBS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/libEGLd.dll" "\${CMAKE_INSTALL_PREFIX}/bin/Qt5OpenGLd.dll" ${LIBS})
@@ -16,7 +16,7 @@ IF(WIN32)
     
     get_filename_component(opencv_dll_directory ${opencv_dll_location} DIRECTORY)
   endif(BUILD_IMAGEPROCESSING)
-  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt5_DIR}/../../../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${cpprestsdk_DIR}/../../bin)
+  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt5_DIR}/../../../bin ${DCMTK_DIR}/../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${cpprestsdk_DIR}/../../bin)
   INCLUDE(InstallRequiredSystemLibraries)
 
   if(BUILD_ASAP)
@@ -47,6 +47,7 @@ ELSEIF(APPLE)
 
    set(LIBS "\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${prefix}/PlugIns/platforms/libqcocoa.dylib"
             "\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${prefix}/MacOS/formats/libopenslidefileformat.dylib"
+            "\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${prefix}/MacOS/formats/libdicomfileformat.dylib"
             "\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${prefix}/MacOS/plugins/tools/libZoomToolPlugin.dylib"
             "\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${prefix}/MacOS/plugins/tools/libPanToolPlugin.dylib"
             "\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${prefix}/MacOS/plugins/filters/libNucleiDetectionFilterPlugin.dylib"
@@ -61,6 +62,7 @@ ELSEIF(APPLE)
    SET(DIRS ${CMAKE_BINARY_DIR}/ASAP
             ${CMAKE_BINARY_DIR}/multiresolutionimageinterface
             ${cpprestsdk_DIR}/../../lib 
+            ${DCMTK_DIR}/../../lib 
             ${UNITTEST_INCLUDE_DIR}/../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../bin 
