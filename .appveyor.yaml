@@ -39,7 +39,7 @@ for:
         mkdir c:\projects\swig\build
         mkdir c:\projects\swig\install
         cd c:\projects\swig\build
-        cmake ..\src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=c:\projects\swig\install -DBISON_EXECUTABLE=C:\tools\winflexbison3\win_bison.exe
+        cmake ..\src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=c:\projects\swig\install -DBISON_EXECUTABLE=C:\ProgramData\chocolatey\lib\winflexbison3\tools\win_bison.exe
         cmake --build . --config Release
         cmake --install .
       }
@@ -55,8 +55,8 @@ for:
         mv c:\projects\dcmtk-3.6.7 c:\projects\dcmtk
       }
   - ps: >-
-      If (!(Test-Path -Path $env:python_location\Lib\site-packages\numpy)) {
-         Invoke-Expression "$env:python_pip install numpy"
+      If (!(Test-Path -Path C:\Python39-x64\Lib\site-packages\numpy)) {
+         Invoke-Expression "C:\Python39-x64\Scripts\pip install numpy"
       } 
   - ps: >-
       If (!(Test-Path -Path 'C:\tools\opencv')) {
