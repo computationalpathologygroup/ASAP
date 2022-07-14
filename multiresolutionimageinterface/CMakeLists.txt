@@ -165,10 +165,7 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	  
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-builtin")
-
-	  if(PYTHONLIBS_VERSION_STRING MATCHES "3.?")
-		  set_property(SOURCE multiresolutionimageinterface.i PROPERTY SWIG_FLAGS "-py3")
-	  endif(PYTHONLIBS_VERSION_STRING MATCHES "3.?")
+      set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-py3-stable-abi")
 
     swig_add_library(py_multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
     swig_link_libraries(py_multiresolutionimageinterface   multiresolutionimageinterface annotation core) 

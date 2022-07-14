@@ -69,6 +69,8 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 	  
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES CPLUSPLUS ON)
 	  set_source_files_properties(wholeslidefilters.i PROPERTIES SWIG_FLAGS "-builtin")
+      set_source_files_properties(wholeslidefilters.i PROPERTIES SWIG_FLAGS "-py3-stable-abi")
+
 	  swig_add_library(py_wholeslidefilters LANGUAGE python SOURCES wholeslidefilters.i)
 	  swig_link_libraries(py_wholeslidefilters wholeslidefilters core) 
 	  swig_link_libraries(py_wholeslidefilters ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
