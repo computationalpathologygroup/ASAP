@@ -1,7 +1,7 @@
 image:
- - Visual Studio 2022
  - Ubuntu
  - macos-bigsur
+ - Visual Studio 2022
 
 environment:
   GIT_REDIRECT_STDERR: '2>&1'
@@ -119,7 +119,7 @@ for:
   build_script:
     - sh: cd buildtools
     - sh: docker build --tag asap_build:${ubuntu_version} --build-arg UBUNTU_VERSION=${ubuntu_version} .
-    - sh: docker run -v ${PWD}:/artifacts asap_build:${ubuntu_version} /root/build/build_ASAP.sh $python_version $python_version_no_dot true
+    - sh: docker run -v ${PWD}:/artifacts asap_build:${ubuntu_version} /root/build/build_ASAP.sh true
 
   artifacts:
     - path: ./buildtools/*.deb
@@ -156,23 +156,30 @@ for:
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
     - sh: brew update
-    - sh: brew install openslide opencv swig qt5
+    - sh: brew install openslide opencv qt5 bison
+    - sh: git clone https://github.com/GeertLitjens/swig /home/appveyor/projects/swig/src
+    - sh: mkdir /home/appveyor/projects/swig/build
+    - sh: mkdir /home/appveyor/projects/swig/install
+    - sh: cd /home/appveyor/projects/swig/build
+    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/home/appveyor/projects/swig/install -DBISON_EXECUTABLE=/usr/local/Cellar/bison/3.8.2/bin/bison
+    - sh: cmake --build . --config Release
+    - sh: cmake --install .
+    - sh: cd /home/appveyor/projects/asap
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.hpp
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugiconfig.hpp
     - sh: sudo mv pugixml.cpp /usr/local/include/
     - sh: sudo mv pugixml.hpp /usr/local/include/
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
-    - sh: source ~/venv${python_version}/bin/activate
+    - sh: source ~/venv3.9/bin/activate
     - sh: pip install numpy
 #    - sh: export APPVEYOR_VNC_BLOCK=true
 #    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython${python_version_macos}/bin/python${python_version} -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython${python_version_macos}/include/python${python_version} -DPYTHON_LIBRARY=/Users/appveyor/.localpython${python_version_macos}/lib/libpython${python_version}.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv${python_version}/lib/python${python_version}/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/home/appveyor/projects/swig/install/bin/swig -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.9.10/bin/python3.9 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.9.10/include/python3.9 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.9.10/lib/libpython3.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.9/lib/python3.9/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
     - sh: sudo make package
-    - sh: sudo mv /Users/appveyor/projects/asap/ASAP-2.1-Darwin.dmg /Users/appveyor/projects/asap/ASAP-2.1-py${python_version_no_dot}-Darwin.dmg
 
   artifacts:
     - path: ./*.dmg

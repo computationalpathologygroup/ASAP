@@ -4,6 +4,7 @@ FROM ubuntu:${UBUNTU_VERSION}
 
 ENV TZ=Europe/Amsterdam
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN export DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y -qq --no-install-recommends \
@@ -12,6 +13,7 @@ RUN apt-get update \
         file \
         g++ \
         make \
+        bison \
         qt5-default \
         qtbase5-dev \
         qttools5-dev \
@@ -22,7 +24,6 @@ RUN apt-get update \
         libopenjp2-7-dev \
         libopenslide-dev \
         wget \
-        swig \
         libunittest++-dev \
         ca-certificates \
         nano \
@@ -49,12 +50,16 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
     rm -f Miniconda3-latest-Linux-x86_64.sh
 
 RUN /root/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
-    /root/miniconda3/bin/conda create --quiet --name build_python3.8 python=3.8 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.8 numpy nomkl && \ 
     /root/miniconda3/bin/conda create --quiet --name build_python3.9 python=3.9 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.9 numpy nomkl && \
-    /root/miniconda3/bin/conda create --quiet --name build_python3.10 python=3.10 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.10 numpy nomkl
+    /root/miniconda3/bin/conda install --quiet -n build_python3.9 numpy nomkl
+
+RUN mkdir -p /root/swig/build && \
+    mkdir -p /root/swig/install && \
+    git clone https://github.com/GeertLitjens/swig /root/swig/src && \
+    cd /root/swig/build && \
+    cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/root/swig/install -DBISON_EXECUTABLE=/usr/bin/bison && \
+    cmake --build . --config Release && \
+    cmake --install .
 
 # Small hack to as libijg8 is installed in a different locations in Ubuntu 20.04
 RUN ln -s /usr/lib/x86_64-linux-gnu/libijg8.so /usr/lib/libijg8.so; exit 0;
