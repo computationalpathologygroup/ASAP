@@ -1,7 +1,7 @@
 image:
- - Ubuntu
  - macos-bigsur
  - Visual Studio 2022
+ - Ubuntu
 
 environment:
   GIT_REDIRECT_STDERR: '2>&1'
@@ -153,15 +153,15 @@ for:
       - image: macos-bigsur
 
   build_script:
+    - sh: mkdir -p /home/appveyor/projects/swig/build
+    - sh: mkdir -p /home/appveyor/projects/swig/install
+    - sh: git clone https://github.com/GeertLitjens/swig /home/appveyor/projects/swig/src
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
     - sh: brew update
     - sh: brew install openslide opencv qt5 bison
-    - sh: git clone https://github.com/GeertLitjens/swig /home/appveyor/projects/swig/src
-    - sh: mkdir /home/appveyor/projects/swig/build
-    - sh: mkdir /home/appveyor/projects/swig/install
     - sh: cd /home/appveyor/projects/swig/build
-    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/home/appveyor/projects/swig/install -DBISON_EXECUTABLE=/usr/local/Cellar/bison/3.8.2/bin/bison
+    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/home/appveyor/projects/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
     - sh: cmake --build . --config Release
     - sh: cmake --install .
     - sh: cd /home/appveyor/projects/asap
