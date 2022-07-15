@@ -153,18 +153,18 @@ for:
       - image: macos-bigsur
 
   build_script:
-    - sh: mkdir -p /home/appveyor/projects/swig/build
-    - sh: mkdir -p /home/appveyor/projects/swig/install
-    - sh: git clone https://github.com/GeertLitjens/swig /home/appveyor/projects/swig/src
+    - sh: mkdir -p /Users/appveyor/tools/swig/build
+    - sh: mkdir -p /Users/appveyor/tools/swig/install
+    - sh: git clone https://github.com/GeertLitjens/swig /Users/appveyor/tools/swig/src
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
     - sh: brew update
     - sh: brew install openslide opencv qt5 bison
-    - sh: cd /home/appveyor/projects/swig/build
-    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/home/appveyor/projects/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
+    - sh: cd /Users/appveyor/tools/swig/build
+    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
     - sh: cmake --build . --config Release
     - sh: cmake --install .
-    - sh: cd /home/appveyor/projects/asap
+    - sh: cd /Users/appveyor/projects/asap
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.hpp
     - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugiconfig.hpp
