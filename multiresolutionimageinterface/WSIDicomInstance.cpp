@@ -123,6 +123,9 @@ WSIDicomInstance::WSIDicomInstance(DcmFileFormat* fileFormat) :
                 pmSeq->findAndGetFloat64(DCM_PixelSpacing, _pixelSpacingX, 0);
                 pmSeq->findAndGetFloat64(DCM_PixelSpacing, _pixelSpacingY, 1);
                 pmSeq->findAndGetFloat64(DCM_SpacingBetweenSlices, _sliceSpacing);
+                _pixelSpacingX *= 1000;
+                _pixelSpacingY *= 1000;
+                _sliceSpacing *= 1000;
                 if (_pixelSpacingX == 0 || _pixelSpacingY == 0) {
                     _isValid = false;
                     return;
@@ -245,14 +248,28 @@ bool WSIDicomInstance::valid() const {
 void* WSIDicomInstance::getFrame(const long long& x, const long long& y, const long long& z, const long long& op)
 {
     unsigned char* buffer;
+    Uint32 bufferSize = _tileHeight * _tileWidth * _samplesPerPixel;
     DcmXfer transferSyntax = _dataset->getOriginalXfer();
     int frameRow = y / _tileHeight;
     int frameColumn = x / _tileWidth;
     std::vector<unsigned short> sizeInTiles = this->getSizeInTiles();
-    int frameOffset = this->_tiling == TilingType::Sparse ? _positionToFrameIndex[frameRow * sizeInTiles[0] + frameColumn] : frameColumn + sizeInTiles[0] * frameRow;
+    int frameOffset = -1;
+    if (this->_tiling == TilingType::Sparse) {
+        auto loc = _positionToFrameIndex.find(frameRow * sizeInTiles[0] + frameColumn);
+        if (loc != _positionToFrameIndex.end()) {
+            frameOffset = loc->second;
+        }
+        else {
+            buffer = new unsigned char[bufferSize];
+            std::fill(buffer, buffer + bufferSize, 255);
+            return buffer;
+        }
+    }
+    else {
+        frameOffset = frameColumn + sizeInTiles[0] * frameRow;;
+    }
 
     if (transferSyntax.getXferID() == std::string(UID_JPEG2000LosslessOnlyTransferSyntax) || transferSyntax.getXferID() == std::string(UID_JPEG2000TransferSyntax)) {
-        Uint32 bufferSize = _tileHeight * _tileWidth * _samplesPerPixel;
         buffer = new unsigned char[bufferSize];
         std::fill(buffer, buffer + bufferSize, 0);
 
