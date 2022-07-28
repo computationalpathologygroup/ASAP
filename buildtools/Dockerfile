@@ -14,7 +14,6 @@ RUN apt-get update \
         g++ \
         make \
         bison \
-        qt5-default \
         qtbase5-dev \
         qttools5-dev \
         libqt5opengl5-dev \
@@ -24,6 +23,7 @@ RUN apt-get update \
         libopenjp2-7-dev \
         libopenslide-dev \
         wget \
+        gpg-agent \
         libunittest++-dev \
         ca-certificates \
         nano \
