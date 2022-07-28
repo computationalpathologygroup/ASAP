@@ -172,7 +172,7 @@ for:
     - sh: sudo mv pugixml.hpp /usr/local/include/
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
     - sh: curl ftp://dicom.offis.de/pub/dicom/offis/software/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz -o dcmtk.tar.gz
-    - sh: tar xzf dcmtk-3.6.7.tar.gz
+    - sh: tar xzf dcmtk.tar.gz
     - sh: mv dcmtk-3.6.7 dcmtk
     - sh: source ~/venv3.9/bin/activate
     - sh: pip install numpy
