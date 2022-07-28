@@ -159,7 +159,7 @@ for:
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
     - sh: brew update
-    - sh: brew install openslide opencv qt5 bison
+    - sh: brew install openslide opencv qt5 dcmtk bison
     - sh: cd /Users/appveyor/tools/swig/build
     - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
     - sh: cmake --build . --config Release
@@ -173,8 +173,8 @@ for:
     - sh: sudo mv pugiconfig.hpp /usr/local/include/
     - sh: source ~/venv3.9/bin/activate
     - sh: pip install numpy
-#    - sh: export APPVEYOR_VNC_BLOCK=true
-#    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
+    - sh: export APPVEYOR_VNC_BLOCK=true
+    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/home/appveyor/projects/swig/install/bin/swig -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.9.10/bin/python3.9 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.9.10/include/python3.9 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.9.10/lib/libpython3.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.9/lib/python3.9/site-packages/numpy/core/include
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
