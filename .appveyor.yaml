@@ -8,7 +8,15 @@ environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   
   matrix:
-    - ubuntu_version:        20.04      
+    - ubuntu_version: 20.04
+    - ubuntu_version: 22.04
+
+  matrix:
+    exclude:
+      - image: Visual Studio 2019
+        ubuntu_version: 20.04
+      - image: macos-bigsur
+        ubuntu_version: 20.04    
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
@@ -26,7 +34,7 @@ for:
   matrix:
     only:
       - image: Visual Studio 2022
-
+      
   before_build:
   - ps: >-
       If (!(Test-Path -Path 'C:\projects\pugixml')) {
