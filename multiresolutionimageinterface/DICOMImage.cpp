@@ -1,6 +1,7 @@
 #include "DICOMImage.h"
 #include <mutex>
 #include <sstream>
+#include <cmath>
 #include "core/filetools.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "WSIDicomInstance.h"

@@ -1,14 +1,18 @@
 #!/bin/bash
 
-if [ "$3" != "" ]; then
-    build_gui="$3"
+if [ "$1" != "" ]; then
+    build_gui="$1"
 else
-    build_gui="false"
+    build_gui="true"
 fi
 ubuntu_version=$(grep 'DISTRIB_RELEASE' /etc/lsb-release | cut -d'=' -f2)
 ubuntu_version_no_dots=$(echo ${ubuntu_version} | tr -d ".")
 
 echo "Building ASAP with Python ${python_ver}; building GUI = ${build_gui}; on Ubuntu ${ubuntu_version}"
+git clone https://github.com/computationalpathologygroup/ASAP src
+mkdir build
+cd build
+
 if [ "${build_gui}" = "true" ] ; then \
         cmake ../src -DPugiXML_INCLUDE_DIR=/root/pugixml-1.9/src/ -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
