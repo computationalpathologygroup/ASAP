@@ -11,12 +11,12 @@ environment:
     - ubuntu_version: 20.04
     - ubuntu_version: 22.04
 
-  matrix:
-    exclude:
-      - image: Visual Studio 2019
-        ubuntu_version: 20.04
-      - image: macos-bigsur
-        ubuntu_version: 20.04    
+matrix:
+  exclude:
+    - image: Visual Studio 2019
+      ubuntu_version: 20.04
+    - image: macos-bigsur
+      ubuntu_version: 20.04    
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
