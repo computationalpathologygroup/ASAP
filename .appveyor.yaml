@@ -8,15 +8,20 @@ environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   
   matrix:
+    - ubuntu_version: 18.04
     - ubuntu_version: 20.04
     - ubuntu_version: 22.04
 
 matrix:
   exclude:
-    - image: Visual Studio 2019
+    - image: Visual Studio 2022
       ubuntu_version: 20.04
+    - image: Visual Studio 2022
+      ubuntu_version: 18.04
     - image: macos-bigsur
       ubuntu_version: 20.04    
+    - image: macos-bigsur
+      ubuntu_version: 18.04    
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
@@ -185,9 +190,9 @@ for:
     - sh: source ~/venv3.9/bin/activate
     - sh: pip install numpy
     - sh: cd /Users/appveyor/projects/asap
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/Users/appveyor/tools/swig/install/bin/swig -DDCMTKJPEG_INCLUDE_DIR=/Users/appveyor/projects -DDCMTKJPEG_LIBRARY=/usr/local/Cellar/dcmtk/3.6.6_1/lib/libijg8.a -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_5/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5_1/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.9.10/bin/python3.9 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.9.10/include/python3.9 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.9.10/lib/libpython3.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.9/lib/python3.9/site-packages/numpy/core/include
-    - sh: export APPVEYOR_VNC_BLOCK=true
-    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/Users/appveyor/tools/swig/install/bin/swig -DDCMTKJPEG_INCLUDE_DIR=/Users/appveyor/projects -DDCMTKJPEG_LIBRARY=/usr/local/Cellar/dcmtk/3.6.6_1/lib/libijg8.a -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_6/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5_1/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.9.10/bin/python3.9 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.9.10/include/python3.9 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.9.10/lib/libpython3.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.9/lib/python3.9/site-packages/numpy/core/include
+#    - sh: export APPVEYOR_VNC_BLOCK=true
+#    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
