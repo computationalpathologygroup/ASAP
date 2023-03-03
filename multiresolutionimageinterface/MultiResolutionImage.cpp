@@ -6,110 +6,158 @@ using namespace pathology;
 // Subsequent specialization to not re-copy data when datatypes are the same
 template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, float*& data) {
-    if (level >= getNumberOfLevels()) {
-      return;
+    if (level < getNumberOfLevels()) {
+      unsigned int nrSamples = getSamplesPerPixel();
+      if (this->getDataType()==pathology::DataType::Float) {
+        delete[] data;
+        data = (float*)readDataFromImage(startX, startY, width, height, level);
+        return;
+      }
+      else if (this->getDataType()==pathology::DataType::UChar) {
+        unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UInt16) {
+        unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UInt32) {
+        unsigned int * temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::transform(temp, temp + width * height * nrSamples, data, [](unsigned int a) { return static_cast<float>(a); });
+          delete[] temp;
+          return;
+        }
+      }
     }
-    unsigned int nrSamples = getSamplesPerPixel();
-    if (this->getDataType()==pathology::DataType::Float) {
-      delete[] data;
-      data = (float*)readDataFromImage(startX, startY, width, height, level);
-    }
-    else if (this->getDataType()==pathology::DataType::UChar) {
-      unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UInt16) {
-      unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UInt32) {
-      unsigned int * temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
-      std::transform(temp, temp + width * height * nrSamples, data, [](unsigned int a) { return static_cast<float>(a); });
-      delete[] temp;
-    }
+
+    delete[] data;
+    data = NULL;
 }
 
 template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned char*& data) {
-    if (level >= getNumberOfLevels()) {
-      return;
+    if (level < getNumberOfLevels()) {
+      unsigned int nrSamples = getSamplesPerPixel();
+      if (this->getDataType()==pathology::DataType::Float) {
+        float * temp = (float*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::transform(temp, temp + width * height * nrSamples, data, [](float a) { return static_cast<unsigned char>(a); });
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UChar) {
+        delete[] data;
+        data = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
+        return;
+      }
+      else if (this->getDataType()==pathology::DataType::UInt16) {
+        unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::transform(temp, temp + width * height * nrSamples, data, [](unsigned short a) { return static_cast<unsigned char>(a); });
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UInt32) {
+        unsigned int * temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
     }
-    unsigned int nrSamples = getSamplesPerPixel();
-    if (this->getDataType()==pathology::DataType::Float) {
-      float * temp = (float*)readDataFromImage(startX, startY, width, height, level);
-      std::transform(temp, temp + width * height * nrSamples, data, [](float a) { return static_cast<unsigned char>(a); });
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UChar) {
-      delete[] data;
-      data = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
-    }
-    else if (this->getDataType()==pathology::DataType::UInt16) {
-      unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
-      std::transform(temp, temp + width * height * nrSamples, data, [](unsigned short a) { return static_cast<unsigned char>(a); });
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UInt32) {
-      unsigned int * temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
+
+    delete[] data;
+    data = NULL;
 }
 
 template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned short*& data) {
-    if (level >= getNumberOfLevels()) {
-      return;
+    if (level < getNumberOfLevels()) {
+      unsigned int nrSamples = getSamplesPerPixel();
+      if (this->getDataType()==pathology::DataType::Float) {
+        float* temp = (float*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::transform(temp, temp + width*height*nrSamples, data, [](float a) { return static_cast<unsigned short>(a); });
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UChar) {
+        unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UInt16) {
+        delete[] data;
+        data = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
+        return;
+      }
+      else if (this->getDataType()==pathology::DataType::UInt32) {
+        unsigned int* temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
     }
-    unsigned int nrSamples = getSamplesPerPixel();
-    if (this->getDataType()==pathology::DataType::Float) {
-      float* temp = (float*)readDataFromImage(startX, startY, width, height, level);
-      std::transform(temp, temp + width*height*nrSamples, data, [](float a) { return static_cast<unsigned short>(a); });
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UChar) {
-      unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UInt16) {
-      delete[] data;
-      data = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
-    }
-    else if (this->getDataType()==pathology::DataType::UInt32) {
-      unsigned int* temp = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
+
+    delete[] data;
+    data = NULL;
 }
 
 template <> void MultiResolutionImage::getRawRegion(const long long& startX, const long long& startY, const unsigned long long& width, 
   const unsigned long long& height, const unsigned int& level, unsigned int*& data) {
-    if (level >= getNumberOfLevels()) {
-      return;
+    if (level < getNumberOfLevels()) {
+      unsigned int nrSamples = getSamplesPerPixel();
+      if (this->getDataType()==pathology::DataType::Float) {
+        float * temp = (float*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::transform(temp, temp + width * height * nrSamples, data, [](float a) { return static_cast<unsigned int>(a); });
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UChar) {
+        unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UInt16) {
+        unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
+        if (temp) {
+          std::copy(temp, temp + width*height*nrSamples, data);
+          delete[] temp;
+          return;
+        }
+      }
+      else if (this->getDataType()==pathology::DataType::UInt32) {
+        delete[] data;
+        data = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
+        return;
+      }
     }
-    unsigned int nrSamples = getSamplesPerPixel();
-    if (this->getDataType()==pathology::DataType::Float) {
-      float * temp = (float*)readDataFromImage(startX, startY, width, height, level);
-      std::transform(temp, temp + width * height * nrSamples, data, [](float a) { return static_cast<unsigned int>(a); });
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UChar) {
-      unsigned char * temp = (unsigned char*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UInt16) {
-      unsigned short * temp = (unsigned short*)readDataFromImage(startX, startY, width, height, level);
-      std::copy(temp, temp + width*height*nrSamples, data);
-      delete[] temp;
-    }
-    else if (this->getDataType()==pathology::DataType::UInt32) {
-      delete[] data;
-      data = (unsigned int*)readDataFromImage(startX, startY, width, height, level);
-    }
+
+    delete[] data;
+    data = NULL;
 }
 
 MultiResolutionImage::MultiResolutionImage() :
