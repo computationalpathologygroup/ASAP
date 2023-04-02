@@ -1,6 +1,3 @@
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-
 set(HEADERS
     ASAP_Window.h
     PathologyViewer.h
@@ -31,12 +28,11 @@ set(SOURCE
     QtProgressMonitor.cpp
 )
 
-find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools Concurrent)
 set(RESOURCE
     resources/ASAP_resources.qrc
 )
 
-qt5_add_resources(RESOURCE_ADDED ${RESOURCE})      
+qt6_add_resources(RESOURCE_ADDED ${RESOURCE})      
 add_library(ASAPLib SHARED ${SOURCE} ${HEADERS} ${RESOURCE_ADDED})
 generate_export_header(ASAPLib)
 
@@ -51,9 +47,9 @@ ELSE(APPLE)
   add_executable(ASAP WIN32 main.cpp ASAP.rc ${RESOURCE_ADDED})
 ENDIF(APPLE)
 
-target_link_libraries(ASAPLib PUBLIC basicfilters PRIVATE multiresolutionimageinterface Qt5::Widgets Qt5::Core Qt5::OpenGL Qt5::UiTools)
+target_link_libraries(ASAPLib PUBLIC basicfilters PRIVATE multiresolutionimageinterface Qt6::Widgets Qt6::Core Qt6::UiTools)
 target_include_directories(ASAPLib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<INSTALL_INTERFACE:include/ASAP> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/ASAP>)
-target_link_libraries(ASAP PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
+target_link_libraries(ASAP PRIVATE ASAPLib Qt6::Core Qt6::Widgets)
 if(WIN32)
 target_compile_options(ASAP PRIVATE "/wd26812;")
 target_compile_options(ASAPLib PRIVATE "/wd26812;")

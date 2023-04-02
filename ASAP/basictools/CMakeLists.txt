@@ -11,12 +11,12 @@ set(PanTool_SOURCE
   PanTool.cpp
 )
 
-qt5_add_resources(TOOL_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/basictools_resources.qrc)
+qt6_add_resources(TOOL_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/basictools_resources.qrc)
 add_library(ZoomToolPlugin SHARED ${ZoomTool_SOURCE} ${TOOL_RESOURCES})
 add_library(PanToolPlugin SHARED ${PanTool_SOURCE} ${TOOL_RESOURCES})
 
-target_link_libraries(PanToolPlugin PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
-target_link_libraries(ZoomToolPlugin PRIVATE ASAPLib Qt5::Core Qt5::Widgets)
+target_link_libraries(PanToolPlugin PRIVATE ASAPLib Qt6::Core Qt6::Widgets)
+target_link_libraries(ZoomToolPlugin PRIVATE ASAPLib Qt6::Core Qt6::Widgets)
 set_target_properties(PanToolPlugin PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(ZoomToolPlugin PROPERTIES DEBUG_POSTFIX _d)
 

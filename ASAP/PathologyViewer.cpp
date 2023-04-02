@@ -7,7 +7,6 @@
 #include <QMenu>
 #include <QAction>
 #include <QMessageBox>
-#include <QGLWidget>
 #include <QTimeLine>
 #include <QScrollBar>
 #include <QHBoxLayout>
@@ -116,10 +115,10 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
 }
 
 void PathologyViewer::wheelEvent(QWheelEvent *event) {
-  int numDegrees = event->delta() / 8;
+  int numDegrees = event->angleDelta().manhattanLength() / 8;
   int numSteps = numDegrees / 15;  // see QWheelEvent documentation
-  _zoomToScenePos = this->mapToScene(event->pos());
-  _zoomToViewPos = event->pos();
+  _zoomToScenePos = this->mapFromScene(event->scenePosition());
+  _zoomToViewPos = event->scenePosition();
   zoom(numSteps);
 }
 

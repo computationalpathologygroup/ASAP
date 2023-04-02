@@ -1,4 +1,3 @@
-set(CMAKE_AUTOMOC ON)
 set(CMAKE_INSTALL_RPATH "$ORIGIN/../../../lib")
 
 set(FilterWorkstationExtensionPlugin_SOURCE
@@ -20,11 +19,11 @@ set(NucleiDetection_SOURCE
     NucleiDetectionFilterPlugin.cpp
 )
 
-qt5_add_resources(COLORDECONVOLUTION_RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/resources/ColorDeconvolutionFilterPlugin.qrc)
-qt5_add_resources(FILTERWORKSTATIONEXTENSIONPLUGIN_RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/resources/FilterWorkstationExtensionPlugin_resources.qrc)
+qt6_add_resources(COLORDECONVOLUTION_RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/resources/ColorDeconvolutionFilterPlugin.qrc)
+qt6_add_resources(FILTERWORKSTATIONEXTENSIONPLUGIN_RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/resources/FilterWorkstationExtensionPlugin_resources.qrc)
 
 if(BUILD_IMAGEPROCESSING)
-  qt5_add_resources(NUCLEIDETECTION_RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/resources/NucleiDetectionFilterPlugin.qrc)
+  qt6_add_resources(NUCLEIDETECTION_RESOURCE ${CMAKE_CURRENT_SOURCE_DIR}/resources/NucleiDetectionFilterPlugin.qrc)
   add_library(NucleiDetectionFilterPlugin SHARED ${NucleiDetection_SOURCE} ${NUCLEIDETECTION_RESOURCE})
 endif(BUILD_IMAGEPROCESSING)
 
@@ -32,7 +31,7 @@ add_library(ColorDeconvolutionFilterPlugin SHARED ${ColorDeconvolutionPlugin_SOU
 add_library(FilterWorkstationExtensionPlugin SHARED ${FilterWorkstationExtensionPlugin_SOURCE} ${FILTERWORKSTATIONEXTENSIONPLUGIN_RESOURCE})
 
 if(BUILD_IMAGEPROCESSING)
-	target_link_libraries(NucleiDetectionFilterPlugin PRIVATE ${OpenCV_LIBS} ASAPLib FRST basicfilters Qt5::Core Qt5::Widgets Qt5::UiTools)
+	target_link_libraries(NucleiDetectionFilterPlugin PRIVATE ${OpenCV_LIBS} ASAPLib FRST basicfilters Qt6::Core Qt6::Widgets Qt6::UiTools)
     set_target_properties(NucleiDetectionFilterPlugin PROPERTIES DEBUG_POSTFIX _d)
 
   IF(APPLE)
@@ -62,8 +61,8 @@ if(BUILD_IMAGEPROCESSING)
 	endif(WIN32)
 endif(BUILD_IMAGEPROCESSING)
 
-target_link_libraries(ColorDeconvolutionFilterPlugin PRIVATE ASAPLib basicfilters Qt5::Core Qt5::Widgets Qt5::UiTools)
-target_link_libraries(FilterWorkstationExtensionPlugin PRIVATE ASAPLib basicfilters multiresolutionimageinterface Qt5::Core Qt5::Widgets Qt5::UiTools)
+target_link_libraries(ColorDeconvolutionFilterPlugin PRIVATE ASAPLib basicfilters Qt6::Core Qt6::Widgets)
+target_link_libraries(FilterWorkstationExtensionPlugin PRIVATE ASAPLib basicfilters multiresolutionimageinterface Qt6::Core Qt6::Widgets Qt6::UiTools)
 set_target_properties(ColorDeconvolutionFilterPlugin PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(FilterWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15.0)
 project(DIAGPathology)
 
 set(CURRENT_MAJOR_VERSION 2)
-set(CURRENT_MINOR_VERSION 1)
+set(CURRENT_MINOR_VERSION 2)
 set(CURRENT_PATCH_VERSION 0)
 set(ASAP_VERSION ${CURRENT_MAJOR_VERSION}.${CURRENT_MINOR_VERSION}.${CURRENT_PATCH_VERSION})
 
@@ -49,15 +49,6 @@ find_package(ZLIB REQUIRED)
 # PugiXML required for LIF file format and reading/writing annotations
 find_package(PugiXML REQUIRED)
 
-add_library(libtiff STATIC IMPORTED)
-SET_PROPERTY(TARGET libtiff PROPERTY IMPORTED_LOCATION ${TIFF_LIBRARY})
-
-add_library(libjpeg STATIC IMPORTED)
-SET_PROPERTY(TARGET libjpeg PROPERTY IMPORTED_LOCATION ${JPEG_LIBRARY})
-
-add_library(zlib STATIC IMPORTED)
-SET_PROPERTY(TARGET zlib PROPERTY IMPORTED_LOCATION ${ZLIB_LIBRARY})
-
 # Required for additional format support
 find_package(OPENSLIDE REQUIRED)
 
@@ -69,7 +60,6 @@ option(BUILD_TESTS "Builds tests" OFF)
 option(PACKAGE_ON_INSTALL "Copies dependent DLLs and packages install" OFF)
 
 if(BUILD_IMAGEPROCESSING)
-  set(OpenCV_STATIC OFF)
   find_package(OpenCV REQUIRED)
 endif()
 
@@ -86,7 +76,13 @@ IF(BUILD_IMAGEPROCESSING)
 ENDIF()
 
 IF(BUILD_ASAP)
+  find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent UiTools)
+  qt_standard_project_setup()
+  option(BUILD_PYSIDE6_WRAPPING "Builds PyASAP wrapping" OFF)
   add_subdirectory(ASAP)
+  if(BUILD_PYSIDE6_WRAPPING)
+    add_subdirectory(pysidewrapping)
+  endif(BUILD_PYSIDE6_WRAPPING)
 ENDIF()
 
 add_subdirectory(buildtools)
@@ -109,11 +105,6 @@ set(INSTALL_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/cmake)
 set(INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
 set(INSTALL_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(INSTALL_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-
-# Create the files for version configuration
-file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
-file(RELATIVE_PATH REL_BINARY_DIR  "${INSTALL_CMAKE_DIR}" "${INSTALL_BINARY_DIR}")
-file(RELATIVE_PATH REL_LIBRARY_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_LIBRARY_DIR}")
 
 configure_file(ASAPConfig.cmake.in
                "${PROJECT_BINARY_DIR}/ASAPConfig.cmake" @ONLY)

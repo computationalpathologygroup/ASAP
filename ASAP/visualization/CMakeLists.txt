@@ -10,9 +10,9 @@ set(VisualizationWorkstationExtensionPlugin_RESOURCE
     resources/VisualizationWorkstationExtensionPlugin_resources.qrc
 )
 
-qt5_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
+qt6_add_resources(VISUALIZATION_RESOURCE_ADDED ${VisualizationWorkstationExtensionPlugin_RESOURCE})
 add_library(VisualizationWorkstationExtensionPlugin SHARED ${VisualizationWorkstationExtensionPlugin_SOURCE} ${VISUALIZATION_RESOURCE_ADDED})
-target_link_libraries(VisualizationWorkstationExtensionPlugin PRIVATE ASAPLib multiresolutionimageinterface annotation Qt5::Core Qt5::Widgets Qt5::UiTools)
+target_link_libraries(VisualizationWorkstationExtensionPlugin PRIVATE ASAPLib multiresolutionimageinterface annotation Qt6::Core Qt6::Widgets Qt6::UiTools)
 set_target_properties(VisualizationWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)
 
 IF(APPLE)
