@@ -43,9 +43,6 @@ find_package(TIFF REQUIRED)
 # JPEG for the codecs
 find_package(JPEG REQUIRED)
 
-# ZLIB for codec support
-find_package(ZLIB REQUIRED)
-
 # PugiXML required for LIF file format and reading/writing annotations
 find_package(PugiXML REQUIRED)
 

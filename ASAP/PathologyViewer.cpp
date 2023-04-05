@@ -117,8 +117,8 @@ void PathologyViewer::resizeEvent(QResizeEvent *event) {
 void PathologyViewer::wheelEvent(QWheelEvent *event) {
   int numDegrees = event->angleDelta().manhattanLength() / 8;
   int numSteps = numDegrees / 15;  // see QWheelEvent documentation
-  _zoomToScenePos = this->mapFromScene(event->scenePosition());
-  _zoomToViewPos = event->scenePosition();
+  _zoomToScenePos = event->scenePosition();
+  _zoomToViewPos = event->position();
   zoom(numSteps);
 }
 

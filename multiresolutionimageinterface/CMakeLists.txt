@@ -87,7 +87,7 @@ endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 
 add_library(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
 target_include_directories(multiresolutionimageinterface PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${PugiXML_INCLUDE_DIR})
-target_link_libraries(multiresolutionimageinterface PUBLIC core PRIVATE jpeg2kcodec TIFF::TIFF JPEG::JPEG ZLIB::ZLIB)
+target_link_libraries(multiresolutionimageinterface PUBLIC core PRIVATE jpeg2kcodec TIFF::TIFF JPEG::JPEG)
 IF(NOT WIN32)
   target_link_libraries(multiresolutionimageinterface PRIVATE dl)
 ENDIF(NOT WIN32)
