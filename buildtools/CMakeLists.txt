@@ -5,8 +5,8 @@ IF(WIN32)
   SET(LIBS "\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/NucleiDetectionFilterPlugin.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/openslidefileformat.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/dicomfileformat.dll")
   SET(LIBS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/NucleiDetectionFilterPlugin_d.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/openslidefileformat_d.dll" "\${CMAKE_INSTALL_PREFIX}/bin/formats/dicomfileformat_d.dll")
   if(BUILD_ASAP)
-    set(LIBS "\${CMAKE_INSTALL_PREFIX}/bin/libEGL.dll" "\${CMAKE_INSTALL_PREFIX}/bin/Qt5OpenGL.dll" ${LIBS})
-    set(LIBS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/libEGLd.dll" "\${CMAKE_INSTALL_PREFIX}/bin/Qt5OpenGLd.dll" ${LIBS})
+#    set(LIBS "\${CMAKE_INSTALL_PREFIX}/bin/libEGL.dll" "\${CMAKE_INSTALL_PREFIX}/bin/Qt6OpenGL.dll" ${LIBS})
+#    set(LIBS_DEBUG "\${CMAKE_INSTALL_PREFIX}/bin/libEGLd.dll" "\${CMAKE_INSTALL_PREFIX}/bin/Qt6OpenGLd.dll" ${LIBS})
   endif(BUILD_ASAP)
   if(BUILD_IMAGEPROCESSING)
     get_target_property(opencv_dll_location opencv_world IMPORTED_LOCATION_RELEASE)
@@ -16,12 +16,12 @@ IF(WIN32)
     
     get_filename_component(opencv_dll_directory ${opencv_dll_location} DIRECTORY)
   endif(BUILD_IMAGEPROCESSING)
-  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt5_DIR}/../../../bin ${DCMTK_DIR}/../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${cpprestsdk_DIR}/../../bin)
+  SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt6_DIR}/../../../bin ${DCMTK_DIR}/../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${cpprestsdk_DIR}/../../bin)
   INCLUDE(InstallRequiredSystemLibraries)
 
   if(BUILD_ASAP)
-  INSTALL(FILES ${Qt5_DIR}/../../../plugins/platforms/qwindows.dll DESTINATION bin/platforms CONFIGURATIONS Release)
-  INSTALL(FILES ${Qt5_DIR}/../../../plugins/platforms/qwindowsd.dll DESTINATION bin/platforms CONFIGURATIONS Debug)
+  INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/qwindows.dll DESTINATION bin/platforms CONFIGURATIONS Release)
+  INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/qwindowsd.dll DESTINATION bin/platforms CONFIGURATIONS Debug)
   INSTALL(CODE "
    include(BundleUtilities)
    if(\"\${CMAKE_INSTALL_CONFIG_NAME}\" STREQUAL \"Debug\")
@@ -38,10 +38,10 @@ ELSEIF(APPLE)
    set(INSTALL_CMAKE_DIR "${prefix}/Resources")
    set(INSTALL_LIB_DIR "${prefix}/Frameworks")
 
-   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqcocoa.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
-   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqminimal.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
-   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqoffscreen.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
-   INSTALL(FILES "${Qt5_DIR}/../../../plugins/platforms/libqwebgl.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt6_DIR}/../../../plugins/platforms/libqcocoa.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt6_DIR}/../../../plugins/platforms/libqminimal.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt6_DIR}/../../../plugins/platforms/libqoffscreen.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
+   INSTALL(FILES "${Qt6_DIR}/../../../plugins/platforms/libqwebgl.dylib" DESTINATION "${prefix}/PlugIns/platforms")  
    INSTALL(FILES "${DIAGPathology_SOURCE_DIR}/ASAP/icon.icns" DESTINATION "${prefix}/Resources")  
    INSTALL(FILES "${DIAGPathology_SOURCE_DIR}/ASAP/Info.plist" DESTINATION "${prefix}")  
 
@@ -66,7 +66,7 @@ ELSEIF(APPLE)
             ${UNITTEST_INCLUDE_DIR}/../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../bin 
-            ${Qt5_DIR}/../.. 
+            ${Qt6_DIR}/../.. 
             ${opencv_dylib_location} 
             ${OPENJPEG_INCLUDE_DIRS}/../../lib 
             ${OPENSLIDE_INCLUDE_DIR}/../../lib 
@@ -83,16 +83,16 @@ ELSEIF(APPLE)
      endforeach()
    endif()
 
-  find_package(Qt5 COMPONENTS Core Widgets Gui OpenGL UiTools Concurrent)
+  find_package(Qt6 COMPONENTS Core Widgets Gui OpenGL UiTools Concurrent)
 
   # Install the plugins for each qt module
   set(REQ_QT_PLUGINS
-          ${Qt5Core_PLUGINS}
-          ${Qt5Widgets_PLUGINS}
-          ${Qt5OpenGL_PLUGINS}
-          ${Qt5UiTools_PLUGINS}
-          ${Qt5Concurrent_PLUGINS}
-          ${Qt5Gui_PLUGINS})
+          ${Qt6Core_PLUGINS}
+          ${Qt6Widgets_PLUGINS}
+          ${Qt6OpenGL_PLUGINS}
+          ${Qt6UiTools_PLUGINS}
+          ${Qt6Concurrent_PLUGINS}
+          ${Qt6Gui_PLUGINS})
   foreach(plugin ${REQ_QT_PLUGINS})
       get_target_property(_qt_plugin_path ${plugin} LOCATION)
       get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)

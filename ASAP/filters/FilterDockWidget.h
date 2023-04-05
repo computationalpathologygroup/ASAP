@@ -53,7 +53,7 @@ signals:
   void changeAutoUpdateStatus(bool autoUpdate);
 
 public :
-  FilterDockWidget(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+  FilterDockWidget(QWidget *parent = 0, Qt::WindowFlags flags = Qt::WindowFlags());
   ~FilterDockWidget();
 
 };

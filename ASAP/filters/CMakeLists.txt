@@ -61,7 +61,7 @@ if(BUILD_IMAGEPROCESSING)
 	endif(WIN32)
 endif(BUILD_IMAGEPROCESSING)
 
-target_link_libraries(ColorDeconvolutionFilterPlugin PRIVATE ASAPLib basicfilters Qt6::Core Qt6::Widgets)
+target_link_libraries(ColorDeconvolutionFilterPlugin PRIVATE ASAPLib basicfilters Qt6::Core Qt6::Widgets Qt6::UiTools)
 target_link_libraries(FilterWorkstationExtensionPlugin PRIVATE ASAPLib basicfilters multiresolutionimageinterface Qt6::Core Qt6::Widgets Qt6::UiTools)
 set_target_properties(ColorDeconvolutionFilterPlugin PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(FilterWorkstationExtensionPlugin PROPERTIES DEBUG_POSTFIX _d)

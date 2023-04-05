@@ -92,20 +92,18 @@ AnnotationWorkstationExtensionPlugin::AnnotationWorkstationExtensionPlugin() :
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
 
   for (int i = 0; i < QColorDialog::customCount(); ++i) {
-    QColor customColor = _settings->value("annotationCustomColor" + QString(i), QColor("white")).value<QColor>();
+    QColor customColor = _settings->value("annotationCustomColor" + QString::number(i), QColor("white")).value<QColor>();
     QColorDialog::setCustomColor(i, customColor);
   }
   QtAnnotation::selectionSensitivity = _settings->value("annotationSelectionSensitivity", 100.).value<float>();
   QtAnnotation::annotationColorForRects = _settings->value("annotationColorForRects", true).value<bool>();
 
-  qRegisterMetaTypeStreamOperators<QtAnnotation*>("QtAnnotation*");
-  qRegisterMetaTypeStreamOperators<QtAnnotationGroup*>("QtAnnotationGroup*");
 }
 
 AnnotationWorkstationExtensionPlugin::~AnnotationWorkstationExtensionPlugin() {
   for (int i = 0; i < QColorDialog::customCount(); ++i) {
     QColor customColor = QColorDialog::customColor(i);
-    _settings->setValue("annotationCustomColor" + QString(i), customColor);
+    _settings->setValue("annotationCustomColor" + QString::number(i), customColor);
   }
   clear();
 }

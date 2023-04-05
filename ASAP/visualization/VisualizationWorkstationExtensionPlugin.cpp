@@ -40,8 +40,6 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
   _previewingLUT(false),
   _segmentationCheckBox(NULL)
 {
-  qRegisterMetaTypeStreamOperators<QList<float>>("QListFloat");
-  qRegisterMetaTypeStreamOperators<QList<QList<float>>>("QListRGBAArray");
 
   _settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "DIAG", "ASAP", this);
   _settings->beginGroup("VisualizationWorkstationExtensionPlugin");
@@ -50,9 +48,10 @@ VisualizationWorkstationExtensionPlugin::VisualizationWorkstationExtensionPlugin
     for (int i = 0; i < nrLUTs; ++i) {
       _settings->setArrayIndex(i);
       std::string lutName = _settings->value("lutName").value<QString>().toStdString();
-      std::vector<float> lutIndices = _settings->value("lutIndices").value<QList<float>>().toVector().toStdVector();
+      QList<float> qlLutIndices = _settings->value("lutIndices").value<QList<float>>();
+      std::vector<float> lutIndices(qlLutIndices.begin(), qlLutIndices.end());
       QList<QList<float>> qtLUTColors = _settings->value("lutColors").value<QList<QList<float>>>();
-      std::vector<rgbaArray> lutColors;;
+      std::vector<rgbaArray> lutColors;
       for (auto color : qtLUTColors) {
         lutColors.push_back({ color[0], color[1], color[2], color[3] });
       }
@@ -76,7 +75,7 @@ VisualizationWorkstationExtensionPlugin::~VisualizationWorkstationExtensionPlugi
     for (auto lut : _colorLookupTables) {
       _settings->setArrayIndex(arrayIndex);
       _settings->setValue("lutName", QString::fromStdString(lut.first));
-      QList<float> indices = QList<float>::fromVector(QVector<float>::fromStdVector(lut.second.indices));
+      QList<float> indices = QList<float>(lut.second.indices.begin(), lut.second.indices.end());
       const std::vector<rgbaArray>& colors = lut.second.colors;
       QList<QList<float>> qtColors;
       for (auto color : colors) {

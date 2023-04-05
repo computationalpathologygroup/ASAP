@@ -1,4 +1,5 @@
 #include "JPEG2000Codec.h"
+#define OPJ_STATIC
 #include "opj_config.h"
 #include "openjpeg.h"
 #include "core/PathologyEnums.h"
