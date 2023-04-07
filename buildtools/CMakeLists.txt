@@ -17,8 +17,7 @@ IF(WIN32)
     get_filename_component(opencv_dll_directory ${opencv_dll_location} DIRECTORY)
   endif(BUILD_IMAGEPROCESSING)
   SET(DIRS ${cpprestsdk_DIR}/../../../../installed/x64-windows/debug/bin ${cpprestsdk_DIR}/../../../../installed/x64-windows/bin ${Qt6_DIR}/../../../bin ${DCMTK_DIR}/../bin ${opencv_dll_directory} ${OPENJPEG_INCLUDE_DIRS}/../../bin ${OPENSLIDE_INCLUDE_DIR}/../../bin ${PugiXML_INCLUDE_DIR}/../bin ${UNITTEST_INCLUDE_DIR}/../bin ${cpprestsdk_DIR}/../../bin)
-  INCLUDE(InstallRequiredSystemLibraries)
-
+  
   if(BUILD_ASAP)
   INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/qwindows.dll DESTINATION bin/platforms CONFIGURATIONS Release)
   INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/qwindowsd.dll DESTINATION bin/platforms CONFIGURATIONS Debug)
@@ -112,9 +111,7 @@ ELSEIF(APPLE)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION "${INSTALL_CMAKE_DIR}")
 
-   include(InstallRequiredSystemLibraries)
-
-   message(STATUS "DIRS: ${DIRS}")
+      message(STATUS "DIRS: ${DIRS}")
    message(STATUS "LIBS: ${LIBS}")
    
    INSTALL(CODE "include(BundleUtilities)

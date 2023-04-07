@@ -75,7 +75,7 @@ ENDIF(APPLE)
 add_library(jpeg2kcodec SHARED JPEG2000Codec.h JPEG2000Codec.cpp)
 generate_export_header(jpeg2kcodec)
 set_target_properties(jpeg2kcodec PROPERTIES DEBUG_POSTFIX _d)
-target_link_libraries(jpeg2kcodec OpenJPEG::OpenJPEG)
+target_link_libraries(jpeg2kcodec openjp2)
 target_include_directories(jpeg2kcodec PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${DIAGPathology_SOURCE_DIR} ${DIAGPathology_BINARY_DIR}/core ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
