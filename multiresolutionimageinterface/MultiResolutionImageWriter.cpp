@@ -595,6 +595,9 @@ template <typename T> int MultiResolutionImageWriter::incorporatePyramid() {
 }
 
 template int MultiResolutionImageWriter::incorporatePyramid<unsigned int>();
+template int MultiResolutionImageWriter::incorporatePyramid<unsigned short>();
+template int MultiResolutionImageWriter::incorporatePyramid<float>();
+template int MultiResolutionImageWriter::incorporatePyramid<unsigned char>();
 
 void MultiResolutionImageWriter::setBaseTags(TIFF* levelTiff) {
 	if (_cType == ColorType::Monochrome || _cType == ColorType::Indexed) {
