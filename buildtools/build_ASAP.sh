@@ -14,7 +14,7 @@ mkdir build
 cd build
 
 if [ "${build_gui}" = "true" ] ; then \
-        cmake ../src -DPugiXML_INCLUDE_DIR=/root/pugixml-1.9/src/ -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
+        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
                     -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE -DCMAKE_BUILD_TYPE=Release \
                     -DDCMTKJPEG_INCLUDE_DIR=/root -DDCMTKJPEG_LIBRARY=/usr/lib/libijg8.so -DUNITTEST_INCLUDE_DIR=/usr/include/UnitTest++ \
@@ -28,7 +28,7 @@ if [ "${build_gui}" = "true" ] ; then \
                     -DPYTHON_NUMPY_INCLUDE_DIR=/root/miniconda3/envs/build_python3.9/lib/python3.9/site-packages/numpy/core/include \
     ; else \
         echo "Skipping GUI..."
-        cmake ../src -DPugiXML_INCLUDE_DIR=/root/pugixml-1.9/src/ -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
+        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
                  -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
                  -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE -DCMAKE_BUILD_TYPE=Release \
                  -DDCMTKJPEG_INCLUDE_DIR=/root -DDCMTKJPEG_LIBRARY=/usr/lib/libijg8.so -DPACKAGE_ON_INSTALL=TRUE \

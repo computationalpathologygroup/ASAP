@@ -92,7 +92,7 @@ bool ImageScopeRepository::loadFromRepo()
       usedIds[curId] = 1;
       std::string curName = idToName[curId];
       std::vector<std::pair<double, double> > closedCoordList = coordIt->second;
-      double dist = sqrt(pow(closedCoordList.begin()->first - closedCoordList.back().first, 2) + pow(closedCoordList.begin()->second - closedCoordList.back().second, 2));
+      double dist = std::sqrt(std::pow(closedCoordList.begin()->first - closedCoordList.back().first, 2) + std::pow(closedCoordList.begin()->second - closedCoordList.back().second, 2));
       if (dist > _closingDistance) {
         bool isOpen = true;
         for (std::map<unsigned int, std::vector<std::pair<double, double> > >::const_iterator coordIt2 = idToCoords.begin(); coordIt2 != idToCoords.end(); ++coordIt2) {

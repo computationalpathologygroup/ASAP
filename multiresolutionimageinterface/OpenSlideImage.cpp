@@ -112,6 +112,11 @@ void* OpenSlideImage::readDataFromImage(const long long& startX, const long long
   unsigned int* temp = new unsigned int[width*height];
   openslide_read_region(_slide, temp, startX, startY, level, width, height);
 
+  if (openslide_get_error(_slide)) {
+    delete[] temp;
+    return NULL;
+  }
+
   unsigned char* rgb = new unsigned char[width*height*3];
   unsigned char* bgra = (unsigned char*)temp;
   for (unsigned long long i = 0, j = 0; i < width*height*4; i+=4, j+=3) {
