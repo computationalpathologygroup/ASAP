@@ -100,68 +100,80 @@ import_array();
      PyObject* getUCharPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
 						     const unsigned long long& height, const unsigned int& level) { 
 		unsigned int nrSamples = self->getSamplesPerPixel();
-        npy_intp dimsDesc[3];
+		npy_intp dimsDesc[3];
 		dimsDesc[0] = height;
 		dimsDesc[1] = width;
 		dimsDesc[2] = nrSamples;
-		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UBYTE);
 		unsigned char* tmp = new unsigned char[height*width*nrSamples];
 		self->getRawRegion(startX, startY, width, height, level, tmp);
-		unsigned char* array_data = (unsigned char*)PyArray_DATA((PyArrayObject*)patch);
-		std::copy(tmp, tmp + height*width*nrSamples, array_data);
-		delete[] tmp;
-		return patch;
+		if (tmp) {
+			PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UBYTE);
+			unsigned char* array_data = (unsigned char*)PyArray_DATA((PyArrayObject*)patch);
+			std::copy(tmp, tmp + height*width*nrSamples, array_data);
+			delete[] tmp;
+			return patch;
+		}
+		Py_RETURN_NONE;
 	}
 };
 %extend MultiResolutionImage {
      PyObject* getUInt16Patch(const long long& startX, const long long& startY, const unsigned long long& width, 
 						     const unsigned long long& height, const unsigned int& level) { 
 		unsigned int nrSamples = self->getSamplesPerPixel();
-        npy_intp dimsDesc[3];
+		npy_intp dimsDesc[3];
 		dimsDesc[0] = height;
 		dimsDesc[1] = width;
 		dimsDesc[2] = nrSamples;
-		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UINT16);
 		unsigned short* tmp = new unsigned short[height*width*nrSamples];
 		self->getRawRegion(startX, startY, width, height, level, tmp);
-		unsigned short* array_data = (unsigned short*)PyArray_DATA((PyArrayObject*)patch);
-		std::copy(tmp, tmp + height*width*nrSamples, array_data);
-		delete[] tmp;
-		return patch;
+		if (tmp) {
+			PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UINT16);
+			unsigned short* array_data = (unsigned short*)PyArray_DATA((PyArrayObject*)patch);
+			std::copy(tmp, tmp + height*width*nrSamples, array_data);
+			delete[] tmp;
+			return patch;
+		}
+		Py_RETURN_NONE;
 	}
 };
 %extend MultiResolutionImage {
      PyObject* getUInt32Patch(const long long& startX, const long long& startY, const unsigned long long& width, 
 						     const unsigned long long& height, const unsigned int& level) { 
 		unsigned int nrSamples = self->getSamplesPerPixel();
-        npy_intp dimsDesc[3];
+		npy_intp dimsDesc[3];
 		dimsDesc[0] = height;
 		dimsDesc[1] = width;
 		dimsDesc[2] = nrSamples;
-		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UINT32);
 		unsigned int* tmp = new unsigned int[height*width*nrSamples];
 		self->getRawRegion(startX, startY, width, height, level, tmp);
-		unsigned int* array_data = (unsigned int*)PyArray_DATA((PyArrayObject*)patch);
-		std::copy(tmp, tmp + height*width*nrSamples, array_data);
-		delete[] tmp;
-		return patch;
+		if (tmp) {
+			PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_UINT32);
+			unsigned int* array_data = (unsigned int*)PyArray_DATA((PyArrayObject*)patch);
+			std::copy(tmp, tmp + height*width*nrSamples, array_data);
+			delete[] tmp;
+			return patch;
+		}
+		Py_RETURN_NONE;
 	}
 };
 %extend MultiResolutionImage {
      PyObject* getFloatPatch(const long long& startX, const long long& startY, const unsigned long long& width, 
 						     const unsigned long long& height, const unsigned int& level) { 
 		unsigned int nrSamples = self->getSamplesPerPixel();
-        npy_intp dimsDesc[3];
+		npy_intp dimsDesc[3];
 		dimsDesc[0] = height;
 		dimsDesc[1] = width;
 		dimsDesc[2] = nrSamples;
-		PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_FLOAT);
 		float* tmp = new float[height*width*nrSamples];
 		self->getRawRegion(startX, startY, width, height, level, tmp);
-		float* array_data = (float*)PyArray_DATA((PyArrayObject*)patch);
-		std::copy(tmp, tmp + height*width*nrSamples, array_data);
-		delete[] tmp;
-		return patch;
+		if (tmp) {
+			PyObject* patch = PyArray_SimpleNew(3, dimsDesc, NPY_FLOAT);
+			float* array_data = (float*)PyArray_DATA((PyArrayObject*)patch);
+			std::copy(tmp, tmp + height*width*nrSamples, array_data);
+			delete[] tmp;
+			return patch;
+		}
+		Py_RETURN_NONE;
 	}
 };
 %extend TIFFImage {
