@@ -1,5 +1,7 @@
 #include "PanTool.h"
 #include <QAction>
+#include <QApplication>
+#include <QStyleHints>
 #include "../PathologyViewer.h"
 
 void PanTool::mouseMoveEvent(QMouseEvent *event) {
@@ -29,7 +31,12 @@ QAction* PanTool::getToolButton() {
   if (!_button) {
     _button = new QAction("Pan", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/basictools_icons/pan.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/basictools_icons/pan_dark.png")));
+    }
+    else {
+        _button->setIcon(QIcon(QPixmap(":/basictools_icons/pan.png")));
+    }
     _button->setShortcut(QKeySequence("x"));
   }
   return _button;

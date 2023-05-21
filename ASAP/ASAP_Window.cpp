@@ -24,6 +24,7 @@
 #include <QStyle>
 #include <QActionGroup>
 #include <QSettings>
+#include <QStyleHints>
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QtUiTools>
@@ -356,8 +357,18 @@ void ASAP_Window::setupUi()
   actionOpen->setObjectName(QStringLiteral("actionOpen"));
   actionClose = new QAction(this);
   actionClose->setObjectName(QStringLiteral("actionClose"));
-  actionOpen->setIcon(QIcon(QPixmap(":/ASAP_icons/open.png")));
-  actionClose->setIcon(QIcon(QPixmap(":/ASAP_icons/close.png")));
+  if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+      actionOpen->setIcon(QIcon(QPixmap(":/ASAP_icons/open_dark.png")));
+  }
+  else {
+      actionOpen->setIcon(QIcon(QPixmap(":/ASAP_icons/open.png")));
+  }
+  if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+      actionClose->setIcon(QIcon(QPixmap(":/ASAP_icons/close_dark.png")));
+  }
+  else {
+      actionClose->setIcon(QIcon(QPixmap(":/ASAP_icons/close.png")));
+  }
   actionAbout = new QAction(this);
   actionAbout->setObjectName(QStringLiteral("actionAbout"));
   menuBar = new QMenuBar(this);

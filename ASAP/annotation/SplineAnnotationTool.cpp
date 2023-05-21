@@ -2,6 +2,8 @@
 #include <QAction>
 #include <QPixmap>
 #include <QIcon>
+#include <QApplication>
+#include <QStyleHints>
 #include "AnnotationWorkstationExtensionPlugin.h"
 #include "../PathologyViewer.h"
 
@@ -14,7 +16,12 @@ QAction* SplineAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("&SplineAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/spline.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/spline_dark.png")));
+    }
+    else {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/spline.png")));
+    }
     _button->setShortcut(QKeySequence("s"));
   }
   return _button;

@@ -1,5 +1,7 @@
 #include "ZoomTool.h"
 #include <QAction>
+#include <QApplication>
+#include <QStyleHints>
 #include "../PathologyViewer.h"
 #include <iostream>
 
@@ -51,7 +53,11 @@ QAction* ZoomTool::getToolButton() {
   if (!_button) {
     _button = new QAction("&Zoom", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/basictools_icons/zoom.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/basictools_icons/zoom_dark.png")));
+    } else {
+        _button->setIcon(QIcon(QPixmap(":/basictools_icons/zoom.png")));
+    }
     _button->setShortcut(QKeySequence("z"));
   }
   return _button;

@@ -4,6 +4,8 @@
 #include <QAction>
 #include <QPen>
 #include <QGraphicsLineItem>
+#include <QApplication>
+#include <QStyleHints>
 #include <QGraphicsItem>
 #include "PolyQtAnnotation.h"
 #include "annotation/Annotation.h"
@@ -91,7 +93,12 @@ QAction* PolyAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("&PolyAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/poly.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/poly_dark.png")));
+    }
+    else {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/poly.png")));
+    }
     _button->setShortcut(QKeySequence("p"));
   }
   return _button;

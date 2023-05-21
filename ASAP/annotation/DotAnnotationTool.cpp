@@ -1,6 +1,8 @@
 #include "DotAnnotationTool.h"
 #include "DotQtAnnotation.h"
 #include <QAction>
+#include <QApplication>
+#include <QStyleHints>
 #include "../PathologyViewer.h"
 #include "AnnotationWorkstationExtensionPlugin.h"
 #include "core/Point.h"
@@ -25,7 +27,12 @@ QAction* DotAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("&DotAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/dot.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/dot_dark.png")));
+    }
+    else {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/dot.png")));
+    }
     _button->setShortcut(QKeySequence("d"));
   }
   return _button;

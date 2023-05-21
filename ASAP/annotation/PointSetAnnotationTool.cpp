@@ -5,6 +5,8 @@
 #include <QPen>
 #include <QGraphicsLineItem>
 #include <QGraphicsItem>
+#include <QApplication>
+#include <QStyleHints>
 #include "PointSetQtAnnotation.h"
 #include "annotation/Annotation.h"
 #include "../PathologyViewer.h"
@@ -31,7 +33,12 @@ QAction* PointSetAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("PointSetAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/pointset.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/pointset_dark.png")));
+    }
+    else {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/pointset.png")));
+    }
     _button->setShortcut(QKeySequence("i"));
   }
   return _button;

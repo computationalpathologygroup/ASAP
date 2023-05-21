@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QDoubleSpinBox>
 #include <QApplication>
+#include <QStyleHints>
 #include "PolyQtAnnotation.h"
 #include "annotation/Annotation.h"
 #include "../PathologyViewer.h"
@@ -206,7 +207,12 @@ QAction* RectangleAnnotationTool::getToolButton() {
   if (!_button) {
     _button = new QAction("&RectangleAnnotation", this);
     _button->setObjectName(QString::fromStdString(name()));
-    _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/rectangle.png")));
+    if (QApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark) {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/rectangle_dark.png")));
+    }
+    else {
+        _button->setIcon(QIcon(QPixmap(":/AnnotationWorkstationExtensionPlugin_icons/rectangle.png")));
+    }
     _button->setShortcut(QKeySequence("r"));
   }
   return _button;

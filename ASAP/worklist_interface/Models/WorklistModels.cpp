@@ -96,7 +96,7 @@ namespace ASAP
 		}
 	}
 
-	std::unique_ptr<QFutureWatcher<void> > WorklistModels::setImageItems(const DataTable& items, WorklistWindow* window)
+	std::unique_ptr<QFutureWatcher<bool> > WorklistModels::setImageItems(const DataTable& items, WorklistWindow* window)
 	{
 		images->removeRows(0, images->rowCount());
 
@@ -124,8 +124,8 @@ namespace ASAP
 			bool valid = creator->insertIcon(index_location);
 			return valid;
 		};
-		QFuture<bool> future = QtConcurrent::mapped(index_locations, create_icons);
-		std::unique_ptr<QFutureWatcher<void> > future_watcher(new QFutureWatcher<void>);
+		auto future = QtConcurrent::mapped(index_locations, create_icons);
+		std::unique_ptr<QFutureWatcher<bool> > future_watcher(new QFutureWatcher<bool>);
 		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::progressValueChanged, [=](int pv) {window->updateStatusBar("Loading thumbnail " + QString::fromStdString(std::to_string(pv)) + " of " + QString::fromStdString(std::to_string(items.size()))); });
 		QObject::connect(&(*future_watcher), &QFutureWatcher<void>::finished, [=]() {window->updateStatusBar("Finished loading thumbnails."); QObject::disconnect(icon_connection); });
 		future_watcher->setFuture(future);

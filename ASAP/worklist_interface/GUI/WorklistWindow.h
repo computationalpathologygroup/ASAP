@@ -47,7 +47,7 @@ namespace ASAP
 		private:
 			SourceProxy									m_source;
 			std::unique_ptr<Ui::WorklistWindowLayout>	m_ui;
-			std::unique_ptr<QFutureWatcher<void>>       m_thumbnail_loader;
+			std::unique_ptr<QFutureWatcher<bool>>       m_thumbnail_loader;
 			std::mutex									m_image_switch_access;
 			std::mutex									m_status_bar_access;
 			TemporaryDirectoryTracker					m_storage_directory;

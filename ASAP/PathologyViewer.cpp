@@ -84,7 +84,6 @@ PathologyViewer::PathologyViewer(QWidget *parent):
 
 PathologyViewer::~PathologyViewer()
 {
-  close();
 }
 
 unsigned long long PathologyViewer::getCacheSize() {

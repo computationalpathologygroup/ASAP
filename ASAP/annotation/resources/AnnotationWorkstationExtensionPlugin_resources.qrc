@@ -5,9 +5,15 @@
 	<file alias="measure.png">measure.png</file>
     <file alias="rectangle.png">rectangle.png</file>
     <file alias="poly.png">poly.png</file>
-    <file alias="freehand.xpm">freehand.xpm</file>
+	<file alias="dot_dark.png">dot_dark.png</file>
+	<file alias="pointset_dark.png">pointset_dark.png</file>
+	<file alias="measure_dark.png">measure_dark.png</file>
+	<file alias="rectangle_dark.png">rectangle_dark.png</file>
+	<file alias="poly_dark.png">poly_dark.png</file>
+	<file alias="freehand.xpm">freehand.xpm</file>
     <file alias="spline.png">spline.png</file>
-    <file alias="xml.xpm">xml.xpm</file>
+	<file alias="spline_dark.png">spline_dark.png</file>
+	<file alias="xml.xpm">xml.xpm</file>
     <file alias="inactive_dot.xpm">inactive_dot.xpm</file>
     <file alias="inactive_poly.xpm">inactive_poly.xpm</file>
     <file alias="inactive_freehand.xpm">inactive_freehand.xpm</file>
