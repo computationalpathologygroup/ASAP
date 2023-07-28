@@ -1,4 +1,3 @@
-option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT "Builds support for Olympus VSI files; requires DCMTK ijg8.lib" ON)
 option(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT "Builds support for DICOM files; requires DCMTK" ON)
 
 set(MULTIRESOLUTIONIMAGEINTERFACE_HS
@@ -12,6 +11,8 @@ set(MULTIRESOLUTIONIMAGEINTERFACE_HS
     TileCache.h
     LIFImage.h
 	LIFImageFactory.h
+    VSIImage.h
+	VSIImageFactory.h
 )
 
 set(MULTIRESOLUTIONIMAGEINTERFACE_SRCS 
@@ -26,6 +27,8 @@ set(MULTIRESOLUTIONIMAGEINTERFACE_SRCS
     TileCache.cpp
     LIFImage.cpp
 	LIFImageFactory.cpp
+    VSIImage.cpp
+	VSIImageFactory.cpp
 )
 
 set(OPENSLIDE_SUPPORT_HS
@@ -33,19 +36,9 @@ set(OPENSLIDE_SUPPORT_HS
 	OpenSlideImageFactory.h
 )
 
-set(VSI_SUPPORT_HS
-    VSIImage.h
-	VSIImageFactory.h
-)
-
 set(OPENSLIDE_SUPPORT_SRCS
     OpenSlideImage.cpp
 	OpenSlideImageFactory.cpp
-)
-
-set(VSI_SUPPORT_SRCS
-    VSIImage.cpp
-	VSIImageFactory.cpp
 )
 
 set(DICOM_SUPPORT_HS
@@ -78,16 +71,9 @@ set_target_properties(jpeg2kcodec PROPERTIES DEBUG_POSTFIX _d)
 target_link_libraries(jpeg2kcodec openjp2)
 target_include_directories(jpeg2kcodec PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${DIAGPathology_SOURCE_DIR} ${DIAGPathology_BINARY_DIR}/core ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
-  # Required for lossless JPEG compression used in VSIs
-  find_package(DCMTKJPEG REQUIRED)
-  list(APPEND MULTIRESOLUTIONIMAGEINTERFACE_SRCS ${VSI_SUPPORT_SRCS})
-  list(APPEND MULTIRESOLUTIONIMAGEINTERFACE_HS ${VSI_SUPPORT_HS})
-endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
+add_library(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS})
 
-add_library(multiresolutionimageinterface SHARED ${MULTIRESOLUTIONIMAGEINTERFACE_SRCS} ${MULTIRESOLUTIONIMAGEINTERFACE_HS} ${VSI_SOURCE_HS} ${VSI_SOURCE_SRCS})
-
-target_include_directories(multiresolutionimageinterface PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${PugiXML_INCLUDE_DIR})
+target_include_directories(multiresolutionimageinterface PUBLIC $<BUILD_INTERFACE:${DIAGPathology_SOURCE_DIR}> $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include/multiresolutionimageinterface> PRIVATE ${PugiXML_INCLUDE_DIR} ${JPEG_INCLUDE_DIR})
 target_link_libraries(multiresolutionimageinterface PUBLIC core PRIVATE jpeg2kcodec TIFF::TIFF JPEG::JPEG pugixml)
 
 IF(NOT WIN32)
@@ -95,14 +81,6 @@ IF(NOT WIN32)
 ENDIF(NOT WIN32)
 generate_export_header(multiresolutionimageinterface)
 set_target_properties(multiresolutionimageinterface PROPERTIES DEBUG_POSTFIX _d)
-
-if(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
-  # Required for lossless JPEG compression used in VSIs
-  find_package(DCMTKJPEG REQUIRED)
-  target_include_directories(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_INCLUDE_DIR})
-  target_link_libraries(multiresolutionimageinterface PRIVATE ${DCMTKJPEG_LIBRARY})
-  target_compile_definitions(multiresolutionimageinterface PRIVATE HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
-endif(BUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT)
 
 # Add the OpenSlide-plugin
 add_library(openslidefileformat SHARED ${OPENSLIDE_SUPPORT_SRCS} ${OPENSLIDE_SUPPORT_HS})
@@ -138,15 +116,9 @@ option(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON "Wrap multi-resolution image re
 if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
   add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
 
-  # IF(APPLE)
-    # set(Python_FIND_ABI "ANY" "ANY" "ANY")
-    # find_package(Python3 COMPONENTS Interpreter Development)
-  # ELSE(APPLE)
-    find_package(PythonLibs REQUIRED)
-  # ENDIF(APPLE)
+  find_package (Python3 COMPONENTS Development.SABIModule NumPy)
 
   find_package(SWIG REQUIRED)
-  find_package(NumPy REQUIRED)
   include (${SWIG_USE_FILE})
   if(SWIG_FOUND)
     mark_as_advanced(SWIG_DIR SWIG_VERSION)
@@ -169,7 +141,7 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
       set_source_files_properties(multiresolutionimageinterface.i PROPERTIES SWIG_FLAGS "-py3-stable-abi")
 
     swig_add_library(py_multiresolutionimageinterface LANGUAGE python SOURCES multiresolutionimageinterface.i)
-    swig_link_libraries(py_multiresolutionimageinterface   multiresolutionimageinterface annotation core) 
+    swig_link_libraries(py_multiresolutionimageinterface multiresolutionimageinterface annotation core) 
 
 	  IF(APPLE)
 	    # Relevant CMake discussions:
@@ -188,12 +160,12 @@ if(WRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON)
 	      endif()
 	    endmacro()
 
-	    target_link_libraries_with_dynamic_lookup(py_multiresolutionimageinterface ${PYTHON_LIBRARIES})
+	    target_link_libraries_with_dynamic_lookup(py_multiresolutionimageinterface Python3::SABIModule Python3::NumPy)
 	  ELSE(APPLE)
-	    swig_link_libraries(py_multiresolutionimageinterface ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
+	    swig_link_libraries(py_multiresolutionimageinterface Python3::SABIModule Python3::NumPy)
 	  ENDIF(APPLE)
 
-    target_include_directories(py_multiresolutionimageinterface   PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${DIAGPathology_BINARY_DIR}/annotation ${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
+      target_include_directories(py_multiresolutionimageinterface   PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${DIAGPathology_BINARY_DIR}/annotation)
 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES FOLDER multiresolutionimageinterface)
 	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES OUTPUT_NAME multiresolutionimageinterface)
  	  set_target_properties(py_multiresolutionimageinterface  PROPERTIES ARCHIVE_OUTPUT_NAME _multiresolutionimageinterface)

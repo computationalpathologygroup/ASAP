@@ -51,7 +51,7 @@ OPTION(WRAP_WHOLESLIDEFILTERS_PYTHON "Wrap whole slide image processing in Pytho
 
 IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
   add_definitions(-DSWIG_PYTHON_INTERPRETER_NO_DEBUG)
-  find_package(PythonLibs REQUIRED)
+  find_package (Python3 COMPONENTS Development.SABIModule NumPy)
   find_package(SWIG REQUIRED)
   include (${SWIG_USE_FILE})
   if(SWIG_FOUND)
@@ -73,8 +73,8 @@ IF(WRAP_WHOLESLIDEFILTERS_PYTHON)
 
 	  swig_add_library(py_wholeslidefilters LANGUAGE python SOURCES wholeslidefilters.i)
 	  swig_link_libraries(py_wholeslidefilters wholeslidefilters core) 
-	  swig_link_libraries(py_wholeslidefilters ${PYTHON_LIBRARIES} ${PYTHON_DEBUG_LIBRARIES})
-	  target_include_directories(py_wholeslidefilters PRIVATE ${PYTHON_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+	  swig_link_libraries(py_wholeslidefilters Python3::SABIModule Python3::NumPy)
+	  target_include_directories(py_wholeslidefilters PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 	  
 	  set_target_properties(py_wholeslidefilters PROPERTIES FOLDER imgproc)
 	  set_target_properties(py_wholeslidefilters PROPERTIES DEBUG_POSTFIX _d)

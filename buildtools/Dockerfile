@@ -66,7 +66,7 @@ RUN mkdir -p /root/swig/build && \
 RUN ln -s /usr/lib/x86_64-linux-gnu/libijg8.so /usr/lib/libijg8.so; exit 0;
 
 WORKDIR /root
-RUN wget -q ftp://dicom.offis.de/pub/dicom/offis/software/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz && tar xzf dcmtk-3.6.7.tar.gz && mv dcmtk-3.6.7 dcmtk && rm dcmtk-3.6.7.tar.gz
+RUN wget -q https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz && tar xzf dcmtk-3.6.7.tar.gz && mv dcmtk-3.6.7 dcmtk && rm dcmtk-3.6.7.tar.gz
 
 WORKDIR /root/build
 COPY build_ASAP.sh /root/build/build_ASAP.sh

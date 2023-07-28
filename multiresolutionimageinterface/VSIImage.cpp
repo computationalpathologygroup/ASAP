@@ -8,13 +8,9 @@
 #include "core/Box.h"
 #include "core/PathologyEnums.h"
 
-// Include DCMTK LIBJPEG for lossy and lossless JPEG compression
+// Include LIBJPEG for lossy (and lossless with TurboJPEG) JPEG compression
 extern "C" {
-#define boolean ijg_boolean
-#include "dcmtk/dcmjpeg/libijg8/jpeglib8.h"
-#include "jpeg_mem_src.h"
-#undef boolean
-#undef const
+#include "jpeglib.h"
 }
 
 #include "JPEG2000Codec.h"
@@ -231,10 +227,9 @@ char* VSIImage::decodeTile(int no, int row, int col) const {
     else if (_compressionType == 2 || _compressionType == 5) {
       jpeg_decompress_struct cinfo;
       jpeg_error_mgr jerr; //error handling
-      jpeg_source_mgr src_mem;
       jpeg_create_decompress(&cinfo);
       cinfo.err = jpeg_std_error(&jerr);      
-      jpeg_mem_src(&cinfo, &src_mem, (void*)buf, size);
+      jpeg_mem_src(&cinfo, (unsigned char*)buf, size);
       jpeg_read_header(&cinfo, true);
       if (_compressionType == 2) {
         cinfo.jpeg_color_space = JCS_YCbCr;

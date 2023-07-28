@@ -1,10 +1,7 @@
 #include "MultiResolutionImageFactory.h"
 #include "MultiResolutionImage.h"
 #include "core/filetools.h"
-
-#ifdef HAS_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT
 #include "VSIImage.h"
-#endif
 
 #ifdef _WIN32
 #include <windows.h>

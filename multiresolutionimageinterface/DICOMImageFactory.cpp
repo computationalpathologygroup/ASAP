@@ -2,7 +2,7 @@
 #include "DICOMImage.h"
 #include "dcmtk/dcmjpeg/djdecode.h"
 
-DICOMImageFactory::DICOMImageFactory() : MultiResolutionImageFactory("DICOM Formats", { "dcm" }, 1) {
+DICOMImageFactory::DICOMImageFactory() : MultiResolutionImageFactory("DICOM Formats", { "dcm" }, 2) {
     DJDecoderRegistration::registerCodecs();
 }
 
