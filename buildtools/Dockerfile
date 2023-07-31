@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=20.04
+ARG UBUNTU_VERSION=22.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -14,18 +14,19 @@ RUN apt-get update \
         g++ \
         make \
         bison \
-        qtbase5-dev \
-        qttools5-dev \
-        libqt5opengl5-dev \
+        qt6-base-dev \
+        qt6-tools-dev \
+        libqt6opengl6-dev \
         git \
         libopencv-dev \
         libdcmtk-dev \
         libopenjp2-7-dev \
         libopenslide-dev \
         libpugixml-dev \
+        libturbojpeg-dev \
+        libgl1-mesa-dev \
         wget \
         gpg-agent \
-        libunittest++-dev \
         ca-certificates \
         nano \
         software-properties-common \
