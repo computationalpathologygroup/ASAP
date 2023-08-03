@@ -25,8 +25,12 @@ if [ "${build_gui}" = "true" ] ; then \
                      -DCMAKE_BUILD_TYPE=Release \
                      -DPACKAGE_ON_INSTALL=TRUE \
                      -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
+                     -DOpenJPEG_DIR=/root/openjpeg/install/lib/cmake/openjpeg-2.5 \
                      -DCMAKE_INSTALL_PREFIX=/root/install \
                      -DSWIG_EXECUTABLE=/root/swig/install/bin/swig \
+                     -DPython3_ROOT_DIR=/root/miniconda3/envs/build_python3.10 \
+                     -DQt6_DIR=/root/qt/6.5.2/gcc_64/lib/cmake/Qt6 \
+                     -DQt6GuiTools_DIR=/root/qt/6.5.2/gcc_64/lib/cmake/Qt6GuiTools \
     ; else \
         echo "Skipping GUI..."
         cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
@@ -35,7 +39,11 @@ if [ "${build_gui}" = "true" ] ; then \
                      -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE \
                      -DCMAKE_BUILD_TYPE=Release \
                      -DPACKAGE_ON_INSTALL=TRUE \
+                     -DCMAKE_INSTALL_PREFIX=/root/install \
                      -DSWIG_EXECUTABLE=/root/swig/install/bin/swig \
+                     -DPython3_ROOT_DIR=/root/miniconda3/envs/build_python3.10 \
+                     -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
+                     -DOpenJPEG_DIR=/root/openjpeg/install/lib/cmake/openjpeg-2.5 \
     ; fi
 export LD_LIBRARY_PATH=/root/miniconda3/envs/build_python3.9/lib
 make package

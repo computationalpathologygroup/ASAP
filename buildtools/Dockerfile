@@ -14,13 +14,9 @@ RUN apt-get update \
         g++ \
         make \
         bison \
-        qt6-base-dev \
-        qt6-tools-dev \
-        libqt6opengl6-dev \
         git \
         libopencv-dev \
         libdcmtk-dev \
-        libopenjp2-7-dev \
         libopenslide-dev \
         libpugixml-dev \
         libturbojpeg-dev \
@@ -46,14 +42,26 @@ RUN apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) m
 RUN apt update && \
     apt install -y cmake
 
+# Build static OpenJPEG ourselves because we need -fPIC
+RUN mkdir mkdir /root/openjpeg /root/openjpeg/build /root/openjpeg/install && \
+    git clone https://github.com/uclouvain/openjpeg /root/openjpeg/src && \
+    cd /root/openjpeg/build && \
+    cmake ../src -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/root/openjpeg/install -DCMAKE_C_FLAGS=-fPIC && \
+    cmake --build . && \
+    cmake --install .    
+
 RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
     mkdir /root/.conda &&\
     bash Miniconda3-latest-Linux-x86_64.sh -b &&\
     rm -f Miniconda3-latest-Linux-x86_64.sh
 
 RUN /root/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
-    /root/miniconda3/bin/conda create --quiet --name build_python3.9 python=3.9 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.9 numpy nomkl
+    /root/miniconda3/bin/conda create --quiet --name build_python3.10 python=3.10 && \
+    /root/miniconda3/bin/conda install --quiet -n build_python3.10 numpy nomkl
+
+# Install Qt ourselves so we can use version 6.5.2
+RUN /root/miniconda3/bin/pip3 install aqtinstall && \
+    /root/miniconda3/bin/aqt install-qt --outputdir /root/qt linux desktop 6.5.2    
 
 RUN mkdir -p /root/swig/build && \
     mkdir -p /root/swig/install && \
@@ -62,9 +70,6 @@ RUN mkdir -p /root/swig/build && \
     cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/root/swig/install -DBISON_EXECUTABLE=/usr/bin/bison && \
     cmake --build . --config Release && \
     cmake --install .
-
-# Small hack to as libijg8 is installed in a different locations in Ubuntu 20.04
-RUN ln -s /usr/lib/x86_64-linux-gnu/libijg8.so /usr/lib/libijg8.so; exit 0;
 
 WORKDIR /root
 RUN wget -q https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz && tar xzf dcmtk-3.6.7.tar.gz && mv dcmtk-3.6.7 dcmtk && rm dcmtk-3.6.7.tar.gz
