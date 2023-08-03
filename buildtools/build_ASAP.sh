@@ -10,9 +10,6 @@ ubuntu_version_no_dots=$(echo ${ubuntu_version} | tr -d ".")
 
 echo "Building ASAP with Python ${python_ver}; building GUI = ${build_gui}; on Ubuntu ${ubuntu_version}"
 git clone https://github.com/computationalpathologygroup/ASAP src
-cd src
-git checkout upgrading_dependencies
-cd ..
 mkdir build
 cd build
 

@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=22.04
+ARG UBUNTU_VERSION=20.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -19,10 +19,9 @@ RUN apt-get update \
         libdcmtk-dev \
         libopenslide-dev \
         libpugixml-dev \
-        libturbojpeg-dev \
-        libgl1-mesa-dev \
         wget \
         gpg-agent \
+        libunittest++-dev \
         ca-certificates \
         nano \
         software-properties-common \
