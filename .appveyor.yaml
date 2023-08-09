@@ -63,7 +63,7 @@ for:
         cmake --install .
       }
   - ps: >-
-      If (!(Test-Path -Path 'c:\projects\openslide')) {
+      If (!(Test-Path -Path 'c:\projects\openslide-win64')) {
         Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/v2.1/openslide-win64.zip'
         7z x openslide-win64.zip -oc:\projects
       }
@@ -79,7 +79,7 @@ for:
 
   build_script:
     - cmd: cd C:\projects\asap
-    - cmd: cmake -B ./ASAP_build -DJPEG_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DJPEG_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DJPEG_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DOpenJPEG_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/openjpeg-2.5 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide-win64/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide-win64/lib/libopenslide.lib -DDCMTK_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/dcmtk -DTIFF_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DTIFF_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DTIFF_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DPugiXML_DIR=c:/projects/pugixml/install/lib/cmake/pugixml -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt6_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6 -DQt6GuiTools_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6GuiTools -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPython3_ROOT_DIR=c:/Python39-x64 -DSWIG_EXECUTABLE=c:/projects/swig/install/bin/swig.exe
+    - cmd: cmake -B ./ASAP_build -DJPEG_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DJPEG_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DJPEG_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DOpenJPEG_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/openjpeg -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide-win64/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide-win64/lib/libopenslide.lib -DDCMTK_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/dcmtk -DTIFF_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DTIFF_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DTIFF_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DPugiXML_DIR=c:/projects/pugixml/install/lib/cmake/pugixml -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt6_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6 -DQt6GuiTools_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6GuiTools -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPython3_ROOT_DIR=c:/Python39-x64 -DSWIG_EXECUTABLE=c:/projects/swig/install/bin/swig.exe
     - cmd: cd ./ASAP_build
     - cmd: cmake --build . --config Release
     - cmd: cpack
