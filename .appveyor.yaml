@@ -38,7 +38,7 @@ for:
   before_build:
   - ps: >-
       If (!(Test-Path -Path 'C:\tools\vcpkg\installed\x64-windows\share\dcmtk')) {
-        vcpkg install dcmtk:x64-windows-static libjpeg-turbo:x64-windows-static libtiff:x64-windows-static zlib:x64-windows-static openjpeg:x64-windows-static
+        vcpkg install dcmtk:x64-windows-static libjpeg-turbo:x64-windows-static tiff:x64-windows-static zlib:x64-windows-static openjpeg:x64-windows-static
       } 
   - ps: >-
       If (!(Test-Path -Path 'C:\projects\pugixml')) {
