@@ -15,12 +15,8 @@ matrix:
   exclude:
     - image: Visual Studio 2022
       ubuntu_version: 22.04
-    - image: Visual Studio 2022
-      ubuntu_version: 23.04
     - image: macos-bigsur
       ubuntu_version: 22.04    
-    - image: macos-bigsur
-      ubuntu_version: 23.04    
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
