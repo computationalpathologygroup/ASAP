@@ -1,6 +1,6 @@
 image:
- - macos-bigsur
  - Visual Studio 2022
+ - macos-bigsur
  - Ubuntu
 
 environment:
@@ -8,20 +8,19 @@ environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   
   matrix:
-    - ubuntu_version: 18.04
-    - ubuntu_version: 20.04
     - ubuntu_version: 22.04
+    - ubuntu_version: 23.04
 
 matrix:
   exclude:
     - image: Visual Studio 2022
-      ubuntu_version: 20.04
+      ubuntu_version: 22.04
     - image: Visual Studio 2022
-      ubuntu_version: 18.04
+      ubuntu_version: 23.04
     - image: macos-bigsur
-      ubuntu_version: 20.04    
+      ubuntu_version: 22.04    
     - image: macos-bigsur
-      ubuntu_version: 18.04    
+      ubuntu_version: 23.04    
 
 install:
   - ps: $env:asap_major_version=findstr "set(CURRENT_MAJOR_VERSION" CMakeLists.txt | % {"$($_.split(' ')[1])"[0]}
@@ -42,8 +41,18 @@ for:
       
   before_build:
   - ps: >-
+      If (!(Test-Path -Path 'C:\tools\vcpkg\installed\x64-windows\share\dcmtk')) {
+        vcpkg install dcmtk:x64-windows-static libjpeg-turbo:x64-windows-static libtiff:x64-windows-static zlib:x64-windows-static openjpeg:x64-windows-static
+      } 
+  - ps: >-
       If (!(Test-Path -Path 'C:\projects\pugixml')) {
-        git clone https://github.com/zeux/pugixml c:\projects\pugixml
+        git clone https://github.com/zeux/pugixml c:\projects\pugixml\src
+        mkdir c:\projects\pugixml\build
+        mkdir c:\projects\pugixml\install
+        cd c:\projects\pugixml\install
+        cmake ..\src -DBUILD_SHARED_LIBS=FALSE -DCMAKE_INSTALL_PREFIX=c:\projects\pugixml\install -DPUGIXML_STATIC_CRT=FALSE -DPUGIXML_USE_POSTFIX=TRUE
+        cmake --build . --config Release
+        cmake --install .
       }
   - ps: >-
       If (!(Test-Path -Path 'C:\projects\swig\install')) {
@@ -58,14 +67,8 @@ for:
       }
   - ps: >-
       If (!(Test-Path -Path 'c:\projects\openslide')) {
-        Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/1.9/custom_openslide.zip'
-        7z x custom_openslide.zip -oc:\projects\openslide
-      }
-  - ps: >-
-      If (!(Test-Path -Path 'c:\projects\other_dependencies')) {
-        Start-FileDownload 'https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.zip'
-        7z x dcmtk-3.6.7.zip -oc:\projects
-        mv c:\projects\dcmtk-3.6.7 c:\projects\dcmtk
+        Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/v2.1/openslide-win64.zip'
+        7z x openslide-win64.zip -oc:\projects
       }
   - ps: >-
       If (!(Test-Path -Path C:\Python39-x64\Lib\site-packages\numpy)) {
@@ -75,23 +78,19 @@ for:
       If (!(Test-Path -Path 'C:\tools\opencv')) {
         choco install opencv
       } 
-  - ps: >-
-      If (!(Test-Path -Path 'C:\tools\vcpkg\installed\x64-windows\share\dcmtk')) {
-        vcpkg install dcmtk:x64-windows
-      } 
 
   build_script:
     - cmd: cd C:\projects\asap
-    - cmd: cmake -B ./ASAP_build -DJPEG_INCLUDE_DIR=C:\projects\openslide\artefacts\include -DJPEG_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DJPEG_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libjpeg.dll.a -DOpenJPEG_DIR=c:/projects/openslide/artefacts/lib/openjpeg-2.3 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide/lib/libopenslide.lib -DDCMTKJPEG_INCLUDE_DIR=C:/projects -DDCMTKJPEG_LIBRARY=c:/tools/vcpkg/installed/x64-windows/lib/ijg8.lib -DDCMTK_DIR=C:/tools/vcpkg/installed/x64-windows/share/dcmtk -DTIFF_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DTIFF_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DTIFF_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libtiff.dll.a -DZLIB_INCLUDE_DIR=c:/projects/openslide/artefacts/include -DZLIB_LIBRARY_DEBUG=c:/projects/openslide/artefacts/lib/libz.dll.a -DZLIB_LIBRARY_RELEASE=c:/projects/openslide/artefacts/lib/libz.dll.a -DPugiXML_INCLUDE_DIR=c:/projects/pugixml/src -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=ON -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt5_DIR=C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5 -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPYTHON_DEBUG_LIBRARY=c:/Python39-x64/libs/python3.lib -DPYTHON_LIBRARY=c:/Python39-x64/libs/python3.lib -DPYTHON_LIBRARY_DEBUG=c:/Python39-x64/libs/python3.lib -DPYTHON_INCLUDE_DIR=c:/Python39-x64/include -DPYTHON_EXECUTABLE=c:/Python39-x64/python.exe -DPYTHON_NUMPY_INCLUDE_DIR=c:/Python39-x64/Lib/site-packages/numpy/core/include -DSWIG_EXECUTABLE=c:/projects/swig/install/bin/swig.exe
+    - cmd: cmake -B ./ASAP_build -DJPEG_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DJPEG_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DJPEG_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DOpenJPEG_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/openjpeg-2.5 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide-win64/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide-win64/lib/libopenslide.lib -DDCMTK_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/dcmtk -DTIFF_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DTIFF_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DTIFF_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DPugiXML_DIR=c:/projects/pugixml/install/lib/cmake/pugixml -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt6_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6 -DQt6GuiTools_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6GuiTools -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPython3_ROOT_DIR=c:/Python39-x64 -DSWIG_EXECUTABLE=c:/projects/swig/install/bin/swig.exe
     - cmd: cd ./ASAP_build
     - cmd: cmake --build . --config Release
     - cmd: cpack
 
   cache:
     - C:\tools\opencv -> appveyor.yml
-    - C:\projects\openslide -> appveyor.yml
+    - C:\projects\openslide-win64 -> appveyor.yml
     - C:\projects\swig\install -> appveyor.yml
-    - C:\projects\pugixml -> appveyor.yml
+    - C:\projects\pugixml\install -> appveyor.yml
     - C:\tools\vcpkg\installed -> appveyor.yml
 
   artifacts:
