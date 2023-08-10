@@ -79,4 +79,3 @@ RUN chmod a+rxwX ./build_ASAP.sh
 RUN mv /root/miniconda3/envs/build/lib/libstdc++.so.6 /root/miniconda3/envs/build/lib/.libstdc++.so.6
 
 CMD ./build_ASAP.sh
->>>>>>> 033498770123cd3b3fc796320af0d4eb63f98c06
