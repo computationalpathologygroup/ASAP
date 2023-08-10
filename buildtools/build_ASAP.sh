@@ -44,4 +44,3 @@ else
           mv $file /artifacts/${outbasename}-nogui-Ubuntu${ubuntu_version_no_dots}.deb
         done;
 fi
->>>>>>> 033498770123cd3b3fc796320af0d4eb63f98c06

@@ -126,7 +126,7 @@ ELSE(WIN32)
 	  get_target_property(opencv_so_location opencv_world IMPORTED_LOCATION_RELEASE)
   else(TARGET opencv_world)
 		get_target_property(opencv_so_location opencv_core IMPORTED_LOCATION_RELEASE)
-	endif(NOT opencv_so_location)
+	endif(TARGET opencv_world)
     
     get_filename_component(opencv_so_directory ${opencv_so_location} DIRECTORY)
   endif(BUILD_IMAGEPROCESSING)
