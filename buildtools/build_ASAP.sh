@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [ "$1" != "" ]; then
     build_gui="$1"
 else
@@ -8,39 +7,30 @@ fi
 ubuntu_version=$(grep 'DISTRIB_RELEASE' /etc/lsb-release | cut -d'=' -f2)
 ubuntu_version_no_dots=$(echo ${ubuntu_version} | tr -d ".")
 
-echo "Building ASAP with Python ${python_ver}; building GUI = ${build_gui}; on Ubuntu ${ubuntu_version}"
+echo "Building ASAP; building GUI = ${build_gui}; on Ubuntu ${ubuntu_version}"
 git clone https://github.com/computationalpathologygroup/ASAP src
 mkdir build
 cd build
 
 if [ "${build_gui}" = "true" ] ; then \
-        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
-                    -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
-                    -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE -DCMAKE_BUILD_TYPE=Release \
-                    -DDCMTKJPEG_INCLUDE_DIR=/root -DDCMTKJPEG_LIBRARY=/usr/lib/libijg8.so -DUNITTEST_INCLUDE_DIR=/usr/include/UnitTest++ \
-                    -DPACKAGE_ON_INSTALL=TRUE -DBUILD_WORKLIST_INTERFACE=TRUE \
-                    -DSWIG_EXECUTABLE=/root/swig/install/bin/swig \
-                    -DPYTHON_DEBUG_LIBRARY=/root/miniconda3/envs/build_python3.9/lib/libpython3.so \
-                    -DPYTHON_LIBRARY_DEBUG=/root/miniconda3/envs/build_python3.9/lib/libpython3.so \
-                    -DPYTHON_LIBRARY=/root/miniconda3/envs/build_python3.9/lib/libpython3.so \
-                    -DPYTHON_INCLUDE_DIR=/root/miniconda3/envs/build_python3.9/include/python3.9 \
-                    -DPYTHON_EXECUTABLE=/root/miniconda3/envs/build_python3.9/bin/python \
-                    -DPYTHON_NUMPY_INCLUDE_DIR=/root/miniconda3/envs/build_python3.9/lib/python3.9/site-packages/numpy/core/include \
+        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide -DOpenJPEG_DIR=/root/openjpeg/install/lib/cmake/openjpeg-2.5 \
+                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
+                     -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release \
+                     -DPACKAGE_ON_INSTALL=TRUE -DBUILD_WORKLIST_INTERFACE=TRUE \
+                     -DSWIG_EXECUTABLE=/root/swig/install/bin/swig \
+                     -DQt6_DIR=/root/qt/6.5.2/gcc_64/lib/cmake/Qt6 \
+                     -DQt6GuiTools_DIR=/root/qt/6.5.2/gcc_64/lib/cmake/Qt6GuiTools \
+                     -DPython3_ROOT_DIR=/root/miniconda3/envs/build \
     ; else \
         echo "Skipping GUI..."
-        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide \
-                 -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
-                 -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_VSI_SUPPORT=TRUE -DCMAKE_BUILD_TYPE=Release \
-                 -DDCMTKJPEG_INCLUDE_DIR=/root -DDCMTKJPEG_LIBRARY=/usr/lib/libijg8.so -DPACKAGE_ON_INSTALL=TRUE \
-                    -DSWIG_EXECUTABLE=/root/swig/install/bin/swig \
-                    -DPYTHON_DEBUG_LIBRARY=/root/miniconda3/envs/build_python3.9/lib/libpython3.so \
-                    -DPYTHON_LIBRARY_DEBUG=/root/miniconda3/envs/build_python3.9/lib/libpython3.so \
-                    -DPYTHON_LIBRARY=/root/miniconda3/envs/build_python3.9/lib/libpython3.so \
-                    -DPYTHON_INCLUDE_DIR=/root/miniconda3/envs/build_python3.9/include/python3.9 \
-                    -DPYTHON_EXECUTABLE=/root/miniconda3/envs/build_python3.9/bin/python \
-                    -DPYTHON_NUMPY_INCLUDE_DIR=/root/miniconda3/envs/build_python3.9/lib/python3.9/site-packages/numpy/core/include \
+        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide -DOpenJPEG_DIR=/root/openjpeg/install/lib/cmake/openjpeg-2.5 \
+                     -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
+                     -DCMAKE_BUILD_TYPE=Release \
+                     -DPACKAGE_ON_INSTALL=TRUE \
+                     -DSWIG_EXECUTABLE=/root/swig/install/bin/swig \
+                     -DPython3_ROOT_DIR=/root/miniconda3/envs/build \
     ; fi
-export LD_LIBRARY_PATH=/root/miniconda3/envs/build_python3.9/lib
+export LD_LIBRARY_PATH=/root/miniconda3/envs/build/lib
 make package
 
 if [ "${build_gui}" = "true" ] ; then
@@ -54,3 +44,4 @@ else
           mv $file /artifacts/${outbasename}-nogui-Ubuntu${ubuntu_version_no_dots}.deb
         done;
 fi
+>>>>>>> 033498770123cd3b3fc796320af0d4eb63f98c06

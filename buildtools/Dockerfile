@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=20.04
+ARG UBUNTU_VERSION=22.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -14,18 +14,15 @@ RUN apt-get update \
         g++ \
         make \
         bison \
-        qtbase5-dev \
-        qttools5-dev \
-        libqt5opengl5-dev \
         git \
         libopencv-dev \
+        libturbojpeg0-dev \
         libdcmtk-dev \
-        libopenjp2-7-dev \
         libopenslide-dev \
         libpugixml-dev \
+        libgl1-mesa-dev \
         wget \
         gpg-agent \
-        libunittest++-dev \
         ca-certificates \
         nano \
         software-properties-common \
@@ -51,8 +48,8 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
     rm -f Miniconda3-latest-Linux-x86_64.sh
 
 RUN /root/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
-    /root/miniconda3/bin/conda create --quiet --name build_python3.9 python=3.9 && \
-    /root/miniconda3/bin/conda install --quiet -n build_python3.9 numpy nomkl
+    /root/miniconda3/bin/conda create --quiet --name build python=3.9 && \
+    /root/miniconda3/bin/conda install --quiet -n build numpy nomkl
 
 RUN mkdir -p /root/swig/build && \
     mkdir -p /root/swig/install && \
@@ -62,14 +59,24 @@ RUN mkdir -p /root/swig/build && \
     cmake --build . --config Release && \
     cmake --install .
 
-# Small hack to as libijg8 is installed in a different locations in Ubuntu 20.04
-RUN ln -s /usr/lib/x86_64-linux-gnu/libijg8.so /usr/lib/libijg8.so; exit 0;
+RUN /root/miniconda3/bin/activate build && \
+    /root/miniconda3/envs/build/bin/pip install aqtinstall && \
+    /root/miniconda3/envs/build/bin/aqt install-qt --outputdir /root/qt linux desktop 6.5.2 gcc_64
 
-WORKDIR /root
-RUN wget -q https://dicom.offis.de/download/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz && tar xzf dcmtk-3.6.7.tar.gz && mv dcmtk-3.6.7 dcmtk && rm dcmtk-3.6.7.tar.gz
+RUN mkdir /root/openjpeg && \
+    mkdir /root/openjpeg/build && \
+    mkdir /root/openjpeg/install && \
+    git clone https://github.com/uclouvain/openjpeg /root/openjpeg/src && \
+    cd /root/openjpeg/build && \
+    cmake ../src -DCMAKE_INSTALL_PREFIX=/root/openjpeg/install -DCMAKE_C_FLAGS=-fPIC -DBUILD_CODEC=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release && \
+    make install
 
 WORKDIR /root/build
 COPY build_ASAP.sh /root/build/build_ASAP.sh
 RUN chmod a+rxwX ./build_ASAP.sh
 
+# Workaround for weird CMake bug
+RUN mv /root/miniconda3/envs/build/lib/libstdc++.so.6 /root/miniconda3/envs/build/lib/.libstdc++.so.6
+
 CMD ./build_ASAP.sh
+>>>>>>> 033498770123cd3b3fc796320af0d4eb63f98c06
