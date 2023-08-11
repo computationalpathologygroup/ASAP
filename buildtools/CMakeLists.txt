@@ -119,7 +119,9 @@ ELSEIF(APPLE)
 ELSE(WIN32)
 IF(BUILD_ASAP)
 INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcb.so DESTINATION bin/platforms CONFIGURATIONS Release)
+INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so DESTINATION lib CONFIGURATIONS Release)
 INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcbd.so DESTINATION bin/platforms CONFIGURATIONS Debug)
+INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpad.so DESTINATION lib CONFIGURATIONS Debug)
 qt_generate_deploy_app_script(
     TARGET ASAP_browser
     OUTPUT_SCRIPT deploy_script
