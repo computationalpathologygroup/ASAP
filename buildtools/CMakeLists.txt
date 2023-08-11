@@ -117,10 +117,14 @@ ELSEIF(APPLE)
    INSTALL(CODE "include(BundleUtilities)
      fixup_bundle(\"${APPS}\" \"${LIBS}\" \"${DIRS}\")")
 ELSE(WIN32)
+IF(BUILD_ASAP)
+INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcb.so DESTINATION bin/platforms CONFIGURATIONS Release)
+INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcbd.so DESTINATION bin/platforms CONFIGURATIONS Debug)
 qt_generate_deploy_app_script(
     TARGET ASAP_browser
     OUTPUT_SCRIPT deploy_script
 )
 install(SCRIPT ${deploy_script})
+ENDIF(BUILD_ASAP)
 ENDIF(WIN32)
 ENDIF(PACKAGE_ON_INSTALL)
