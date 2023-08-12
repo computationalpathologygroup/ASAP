@@ -59,7 +59,7 @@ for:
       } 
   - ps: >-
       If (!(Test-Path -Path 'C:\tools\opencv')) {
-        choco install opencv
+        choco install -r opencv
       } 
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
