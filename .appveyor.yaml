@@ -71,11 +71,7 @@ for:
     - cmd: cpack
 
   cache:
-    - C:\tools\opencv
-    - C:\projects\openslide-win64
     - C:\projects\swig\install
-    - C:\projects\pugixml\install
-    - C:\tools\vcpkg\installed
 
   artifacts:
     - path: ./ASAP_build/*.exe
