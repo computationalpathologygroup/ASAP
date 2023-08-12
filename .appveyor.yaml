@@ -99,7 +99,7 @@ for:
     - provider: GitHub
       release: ASAP $(asap_major_version).$(asap_minor_version) (Nightly)
       auth_token:
-        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+        secure: hRxFBfnDeq0DQLsi9pwxDMGEPfGa+0UxooCFH0LqO/bSajx+IixhfWnAA/z/tI5L
       artifact: ASAP_Installer
       draft: false
       force_update: true
@@ -110,7 +110,7 @@ for:
     - provider: GitHub
       release: ASAP $(asap_major_version).$(asap_minor_version)
       auth_token:
-        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+        secure: hRxFBfnDeq0DQLsi9pwxDMGEPfGa+0UxooCFH0LqO/bSajx+IixhfWnAA/z/tI5L
       artifact: ASAP_Installer
       draft: false
       force_update: true
@@ -139,7 +139,7 @@ for:
     - provider: GitHub
       release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION (Nightly)    
       auth_token:
-        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+        secure: hRxFBfnDeq0DQLsi9pwxDMGEPfGa+0UxooCFH0LqO/bSajx+IixhfWnAA/z/tI5L
       artifact: ASAP_DEB_Package
       draft: false
       force_update: true
@@ -150,7 +150,7 @@ for:
     - provider: GitHub
       release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION
       auth_token:
-        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+        secure: hRxFBfnDeq0DQLsi9pwxDMGEPfGa+0UxooCFH0LqO/bSajx+IixhfWnAA/z/tI5L
       artifact: ASAP_DEB_Package
       draft: true
       force_update: true
@@ -203,7 +203,7 @@ for:
     - provider: GitHub
       release: ASAP $ASAP_MAJOR_VERSION.$ASAP_MINOR_VERSION (Nightly)    
       auth_token:
-        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+        secure: hRxFBfnDeq0DQLsi9pwxDMGEPfGa+0UxooCFH0LqO/bSajx+IixhfWnAA/z/tI5L
       artifact: ASAP_DMG_Package
       draft: false
       force_update: true
@@ -214,7 +214,7 @@ for:
     - provider: GitHub
       release: ASAP $(asap_major_version).$(asap_minor_version)
       auth_token:
-        secure: 9dwaJVWgqJszg3feksfrVuddjVklp8UWrPskUUZnSuG62R014vDOuW0p+ytGBJbS
+        secure: hRxFBfnDeq0DQLsi9pwxDMGEPfGa+0UxooCFH0LqO/bSajx+IixhfWnAA/z/tI5L
       artifact: ASAP_DMG_Package
       draft: false
       force_update: true
