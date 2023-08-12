@@ -8,7 +8,6 @@ RUN export DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y -qq --no-install-recommends \
-        cmake \
         dpkg-dev \
         file \
         g++ \
@@ -16,6 +15,7 @@ RUN apt-get update \
         bison \
         git \
         libopencv-dev \
+        libxcb-cursor0 \
         libturbojpeg0-dev \
         libdcmtk-dev \
         libopenslide-dev \
@@ -36,11 +36,9 @@ RUN apt-get update \
     && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 50
 
 # Ensure latest version of CMake
-RUN apt purge -y --auto-remove cmake 
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-RUN apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-RUN apt update && \
-    apt install -y cmake
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.27.2/cmake-3.27.2-linux-x86_64.sh && \
+    chmod a+x ./cmake-3.27.2-linux-x86_64.sh && \
+    ./cmake-3.27.2-linux-x86_64.sh --prefix=/usr/local --exclude-subdir --skip-license
 
 RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
     mkdir /root/.conda &&\
@@ -62,6 +60,10 @@ RUN mkdir -p /root/swig/build && \
 RUN /root/miniconda3/bin/activate build && \
     /root/miniconda3/envs/build/bin/pip install aqtinstall && \
     /root/miniconda3/envs/build/bin/aqt install-qt --outputdir /root/qt linux desktop 6.5.2 gcc_64
+
+# Make sure Qt dependecies are installed to allow DEB packaging
+RUN apt-get install -y -qq --no-install-recommends qt6-base-dev && \
+    apt remove -y -qq --no-install-recommends qt6-base-dev libqt6core6
 
 RUN mkdir /root/openjpeg && \
     mkdir /root/openjpeg/build && \
