@@ -1,6 +1,6 @@
 image:
- - Ubuntu
  - Visual Studio 2022
+ - Ubuntu
  - macos-bigsur
  
 environment:
@@ -38,18 +38,9 @@ for:
       
   before_build:
   - ps: >-
-      If (!(Test-Path -Path 'C:\tools\vcpkg\installed\x64-windows\share\dcmtk')) {
-        vcpkg install dcmtk:x64-windows-static libjpeg-turbo:x64-windows-static tiff:x64-windows-static openjpeg:x64-windows-static
-      } 
-  - ps: >-
-      If (!(Test-Path -Path 'C:\projects\pugixml')) {
-        git clone https://github.com/zeux/pugixml c:\projects\pugixml\src
-        mkdir c:\projects\pugixml\build
-        mkdir c:\projects\pugixml\install
-        cd c:\projects\pugixml\install
-        cmake ..\src -DBUILD_SHARED_LIBS=FALSE -DCMAKE_INSTALL_PREFIX=c:\projects\pugixml\install -DPUGIXML_STATIC_CRT=FALSE -DPUGIXML_USE_POSTFIX=TRUE
-        cmake --build . --config Release
-        cmake --install .
+      If (!(Test-Path -Path 'c:\projects\dcmtk')) {
+        Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/v2.1/asap_deps.zip'
+        7z x asap_deps.zip -oc:\projects
       }
   - ps: >-
       If (!(Test-Path -Path 'C:\projects\swig\install')) {
@@ -63,11 +54,6 @@ for:
         cmake --install .
       }
   - ps: >-
-      If (!(Test-Path -Path 'c:\projects\openslide-win64')) {
-        Start-FileDownload 'https://github.com/computationalpathologygroup/ASAP/releases/download/v2.1/openslide-win64.zip'
-        7z x openslide-win64.zip -oc:\projects
-      }
-  - ps: >-
       If (!(Test-Path -Path C:\Python39-x64\Lib\site-packages\numpy)) {
          Invoke-Expression "C:\Python39-x64\Scripts\pip install numpy"
       } 
@@ -75,11 +61,11 @@ for:
       If (!(Test-Path -Path 'C:\tools\opencv')) {
         choco install opencv
       } 
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
   build_script:
     - cmd: cd C:\projects\asap
-    - cmd: cmake -B ./ASAP_build -DJPEG_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DJPEG_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DJPEG_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libjpeg.lib -DOpenJPEG_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/openjpeg -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide-win64/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide-win64/lib/libopenslide.lib -DDCMTK_DIR=C:/tools/vcpkg/installed/x64-windows-static/share/dcmtk -DTIFF_INCLUDE_DIR=C:/tools/vcpkg/installed/x64-windows-static/include -DTIFF_LIBRARY_DEBUG=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DTIFF_LIBRARY_RELEASE=C:/tools/vcpkg/installed/x64-windows-static/lib/libtiff.lib -DPugiXML_DIR=c:/projects/pugixml/install/lib/cmake/pugixml -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt6_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6 -DQt6GuiTools_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6GuiTools -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPython3_ROOT_DIR=c:/Python39-x64 -DSWIG_EXECUTABLE=c:/projects/swig/install/bin/swig.exe
+    - cmd: cmake -B ./ASAP_build -DJPEG_INCLUDE_DIR=C:/projects/libjpeg-turbo/include -DJPEG_LIBRARY_DEBUG=C:/projects/libjpeg-turbo/lib/jpeg-static.lib -DJPEG_LIBRARY_RELEASE=C:/projects/libjpeg-turbo/lib/jpeg-static.lib -DOpenJPEG_DIR=C:/projects/openjpeg/lib/cmake/openjpeg-2.5 -DOPENSLIDE_INCLUDE_DIR=c:/projects/openslide-win64/include/openslide -DOPENSLIDE_LIBRARY=c:/projects/openslide-win64/lib/libopenslide.lib -DDCMTK_DIR=c:/projects/dcmtk/cmake -DTIFF_INCLUDE_DIR=c:/projects/libtiff/include -DTIFF_LIBRARY_DEBUG=c:/projects/libtiff/lib/tiff.lib -DTIFF_LIBRARY_RELEASE=c:/projects/libtiff/lib/tiff.lib -DPugiXML_DIR=c:/projects/pugixml/lib/cmake/pugixml -DBUILD_MULTIRESOLUTIONIMAGEINTERFACE_DICOM_SUPPORT=ON -DPACKAGE_ON_INSTALL=TRUE -DBUILD_ASAP=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DBUILD_EXECUTABLES=TRUE -DQt6_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6 -DQt6GuiTools_DIR=C:/Qt/6.5.1/msvc2019_64/lib/cmake/Qt6GuiTools -DOpenCV_DIR=c:/tools/opencv/build -DBUILD_WORKLIST_INTERFACE=TRUE -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=ON -DWRAP_WHOLESLIDEFILTERS_PYTHON=ON -DPython3_ROOT_DIR=c:/Python39-x64 -DSWIG_EXECUTABLE=c:/projects/swig/install/bin/swig.exe
     - cmd: cd ./ASAP_build
     - cmd: cmake --build . --config Release
     - cmd: cpack
@@ -128,7 +114,7 @@ for:
 
   build_script:
     - sh: cd buildtools
-    - sh: docker build --tag asap_build:${ubuntu_version} --build-arg UBUNTU_VERSION=${ubuntu_version} .
+    - sh: docker build -q --tag asap_build:${ubuntu_version} --build-arg UBUNTU_VERSION=${ubuntu_version} .
     - sh: docker run -v ${PWD}:/artifacts asap_build:${ubuntu_version} /root/build/build_ASAP.sh true
 
   artifacts:
