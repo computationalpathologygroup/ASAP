@@ -1,7 +1,7 @@
 image:
+ - macos-monterey
  - Visual Studio 2022
  - Ubuntu
- - macos-bigsur
  
 environment:
   GIT_REDIRECT_STDERR: '2>&1'
@@ -16,7 +16,7 @@ matrix:
   exclude:
     - image: Visual Studio 2022
       ubuntu_version: 22.04
-    - image: macos-bigsur
+    - image: macos-monterey
       ubuntu_version: 22.04    
 
 install:
