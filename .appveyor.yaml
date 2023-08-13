@@ -142,7 +142,7 @@ for:
 - 
   matrix:
     only:
-      - image: macos-bigsur
+      - image: macos-monterey
 
   build_script:
     - sh: mkdir -p /Users/appveyor/tools/swig/build
