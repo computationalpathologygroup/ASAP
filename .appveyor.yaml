@@ -150,10 +150,10 @@ for:
     - sh: git clone https://github.com/GeertLitjens/swig /Users/appveyor/tools/swig/src
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
-    - sh: brew update
-    - sh: brew install openslide opencv qt5 dcmtk bison
     - sh: export APPVEYOR_VNC_BLOCK=true
     - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
+    - sh: brew update
+    - sh: brew install openslide opencv qt5 dcmtk bison
     - sh: cd /Users/appveyor/tools/swig/build
     - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
     - sh: cmake --build . --config Release
