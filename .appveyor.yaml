@@ -159,6 +159,7 @@ for:
     - sh: /Users/appveyor/miniconda3/bin/conda create --quiet --name build python=3.9
     - sh: /Users/appveyor/miniconda3/bin/conda install --quiet -n build numpy nomkl
 
+    - sh: brew install bison
     - sh: git clone https://github.com/GeertLitjens/swig /Users/appveyor/tools/swig/src
     - sh: rm -f /usr/local/include/X11
     - sh: cd /Users/appveyor/tools/swig/build
@@ -169,7 +170,7 @@ for:
     - sh: export APPVEYOR_VNC_BLOCK=true
     - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: brew update
-    - sh: brew install openslide opencv qt6 dcmtk bison
+    - sh: brew install openslide opencv qt6 dcmtk
     - sh: cd /Users/appveyor/projects
     - sh: cd /Users/appveyor/projects/asap
     - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/Users/appveyor/tools/swig/install/bin/swig -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_6/include/openslide -DQt6_DIR:PATH=/usr/local/Cellar/qt6/6.5.1_2/lib/cmake/Qt6 -DPython3_ROOT_DIR=/Users/appveyor/.localpython3.9.15/bin/python3.9
