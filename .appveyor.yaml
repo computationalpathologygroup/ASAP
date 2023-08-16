@@ -145,6 +145,21 @@ for:
       - image: macos-monterey
 
   build_script:
+    - sh: cd /Users/appveyor/tools
+    - sh: curl -o cmake.tar.gz -LJ https://github.com/Kitware/CMake/releases/download/v3.27.2/cmake-3.27.2-macos-universal.tar.gz
+    - sh: tar -xvf ./cmake.tar.gz -C /Users/appveyor/tools
+    - sh: curl -o miniconda.sh -LJ https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+    - sh: mkdir /Users/appveyor/.conda
+    - sh: chmod a+x miniconda.sh
+    - sh: ./miniconda.sh -b
+
+    - sh: /Users/appveyor/miniconda3/bin/conda update --quiet -n base -c defaults conda && \
+    - sh: /Users/appveyor/miniconda3/bin/conda create --quiet --name build python=3.9 && \
+    - sh: /Users/appveyor/miniconda3/bin/conda install --quiet -n build numpy nomkl
+
+    - sh: export APPVEYOR_VNC_BLOCK=true
+    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
+
     - sh: mkdir -p /Users/appveyor/tools/swig/build
     - sh: mkdir -p /Users/appveyor/tools/swig/install
     - sh: git clone https://github.com/GeertLitjens/swig /Users/appveyor/tools/swig/src
@@ -153,14 +168,10 @@ for:
     - sh: brew update
     - sh: brew install openslide opencv qt5 dcmtk bison
     - sh: cd /Users/appveyor/tools/swig/build
-    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_CXX_FLAGS=-std=c++17 -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
-    - sh: cmake --build . --config Release
-    - sh: cmake --install .
+    - sh: /Users/appveyor/tools/cmake-3.27.2-macos-universal/CMake.app/Contents/bin/cmake ../src -DWITH_PCRE=OFF -DCMAKE_CXX_FLAGS=-std=c++17 -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
+    - sh: /Users/appveyor/tools/cmake-3.27.2-macos-universal/CMake.app/Contents/bin/cmake --build . --config Release
+    - sh: /Users/appveyor/tools/cmake-3.27.2-macos-universal/CMake.app/Contents/bin/cmake --install .
     - sh: cd /Users/appveyor/projects
-    - sh: source ~/venv3.11/bin/activate
-    - sh: export APPVEYOR_VNC_BLOCK=true
-    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
-    - sh: pip install numpy
     - sh: cd /Users/appveyor/projects/asap
     - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/Users/appveyor/tools/swig/install/bin/swig -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_6/include/openslide -DQt6_DIR:PATH=/usr/local/Cellar/qt6/6.5.1_2/lib/cmake/Qt6 -DPython3_ROOT_DIR=/Users/appveyor/.localpython3.9.15/bin/python3.9
     - sh: make
