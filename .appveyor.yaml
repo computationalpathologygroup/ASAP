@@ -145,6 +145,8 @@ for:
       - image: macos-monterey
 
   build_script:
+    - sh: mkdir -p /Users/appveyor/tools/swig/build
+    - sh: mkdir -p /Users/appveyor/tools/swig/install
     - sh: cd /Users/appveyor/tools
     - sh: curl -o cmake.tar.gz -LJ https://github.com/Kitware/CMake/releases/download/v3.27.2/cmake-3.27.2-macos-universal.tar.gz
     - sh: tar -xvf ./cmake.tar.gz -C /Users/appveyor/tools
@@ -160,8 +162,6 @@ for:
     - sh: export APPVEYOR_VNC_BLOCK=true
     - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
 
-    - sh: mkdir -p /Users/appveyor/tools/swig/build
-    - sh: mkdir -p /Users/appveyor/tools/swig/install
     - sh: git clone https://github.com/GeertLitjens/swig /Users/appveyor/tools/swig/src
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
