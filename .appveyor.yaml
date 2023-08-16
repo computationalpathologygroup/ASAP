@@ -150,28 +150,19 @@ for:
     - sh: git clone https://github.com/GeertLitjens/swig /Users/appveyor/tools/swig/src
     - sh: rm -f /usr/local/include/X11
     - sh: brew unlink subversion
-    - sh: export APPVEYOR_VNC_BLOCK=true
-    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: brew update
     - sh: brew install openslide opencv qt5 dcmtk bison
     - sh: cd /Users/appveyor/tools/swig/build
-    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
+    - sh: cmake ../src -DWITH_PCRE=OFF -DCMAKE_CXX_FLAGS=-std=c++17 -DCMAKE_INSTALL_PREFIX=/Users/appveyor/tools/swig/install -DBISON_EXECUTABLE=/usr/local/opt/bison/bin/bison
     - sh: cmake --build . --config Release
     - sh: cmake --install .
     - sh: cd /Users/appveyor/projects
-    - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.cpp
-    - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugixml.hpp
-    - sh: curl -LJO  https://raw.githubusercontent.com/zeux/pugixml/master/src/pugiconfig.hpp
-    - sh: sudo mv pugixml.cpp /usr/local/include/
-    - sh: sudo mv pugixml.hpp /usr/local/include/
-    - sh: sudo mv pugiconfig.hpp /usr/local/include/
-    - sh: curl ftp://dicom.offis.de/pub/dicom/offis/software/dcmtk/dcmtk367/dcmtk-3.6.7.tar.gz -o dcmtk.tar.gz
-    - sh: tar xzf dcmtk.tar.gz
-    - sh: mv dcmtk-3.6.7 dcmtk
-    - sh: source ~/venv3.9/bin/activate
+    - sh: source ~/venv3.11/bin/activate
+    - sh: export APPVEYOR_VNC_BLOCK=true
+    - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-vnc.sh' | bash -e -
     - sh: pip install numpy
     - sh: cd /Users/appveyor/projects/asap
-    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/Users/appveyor/tools/swig/install/bin/swig -DDCMTKJPEG_INCLUDE_DIR=/Users/appveyor/projects -DDCMTKJPEG_LIBRARY=/usr/local/Cellar/dcmtk/3.6.6_1/lib/libijg8.a -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_6/include/openslide -DQt5_DIR:PATH=/usr/local/Cellar/qt@5/5.15.5_1/lib/cmake/Qt5 -DPYTHON_EXECUTABLE=/Users/appveyor/.localpython3.9.10/bin/python3.9 -DPYTHON_INCLUDE_DIR=/Users/appveyor/.localpython3.9.10/include/python3.9 -DPYTHON_LIBRARY=/Users/appveyor/.localpython3.9.10/lib/libpython3.dylib -DPYTHON_NUMPY_INCLUDE_DIR=/Users/appveyor/venv3.9/lib/python3.9/site-packages/numpy/core/include
+    - sh: cmake . -DCMAKE_VERBOSE_MAKEFILE=ON -DBUILD_WORKLIST_INTERFACE=TRUE -DSWIG_EXECUTABLE=/Users/appveyor/tools/swig/install/bin/swig -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release -DPACKAGE_ON_INSTALL=TRUE -DOPENSLIDE_INCLUDE_DIR:PATH=/usr/local/Cellar/openslide/3.4.1_6/include/openslide -DQt6_DIR:PATH=/usr/local/Cellar/qt6/6.5.1_2/lib/cmake/Qt6 -DPython3_ROOT_DIR=/Users/appveyor/.localpython3.9.15/bin/python3.9
     - sh: make
     - sh: cp **/*/*.dylib /usr/local/lib/  # i don't know how to combine these two commands
     - sh: cp **/*.dylib /usr/local/lib/
