@@ -120,10 +120,16 @@ ELSE(WIN32)
         INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcbd.so DESTINATION bin/platforms CONFIGURATIONS Debug)
         INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpad.so.6 DESTINATION lib CONFIGURATIONS Debug)
         INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6.5.2 DESTINATION lib CONFIGURATIONS Release)
-        qt_generate_deploy_app_script(
-            TARGET ASAP_browser
-            OUTPUT_SCRIPT deploy_script
-        )
+        qt_generate_deploy_script(
+          TARGET asap
+          OUTPUT_SCRIPT deploy_script
+          CONTENT "
+      qt_deploy_runtime_dependencies(
+          EXECUTABLE $<TARGET_FILE_NAME:ASAP>
+          ADDITIONAL_EXECUTABLES $<TARGET_FILE_NAME:ASAP_browser>
+          ADDITIONAL_LIBRARIES $<TARGET_FILE_NAME:openslidefileformat>
+      )
+      ")
         install(SCRIPT ${deploy_script})
     ENDIF(BUILD_ASAP)
 ENDIF(WIN32)

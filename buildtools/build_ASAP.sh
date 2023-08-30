@@ -13,7 +13,7 @@ mkdir build
 cd build
 
 if [ "${build_gui}" = "true" ] ; then \
-        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/include/openslide -DOpenJPEG_DIR=/root/openjpeg/install/lib/cmake/openjpeg-2.5 \
+        cmake ../src -DOPENSLIDE_INCLUDE_DIR=/usr/local/include/openslide -DOpenJPEG_DIR=/root/openjpeg/install/lib/cmake/openjpeg-2.5 \
                      -DWRAP_MULTIRESOLUTIONIMAGEINTERFACE_PYTHON=TRUE -DCMAKE_INSTALL_PREFIX=/root/install \
                      -DBUILD_ASAP=TRUE -DBUILD_EXECUTABLES=TRUE -DBUILD_IMAGEPROCESSING=TRUE -DCMAKE_BUILD_TYPE=Release \
                      -DPACKAGE_ON_INSTALL=TRUE -DBUILD_WORKLIST_INTERFACE=TRUE \

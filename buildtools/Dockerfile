@@ -14,13 +14,17 @@ RUN apt-get update \
         make \
         bison \
         git \
+        meson \
         libopencv-dev \
         libxcb-cursor0 \
         libturbojpeg0-dev \
         libdcmtk-dev \
-        libopenslide-dev \
         libpugixml-dev \
         libgl1-mesa-dev \
+        glib2.0-dev \
+        libgdk-pixbuf-2.0-dev \
+        libcairo-dev \
+        libsqlite3-dev \
         wget \
         gpg-agent \
         ca-certificates \
@@ -70,8 +74,15 @@ RUN mkdir /root/openjpeg && \
     mkdir /root/openjpeg/install && \
     git clone https://github.com/uclouvain/openjpeg /root/openjpeg/src && \
     cd /root/openjpeg/build && \
-    cmake ../src -DCMAKE_INSTALL_PREFIX=/root/openjpeg/install -DCMAKE_C_FLAGS=-fPIC -DBUILD_CODEC=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release && \
-    make install
+    cmake ../src -DCMAKE_C_FLAGS=-fPIC -DBUILD_CODEC=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release && \
+    make install && \
+    cd /root
+
+RUN git clone https://github.com/openslide/openslide && \
+    cd openslide && \
+    meson setup build && \
+    meson compile -C build && \
+    meson install -C build
 
 WORKDIR /root/build
 COPY build_ASAP.sh /root/build/build_ASAP.sh
