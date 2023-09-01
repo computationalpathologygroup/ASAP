@@ -113,24 +113,39 @@ ELSEIF(APPLE)
    INSTALL(CODE "include(BundleUtilities)
      fixup_bundle(\"${APPS}\" \"${LIBS}\" \"${DIRS}\")")
 ELSE(WIN32)
-    IF(BUILD_ASAP)
-        INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcb.so DESTINATION bin/platforms CONFIGURATIONS Release)
-        INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6 DESTINATION lib CONFIGURATIONS Release)
-        INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6.5.2 DESTINATION lib CONFIGURATIONS Release)
-        INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcbd.so DESTINATION bin/platforms CONFIGURATIONS Debug)
-        INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpad.so.6 DESTINATION lib CONFIGURATIONS Debug)
-        INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6.5.2 DESTINATION lib CONFIGURATIONS Release)
-        qt_generate_deploy_script(
-          TARGET asap
-          OUTPUT_SCRIPT deploy_script
-          CONTENT "
-      qt_deploy_runtime_dependencies(
-          EXECUTABLE $<TARGET_FILE_NAME:ASAP>
-          ADDITIONAL_EXECUTABLES $<TARGET_FILE_NAME:ASAP_browser>
-          ADDITIONAL_LIBRARIES $<TARGET_FILE_NAME:openslidefileformat>
-      )
-      ")
-        install(SCRIPT ${deploy_script})
-    ENDIF(BUILD_ASAP)
+  SET(APPS "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/ASAP")
+  SET(APPS_DEBUG "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/ASAP_d")
+  SET(LIBS "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/libNucleiDetectionFilterPlugin.so" "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/formats/libopenslidefileformat.so" "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/formats/libdicomfileformat.so")
+  SET(LIBS_DEBUG "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/plugins/filters/libNucleiDetectionFilterPlugin_d.so" "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/formats/libopenslidefileformat_d.so" "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/formats/libdicomfileformat_d.so")
+  if(BUILD_IMAGEPROCESSING)
+      if(TARGET opencv_world)
+        get_target_property(opencv_dll_location opencv_world IMPORTED_LOCATION_RELEASE)
+      else(TARGET opencv_world)
+        get_target_property(opencv_dll_location opencv_core IMPORTED_LOCATION_RELEASE)
+      endif(TARGET opencv_world)
+      get_filename_component(opencv_dll_directory ${opencv_dll_location} DIRECTORY)
+  endif(BUILD_IMAGEPROCESSING)
+  
+  SET(DIRS ${Qt6_DIR}/../../../lib ${opencv_dll_directory} ${OPENSLIDE_INCLUDE_DIR}/../../lib)
+  IF(BUILD_ASAP)
+
+    INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcb.so DESTINATION bin/platforms CONFIGURATIONS Release)
+    INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6 DESTINATION lib CONFIGURATIONS Release)
+    INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6.5.2 DESTINATION lib CONFIGURATIONS Release)
+    INSTALL(FILES ${Qt6_DIR}/../../../plugins/platforms/libqxcbd.so DESTINATION bin/platforms CONFIGURATIONS Debug)
+    INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpad.so.6 DESTINATION lib CONFIGURATIONS Debug)
+    INSTALL(FILES ${Qt6_DIR}/../../../lib/libQt6XcbQpa.so.6.5.2 DESTINATION lib CONFIGURATIONS Release)
+  
+  INSTALL(CODE "
+   include(BundleUtilities)
+   if(\"\${CMAKE_INSTALL_CONFIG_NAME}\" STREQUAL \"Debug\")
+   fixup_bundle(\"${APPS_DEBUG}\"   \"${LIBS_DEBUG}\"   \"${DIRS}\")
+   else()
+   fixup_bundle(\"${APPS}\"  \"${LIBS}\"   \"${DIRS}\")
+   endif()
+   ")  
+
+     
+   ENDIF(BUILD_ASAP)
 ENDIF(WIN32)
 ENDIF(PACKAGE_ON_INSTALL)
