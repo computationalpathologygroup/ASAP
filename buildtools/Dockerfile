@@ -15,6 +15,7 @@ RUN apt-get update \
         bison \
         git \
         meson \
+        patchelf \
         libopencv-dev \
         libxcb-cursor0 \
         libturbojpeg0-dev \
@@ -90,5 +91,8 @@ RUN chmod a+rxwX ./build_ASAP.sh
 
 # Workaround for weird CMake bug
 RUN mv /root/miniconda3/envs/build/lib/libstdc++.so.6 /root/miniconda3/envs/build/lib/.libstdc++.so.6
+
+# Workaround for moveable install
+RUN patchelf --set-rpath '$ORIGIN:/$ORIGIN/../lib' /usr/local/lib/x86_64-linux-gnu/libopenslide.so.0.4.1
 
 CMD ./build_ASAP.sh
